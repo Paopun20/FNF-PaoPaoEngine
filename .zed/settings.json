@@ -1,0 +1,9 @@
+{
+  "lsp": {
+    "haxe-language-server": {
+      "initialization_options": {
+          "displayArguments": ["export/release/windows/haxe/release.hxml"]
+      }
+    }
+  }
+}

@@ -21,7 +21,7 @@ class PsychUICheckBox extends FlxSpriteGroup
 		add(box);
 
 		text = new FlxText(box.width + 4, 0, textWid, label);
-		text.y += box.height/2 - text.height/2;
+		text.y += box.height / 2 - text.height / 2;
 		add(text);
 
 		this.onClick = callback;
@@ -36,20 +36,23 @@ class PsychUICheckBox extends FlxSpriteGroup
 	}
 
 	public var broadcastCheckBoxEvent:Bool = true;
+
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 
-		if(FlxG.mouse.justPressed)
+		if (FlxG.mouse.justPressed)
 		{
 			var screenPos:FlxPoint = getScreenPosition(null, camera);
 			var mousePos:FlxPoint = FlxG.mouse.getPositionInCameraView(camera);
-			if((mousePos.x >= screenPos.x && mousePos.x < screenPos.x + width) &&
-				(mousePos.y >= screenPos.y && mousePos.y < screenPos.y + height))
+			if ((mousePos.x >= screenPos.x && mousePos.x < screenPos.x + width)
+				&& (mousePos.y >= screenPos.y && mousePos.y < screenPos.y + height))
 			{
 				checked = !checked;
-				if(onClick != null) onClick();
-				if(broadcastCheckBoxEvent) PsychUIEventHandler.event(CLICK_EVENT, this);
+				if (onClick != null)
+					onClick();
+				if (broadcastCheckBoxEvent)
+					PsychUIEventHandler.event(CLICK_EVENT, this);
 			}
 		}
 	}
@@ -61,10 +64,13 @@ class PsychUICheckBox extends FlxSpriteGroup
 		return (checked = v);
 	}
 
-	function get_label():String {
+	function get_label():String
+	{
 		return text.text;
 	}
-	function set_label(v:String):String {
+
+	function set_label(v:String):String
+	{
 		return (text.text = v);
 	}
 }

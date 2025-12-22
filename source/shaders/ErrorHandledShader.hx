@@ -8,7 +8,11 @@ import lime.app.Application;
 class ErrorHandledShader extends FlxShader implements IErrorHandler
 {
 	public var shaderName:String = '';
-	public dynamic function onError(error:Dynamic):Void {}
+
+	public dynamic function onError(error:Dynamic):Void
+	{
+	}
+
 	public function new(?shaderName:String)
 	{
 		this.shaderName = shaderName;
@@ -28,10 +32,11 @@ class ErrorHandledShader extends FlxShader implements IErrorHandler
 			return null;
 		}
 	}
-	
+
 	public static function crashSave(shaderName:String, error:Dynamic, onError:Dynamic) // prevent the app from dying immediately
 	{
-		if(shaderName == null) shaderName = 'unnamed';
+		if (shaderName == null)
+			shaderName = 'unnamed';
 		var alertTitle:String = 'Error on Shader: "$shaderName"';
 
 		trace(error);
@@ -58,7 +63,11 @@ class ErrorHandledShader extends FlxShader implements IErrorHandler
 class ErrorHandledRuntimeShader extends FlxRuntimeShader implements IErrorHandler
 {
 	public var shaderName:String = '';
-	public dynamic function onError(error:Dynamic):Void {}
+
+	public dynamic function onError(error:Dynamic):Void
+	{
+	}
+
 	public function new(?shaderName:String, ?fragmentSource:String, ?vertexSource:String)
 	{
 		this.shaderName = shaderName;

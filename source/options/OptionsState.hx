@@ -12,15 +12,17 @@ class OptionsState extends MusicBeatState
 		'Graphics',
 		'Visuals',
 		'Gameplay'
-		#if TRANSLATIONS_ALLOWED , 'Language' #end
+		#if TRANSLATIONS_ALLOWED, 'Language' #end
 	];
 	private var grpOptions:FlxTypedGroup<Alphabet>;
+
 	private static var curSelected:Int = 0;
 	public static var menuBG:FlxSprite;
 	public static var onPlayState:Bool = false;
 
-	function openSelectedSubstate(label:String) {
-		switch(label)
+	function openSelectedSubstate(label:String)
+	{
+		switch (label)
 		{
 			case 'Note Colors':
 				openSubState(new options.NotesColorSubState());
@@ -87,7 +89,8 @@ class OptionsState extends MusicBeatState
 		#end
 	}
 
-	override function update(elapsed:Float) {
+	override function update(elapsed:Float)
+	{
 		super.update(elapsed);
 
 		if (controls.UI_UP_P)
@@ -98,17 +101,19 @@ class OptionsState extends MusicBeatState
 		if (controls.BACK)
 		{
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			if(onPlayState)
+			if (onPlayState)
 			{
 				StageData.loadDirectory(PlayState.SONG);
 				LoadingState.loadAndSwitchState(new PlayState());
 				FlxG.sound.music.volume = 0;
 			}
-			else MusicBeatState.switchState(new MainMenuState());
+			else
+				MusicBeatState.switchState(new MainMenuState());
 		}
-		else if (controls.ACCEPT) openSelectedSubstate(options[curSelected]);
+		else if (controls.ACCEPT)
+			openSelectedSubstate(options[curSelected]);
 	}
-	
+
 	function changeSelection(change:Int = 0)
 	{
 		curSelected = FlxMath.wrap(curSelected + change, 0, options.length - 1);

@@ -15,7 +15,6 @@ function onDestroy()
 	// Triggered when the hscript file is ended
 }
 
-
 // Gameplay/Song interactions
 function onSectionHit()
 {
@@ -58,18 +57,18 @@ function onCountdownStarted()
 
 function onCountdownTick(tick:Countdown, counter:Int)
 {
-	switch(tick)
+	switch (tick)
 	{
 		case Countdown.THREE:
-			//Counter equals to 0
+			// Counter equals to 0
 		case Countdown.TWO:
-			//Counter equals to 1
+			// Counter equals to 1
 		case Countdown.ONE:
-			//Counter equals to 2
+			// Counter equals to 2
 		case Countdown.GO:
-			//Counter equals to 3
+			// Counter equals to 3
 		case Countdown.START:
-			//Counter equals to 4, this has no visual indication or anything, it's pretty much at nearly the exact time the song starts playing
+			// Counter equals to 4, this has no visual indication or anything, it's pretty much at nearly the exact time the song starts playing
 	}
 }
 
@@ -89,7 +88,6 @@ function onEndSong()
 	// return Function_Stop to stop the song from ending for playing a cutscene or something.
 	return Function_Continue;
 }
-
 
 // Substate interactions
 function onPause()
@@ -122,7 +120,6 @@ function onGameOverConfirm(retry:Bool)
 	// If you've pressed Esc, value "retry" will be false
 }
 
-
 // Dialogue (When a dialogue is finished, it calls startCountdown again)
 function onNextDialogue(line:Int)
 {
@@ -133,7 +130,6 @@ function onSkipDialogue(line:Int)
 {
 	// Triggered when you press Enter and skip a dialogue line that was still being typed, dialogue line starts at 0 (first line)
 }
-
 
 // Key Press/Release
 function onKeyPressPre(key:Int)
@@ -166,12 +162,12 @@ function onGhostTap(key:Int)
 	// "key" can be: 0 - left, 1 - down, 2 - up, 3 - right
 }
 
-
 // Note miss/hit
 function goodNoteHitPre(note:Note)
 {
 	// Function called when you hit a note (***before*** note hit calculations)
 }
+
 function opponentNoteHitPre(note:Note)
 {
 	// Works the same as goodNoteHitPre, but for Opponent's notes being hit
@@ -181,6 +177,7 @@ function goodNoteHit(note:Note)
 {
 	// Function called when you hit a note (***after*** note hit calculations)
 }
+
 function opponentNoteHit(note:Note)
 {
 	// Works the same as goodNoteHit, but for Opponent's notes being hit
@@ -197,7 +194,6 @@ function noteMiss(note:Note)
 	// Called after the note miss calculations
 	// Player missed a note by letting it go offscreen
 }
-
 
 // Other function hooks
 function preUpdateScore(miss:Bool)
@@ -240,7 +236,6 @@ function onMoveCamera(focus:String)
 	}
 }
 
-
 // Event notes hooks
 function onEvent(name:String, value1:String, value2:String, strumTime:Float)
 {
@@ -257,17 +252,16 @@ function onEventPushed(name:String, value1:String, value2:String, strumTime:Floa
 function eventEarlyTrigger(name:String, value1:String, value2:String, strumTime:Float)
 {
 	/*
-	Here's a port of the Kill Henchmen early trigger:
+		Here's a port of the Kill Henchmen early trigger:
 
-	if (name == 'Kill Henchmen')
-		return 280;
+		if (name == 'Kill Henchmen')
+			return 280;
 
-	This makes the "Kill Henchmen" event be triggered 280 miliseconds earlier so that the kill sound is perfectly timed with the song
-	*/
+		This makes the "Kill Henchmen" event be triggered 280 miliseconds earlier so that the kill sound is perfectly timed with the song
+	 */
 
 	// write your shit under this line, the new return value will override the ones hardcoded on the engine
 }
-
 
 // Custom Substates
 function onCustomSubstateCreate(name:String)
