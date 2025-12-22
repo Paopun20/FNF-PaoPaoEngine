@@ -19,7 +19,7 @@ class Python
 	public var parser:PyParser;
 	public var interp:PyInterp;
 
-	public var filePath:String;
+	public var origin:String;
 	public var returnValue:Dynamic;
 
 	#if LUA_ALLOWED
@@ -83,6 +83,11 @@ class Python
 		return interp.getdef(func) != null;
 	}
 
+	public function set(variable:String, arg:Dynamic)
+	{
+		interp.setVar(variable, arg);
+	}
+
 	// Inject variables / API
 	function preset(varsToBring:Any)
 	{
@@ -91,64 +96,64 @@ class Python
 		{
 			for (k in Reflect.fields(varsToBring))
 			{
-				interp.setVar(k, Reflect.field(varsToBring, k));
+				set(k, Reflect.field(varsToBring, k));
 			}
 		}
 
 		#if LUA_ALLOWED
-		interp.setVar("parentLua", parentLua);
+		set("parentLua", parentLua);
 		#end
 
-		interp.setVar('Type', Type);
+		set('Type', Type);
 		#if sys
-		interp.setVar('File', File);
-		interp.setVar('FileSystem', FileSystem);
+		set('File', File);
+		set('FileSystem', FileSystem);
 		#end
-		interp.setVar('FlxG', flixel.FlxG);
-		interp.setVar('FlxMath', flixel.math.FlxMath);
-		interp.setVar('FlxSprite', flixel.FlxSprite);
-		interp.setVar('FlxText', flixel.text.FlxText);
-		interp.setVar('FlxCamera', flixel.FlxCamera);
-		interp.setVar('PsychCamera', backend.PsychCamera);
-		interp.setVar('FlxTimer', flixel.util.FlxTimer);
-		interp.setVar('FlxTween', flixel.tweens.FlxTween);
-		interp.setVar('FlxEase', flixel.tweens.FlxEase);
-		interp.setVar('Countdown', backend.BaseStage.Countdown);
-		interp.setVar('PlayState', PlayState);
-		interp.setVar('Paths', Paths);
-		interp.setVar('Conductor', Conductor);
-		interp.setVar('ClientPrefs', ClientPrefs);
+		set('FlxG', flixel.FlxG);
+		set('FlxMath', flixel.math.FlxMath);
+		set('FlxSprite', flixel.FlxSprite);
+		set('FlxText', flixel.text.FlxText);
+		set('FlxCamera', flixel.FlxCamera);
+		set('PsychCamera', backend.PsychCamera);
+		set('FlxTimer', flixel.util.FlxTimer);
+		set('FlxTween', flixel.tweens.FlxTween);
+		set('FlxEase', flixel.tweens.FlxEase);
+		set('Countdown', backend.BaseStage.Countdown);
+		set('PlayState', PlayState);
+		set('Paths', Paths);
+		set('Conductor', Conductor);
+		set('ClientPrefs', ClientPrefs);
 		#if ACHIEVEMENTS_ALLOWED
-		interp.setVar('Achievements', Achievements);
+		set('Achievements', Achievements);
 		#end
-		interp.setVar('Character', Character);
-		interp.setVar('Alphabet', Alphabet);
-		interp.setVar('Note', objects.Note);
-		interp.setVar('CustomSubstate', CustomSubstate);
+		set('Character', Character);
+		set('Alphabet', Alphabet);
+		set('Note', objects.Note);
+		set('CustomSubstate', CustomSubstate);
 		#if (!flash && sys)
-		interp.setVar('FlxRuntimeShader', flixel.addons.display.FlxRuntimeShader);
-		interp.setVar('ErrorHandledRuntimeShader', shaders.ErrorHandledShader.ErrorHandledRuntimeShader);
+		set('FlxRuntimeShader', flixel.addons.display.FlxRuntimeShader);
+		set('ErrorHandledRuntimeShader', shaders.ErrorHandledShader.ErrorHandledRuntimeShader);
 		#end
-		interp.setVar('ShaderFilter', openfl.filters.ShaderFilter);
-		interp.setVar('StringTools', StringTools);
+		set('ShaderFilter', openfl.filters.ShaderFilter);
+		set('StringTools', StringTools);
 		#if flxanimate
-		interp.setVar('FlxAnimate', FlxAnimate);
+		set('FlxAnimate', FlxAnimate);
 		#end
 
 		// Functions & Variables
-		interp.setVar('setVar', function(name:String, value:Dynamic)
+		set('setVar', function(name:String, value:Dynamic)
 		{
 			MusicBeatState.getVariables().set(name, value);
 			return value;
 		});
-		interp.setVar('getVar', function(name:String)
+		set('getVar', function(name:String)
 		{
 			var result:Dynamic = null;
 			if (MusicBeatState.getVariables().exists(name))
 				result = MusicBeatState.getVariables().get(name);
 			return result;
 		});
-		interp.setVar('removeVar', function(name:String)
+		set('removeVar', function(name:String)
 		{
 			if (MusicBeatState.getVariables().exists(name))
 			{
@@ -157,12 +162,21 @@ class Python
 			}
 			return false;
 		});
-		interp.setVar('debugPrint', function(text:String, ?color:FlxColor = null)
+		set('debugPrint', function(text:String, ?color:FlxColor = null)
 		{
 			if (color == null)
 				color = FlxColor.WHITE;
 			PlayState.instance.addTextToDebug(text, color);
 		});
+	}
+
+	public function stop()
+	{
+		if (interp != null)
+		{
+			// interp.stop();
+			interp = null;
+		}
 	}
 
 	public function destroy()

@@ -3749,8 +3749,9 @@ class PlayState extends MusicBeatState
 	{
 		var code:String = File.getContent(file);
 		var newScript:Python = new Python();
-		if (newScript.execute(code) != null)
+		if (newScript.execute(code) == true)
 		{
+			newScript.origin = file;
 			pythonArray.push(newScript);
 			return true;
 		}
@@ -3772,6 +3773,8 @@ class PlayState extends MusicBeatState
 		var result:Dynamic = callOnLuas(funcToCall, args, ignoreStops, exclusions, excludeValues);
 		if (result == null || excludeValues.contains(result))
 			result = callOnHScript(funcToCall, args, ignoreStops, exclusions, excludeValues);
+		if (result == null || excludeValues.contains(result))
+			result = callOnPython(funcToCall, args, ignoreStops, exclusions, excludeValues);
 		return result;
 	}
 
@@ -3865,6 +3868,50 @@ class PlayState extends MusicBeatState
 
 		return returnVal;
 	}
+	
+	public function callOnPython(funcToCall:String, args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null,
+			excludeValues:Array<Dynamic> = null):Dynamic {
+			
+			var returnVal:Dynamic = LuaUtils.Function_Continue;
+
+			#if HSCRIPT_ALLOWED
+			if (exclusions == null)
+				exclusions = new Array();
+			if (excludeValues == null)
+				excludeValues = new Array();
+			excludeValues.push(LuaUtils.Function_Continue);
+
+			var len:Int = pythonArray.length;
+			if (len < 1)
+				return returnVal;
+
+			for (script in pythonArray)
+			{
+				@:privateAccess
+				if (script == null || !script.exists(funcToCall) || exclusions.contains(script.origin))
+					continue;
+
+				var callValue = script.call(funcToCall, args);
+				if (callValue != null)
+				{
+					var myValue:Dynamic = callValue;
+
+					if ((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll)
+						&& !excludeValues.contains(myValue)
+						&& !ignoreStops)
+					{
+						returnVal = myValue;
+						break;
+					}
+
+					if (myValue != null && !excludeValues.contains(myValue))
+						returnVal = myValue;
+				}
+			}
+			#end
+
+			return returnVal;
+	}
 
 	public function setOnScripts(variable:String, arg:Dynamic, exclusions:Array<String> = null)
 	{
@@ -3895,6 +3942,21 @@ class PlayState extends MusicBeatState
 		if (exclusions == null)
 			exclusions = [];
 		for (script in hscriptArray)
+		{
+			if (exclusions.contains(script.origin))
+				continue;
+
+			script.set(variable, arg);
+		}
+		#end
+	}
+	
+	public function setOnPython(variable:String, arg:Dynamic, exclusions:Array<String> = null)
+	{
+		#if PYTHON_ALLOWED
+		if (exclusions == null)
+			exclusions = [];
+		for (script in pythonArray)
 		{
 			if (exclusions.contains(script.origin))
 				continue;
