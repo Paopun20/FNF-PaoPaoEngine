@@ -8,8 +8,7 @@ art/buildScripts/test_x64-debug-officialrelease.bat
 ### VS Code
 export/*
 .vscode/*
-.haxelib/
-.github/
+.haxelib/*
 *.code-workspace
 vs_Community.exe
 # Local history which shouldn't be shared.
@@ -19,9 +18,6 @@ vs_Community.exe
 *.DS_Store
 # ! means a file should be added regardless of it it gets ignored prior.
 # Including to allow others to use already set-up configuration tweaked for the project.
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+!.vscode/
 art/build_html.bat
 art/build_html-debug.bat

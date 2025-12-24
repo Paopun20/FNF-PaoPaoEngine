@@ -1,0 +1,84 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: linux
+            artifact: linux
+            build_cmd: linux
+            setup_cmd: |
+              sudo apt-get update
+              sudo apt-get install -y libvlc-dev libvlccore-dev
+              haxelib setup ~/haxelib
+              haxelib install hxcpp > /dev/null --quiet
+              chmod +x ./setup/unix.sh
+              sh ./setup/unix.sh
+            settings_path: ~/settings.cocoa
+            output: export/release/linux/bin
+
+          - os: windows-latest
+            name: windows
+            artifact: windows
+            build_cmd: windows
+            setup_cmd: |
+              haxelib setup C:/haxelib
+              haxelib install hxcpp > NUL
+              setup\windows.ps1
+            shell: cmd
+            settings_path: "%USERPROFILE%/settings.cocoa"
+            output: export/release/windows/bin
+
+          - os: macos-15
+            name: mac
+            artifact: macos
+            build_cmd: mac
+            setup_cmd: |
+              haxelib setup ~/haxelib
+              haxelib install hxcpp > /dev/null --quiet
+              chmod +x ./setup/unix.sh
+              sh ./setup/unix.sh
+            settings_path: ~/settings.cocoa
+            output: export/release/macos/bin
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: krdlab/setup-haxe@v2
+        with:
+          haxe-version: 4.3.7
+
+      - name: Install Haxelib
+        run: ${{ matrix.setup_cmd }}
+        shell: ${{ matrix.shell || 'bash' }}
+
+      - name: Skip SScript setup mode
+        run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> ${{ matrix.settings_path }}
+        shell: ${{ matrix.shell || 'bash' }}
+
+      - name: Create Version Tag
+        run: echo "${{ github.run_id }}" > VERSION
+
+      - name: Compile
+        run: |
+          haxelib run lime build Project.xml ${{ matrix.build_cmd }} \
+            --app-version="4.0.0-${{ github.run_id }}" \
+            -D officialBuild
+
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.output }}

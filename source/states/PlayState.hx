@@ -45,7 +45,7 @@ import crowplexus.iris.Iris;
 import crowplexus.hscript.Expr.Error as IrisError;
 import crowplexus.hscript.Printer;
 #end
-#if HYTHON_ALLOWED
+#if PYTHON_ALLOWED
 import psychlua.Python;
 #end
 
@@ -94,7 +94,7 @@ class PlayState extends MusicBeatState
 	public var hscriptArray:Array<HScript> = [];
 	#end
 
-	#if HYTHON_ALLOWED
+	#if PYTHON_ALLOWED
 	public var pythonArray:Array<Python> = [];
 	#end
 
@@ -451,7 +451,7 @@ class PlayState extends MusicBeatState
 			add(boyfriendGroup);
 		}
 
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || HYTHON_ALLOWED)
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
 		// "SCRIPTS FOLDER" SCRIPTS
 		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'scripts/'))
 			for (file in FileSystem.readDirectory(folder))
@@ -466,7 +466,7 @@ class PlayState extends MusicBeatState
 					initHScript(folder + file);
 				#end
 
-				#if HYTHON_ALLOWED
+				#if PYTHON_ALLOWED
 				if (file.toLowerCase().endsWith('.py'))
 					initPython(folder + file);
 				#end
@@ -491,7 +491,7 @@ class PlayState extends MusicBeatState
 		// STAGE SCRIPTS
 		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua'); #end
 		#if HSCRIPT_ALLOWED startHScriptsNamed('stages/' + curStage + '.hx'); #end
-		// #if HYTHON_ALLOWED startPythonScriptsNamed('stages/' + curStage + '.py'); #end
+		// #if PYTHON_ALLOWED startPythonScriptsNamed('stages/' + curStage + '.py'); #end
 
 		// CHARACTER SCRIPTS
 		if (gf != null)
@@ -618,7 +618,7 @@ class PlayState extends MusicBeatState
 		eventsPushed = null;
 
 		// SONG SPECIFIC SCRIPTS
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || HYTHON_ALLOWED)
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
 		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'data/$songName/'))
 			for (file in FileSystem.readDirectory(folder))
 			{
@@ -632,7 +632,7 @@ class PlayState extends MusicBeatState
 					initHScript(folder + file);
 				#end
 
-				#if HYTHON_ALLOWED
+				#if PYTHON_ALLOWED
 				if (file.toLowerCase().endsWith('.py'))
 					initPython(folder + file);
 				#end
@@ -3542,7 +3542,7 @@ class PlayState extends MusicBeatState
 		hscriptArray = null;
 		#end
 
-		#if HYTHON_ALLOWED
+		#if PYTHON_ALLOWED
 		for (python in pythonArray)
 		{
 			python.call('onDestroy', []);
@@ -3744,18 +3744,15 @@ class PlayState extends MusicBeatState
 	}
 	#end
 
-	#if HYTHON_ALLOWED
+	#if PYTHON_ALLOWED
 	public function initPython(file:String)
 	{
 		var code:String = File.getContent(file);
-		var newScript:Python = new Python();
-		if (newScript.execute(code) == true)
-		{
-			newScript.origin = file;
-			pythonArray.push(newScript);
-			return true;
-		}
-		return false;
+		var newScript:Python = new Python(null, code);
+		newScript.origin = file;
+		trace('initialized python interp successfully: $file');
+		pythonArray.push(newScript);
+		return true;
 	}
 	#end
 
@@ -3896,7 +3893,7 @@ class PlayState extends MusicBeatState
 				{
 					var myValue:Dynamic = callValue;
 
-					if ((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll)
+					if ((myValue == LuaUtils.Function_StopPython || myValue == LuaUtils.Function_StopAll)
 						&& !excludeValues.contains(myValue)
 						&& !ignoreStops)
 					{

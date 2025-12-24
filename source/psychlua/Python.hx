@@ -1,14 +1,9 @@
 package psychlua;
 
-#if HYTHON_ALLOWED
-import paopao.hython.Parser as PyParser;
-import paopao.hython.Interp as PyInterp;
-#if LUA_ALLOWED
-import psychlua.FunkinLua;
-#end
-import flixel.FlxBasic;
+#if PYTHON_ALLOWED
 import objects.Character;
-import psychlua.LuaUtils;
+import paopao.hython.Interp as PyInterp;
+import paopao.hython.Parser as PyParser;
 import psychlua.CustomSubstate;
 #if LUA_ALLOWED
 import psychlua.FunkinLua;
@@ -39,48 +34,40 @@ class Python
 
 		if (!manualRun && code != null && code.length > 0)
 		{
-			try
-			{
+		    try 
+		    {
 				execute(code);
-			}
-			catch (e)
-			{
-				trace('[Python] Runtime error: ' + e);
-				returnValue = null;
-			}
+		    }
+		    catch (e)
+		    {
+		        trace('[Python] Runtime error: ' + e);
+		    }
 		}
 	}
 
 	// Execute python-like code
-	public function execute(code:String):Bool
-	{
+	public function execute(code:String):Dynamic
+	{   
 		var expr = parser.parseString(code);
 		returnValue = interp.execute(expr);
-		if (returnValue == null)
-		{
-			returnValue = false;
-		}
-		else
-		{
-			returnValue = true;
-		}
 		return returnValue;
 	}
 
 	// Call python function
 	public function call(func:String, ?args:Array<Dynamic>):Dynamic
 	{
-		if (!exists(func))
+		if (args == null)
+			args = [];
+		if (exists(func))
 		{
-			PlayState.instance.addTextToDebug("Python: No function named: " + func, FlxColor.RED);
-			return null;
+			return interp.calldef(func, args);
 		}
-		return interp.calldef(func, args ?? []);
+		return null;
 	}
 
-	public function exists(func:String):Bool
+	public function exists(func:String):Bool // it have is be true // if not exists be false
 	{
-		return interp.getdef(func) != null;
+		return interp.getdef(func);
 	}
 
 	public function set(variable:String, arg:Dynamic)
@@ -174,7 +161,7 @@ class Python
 	{
 		if (interp != null)
 		{
-			// interp.stop();
+			interp.stop();
 			interp = null;
 		}
 	}
@@ -194,13 +181,13 @@ class Python
 	public function new()
 	{
 		trace("[Python] Python is not allowed on this platform!");
-		PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!");
+		PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
 	}
 
 	public function execute(code:String):Dynamic
 	{
 		trace("[Python] Python is not allowed on this platform!");
-		PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!");
+		PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
 		return null;
 	}
 
@@ -212,7 +199,7 @@ class Python
 
 	public function destroy()
 	{
-		PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!");
+		PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
 		trace("[Python] Python is not allowed on this platform!");
 	}
 }

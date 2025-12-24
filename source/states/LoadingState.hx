@@ -349,18 +349,41 @@ class LoadingState extends MusicBeatState
 
 	public static function checkLoaded():Bool
 	{
-		for (key => bitmap in requestedBitmaps)
+		// Acquire mutex before accessing shared data
+		if (mutex != null) mutex.acquire();
+		var localRequestedBitmaps = requestedBitmaps.copy();
+		var localOriginalBitmapKeys = originalBitmapKeys.copy();
+		if (mutex != null) mutex.release();
+		
+		// Process bitmaps outside the mutex lock to avoid blocking threads
+		for (key => bitmap in localRequestedBitmaps)
 		{
-			if (bitmap != null && Paths.cacheBitmap(originalBitmapKeys.get(key), bitmap) != null)
+			if (bitmap != null && Paths.cacheBitmap(localOriginalBitmapKeys.get(key), bitmap) != null)
 			{
-			} // trace('finished preloading image $key');
-			else
+				trace('finished preloading image $key');
+			}
+			else if (bitmap != null)
+			{
 				trace('failed to cache image $key');
+			}
+			else
+			{
+				trace('failed to load image $key');
+			}
 		}
+		
+		// Clear the maps in a thread-safe way
+		if (mutex != null) mutex.acquire();
 		requestedBitmaps.clear();
 		originalBitmapKeys.clear();
-		// trace('we checked if loaded');
-		return (loaded >= loadMax && initialThreadCompleted);
+		if (mutex != null) mutex.release();
+		
+		// Return the condition in a thread-safe way
+		var result = false;
+		if (mutex != null) mutex.acquire();
+		result = (loaded >= loadMax && initialThreadCompleted);
+		if (mutex != null) mutex.release();
+		return result;
 	}
 
 	public static function loadNextDirectory()
@@ -414,6 +437,7 @@ class LoadingState extends MusicBeatState
 
 	public static function prepare(images:Array<String> = null, sounds:Array<String> = null, music:Array<String> = null)
 	{
+		// This function is called before threading starts, so no mutex needed
 		if (images != null)
 			imagesToPrepare = imagesToPrepare.concat(images);
 		if (sounds != null)
@@ -440,6 +464,7 @@ class LoadingState extends MusicBeatState
 	{
 		if (PlayState.SONG == null)
 		{
+			// Reset arrays and counters - called from main thread
 			imagesToPrepare = [];
 			soundsToPrepare = [];
 			musicToPrepare = [];
@@ -460,10 +485,15 @@ class LoadingState extends MusicBeatState
 		initialThreadCompleted = false;
 		var threadsCompleted:Int = 0;
 		var threadsMax:Int = 0;
+		var threadMutex = new Mutex(); // Local mutex for thread completion tracking
 		function completedThread()
 		{
+			threadMutex.acquire();
 			threadsCompleted++;
-			if (threadsCompleted == threadsMax)
+			var allCompleted = (threadsCompleted == threadsMax);
+			threadMutex.release();
+			
+			if (allCompleted)
 			{
 				clearInvalids();
 				startThreads();
@@ -632,7 +662,11 @@ class LoadingState extends MusicBeatState
 					});
 				}
 
-				if (threadsCompleted == threadsMax)
+				threadMutex.acquire();
+				var allCompleted = (threadsCompleted == threadsMax);
+				threadMutex.release();
+				
+				if (allCompleted)
 				{
 					clearInvalids();
 					startThreads();
@@ -647,6 +681,7 @@ class LoadingState extends MusicBeatState
 
 	public static function clearInvalids()
 	{
+		// This is called from the main thread before starting threads, so no mutex needed
 		clearInvalidFrom(imagesToPrepare, 'images', '.png', IMAGE);
 		clearInvalidFrom(soundsToPrepare, 'sounds', '.${Paths.SOUND_EXT}', SOUND);
 		clearInvalidFrom(musicToPrepare, 'music', ' .${Paths.SOUND_EXT}', SOUND);
@@ -659,6 +694,7 @@ class LoadingState extends MusicBeatState
 
 	static function clearInvalidFrom(arr:Array<String>, prefix:String, ext:String, type:AssetType, ?parentFolder:String = null)
 	{
+		// Process folder expansion before filtering - this is safe as it only reads
 		for (folder in arr.copy())
 		{
 			var nam:String = folder.trim();
@@ -681,6 +717,7 @@ class LoadingState extends MusicBeatState
 			}
 		}
 
+		// Filter invalid entries - this modifies the array
 		var i:Int = 0;
 		while (i < arr.length)
 		{
@@ -705,9 +742,12 @@ class LoadingState extends MusicBeatState
 	public static function startThreads()
 	{
 		mutex = new Mutex();
+		// Set loadMax in a thread-safe way
+		mutex.acquire();
 		loadMax = imagesToPrepare.length + soundsToPrepare.length + musicToPrepare.length + songsToPrepare.length;
 		loaded = 0;
-
+		mutex.release();
+		
 		// then start threads
 		_threadFunc();
 	}
@@ -756,9 +796,10 @@ class LoadingState extends MusicBeatState
 			{
 				trace('ERROR! fail on preloading $traceData: $e');
 			}
-			// mutex.acquire();
+			// Thread-safe increment of loaded counter
+			if (mutex != null) mutex.acquire();
 			loaded++;
-			// mutex.release();
+			if (mutex != null) mutex.release();
 		});
 	}
 
@@ -833,9 +874,9 @@ class LoadingState extends MusicBeatState
 			if (#if sys FileSystem.exists(file) || #end OpenFlAssets.exists(file, SOUND))
 			{
 				var sound:Sound = #if sys Sound.fromFile(file) #else OpenFlAssets.getSound(file, false) #end;
-				mutex.acquire();
+				if (mutex != null) mutex.acquire();
 				Paths.currentTrackedSounds.set(file, sound);
-				mutex.release();
+				if (mutex != null) mutex.release();
 			}
 			else if (beepOnNull)
 			{
@@ -844,14 +885,14 @@ class LoadingState extends MusicBeatState
 				return FlxAssets.getSound('flixel/sounds/beep');
 			}
 		}
-		mutex.acquire();
+		if (mutex != null) mutex.acquire();
 		Paths.localTrackedAssets.push(file);
-		mutex.release();
+		if (mutex != null) mutex.release();
 
 		return Paths.currentTrackedSounds.get(file);
 	}
 
-	// thread safe sound loader
+	// thread safe graphic loader
 	static function preloadGraphic(key:String):Null<BitmapData>
 	{
 		try
@@ -872,10 +913,11 @@ class LoadingState extends MusicBeatState
 					var bitmap:BitmapData = OpenFlAssets.getBitmapData(file, false);
 					#end
 
-					mutex.acquire();
+					// Store in temporary map for later processing in checkLoaded
+					if (mutex != null) mutex.acquire();
 					requestedBitmaps.set(file, bitmap);
 					originalBitmapKeys.set(file, requestKey);
-					mutex.release();
+					if (mutex != null) mutex.release();
 					return bitmap;
 				}
 				else
