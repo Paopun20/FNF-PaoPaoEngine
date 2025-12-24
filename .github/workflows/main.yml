@@ -9,6 +9,7 @@ on:
 
 jobs:
   build:
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -34,7 +35,7 @@ jobs:
             setup_cmd: |
               haxelib setup C:/haxelib
               haxelib install hxcpp > NUL
-              . setup\windows.ps1
+              PowerShell setup/windows.ps1
             settings_path: "%USERPROFILE%/settings.cocoa"
             output: export/release/windows/bin
 
