@@ -8,3 +8,5 @@
 - Fixed Loading Screen race condition and made it thread-safe
  > A race condition occurs when two or more threads access a shared resource simultaneously, leading to unpredictable behavior or data corruption.
  > More details [here](https://www.youtube.com/watch?v=bhpzTWtee2A)
+- Format all files to make them more readable and easier to understand
+- Fixed some bugs in the engine
