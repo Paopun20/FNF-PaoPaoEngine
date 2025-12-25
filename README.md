@@ -10,3 +10,6 @@
  > More details [here](https://www.youtube.com/watch?v=bhpzTWtee2A)
 - Format all files to make them more readable and easier to understand
 - Fixed some bugs in the engine
+- Discord RPC to make it more interactive and engaging
+- Updated dependencies to the most compatible versions
+- Add HXCPP_[NAME] - Haxe Cross-Platform Compiler for Native Code
