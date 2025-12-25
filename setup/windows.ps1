@@ -8,8 +8,8 @@ if ([string]::IsNullOrEmpty((Get-Command haxe -ea 0))) {
 
 haxelib install lime 8.3.0
 haxelib install openfl 9.5.0
-haxelib install flixel 5.6.1
-haxelib install flixel-addons 3.2.2
+haxelib install flixel 5.9.0
+haxelib install flixel-addons 3.3.0
 haxelib install flixel-tools 1.5.1
 haxelib install hscript-iris 1.1.3
 haxelib install tjson 1.4.0

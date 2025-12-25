@@ -7,8 +7,8 @@
   Why WIP? Because some Python futures contracts are not yet complete.\
   Want help? Submit a pull request [here](https://github.com/Paopun20/Hython) <- this Hython is a Python interpreter written in Haxe
 - Fixed Loading Screen race condition and made it thread-safe
-  > A race condition occurs when two or more threads access a shared resource simultaneously, leading to unpredictable behavior or data corruption.\
-  More details [here](https://www.youtube.com/watch?v=bhpzTWtee2A)
+  > A race condition occurs when two or more threads access a shared resource simultaneously, leading to unpredictable behavior or data corruption or stuck on loading screen.\
+  More details? [here](https://www.youtube.com/watch?v=bhpzTWtee2A)
 - Open mod folder by clicking on the "Open Mod Folder" button in the mod menu.
 - Format all files to make them more readable and easier to understand
 - Fixed some bugs in the engine

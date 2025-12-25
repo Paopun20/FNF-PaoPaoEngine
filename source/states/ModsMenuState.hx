@@ -1,16 +1,16 @@
 package states;
 
-import backend.WeekData;
 import backend.Mods;
+import backend.WeekData;
+import flash.geom.Rectangle;
 import flixel.FlxBasic;
 import flixel.graphics.FlxGraphic;
-import flash.geom.Rectangle;
-import haxe.Json;
 import flixel.util.FlxSpriteUtil;
-import objects.AttachedSprite;
-import options.ModSettingsSubState;
-import openfl.display.BitmapData;
+import haxe.Json;
 import lime.utils.Assets;
+import objects.AttachedSprite;
+import openfl.display.BitmapData;
+import options.ModSettingsSubState;
 
 class ModsMenuState extends MusicBeatState
 {
@@ -24,8 +24,7 @@ class ModsMenuState extends MusicBeatState
 	var bgList:FlxSprite;
 	var buttonReload:MenuButton;
 	var buttonModFolder:MenuButton;
-	var buttonEnableAll:MenuButton;
-	var buttonDisableAll:MenuButton;
+	var toggleButton:MenuButton;
 	var buttons:Array<MenuButton> = [];
 	var settingsButton:MenuButton;
 
@@ -37,7 +36,7 @@ class ModsMenuState extends MusicBeatState
 	var curSelectedMod:Int = 0;
 
 	var hoveringOnMods:Bool = true;
-	var curSelectedButton:Int = 0; ///-1 = Enable/Disable All, -2 = Mod Folder, -3 = Reload
+	var curSelectedButton:Int = 0; ///-1 = Toggle All, -2 = Mod Folder, -3 = Reload
 	var modNameInitialY:Float = 0;
 
 	var noModsSine:Float = 0;
@@ -119,55 +118,53 @@ class ModsMenuState extends MusicBeatState
 
 		myY = buttonModFolder.y + buttonModFolder.bg.height + 20;
 
-		buttonEnableAll = new MenuButton(buttonX, myY, buttonWidth, buttonHeight, Language.getPhrase('enable_all_button', 'ENABLE ALL'), function()
+		// Combined toggle all button
+		toggleButton = new MenuButton(buttonX, myY, buttonWidth, buttonHeight, Language.getPhrase('enable_all_button', 'ENABLE ALL'), function()
 		{
-			buttonEnableAll.ignoreCheck = false;
-			for (mod in modsGroup.members)
-			{
-				if (modsList.disabled.contains(mod.folder))
-				{
-					modsList.disabled.remove(mod.folder);
-					modsList.enabled.push(mod.folder);
-					mod.icon.color = FlxColor.WHITE;
-					mod.text.color = FlxColor.WHITE;
-				}
-			}
-			updateModDisplayData();
-			checkToggleButtons();
-			FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
-		});
-		buttonEnableAll.bg.color = FlxColor.GREEN;
-		buttonEnableAll.focusChangeCallback = function(focus:Bool) if (!focus)
-			buttonEnableAll.bg.color = FlxColor.GREEN;
-		add(buttonEnableAll);
+			toggleButton.ignoreCheck = false;
 
-		buttonDisableAll = new MenuButton(buttonX, myY, buttonWidth, buttonHeight, Language.getPhrase('disable_all_button', 'DISABLE ALL'), function()
-		{
-			buttonDisableAll.ignoreCheck = false;
-			for (mod in modsGroup.members)
+			// Check if any mods are currently disabled to determine action
+			var hasDisabledMods = modsList.disabled.length > 0;
+
+			if (hasDisabledMods)
 			{
-				if (modsList.enabled.contains(mod.folder))
+				// Enable all
+				for (mod in modsGroup.members)
 				{
-					modsList.enabled.remove(mod.folder);
-					modsList.disabled.push(mod.folder);
-					mod.icon.color = 0xFFFF6666;
-					mod.text.color = FlxColor.GRAY;
+					if (modsList.disabled.contains(mod.folder))
+					{
+						modsList.disabled.remove(mod.folder);
+						modsList.enabled.push(mod.folder);
+						mod.icon.color = FlxColor.WHITE;
+						mod.text.color = FlxColor.WHITE;
+					}
 				}
 			}
+			else
+			{
+				// Disable all
+				for (mod in modsGroup.members)
+				{
+					if (modsList.enabled.contains(mod.folder))
+					{
+						modsList.enabled.remove(mod.folder);
+						modsList.disabled.push(mod.folder);
+						mod.icon.color = 0xFFFF6666;
+						mod.text.color = FlxColor.GRAY;
+					}
+				}
+			}
+
 			updateModDisplayData();
-			checkToggleButtons();
+			updateToggleButtonState();
 			FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
 		});
-		buttonDisableAll.bg.color = 0xFFFF6666;
-		buttonDisableAll.focusChangeCallback = function(focus:Bool) if (!focus)
-			buttonDisableAll.bg.color = 0xFFFF6666;
-		add(buttonDisableAll);
-		checkToggleButtons();
+		updateToggleButtonState(); // Set initial state
+		add(toggleButton);
 
 		if (modsList.all.length < 1)
 		{
-			buttonDisableAll.visible = buttonDisableAll.enabled = false;
-			buttonEnableAll.visible = true;
+			toggleButton.visible = toggleButton.enabled = false;
 
 			var myX = bgList.x + bgList.width + 20;
 			noModsTxt = new FlxText(myX, 0, FlxG.width - myX - 20,
@@ -290,13 +287,12 @@ class ModsMenuState extends MusicBeatState
 			if (curMod.mustRestart)
 				waitingToRestart = true;
 			updateModDisplayData();
-			checkToggleButtons();
+			updateToggleButtonState();
 			FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
 		}, 54, 54);
 		button.icon.animation.add('icon', [4]);
 		button.icon.animation.play('icon', true);
 		add(button);
-		buttons.push(button);
 		button.focusChangeCallback = function(focus:Bool)
 		{
 			if (!focus)
@@ -637,7 +633,7 @@ class ModsMenuState extends MusicBeatState
 			case -2:
 				return buttonModFolder;
 			case -1:
-				return buttonEnableAll.enabled ? buttonEnableAll : buttonDisableAll;
+				return toggleButton; // Now returns the single toggle button
 		}
 
 		if (modsList.all.length < 1)
@@ -818,10 +814,23 @@ class ModsMenuState extends MusicBeatState
 		FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
 	}
 
-	function checkToggleButtons()
+	// Function to update the toggle all button state
+	function updateToggleButtonState()
 	{
-		buttonEnableAll.visible = buttonEnableAll.enabled = modsList.disabled.length > 0;
-		buttonDisableAll.visible = buttonDisableAll.enabled = !buttonEnableAll.visible;
+		if (modsList.disabled.length > 0)
+		{
+			// There are disabled mods, so show "Enable All"
+			toggleButton.textOn.text = Language.getPhrase('enable_all_button', 'ENABLE ALL');
+			toggleButton.textOff.text = Language.getPhrase('enable_all_button', 'ENABLE ALL');
+			toggleButton.bg.color = FlxColor.GREEN;
+		}
+		else
+		{
+			// All mods are enabled, so show "Disable All"
+			toggleButton.textOn.text = Language.getPhrase('disable_all_button', 'DISABLE ALL');
+			toggleButton.textOff.text = Language.getPhrase('disable_all_button', 'DISABLE ALL');
+			toggleButton.bg.color = 0xFFFF6666;
+		}
 	}
 
 	function reload()

@@ -3,17 +3,18 @@ package;
 #if android
 import android.content.Context;
 #end
+import backend.Highscore;
 import debug.FPSCounter;
-import flixel.graphics.FlxGraphic;
 import flixel.FlxGame;
 import flixel.FlxState;
+import flixel.graphics.FlxGraphic;
 import haxe.io.Path;
+import lime.app.Application;
 import openfl.Assets;
 import openfl.Lib;
 import openfl.display.Sprite;
-import openfl.events.Event;
 import openfl.display.StageScaleMode;
-import lime.app.Application;
+import openfl.events.Event;
 import states.TitleState;
 #if HSCRIPT_ALLOWED
 import crowplexus.iris.Iris;
@@ -27,11 +28,10 @@ import backend.ALSoftConfig; // Just to make sure DCE doesn't remove this, since
 #end
 // crash handler stuff
 #if CRASH_HANDLER
-import openfl.events.UncaughtErrorEvent;
 import haxe.CallStack;
 import haxe.io.Path;
+import openfl.events.UncaughtErrorEvent;
 #end
-import backend.Highscore;
 
 // NATIVE API STUFF, YOU CAN IGNORE THIS AND SCROLL //
 #if (linux && !debug)
@@ -228,8 +228,7 @@ class Main extends Sprite
 		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
 		var dateNow:String = Date.now().toString();
 
-		dateNow = dateNow.replace(" ", "_");
-		dateNow = dateNow.replace(":", "'");
+		dateNow = dateNow.replace(" ", "_").replace(":", "-");
 
 		path = "./crash/" + "PsychEngine_" + dateNow + ".txt";
 
@@ -238,7 +237,7 @@ class Main extends Sprite
 			switch (stackItem)
 			{
 				case FilePos(s, file, line, column):
-					errMsg += file + " (line " + line + ")\n";
+					errMsg += file + " (line " + line + ", column " + column + ")\n";
 				default:
 					Sys.println(stackItem);
 			}
@@ -248,7 +247,7 @@ class Main extends Sprite
 		// remove if you're modding and want the crash log message to contain the link
 		// please remember to actually modify the link for the github page to report the issues to.
 		#if officialBuild
-		errMsg += "\nPlease report this error to the GitHub page: https://github.com/ShadowMario/FNF-PsychEngine";
+		errMsg += "\nPlease report this error to the GitHub page: https://github.com/Paopun20/FNF-PaoPaoEngine";
 		#end
 		errMsg += "\n\n> Crash Handler written by: sqirra-rng";
 
