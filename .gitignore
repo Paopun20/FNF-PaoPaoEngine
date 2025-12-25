@@ -21,3 +21,6 @@ vs_Community.exe
 !.vscode/
 art/build_html.bat
 art/build_html-debug.bat
+
+# this is testing files!
+example_mods/u-test/
