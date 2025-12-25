@@ -193,8 +193,8 @@
 
 	<!-- _______________________________ Libraries ______________________________ -->
 
-	<haxelib name="flixel" version="5.6.1" />
-	<haxelib name="flixel-addons" version="3.2.2" />
+	<haxelib name="flixel" version="5.9.0" />
+	<haxelib name="flixel-addons" version="3.3.0" />
 	<haxelib name="tjson" version="1.4.0" />
 
 	<!--Psych stuff needed-->
@@ -254,6 +254,11 @@
 	<haxedef name="HXCPP_CHECK_POINTER" if="CRASH_HANDLER" />
 	<haxedef name="HXCPP_STACK_LINE" if="CRASH_HANDLER" />
 	<haxedef name="HXCPP_STACK_TRACE" if="CRASH_HANDLER" />
+	<haxedef name="HXCPP_GC_BIG_BLOCKS" />
+	<haxedef name="HXCPP_GC_DYNAMIC_SIZE" />
+	<haxedef name="HXCPP_GC_GENERATIONAL" />
+	<haxedef name="HXCPP_CPP_GC_MARK_MOVE" />
+	<haxedef name="HXCPP_CPP11" />
 
 	<!--Disable deprecated warnings-->
 	<haxedef name='no-deprecation-warnings' />

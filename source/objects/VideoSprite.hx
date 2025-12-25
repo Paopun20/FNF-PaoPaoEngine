@@ -1,183 +1,267 @@
 package objects;
 
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.group.FlxSpriteGroup;
+import flixel.math.FlxMath;
+import flixel.util.FlxColor;
 import flixel.addons.display.FlxPieDial;
 #if hxvlc
 import hxvlc.flixel.FlxVideoSprite;
 #end
 
+#if VIDEOS_ALLOWED
+enum VideoState
+{
+	Idle;
+	Playing;
+	Skipped;
+	Finished;
+	Destroyed;
+}
+
 class VideoSprite extends FlxSpriteGroup
 {
-	#if VIDEOS_ALLOWED
-	public var finishCallback:Void->Void = null;
-	public var onSkip:Void->Void = null;
+	// Public API
+	public var finishCallback:Void->Void;
+	public var onSkip:Void->Void;
 
-	final _timeToSkip:Float = 1;
-
-	public var holdingTime:Float = 0;
-	public var videoSprite:FlxVideoSprite;
-	public var skipSprite:FlxPieDial;
-	public var cover:FlxSprite;
-	public var canSkip(default, set):Bool = false;
-
-	private var videoName:String;
-
-	public var waiting:Bool = false;
-
-	public function new(videoName:String, isWaiting:Bool, canSkip:Bool = false, shouldLoop:Dynamic = false)
-	{
-		super();
-
-		this.videoName = videoName;
-		scrollFactor.set();
-		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-
-		waiting = isWaiting;
-		if (!waiting)
-		{
-			cover = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
-			cover.scale.set(FlxG.width + 100, FlxG.height + 100);
-			cover.screenCenter();
-			cover.scrollFactor.set();
-			add(cover);
-		}
-
-		// initialize sprites
-		videoSprite = new FlxVideoSprite();
-		videoSprite.antialiasing = ClientPrefs.data.antialiasing;
-		add(videoSprite);
-		if (canSkip)
-			this.canSkip = true;
-
-		// callbacks
-		if (!shouldLoop)
-			videoSprite.bitmap.onEndReached.add(finishVideo);
-
-		videoSprite.bitmap.onFormatSetup.add(function()
-		{
-			/*
-				#if hxvlc
-				var wd:Int = videoSprite.bitmap.formatWidth;
-				var hg:Int = videoSprite.bitmap.formatHeight;
-				trace('Video Resolution: ${wd}x${hg}');
-				videoSprite.scale.set(FlxG.width / wd, FlxG.height / hg);
-				#end
-			 */
-			videoSprite.setGraphicSize(FlxG.width);
-			videoSprite.updateHitbox();
-			videoSprite.screenCenter();
-		});
-
-		// start video and adjust resolution to screen size
-		videoSprite.load(videoName, shouldLoop ? ['input-repeat=65545'] : null);
-	}
-
-	var alreadyDestroyed:Bool = false;
-
-	override function destroy()
-	{
-		if (alreadyDestroyed)
-			return;
-
-		trace('Video destroyed');
-		if (cover != null)
-		{
-			remove(cover);
-			cover.destroy();
-		}
-
-		finishCallback = null;
-		onSkip = null;
-
-		if (FlxG.state != null)
-		{
-			if (FlxG.state.members.contains(this))
-				FlxG.state.remove(this);
-
-			if (FlxG.state.subState != null && FlxG.state.subState.members.contains(this))
-				FlxG.state.subState.remove(this);
-		}
-		super.destroy();
-		alreadyDestroyed = true;
-	}
-
-	function finishVideo()
-	{
-		if (!alreadyDestroyed)
-		{
-			if (finishCallback != null)
-				finishCallback();
-
-			destroy();
-		}
-	}
-
-	override function update(elapsed:Float)
-	{
-		if (canSkip)
-		{
-			if (Controls.instance.pressed('accept'))
-			{
-				holdingTime = Math.max(0, Math.min(_timeToSkip, holdingTime + elapsed));
-			}
-			else if (holdingTime > 0)
-			{
-				holdingTime = Math.max(0, FlxMath.lerp(holdingTime, -0.1, FlxMath.bound(elapsed * 3, 0, 1)));
-			}
-			updateSkipAlpha();
-
-			if (holdingTime >= _timeToSkip)
-			{
-				if (onSkip != null)
-					onSkip();
-				finishCallback = null;
-				videoSprite.bitmap.onEndReached.dispatch();
-				trace('Skipped video');
-				return;
-			}
-		}
-		super.update(elapsed);
-	}
-
-	function set_canSkip(newValue:Bool)
-	{
-		canSkip = newValue;
-		if (canSkip)
-		{
-			if (skipSprite == null)
-			{
-				skipSprite = new FlxPieDial(0, 0, 40, FlxColor.WHITE, 40, true, 24);
-				skipSprite.replaceColor(FlxColor.BLACK, FlxColor.TRANSPARENT);
-				skipSprite.x = FlxG.width - (skipSprite.width + 80);
-				skipSprite.y = FlxG.height - (skipSprite.height + 72);
-				skipSprite.amount = 0;
-				add(skipSprite);
-			}
-		}
-		else if (skipSprite != null)
-		{
-			remove(skipSprite);
-			skipSprite.destroy();
-			skipSprite = null;
-		}
-		return canSkip;
-	}
-
-	function updateSkipAlpha()
-	{
-		if (skipSprite == null)
-			return;
-
-		skipSprite.amount = Math.min(1, Math.max(0, (holdingTime / _timeToSkip) * 1.025));
-		skipSprite.alpha = FlxMath.remapToRange(skipSprite.amount, 0.025, 1, 0, 1);
-	}
+	public var canSkip(default, null):Bool = false;
+	public var waiting(default, null):Bool = false;
 
 	public function play()
 		videoSprite?.play();
 
+	public function pause()
+		videoSprite?.pause();
+
 	public function resume()
 		videoSprite?.resume();
 
-	public function pause()
-		videoSprite?.pause();
-	#end
+	// Config
+	final _timeToSkip:Float = 1.0;
+
+	// Runtime
+	var state:VideoState = Idle;
+	var holdingTime:Float = 0;
+
+	// Visuals
+	public var videoSprite:FlxVideoSprite;
+
+	var skipSprite:FlxPieDial;
+	var cover:FlxSprite;
+
+	// Internal
+	var videoName:String;
+	var alreadyDestroyed:Bool = false;
+
+	public function new(videoName:String, isWaiting:Bool, allowSkip:Bool = false, shouldLoop:Bool = false)
+	{
+		super();
+
+		this.videoName = videoName;
+		this.waiting = isWaiting;
+
+		scrollFactor.set();
+		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+
+		if (!waiting)
+			createCover();
+
+		createVideo(shouldLoop);
+
+		if (allowSkip)
+			enableSkip();
+	}
+
+	override function update(elapsed:Float)
+	{
+		if (state == Playing && canSkip)
+			updateSkip(elapsed);
+
+		super.update(elapsed);
+	}
+
+	override function destroy()
+	{
+		cleanupAndDestroy();
+	}
+
+	// VIDEO LIFECYCLE
+
+	function createVideo(shouldLoop:Bool)
+	{
+		videoSprite = new FlxVideoSprite();
+		videoSprite.antialiasing = ClientPrefs.data.antialiasing;
+		add(videoSprite);
+
+		videoSprite.bitmap.onFormatSetup.add(fitVideoToScreen);
+
+		if (!shouldLoop)
+			videoSprite.bitmap.onEndReached.add(() -> endVideo(false));
+
+		videoSprite.load(videoName, shouldLoop ? ['input-repeat=65545'] : null);
+
+		state = Playing;
+	}
+
+	function fitVideoToScreen()
+	{
+		#if hxvlc
+		var vw = videoSprite.bitmap.width;
+		var vh = videoSprite.bitmap.height;
+
+		if (vw <= 0 || vh <= 0)
+			return;
+
+		var scale = Math.max(FlxG.width / vw, FlxG.height / vh);
+		videoSprite.scale.set(scale, scale);
+		videoSprite.updateHitbox();
+		videoSprite.screenCenter();
+		#end
+	}
+
+	function endVideo(skipped:Bool)
+	{
+		if (alreadyDestroyed || state == Destroyed)
+			return;
+
+		state = skipped ? Skipped : Finished;
+
+		if (skipped)
+			if (onSkip != null)
+				onSkip();
+			else if (finishCallback != null)
+				finishCallback();
+
+		cleanupAndDestroy();
+	}
+
+	// SKIP LOGIC
+
+	function updateSkip(elapsed:Float)
+	{
+		if (Controls.instance.pressed('accept'))
+			increaseHold(elapsed);
+		else
+			decreaseHold(elapsed);
+
+		updateSkipUI();
+
+		if (holdingTime >= _timeToSkip)
+			endVideo(true);
+	}
+
+	inline function increaseHold(elapsed:Float)
+	{
+		holdingTime = Math.min(_timeToSkip, holdingTime + elapsed);
+	}
+
+	inline function decreaseHold(elapsed:Float)
+	{
+		holdingTime = Math.max(0, holdingTime - elapsed * 3);
+	}
+
+	function updateSkipUI()
+	{
+		if (skipSprite == null)
+			return;
+
+		skipSprite.amount = holdingTime / _timeToSkip;
+		skipSprite.alpha = FlxMath.remapToRange(skipSprite.amount, 0.05, 1, 0, 1);
+	}
+
+	public function enableSkip()
+	{
+		if (canSkip)
+			return;
+
+		canSkip = true;
+		createSkipUI();
+	}
+
+	public function disableSkip()
+	{
+		if (!canSkip)
+			return;
+
+		canSkip = false;
+		destroySkipUI();
+	}
+
+	function createSkipUI()
+	{
+		skipSprite = new FlxPieDial(0, 0, 40, FlxColor.WHITE, 40, true, 24);
+		skipSprite.replaceColor(FlxColor.BLACK, FlxColor.TRANSPARENT);
+
+		skipSprite.x = FlxG.width - (skipSprite.width + 80);
+		skipSprite.y = FlxG.height - (skipSprite.height + 72);
+
+		skipSprite.amount = 0;
+		add(skipSprite);
+	}
+
+	function destroySkipUI()
+	{
+		if (skipSprite == null)
+			return;
+
+		remove(skipSprite);
+		skipSprite.destroy();
+		skipSprite = null;
+	}
+
+	// CLEANUP
+
+	function createCover()
+	{
+		cover = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		cover.scale.set(FlxG.width + 100, FlxG.height + 100);
+		cover.screenCenter();
+		cover.scrollFactor.set();
+		add(cover);
+	}
+
+	function cleanupAndDestroy()
+	{
+		if (alreadyDestroyed)
+			return;
+
+		alreadyDestroyed = true;
+		state = Destroyed;
+
+		clearCallbacks();
+		removeFromState();
+		destroyVisuals();
+
+		super.destroy();
+	}
+
+	inline function clearCallbacks()
+	{
+		finishCallback = null;
+		onSkip = null;
+	}
+
+	function removeFromState()
+	{
+		if (FlxG.state?.members.contains(this))
+			FlxG.state.remove(this);
+
+		if (FlxG.state?.subState?.members.contains(this))
+			FlxG.state.subState.remove(this);
+	}
+
+	function destroyVisuals()
+	{
+		if (cover != null)
+		{
+			remove(cover);
+			cover.destroy();
+			cover = null;
+		}
+
+		destroySkipUI();
+	}
 }
+#end

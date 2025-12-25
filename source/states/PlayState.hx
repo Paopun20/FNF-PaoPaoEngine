@@ -3865,49 +3865,49 @@ class PlayState extends MusicBeatState
 
 		return returnVal;
 	}
-	
+
 	public function callOnPython(funcToCall:String, args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null,
-			excludeValues:Array<Dynamic> = null):Dynamic {
-			
-			var returnVal:Dynamic = LuaUtils.Function_Continue;
+			excludeValues:Array<Dynamic> = null):Dynamic
+	{
+		var returnVal:Dynamic = LuaUtils.Function_Continue;
 
-			#if HSCRIPT_ALLOWED
-			if (exclusions == null)
-				exclusions = new Array();
-			if (excludeValues == null)
-				excludeValues = new Array();
-			excludeValues.push(LuaUtils.Function_Continue);
+		#if HSCRIPT_ALLOWED
+		if (exclusions == null)
+			exclusions = new Array();
+		if (excludeValues == null)
+			excludeValues = new Array();
+		excludeValues.push(LuaUtils.Function_Continue);
 
-			var len:Int = pythonArray.length;
-			if (len < 1)
-				return returnVal;
-
-			for (script in pythonArray)
-			{
-				@:privateAccess
-				if (script == null || !script.exists(funcToCall) || exclusions.contains(script.origin))
-					continue;
-
-				var callValue = script.call(funcToCall, args);
-				if (callValue != null)
-				{
-					var myValue:Dynamic = callValue;
-
-					if ((myValue == LuaUtils.Function_StopPython || myValue == LuaUtils.Function_StopAll)
-						&& !excludeValues.contains(myValue)
-						&& !ignoreStops)
-					{
-						returnVal = myValue;
-						break;
-					}
-
-					if (myValue != null && !excludeValues.contains(myValue))
-						returnVal = myValue;
-				}
-			}
-			#end
-
+		var len:Int = pythonArray.length;
+		if (len < 1)
 			return returnVal;
+
+		for (script in pythonArray)
+		{
+			@:privateAccess
+			if (script == null || !script.exists(funcToCall) || exclusions.contains(script.origin))
+				continue;
+
+			var callValue = script.call(funcToCall, args);
+			if (callValue != null)
+			{
+				var myValue:Dynamic = callValue;
+
+				if ((myValue == LuaUtils.Function_StopPython || myValue == LuaUtils.Function_StopAll)
+					&& !excludeValues.contains(myValue)
+					&& !ignoreStops)
+				{
+					returnVal = myValue;
+					break;
+				}
+
+				if (myValue != null && !excludeValues.contains(myValue))
+					returnVal = myValue;
+			}
+		}
+		#end
+
+		return returnVal;
 	}
 
 	public function setOnScripts(variable:String, arg:Dynamic, exclusions:Array<String> = null)
@@ -3947,7 +3947,7 @@ class PlayState extends MusicBeatState
 		}
 		#end
 	}
-	
+
 	public function setOnPython(variable:String, arg:Dynamic, exclusions:Array<String> = null)
 	{
 		#if PYTHON_ALLOWED

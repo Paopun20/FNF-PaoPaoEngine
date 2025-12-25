@@ -16,6 +16,7 @@ class DiscordClient
 
 	private static final button1:DiscordButton = new DiscordButton();
 	private static final button2:DiscordButton = new DiscordButton();
+
 	public static function initialize():Void
 	{
 		Sys.println('Initializing Discord RPC...');
@@ -29,9 +30,9 @@ class DiscordClient
 		button1.url = "https://github.com/Paopun20/FNF-PaoPaoEngine/releases";
 		button2.label = "GitHub link";
 		button2.url = "https://github.com/Paopun20/FNF-PaoPaoEngine";
-		
+
 		discordPresence.buttons[0] = button1;
-        discordPresence.buttons[1] = button2;
+		discordPresence.buttons[1] = button2;
 
 		Thread.create(function():Void
 		{
@@ -96,12 +97,15 @@ class DiscordClient
 		clientID = _defaultID;
 	}
 
-	public static function changePresence(details:String = 'In the Menus', ?state:String, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float, largeImageKey:String = 'icon')
+	public static function changePresence(details:String = 'In the Menus', ?state:String, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float,
+			largeImageKey:String = 'icon')
 	{
 		var startTimestamp:Float = 0;
-		if (hasStartTimestamp) startTimestamp = Date.now().getTime();
-		if (endTimestamp > 0) endTimestamp = startTimestamp + endTimestamp;
-        
+		if (hasStartTimestamp)
+			startTimestamp = Date.now().getTime();
+		if (endTimestamp > 0)
+			endTimestamp = startTimestamp + endTimestamp;
+
 		discordPresence.state = state;
 		discordPresence.details = details;
 		discordPresence.smallImageKey = smallImageKey;
@@ -163,13 +167,18 @@ class DiscordClient
 	#end
 
 	#if LUA_ALLOWED
-	public static function addLuaCallbacks(lua:State) {
-		Lua_helper.add_callback(lua, "changeDiscordPresence", function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float) {
-			changePresence(details, state, smallImageKey, hasStartTimestamp, endTimestamp);
-		});
+	public static function addLuaCallbacks(lua:State)
+	{
+		Lua_helper.add_callback(lua, "changeDiscordPresence",
+			function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float)
+			{
+				changePresence(details, state, smallImageKey, hasStartTimestamp, endTimestamp);
+			});
 
-		Lua_helper.add_callback(lua, "changeDiscordClientID", function(?newID:String = null) {
-			if(newID == null) newID = _defaultID;
+		Lua_helper.add_callback(lua, "changeDiscordClientID", function(?newID:String = null)
+		{
+			if (newID == null)
+				newID = _defaultID;
 			clientID = newID;
 		});
 	}

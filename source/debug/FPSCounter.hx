@@ -3,7 +3,7 @@ package debug;
 import flixel.FlxG;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
-import openfl.system.System;
+import flixel.util.FlxStringUtil;
 
 /**
 	The FPS class provides an easy-to-use monitor to display
@@ -21,6 +21,8 @@ class FPSCounter extends TextField
 	**/
 	public var memoryMegas(get, never):Float;
 
+	private var _color:Int;
+
 	@:noCompletion private var times:Array<Float>;
 
 	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000)
@@ -29,6 +31,7 @@ class FPSCounter extends TextField
 
 		this.x = x;
 		this.y = y;
+		this._color = color;
 
 		currentFPS = 0;
 		selectable = false;
@@ -64,9 +67,10 @@ class FPSCounter extends TextField
 
 	public dynamic function updateText():Void
 	{ // so people can override it in hscript
-		text = 'FPS: ${currentFPS}' + '\nMemory: ${flixel.util.FlxStringUtil.formatBytes(memoryMegas)}';
+		text = 'FPS: ${currentFPS}' + '\nMemory: ${FlxStringUtil.formatBytes(memoryMegas)}';
 
-		textColor = 0xFFFFFFFF;
+		textColor = this._color;
+
 		if (currentFPS < FlxG.drawFramerate * 0.5)
 			textColor = 0xFFFF0000;
 	}

@@ -34,20 +34,20 @@ class Python
 
 		if (!manualRun && code != null && code.length > 0)
 		{
-		    try 
-		    {
+			try
+			{
 				execute(code);
-		    }
-		    catch (e)
-		    {
-		        trace('[Python] Runtime error: ' + e);
-		    }
+			}
+			catch (e)
+			{
+				trace('[Python] Runtime error: ' + e);
+			}
 		}
 	}
 
 	// Execute python-like code
 	public function execute(code:String):Dynamic
-	{   
+	{
 		var expr = parser.parseString(code);
 		returnValue = interp.execute(expr);
 		return returnValue;

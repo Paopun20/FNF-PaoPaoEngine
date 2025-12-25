@@ -23,7 +23,7 @@ class ModsMenuState extends MusicBeatState
 
 	var bgList:FlxSprite;
 	var buttonReload:MenuButton;
-	// var buttonModFolder:MenuButton;
+	var buttonModFolder:MenuButton;
 	var buttonEnableAll:MenuButton;
 	var buttonDisableAll:MenuButton;
 	var buttons:Array<MenuButton> = [];
@@ -37,7 +37,7 @@ class ModsMenuState extends MusicBeatState
 	var curSelectedMod:Int = 0;
 
 	var hoveringOnMods:Bool = true;
-	var curSelectedButton:Int = 0; ///-1 = Enable/Disable All, -2 = Reload
+	var curSelectedButton:Int = 0; ///-1 = Enable/Disable All, -2 = Mod Folder, -3 = Reload
 	var modNameInitialY:Float = 0;
 
 	var noModsSine:Float = 0;
@@ -72,7 +72,7 @@ class ModsMenuState extends MusicBeatState
 		add(bg);
 		bg.screenCenter();
 
-		bgList = FlxSpriteUtil.drawRoundRect(new FlxSprite(40, 40).makeGraphic(340, 440, FlxColor.TRANSPARENT), 0, 0, 340, 440, 15, 15, FlxColor.BLACK);
+		bgList = FlxSpriteUtil.drawRoundRect(new FlxSprite(40, 40).makeGraphic(340, 360, FlxColor.TRANSPARENT), 0, 0, 340, 360, 15, 15, FlxColor.BLACK);
 		bgList.alpha = 0.6;
 
 		modsGroup = new FlxTypedGroup<ModItem>();
@@ -104,16 +104,20 @@ class ModsMenuState extends MusicBeatState
 		add(buttonReload);
 
 		var myY = buttonReload.y + buttonReload.bg.height + 20;
-		/*buttonModFolder = new MenuButton(buttonX, myY, buttonWidth, buttonHeight, "MODS FOLDER", function() {
-				var modFolder = Paths.mods();
-				if(!FileSystem.exists(modFolder))
-				{
-					trace('created missing folder');
-					FileSystem.createDirectory(modFolder);
-				}
-				CoolUtil.openFolder(modFolder);
-			});
-			add(buttonModFolder); */
+
+		buttonModFolder = new MenuButton(buttonX, myY, buttonWidth, buttonHeight, Language.getPhrase('mods_folder_button', 'MODS FOLDER'), function()
+		{
+			var modFolder = Paths.mods();
+			if (!FileSystem.exists(modFolder))
+			{
+				trace('created missing folder');
+				FileSystem.createDirectory(modFolder);
+			}
+			CoolUtil.openFolder(modFolder);
+		});
+		add(buttonModFolder);
+
+		myY = buttonModFolder.y + buttonModFolder.bg.height + 20;
 
 		buttonEnableAll = new MenuButton(buttonX, myY, buttonWidth, buttonHeight, Language.getPhrase('enable_all_button', 'ENABLE ALL'), function()
 		{
@@ -525,12 +529,14 @@ class ModsMenuState extends MusicBeatState
 						{
 							switch (curSelectedButton)
 							{
-								case -2:
+								case -3:
 									curSelectedMod = 0;
 									hoveringOnMods = true;
 									var button = getButton();
 									button.ignoreCheck = button.onFocus = false;
 									changeSelectedMod();
+								case -2:
+									changeSelectedButton(-1);
 								case -1:
 									changeSelectedButton(-1);
 							}
@@ -539,6 +545,8 @@ class ModsMenuState extends MusicBeatState
 						{
 							switch (curSelectedButton)
 							{
+								case -3:
+									changeSelectedButton(1);
 								case -2:
 									changeSelectedButton(1);
 								case -1:
@@ -595,8 +603,8 @@ class ModsMenuState extends MusicBeatState
 		button.ignoreCheck = button.onFocus = false;
 
 		curSelectedButton += add;
-		if (curSelectedButton < -2)
-			curSelectedButton = -2;
+		if (curSelectedButton < -3)
+			curSelectedButton = -3;
 		else if (curSelectedButton > max)
 			curSelectedButton = max;
 
@@ -624,8 +632,10 @@ class ModsMenuState extends MusicBeatState
 	{
 		switch (curSelectedButton)
 		{
-			case -2:
+			case -3:
 				return buttonReload;
+			case -2:
+				return buttonModFolder;
 			case -1:
 				return buttonEnableAll.enabled ? buttonEnableAll : buttonDisableAll;
 		}
@@ -676,7 +686,7 @@ class ModsMenuState extends MusicBeatState
 			{
 				curSelectedMod = lastSelected;
 				hoveringOnMods = false;
-				curSelectedButton = -2;
+				curSelectedButton = -3;
 				changeSelectedButton();
 				return;
 			}

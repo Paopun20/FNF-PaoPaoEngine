@@ -350,11 +350,13 @@ class LoadingState extends MusicBeatState
 	public static function checkLoaded():Bool
 	{
 		// Acquire mutex before accessing shared data
-		if (mutex != null) mutex.acquire();
+		if (mutex != null)
+			mutex.acquire();
 		var localRequestedBitmaps = requestedBitmaps.copy();
 		var localOriginalBitmapKeys = originalBitmapKeys.copy();
-		if (mutex != null) mutex.release();
-		
+		if (mutex != null)
+			mutex.release();
+
 		// Process bitmaps outside the mutex lock to avoid blocking threads
 		for (key => bitmap in localRequestedBitmaps)
 		{
@@ -371,18 +373,22 @@ class LoadingState extends MusicBeatState
 				trace('failed to load image $key');
 			}
 		}
-		
+
 		// Clear the maps in a thread-safe way
-		if (mutex != null) mutex.acquire();
+		if (mutex != null)
+			mutex.acquire();
 		requestedBitmaps.clear();
 		originalBitmapKeys.clear();
-		if (mutex != null) mutex.release();
-		
+		if (mutex != null)
+			mutex.release();
+
 		// Return the condition in a thread-safe way
 		var result = false;
-		if (mutex != null) mutex.acquire();
+		if (mutex != null)
+			mutex.acquire();
 		result = (loaded >= loadMax && initialThreadCompleted);
-		if (mutex != null) mutex.release();
+		if (mutex != null)
+			mutex.release();
 		return result;
 	}
 
@@ -492,7 +498,7 @@ class LoadingState extends MusicBeatState
 			threadsCompleted++;
 			var allCompleted = (threadsCompleted == threadsMax);
 			threadMutex.release();
-			
+
 			if (allCompleted)
 			{
 				clearInvalids();
@@ -665,7 +671,7 @@ class LoadingState extends MusicBeatState
 				threadMutex.acquire();
 				var allCompleted = (threadsCompleted == threadsMax);
 				threadMutex.release();
-				
+
 				if (allCompleted)
 				{
 					clearInvalids();
@@ -747,7 +753,7 @@ class LoadingState extends MusicBeatState
 		loadMax = imagesToPrepare.length + soundsToPrepare.length + musicToPrepare.length + songsToPrepare.length;
 		loaded = 0;
 		mutex.release();
-		
+
 		// then start threads
 		_threadFunc();
 	}
@@ -797,9 +803,11 @@ class LoadingState extends MusicBeatState
 				trace('ERROR! fail on preloading $traceData: $e');
 			}
 			// Thread-safe increment of loaded counter
-			if (mutex != null) mutex.acquire();
+			if (mutex != null)
+				mutex.acquire();
 			loaded++;
-			if (mutex != null) mutex.release();
+			if (mutex != null)
+				mutex.release();
 		});
 	}
 
@@ -874,9 +882,11 @@ class LoadingState extends MusicBeatState
 			if (#if sys FileSystem.exists(file) || #end OpenFlAssets.exists(file, SOUND))
 			{
 				var sound:Sound = #if sys Sound.fromFile(file) #else OpenFlAssets.getSound(file, false) #end;
-				if (mutex != null) mutex.acquire();
+				if (mutex != null)
+					mutex.acquire();
 				Paths.currentTrackedSounds.set(file, sound);
-				if (mutex != null) mutex.release();
+				if (mutex != null)
+					mutex.release();
 			}
 			else if (beepOnNull)
 			{
@@ -885,9 +895,11 @@ class LoadingState extends MusicBeatState
 				return FlxAssets.getSound('flixel/sounds/beep');
 			}
 		}
-		if (mutex != null) mutex.acquire();
+		if (mutex != null)
+			mutex.acquire();
 		Paths.localTrackedAssets.push(file);
-		if (mutex != null) mutex.release();
+		if (mutex != null)
+			mutex.release();
 
 		return Paths.currentTrackedSounds.get(file);
 	}
@@ -914,10 +926,12 @@ class LoadingState extends MusicBeatState
 					#end
 
 					// Store in temporary map for later processing in checkLoaded
-					if (mutex != null) mutex.acquire();
+					if (mutex != null)
+						mutex.acquire();
 					requestedBitmaps.set(file, bitmap);
 					originalBitmapKeys.set(file, requestKey);
-					if (mutex != null) mutex.release();
+					if (mutex != null)
+						mutex.release();
 					return bitmap;
 				}
 				else
