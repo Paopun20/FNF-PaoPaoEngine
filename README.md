@@ -13,3 +13,5 @@
 - Discord RPC to make it more interactive and engaging
 - Updated dependencies to the most compatible versions
 - Add HXCPP_[NAME] - Haxe Cross-Platform Compiler for Native Code
+
+> (I haven't finished writing the README yet.)
