@@ -5,6 +5,7 @@ import objects.Character;
 import paopao.hython.Interp as PyInterp;
 import paopao.hython.Parser as PyParser;
 import psychlua.CustomSubstate;
+import psychlua.LuaUtils;
 #if LUA_ALLOWED
 import psychlua.FunkinLua;
 #end
@@ -14,24 +15,32 @@ class Python
 	public var parser:PyParser;
 	public var interp:PyInterp;
 
-	public var origin:String;
+	public var origin:Null<String>;
 	public var returnValue:Dynamic;
+
+	#if MODS_ALLOWED
+	public var modFolder:String = null;
+	public var modName:String = null;
+	#end
 
 	#if LUA_ALLOWED
 	public var parentLua:FunkinLua;
 	#end
 
-	public function new(?parent:Dynamic, ?code:String = '', ?varsToBring:Any = null, ?manualRun:Bool = false)
+	public function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?manualRun:Bool = false)
 	{
 		parser = new PyParser();
 		interp = new PyInterp();
+		origin = file;
+		set("__file__", origin);
+
+		var code:String = File.getContent(file);
 
 		#if LUA_ALLOWED
 		parentLua = parent;
 		#end
 
 		preset(varsToBring);
-
 		if (!manualRun && code != null && code.length > 0)
 		{
 			try
@@ -40,7 +49,8 @@ class Python
 			}
 			catch (e)
 			{
-				trace('[Python] Runtime error: ' + e);
+				this.stop();
+				throw e;
 			}
 		}
 	}
@@ -127,6 +137,31 @@ class Python
 		set('FlxAnimate', FlxAnimate);
 		#end
 
+		set('Function_StopLua', LuaUtils.Function_StopLua); // doesnt do much cuz HScript has a lower priority than Lua
+		set('Function_StopHScript', LuaUtils.Function_StopHScript);
+		set('Function_StopPython', LuaUtils.Function_StopPython);
+		set('Function_StopAll', LuaUtils.Function_StopAll);
+
+		set("getModSetting", function(saveTag:String, ?modName:String = null)
+		{
+			#if MODS_ALLOWED
+			if (modName == null)
+			{
+				if (this.modFolder == null)
+				{
+					PlayState.instance.addTextToDebug('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!', FlxColor.RED);
+					return null;
+				}
+				modName = this.modFolder;
+			}
+
+			return LuaUtils.getModSetting(saveTag, modName);
+			#else
+			PlayState.instance.addTextToDebug("getModSetting: Mods are disabled in this build!", FlxColor.RED);
+			return null;
+			#end
+		});
+
 		// Functions & Variables
 		set('setVar', function(name:String, value:Dynamic)
 		{
@@ -168,6 +203,7 @@ class Python
 
 	public function destroy()
 	{
+		stop();
 		parser = null;
 		interp = null;
 		returnValue = null;

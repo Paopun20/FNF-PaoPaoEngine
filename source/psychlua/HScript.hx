@@ -396,6 +396,7 @@ class HScript extends Iris
 		set('Function_Continue', LuaUtils.Function_Continue);
 		set('Function_StopLua', LuaUtils.Function_StopLua); // doesnt do much cuz HScript has a lower priority than Lua
 		set('Function_StopHScript', LuaUtils.Function_StopHScript);
+		set('Function_StopPython', LuaUtils.Function_StopPython);
 		set('Function_StopAll', LuaUtils.Function_StopAll);
 	}
 

@@ -3747,12 +3747,26 @@ class PlayState extends MusicBeatState
 	#if PYTHON_ALLOWED
 	public function initPython(file:String)
 	{
-		var code:String = File.getContent(file);
-		var newScript:Python = new Python(null, code);
-		newScript.origin = file;
-		trace('initialized python interp successfully: $file');
-		pythonArray.push(newScript);
-		return true;
+		try
+		{
+			var newScript:Python = new Python(null, file);
+			trace('initialized python interp successfully: $file');
+			pythonArray.push(newScript);
+		}
+		catch (e:Dynamic)
+		{
+			trace('[Python] Runtime error: "' + e + '" at ' + file);
+			PlayState.instance.addTextToDebug('[Python] Runtime error: "' + e + '" at ' + file, FlxColor.RED);
+
+			for (i in 0...pythonArray.length)
+			{
+				if (pythonArray[i].origin == file)
+				{
+					pythonArray.splice(i, 1);
+					break;
+				}
+			}
+		}
 	}
 	#end
 

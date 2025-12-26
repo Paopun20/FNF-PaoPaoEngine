@@ -55,8 +55,8 @@ class FunkinLua
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
 
-		// trace('Lua version: ' + Lua.version());
-		// trace("LuaJIT version: " + Lua.versionJIT());
+		trace('Lua version: ' + Lua.version());
+		trace("LuaJIT version: " + Lua.versionJIT());
 
 		// LuaL.dostring(lua, CLENSE);
 
@@ -239,6 +239,14 @@ class FunkinLua
 				exclusions.push(scriptName);
 			game.setOnLuas(varName, arg, exclusions);
 		});
+		addLocalCallback("setOnPython", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null)
+		{
+			if (exclusions == null)
+				exclusions = [];
+			if (ignoreSelf && !exclusions.contains(scriptName))
+				exclusions.push(scriptName);
+			game.setOnPython(varName, arg, exclusions);
+		});
 
 		addLocalCallback("callOnScripts",
 			function(funcName:String, ?args:Array<Dynamic> = null, ?ignoreStops = false, ?ignoreSelf:Bool = true, ?excludeScripts:Array<String> = null,
@@ -269,6 +277,16 @@ class FunkinLua
 				if (ignoreSelf && !excludeScripts.contains(scriptName))
 					excludeScripts.push(scriptName);
 				return game.callOnHScript(funcName, args, ignoreStops, excludeScripts, excludeValues);
+			});
+		addLocalCallback("callOnPython",
+			function(funcName:String, ?args:Array<Dynamic> = null, ?ignoreStops = false, ?ignoreSelf:Bool = true, ?excludeScripts:Array<String> = null,
+					?excludeValues:Array<Dynamic> = null)
+			{
+				if (excludeScripts == null)
+					excludeScripts = [];
+				if (ignoreSelf && !excludeScripts.contains(scriptName))
+					excludeScripts.push(scriptName);
+				return game.callOnPython(funcName, args, ignoreStops, excludeScripts, excludeValues);
 			});
 
 		Lua_helper.add_callback(lua, "callScript", function(luaFile:String, funcName:String, ?args:Array<Dynamic> = null)
@@ -302,6 +320,15 @@ class FunkinLua
 			{
 				for (hscriptInstance in game.hscriptArray)
 					if (hscriptInstance.origin == hscriptPath)
+						return true;
+			}
+			#end
+			#if PYTHON_ALLOWED
+			var pythonPath:String = findScript(scriptFile, '.py');
+			if (pythonPath != null)
+			{
+				for (pythonInstance in game.pythonArray)
+					if (pythonInstance.origin == pythonPath)
 						return true;
 			}
 			#end
@@ -358,6 +385,28 @@ class FunkinLua
 			luaTrace("addHScript: HScript is not supported on this platform!", false, false, FlxColor.RED);
 			#end
 		});
+		Lua_helper.add_callback(lua, "addPython", function(scriptFile:String, ?ignoreAlreadyRunning:Bool = false)
+		{
+			#if PYTHON_ALLOWED
+			var scriptPath:String = findScript(scriptFile, '.py');
+			if (scriptPath != null)
+			{
+				if (!ignoreAlreadyRunning)
+					for (script in game.pythonArray)
+						if (script.origin == scriptPath)
+						{
+							luaTrace('addPython: The script "' + scriptPath + '" is already running!');
+							return;
+						}
+
+				PlayState.instance.initPython(scriptPath);
+				return;
+			}
+			luaTrace("addPython: Script doesn't exist!", false, false, FlxColor.RED);
+			#else
+			luaTrace("addPython: Python is not supported on this platform!", false, false, FlxColor.RED);
+			#end
+		});
 		Lua_helper.add_callback(lua, "removeLuaScript", function(luaFile:String)
 		{
 			var luaPath:String = findScript(luaFile);
@@ -406,7 +455,34 @@ class FunkinLua
 			luaTrace("removeHScript: HScript is not supported on this platform!", false, false, FlxColor.RED);
 			#end
 		});
-
+		Lua_helper.add_callback(lua, "removePython", function(scriptFile:String)
+		{
+			#if PYTHON_ALLOWED
+			var scriptPath:String = findScript(scriptFile, '.py');
+			if (scriptPath != null)
+			{
+				var foundAny:Bool = false;
+				for (script in game.pythonArray)
+				{
+					if (script.origin == scriptPath)
+					{
+						trace('Closing python script $scriptPath');
+						script.destroy();
+						foundAny = true;
+					}
+				}
+				if (foundAny)
+					return true;
+			}
+			
+			luaTrace("removePython: Python script $scriptFile isn't running!", false, false, FlxColor.RED);
+			return false;
+			#else
+			luaTrace("removePython: Python is not supported on this platform!", false, false, FlxColor.RED);
+			return false;
+			#end
+		});
+		
 		Lua_helper.add_callback(lua, "loadSong", function(?name:String = null, ?difficultyNum:Int = -1)
 		{
 			if (name == null || name.length < 1)
