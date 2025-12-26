@@ -253,7 +253,8 @@ class Paths
 
 			if (bitmap == null)
 			{
-				trace('Bitmap not found: $file | key: $key');
+				// trace('Bitmap not found: $file | key: $key');
+				Logger.error('Bitmap not found: $file | key: $key');
 				return null;
 			}
 		}
@@ -373,7 +374,8 @@ class Paths
 	inline static public function getSparrowAtlas(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
 	{
 		if (key.contains('psychic'))
-			trace(key, parentFolder, allowGPU);
+			// trace(key, parentFolder, allowGPU);
+			Logger.info(key + " " + parentFolder + " " + allowGPU);
 		var imageLoaded:FlxGraphic = image(key, parentFolder, allowGPU);
 		#if MODS_ALLOWED
 		var xmlExists:Bool = false;
@@ -449,7 +451,8 @@ class Paths
 			#end
 		else if (beepOnNull)
 		{
-			trace('SOUND NOT FOUND: $key, PATH: $path');
+		    Logger.error('SOUND NOT FOUND: $key, PATH: $path');
+			// trace('SOUND NOT FOUND: $key, PATH: $path');
 			FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
 			return FlxAssets.getSound('flixel/sounds/beep');
 		}

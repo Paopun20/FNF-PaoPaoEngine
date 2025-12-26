@@ -216,27 +216,31 @@ class Python
 {
 	public function new()
 	{
-		trace("[Python] Python is not allowed on this platform!");
+	    Logger.error("[Python] Python is not allowed on this platform!");
+		// trace("[Python] Python is not allowed on this platform!");
 		PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
 	}
 
 	public function execute(code:String):Dynamic
 	{
-		trace("[Python] Python is not allowed on this platform!");
+	    Logger.error("[Python] Python is not allowed on this platform!");
+	    // trace("[Python] Python is not allowed on this platform!");
 		PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
 		return null;
 	}
 
 	public function call(func:String, ?args:Array<Dynamic>):Dynamic
 	{
-		trace("[Python] Python is not allowed on this platform!");
+	    Logger.error("[Python] Python is not allowed on this platform!");
+	    // trace("[Python] Python is not allowed on this platform!");
 		return null;
 	}
 
 	public function destroy()
 	{
 		PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
-		trace("[Python] Python is not allowed on this platform!");
+        Logger.error("[Python] Python is not allowed on this platform!");
+        // trace("[Python] Python is not allowed on this platform!");
 	}
 }
 #end

@@ -169,7 +169,8 @@ class LuaUtils
 					#if windows
 					lime.app.Application.current.window.alert(errorMsg, errorTitle);
 					#end
-					trace('$errorTitle - $errorMsg');
+					Logger.error('$errorTitle - $errorMsg');
+					// trace('$errorTitle - $errorMsg');
 				}
 			}
 		}

@@ -160,7 +160,8 @@ class Mods
 			}
 			catch (e:Dynamic)
 			{
-				trace(e);
+				// trace(e);
+				Logger.error(e);
 			}
 		}
 		#end
@@ -194,7 +195,8 @@ class Mods
 		}
 		catch (e)
 		{
-			trace(e);
+			// trace(e);
+			Logger.error(e);
 		}
 		#end
 		return list;
@@ -224,7 +226,8 @@ class Mods
 		}
 		catch (e)
 		{
-			trace(e);
+			// trace(e);
+			Logger.error(e);
 		}
 
 		// Scan for folders that aren't on modsList.txt yet

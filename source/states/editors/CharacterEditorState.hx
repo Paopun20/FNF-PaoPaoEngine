@@ -337,7 +337,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 				}
 				/*hideGhostButton.active = true;
 					hideGhostButton.alpha = 1; */
-				trace('created ghost image');
+				// trace('created ghost image');
+				Logger.info('created ghost image');
 			}
 		});
 
@@ -567,7 +568,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			reloadAnimList();
 			@:arrayAccess curAnim = Std.int(Math.max(0, character.animationsArray.indexOf(addedAnim)));
 			character.playAnim(addedAnim.anim, true);
-			trace('Added/Updated animation: ' + animationInputText.text);
+			// trace('Added/Updated animation: ' + animationInputText.text);
+			Logger.info('Added/Updated animation: ' + animationInputText.text);
 		});
 
 		var removeButton:PsychUIButton = new PsychUIButton(180, animationIndicesInputText.y + 60, "Remove", function()
@@ -594,7 +596,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 						character.playAnim(anims[curAnim].anim, true);
 					}
 					reloadAnimList();
-					trace('Removed animation: ' + animationInputText.text);
+					// trace('Removed animation: ' + animationInputText.text);
+					Logger.info('Removed animation: ' + animationInputText.text);
 					break;
 				}
 		});

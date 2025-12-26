@@ -90,7 +90,8 @@ class CutsceneHandler extends FlxBasic
 		{
 			if (holdingTime >= _timeToSkip)
 			{
-				trace('skipped cutscene');
+				// trace('skipped cutscene');
+				Logger.info('skipped cutscene');
 				if (skipCallback != null)
 					skipCallback();
 			}

@@ -94,7 +94,8 @@ class FileDialogHandler extends FlxBasic
 		@:privateAccess
 		this.path = _fileRef._trackSavedPath;
 		this.completed = true;
-		trace('Saved file to: $path');
+		Logger.info('Saved file to: $path');
+		// trace('Saved file to: $path');
 
 		removeEvents();
 		this.completed = true;
@@ -108,7 +109,8 @@ class FileDialogHandler extends FlxBasic
 		this.path = _fileRef.__path;
 		this.data = File.getContent(this.path);
 		this.completed = true;
-		trace('Loaded file from: $path');
+		Logger.info('Loaded file from: $path');
+		// trace('Loaded file from: $path');
 
 		removeEvents();
 		this.completed = true;
@@ -121,7 +123,8 @@ class FileDialogHandler extends FlxBasic
 		@:privateAccess
 		this.path = _fileRef.__path;
 		this.completed = true;
-		trace('Loaded directory: $path');
+		Logger.info('Loaded directory: $path');
+		// trace('Loaded directory: $path');
 
 		removeEvents();
 		this.completed = true;

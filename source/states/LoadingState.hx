@@ -118,12 +118,14 @@ class LoadingState extends MusicBeatState
 					if (hscript.exists('onCreate'))
 					{
 						hscript.call('onCreate');
-						trace('initialized hscript interp successfully: $scriptPath');
+						Logger.info('initialized hscript interp successfully: $scriptPath');
+						// trace('initialized hscript interp successfully: $scriptPath');
 						return super.create();
 					}
 					else
 					{
-						trace('"$scriptPath" contains no \"onCreate" function, stopping script.');
+						Logger.error('"$scriptPath" contains no \"onCreate" function, stopping script.');
+						// trace('"$scriptPath" contains no \"onCreate" function, stopping script.');
 					}
 				}
 				catch (e:IrisError)
@@ -362,15 +364,18 @@ class LoadingState extends MusicBeatState
 		{
 			if (bitmap != null && Paths.cacheBitmap(localOriginalBitmapKeys.get(key), bitmap) != null)
 			{
-				trace('finished preloading image $key');
+				Logger.info('finished preloading image $key');
+				// trace('finished preloading image $key');
 			}
 			else if (bitmap != null)
 			{
-				trace('failed to cache image $key');
+				Logger.error('failed to cache image $key');
+				// trace('failed to cache image $key');
 			}
 			else
 			{
-				trace('failed to load image $key');
+				Logger.error('failed to load image $key');
+				// trace('failed to load image $key');
 			}
 		}
 
@@ -402,7 +407,8 @@ class LoadingState extends MusicBeatState
 			directory = weekDir;
 
 		Paths.setCurrentLevel(directory);
-		trace('Setting asset folder to ' + directory);
+		Logger.info('Setting asset folder to ' + directory);
+		// trace('Setting asset folder to ' + directory);
 	}
 
 	static var isIntrusive:Bool = false;
@@ -681,7 +687,8 @@ class LoadingState extends MusicBeatState
 				return true;
 			}, isIntrusive)).onError((err:Dynamic) ->
 			{
-				trace('ERROR! while preparing song: $err');
+				// trace('ERROR! while preparing song: $err');
+				Logger.error('ERROR! while preparing song: $err');
 			});
 	}
 
@@ -738,7 +745,8 @@ class LoadingState extends MusicBeatState
 			{
 				arr.remove(member);
 				if (doTrace)
-					trace('Removed invalid $prefix: $member');
+					Logger.info('Removed invalid $prefix: $member');
+					// trace('Removed invalid $prefix: $member');
 			}
 			else
 				i++;
@@ -783,7 +791,8 @@ class LoadingState extends MusicBeatState
 		{
 			#if debug
 			var threadStart = Sys.time();
-			trace('$traceData took ${threadStart - threadSchedule}s to start preloading');
+			Logger.info('$traceData took ${threadStart - threadSchedule}s to start preloading');
+			// trace('$traceData took ${threadStart - threadSchedule}s to start preloading');
 			#end
 
 			try
@@ -792,15 +801,18 @@ class LoadingState extends MusicBeatState
 				{
 					#if debug
 					var diff = Sys.time() - threadStart;
-					trace('finished preloading $traceData in ${diff}s');
+					Logger.info('finished preloading $traceData in ${diff}s');
+					// trace('finished preloading $traceData in ${diff}s');
 					#end
 				}
 				else
-					trace('ERROR! fail on preloading $traceData ');
+					Logger.error('ERROR! fail on preloading $traceData ');
+					// trace('ERROR! fail on preloading $traceData ');
 			}
 			catch (e:Dynamic)
 			{
-				trace('ERROR! fail on preloading $traceData: $e');
+				Logger.error('ERROR! fail on preloading $traceData: $e');
+				// trace('ERROR! fail on preloading $traceData: $e');
 			}
 			// Thread-safe increment of loaded counter
 			if (mutex != null)
@@ -867,7 +879,8 @@ class LoadingState extends MusicBeatState
 		}
 		catch (e:haxe.Exception)
 		{
-			trace(e.details());
+			// trace(e.details());
+			Logger.error(e.details());
 		}
 	}
 
@@ -890,7 +903,8 @@ class LoadingState extends MusicBeatState
 			}
 			else if (beepOnNull)
 			{
-				trace('SOUND NOT FOUND: $key, PATH: $path');
+				Logger.error('SOUND NOT FOUND: $key, PATH: $path');
+				// trace('SOUND NOT FOUND: $key, PATH: $path');
 				FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
 				return FlxAssets.getSound('flixel/sounds/beep');
 			}
@@ -935,14 +949,15 @@ class LoadingState extends MusicBeatState
 					return bitmap;
 				}
 				else
-					trace('no such image $key exists');
+					Logger.error('no such image $key exists');
+					// trace('no such image $key exists');
 			}
 
 			return Paths.currentTrackedAssets.get(requestKey).bitmap;
 		}
 		catch (e:haxe.Exception)
 		{
-			trace('ERROR! fail on preloading image $key');
+			Logger.error('ERROR! fail on preloading image $key');
 		}
 
 		return null;

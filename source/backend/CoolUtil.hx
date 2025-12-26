@@ -12,15 +12,18 @@ class CoolUtil
 		var version:String = states.MainMenuState.psychEngineVersion.trim();
 		if (ClientPrefs.data.checkForUpdates)
 		{
-			trace('checking for updates...');
+		    Logger.info('checking for updates...');
+			// trace('checking for updates...');
 			var http = new haxe.Http(url);
 			http.onData = function(data:String)
 			{
 				var newVersion:String = data.split('\n')[0].trim();
-				trace('version online: $newVersion, your version: $version');
+				Logger.info('version online: $newVersion, your version: $version');
+				// trace('version online: $newVersion, your version: $version');
 				if (newVersion != version)
 				{
-					trace('versions arent matching! please update');
+					Logger.info('versions arent matching! please update');
+					// trace('versions arent matching! please update');
 					version = newVersion;
 					http.onData = null;
 					http.onError = null;
@@ -29,7 +32,8 @@ class CoolUtil
 			}
 			http.onError = function(error)
 			{
-				trace('error: $error');
+				Logger.error('error: $error');
+				// trace('error: $error');
 			}
 			http.request();
 		}
@@ -158,7 +162,8 @@ class CoolUtil
 		var command:String = 'explorer.exe';
 		#end
 		Sys.command(command, [folder]);
-		trace('$command $folder');
+		// trace('$command $folder');
+		Logger.info('$command $folder');
 		#else
 		FlxG.error("Platform is not supported for CoolUtil.openFolder");
 		#end

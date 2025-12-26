@@ -67,6 +67,8 @@ class Main extends Sprite
 		backend.Native.fixScaling();
 		#end
 
+		Logger.init();
+
 		// Credits to MAJigsaw77 (he's the og author for this code)
 		#if android
 		Sys.setCwd(Path.addTrailingSlash(Context.getExternalFilesDir()));

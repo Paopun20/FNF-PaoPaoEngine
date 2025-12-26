@@ -1581,7 +1581,8 @@ class PlayState extends MusicBeatState
 				oldNote = swagNote;
 			}
 		}
-		trace('["${SONG.song.toUpperCase()}" CHART INFO]: Ghost Notes Cleared: $ghostNotesCaught');
+		Logger.info('["${SONG.song.toUpperCase()}" CHART INFO]: Ghost Notes Cleared: $ghostNotesCaught');
+		// trace('["${SONG.song.toUpperCase()}" CHART INFO]: Ghost Notes Cleared: $ghostNotesCaught');
 		for (event in songData.events) // Event Notes
 			for (i in 0...event[1].length)
 				makeEvent(event, i);
@@ -1809,7 +1810,8 @@ class PlayState extends MusicBeatState
 		if (finishTimer != null)
 			return;
 
-		trace('resynced vocals at ' + Math.floor(Conductor.songPosition));
+		Logger.info('resynced vocals at ' + Math.floor(Conductor.songPosition));
+		// trace('resynced vocals at ' + Math.floor(Conductor.songPosition));
 
 		FlxG.sound.music.play();
 		#if FLX_PITCH FlxG.sound.music.pitch = playbackRate; #end
@@ -1946,7 +1948,8 @@ class PlayState extends MusicBeatState
 		if (!ClientPrefs.data.noReset && controls.RESET && canReset && !inCutscene && startedCountdown && !endingSong)
 		{
 			health = 0;
-			trace("RESET = True");
+			// trace("RESET = True");
+			Logger.info("RESET = True");
 		}
 		doDeathCheck();
 
@@ -2761,8 +2764,10 @@ class PlayState extends MusicBeatState
 				{
 					var difficulty:String = Difficulty.getFilePath();
 
-					trace('LOADING NEXT SONG');
-					trace(Paths.formatToSongPath(PlayState.storyPlaylist[0]) + difficulty);
+					// trace('LOADING NEXT SONG');
+					Logger.info('LOADING NEXT SONG');
+					// trace(Paths.formatToSongPath(PlayState.storyPlaylist[0]) + difficulty);
+					Logger.info(Paths.formatToSongPath(PlayState.storyPlaylist[0]) + difficulty);
 
 					FlxTransitionableState.skipNextTransIn = true;
 					FlxTransitionableState.skipNextTransOut = true;
@@ -2778,7 +2783,8 @@ class PlayState extends MusicBeatState
 			}
 			else
 			{
-				trace('WENT BACK TO FREEPLAY??');
+				Logger.info('WENT BACK TO FREEPLAY??');
+				// trace('WENT BACK TO FREEPLAY??');
 				Mods.loadTopMod();
 				#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 
@@ -3730,7 +3736,8 @@ class PlayState extends MusicBeatState
 			newScript = new HScript(null, file);
 			if (newScript.exists('onCreate'))
 				newScript.call('onCreate');
-			trace('initialized hscript interp successfully: $file');
+			// trace('initialized hscript interp successfully: $file');
+			Logger.info('initialized hscript interp successfully: $file');
 			hscriptArray.push(newScript);
 		}
 		catch (e:IrisError)
@@ -3750,12 +3757,14 @@ class PlayState extends MusicBeatState
 		try
 		{
 			var newScript:Python = new Python(null, file);
-			trace('initialized python interp successfully: $file');
+			Logger.info('initialized python interp successfully: $file');
+			// trace('initialized python interp successfully: $file');
 			pythonArray.push(newScript);
 		}
 		catch (e:Dynamic)
 		{
-			trace('[Python] Runtime error: "' + e + '" at ' + file);
+			Logger.info('[Python] Runtime error: "' + e + '" at ' + file);
+			// trace('[Python] Runtime error: "' + e + '" at ' + file);
 			PlayState.instance.addTextToDebug('[Python] Runtime error: "' + e + '" at ' + file, FlxColor.RED);
 
 			for (i in 0...pythonArray.length)

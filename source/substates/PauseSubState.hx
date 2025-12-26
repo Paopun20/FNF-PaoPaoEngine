@@ -247,7 +247,8 @@ class PauseSubState extends MusicBeatSubstate
 				}
 				catch (e:haxe.Exception)
 				{
-					trace('ERROR! ${e.message}');
+					Logger.error('ERROR! ${e.message}');
+					// trace('ERROR! ${e.message}');
 
 					var errorStr:String = e.message;
 					if (errorStr.startsWith('[lime.utils.Assets] ERROR:'))

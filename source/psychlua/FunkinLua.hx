@@ -55,8 +55,8 @@ class FunkinLua
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
 
-		trace('Lua version: ' + Lua.version());
-		trace("LuaJIT version: " + Lua.versionJIT());
+		// trace('Lua version: ' + Lua.version());
+		// trace("LuaJIT version: " + Lua.versionJIT());
 
 		// LuaL.dostring(lua, CLENSE);
 
@@ -417,7 +417,8 @@ class FunkinLua
 				{
 					if (luaInstance.scriptName == luaPath)
 					{
-						trace('Closing lua script $luaPath');
+						// trace('Closing lua script $luaPath');
+						Logger.info('Closing lua script $luaPath');
 						luaInstance.stop();
 						foundAny = true;
 					}
@@ -440,7 +441,8 @@ class FunkinLua
 				{
 					if (script.origin == scriptPath)
 					{
-						trace('Closing hscript $scriptPath');
+						//trace('Closing hscript $scriptPath');
+						Logger.info('Closing hscript $scriptPath');
 						script.destroy();
 						foundAny = true;
 					}
@@ -466,7 +468,8 @@ class FunkinLua
 				{
 					if (script.origin == scriptPath)
 					{
-						trace('Closing python script $scriptPath');
+						// trace('Closing python script $scriptPath');
+						Logger.info('Closing python script $scriptPath');
 						script.destroy();
 						foundAny = true;
 					}
@@ -1865,7 +1868,8 @@ class FunkinLua
 		addLocalCallback("close", function()
 		{
 			closed = true;
-			trace('Closing script $scriptName');
+			// trace('Closing script $scriptName');
+			Logger.info('Closing script $scriptName');
 			return closed;
 		});
 
@@ -1899,7 +1903,8 @@ class FunkinLua
 			var resultStr:String = Lua.tostring(lua, result);
 			if (resultStr != null && result != 0)
 			{
-				trace(resultStr);
+			    Logger.info(resultStr);
+				// trace(resultStr);
 				#if windows
 				lime.app.Application.current.window.alert(resultStr, 'Error on lua script!');
 				#else
@@ -1916,7 +1921,8 @@ class FunkinLua
 			trace(e);
 			return;
 		}
-		trace('lua file loaded succesfully:' + scriptName);
+		Logger.info('lua file loaded succesfully:' + scriptName);
+		// trace('lua file loaded succesfully:' + scriptName);
 
 		call('onCreate', []);
 	}
@@ -1974,7 +1980,8 @@ class FunkinLua
 		}
 		catch (e:Dynamic)
 		{
-			trace(e);
+		    Logger.info(e);
+			// trace(e);
 		}
 		return LuaUtils.Function_Continue;
 	}

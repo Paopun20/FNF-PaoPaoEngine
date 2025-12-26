@@ -78,7 +78,8 @@ class MenuCharacter extends FlxSprite
 				}
 				catch (e:Dynamic)
 				{
-					trace('Error loading menu character file of "$character": $e');
+					// trace('Error loading menu character file of "$character": $e');
+					Logger.error('Error loading menu character file of "$character": $e');
 				}
 
 				frames = Paths.getSparrowAtlas('menucharacters/' + charFile.image);

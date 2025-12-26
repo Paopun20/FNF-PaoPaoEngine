@@ -521,7 +521,8 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 				if (loadedDialog.dialogue != null && loadedDialog.dialogue.length > 0) // Make sure it's really a dialogue file
 				{
 					var cutName:String = _file.name.substr(0, _file.name.length - 5);
-					trace("Successfully loaded file: " + cutName);
+					Logger.info("Successfully loaded file: " + cutName);
+					// trace("Successfully loaded file: " + cutName);
 					dialogueFile = loadedDialog;
 					changeText();
 					_file = null;
@@ -531,7 +532,8 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 		}
 		_file = null;
 		#else
-		trace("File couldn't be loaded! You aren't on Desktop, are you?");
+		Logger.error("File couldn't be loaded! You aren't on Desktop, are you?");
+		// trace("File couldn't be loaded! You aren't on Desktop, are you?");
 		#end
 	}
 
@@ -544,7 +546,8 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 		_file.removeEventListener(Event.CANCEL, onLoadCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 		_file = null;
-		trace("Cancelled file loading.");
+		Logger.error("Cancelled file loading.");
+		// trace("Cancelled file loading.");
 	}
 
 	/**
@@ -556,7 +559,8 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 		_file.removeEventListener(Event.CANCEL, onLoadCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 		_file = null;
-		trace("Problem loading file");
+		Logger.error("Problem loading file");
+		// trace("Problem loading file");
 	}
 
 	function saveDialogue()

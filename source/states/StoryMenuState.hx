@@ -327,7 +327,8 @@ class StoryMenuState extends MusicBeatState
 			}
 			catch (e:Dynamic)
 			{
-				trace('ERROR! $e');
+				// trace('ERROR! $e');
+				Logger.info('ERROR! $e');
 				return;
 			}
 
@@ -352,7 +353,8 @@ class StoryMenuState extends MusicBeatState
 			@:privateAccess
 			if (PlayState._lastLoadedModDirectory != Mods.currentModDirectory)
 			{
-				trace('CHANGED MOD DIRECTORY, RELOADING STUFF');
+				Logger.info('CHANGED MOD DIRECTORY, RELOADING STUFF');
+				// trace('CHANGED MOD DIRECTORY, RELOADING STUFF');
 				Paths.freeGraphicsFromMemory();
 			}
 			LoadingState.prepareToSong();

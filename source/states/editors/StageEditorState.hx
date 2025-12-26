@@ -119,7 +119,8 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 			directory = weekDir;
 
 		Paths.setCurrentLevel(directory);
-		trace('Setting asset folder to ' + directory);
+		Logger.info('Setting asset folder to ' + directory);
+		// trace('Setting asset folder to ' + directory);
 	}
 
 	var showSelectionQuad:Bool = true;
@@ -299,7 +300,8 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		spriteListRadioGroup.cameras = [camHUD];
 		spriteListRadioGroup.onClick = function()
 		{
-			trace('Selected sprite: ${spriteListRadioGroup.checkedRadio.label}');
+			Logger.info('Selected sprite: ${spriteListRadioGroup.checkedRadio.label}');
+			// trace('Selected sprite: ${spriteListRadioGroup.checkedRadio.label}');
 			updateSelectedUI();
 		}
 		tab_group.add(spriteListRadioGroup);
@@ -862,7 +864,8 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		imgTxt = new FlxText(objX, objY - 15, 200, 'Image: ', 8);
 		var imgButton:PsychUIButton = new PsychUIButton(objX, objY, 'Change Image', function()
 		{
-			trace('attempt to load image');
+			Logger.info('attempt to load image');
+			// trace('attempt to load image');
 			loadImage();
 		});
 		tab_group.add(imgButton);
@@ -1423,14 +1426,16 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		if (FlxG.keys.justPressed.W)
 		{
 			spriteListRadioGroup.checked = FlxMath.wrap(spriteListRadioGroup.checked - 1, 0, spriteListRadioGroup.labels.length - 1);
-			trace(spriteListRadioGroup.checked);
+			Logger.info(spriteListRadioGroup.checked);
+			// trace(spriteListRadioGroup.checked);
 			checkUIOnObject();
 			updateSelectedUI();
 		}
 		else if (FlxG.keys.justPressed.S)
 		{
 			spriteListRadioGroup.checked = FlxMath.wrap(spriteListRadioGroup.checked + 1, 0, spriteListRadioGroup.labels.length - 1);
-			trace(spriteListRadioGroup.checked);
+			Logger.info(spriteListRadioGroup.checked);
+			// trace(spriteListRadioGroup.checked);
 			checkUIOnObject();
 			updateSelectedUI();
 		}
@@ -1839,7 +1844,8 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 					{
 						var p1:String = '$pathNoExt.$ext';
 						var p2:String = modFolder + '$fileName.$ext';
-						trace(p1, p2);
+						Logger.info(p1 + " " + p2);
+						// trace(p1, p2);
 						if (FileSystem.exists(p1))
 							File.saveBytes(p2, File.getBytes(p1));
 					}
@@ -1875,7 +1881,8 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		}
 		_file = null;
 		#else
-		trace('File couldn\'t be loaded! You aren\'t on Desktop, are you?');
+		Logger.error('File couldn\'t be loaded! You aren\'t on Desktop, are you?');
+		// trace('File couldn\'t be loaded! You aren\'t on Desktop, are you?');
 		#end
 	}
 
@@ -1905,7 +1912,8 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 			createPopup.visible = createPopup.active = false;
 			_makeNewSprite = null;
 		}
-		trace('Cancelled file loading.');
+		Logger.error('Cancelled file loading.');
+		// trace('Cancelled file loading.');
 	}
 
 	/**
@@ -1925,7 +1933,8 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 			createPopup.visible = createPopup.active = false;
 			_makeNewSprite = null;
 		}
-		trace('Problem loading file');
+		Logger.error('Problem loading file');
+		// trace('Problem loading file');
 	}
 
 	override function destroy()
@@ -2175,7 +2184,8 @@ class StageEditorAnimationSubstate extends MusicBeatSubstate
 			target.sprite.screenCenter();
 			add(target.sprite);
 			reloadAnimList();
-			trace('Opened substate');
+			Logger.info('Opened substate');
+			// trace('Opened substate');
 		};
 
 		closeCallback = function()
@@ -2294,7 +2304,8 @@ class StageEditorAnimationSubstate extends MusicBeatSubstate
 
 			curAnim = target.animations.length - 1;
 			updateTextColors();
-			trace('Added/Updated animation: ' + animationInputText.text);
+			Logger.info('Added/Updated animation: ' + animationInputText.text);
+			// trace('Added/Updated animation: ' + animationInputText.text);
 		});
 
 		var removeButton:PsychUIButton = new PsychUIButton(160, animationIndicesInputText.y + 35, 'Remove', function()
@@ -2323,7 +2334,8 @@ class StageEditorAnimationSubstate extends MusicBeatSubstate
 					else if (target.animations.length < 1)
 						target.sprite.animation.curAnim = null;
 
-					trace('Removed animation: ' + animationInputText.text);
+					Logger.info('Removed animation: ' + animationInputText.text);
+					// trace('Removed animation: ' + animationInputText.text);
 					reloadAnimList();
 					break;
 				}

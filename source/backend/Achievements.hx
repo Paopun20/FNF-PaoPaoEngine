@@ -172,7 +172,8 @@ class Achievements
 		if (Achievements.isUnlocked(name))
 			return null;
 
-		trace('Completed achievement "$name"');
+		// trace('Completed achievement "$name"');
+		Logger.info('Completed achievement "$name"');
 		achievementsUnlocked.push(name);
 
 		// earrape prevention
@@ -273,7 +274,8 @@ class Achievements
 							#if windows
 							lime.app.Application.current.window.alert(errorMsg, errorTitle);
 							#end
-							trace('$errorTitle - $errorMsg');
+			                Logger.error('$errorTitle - $errorMsg');
+							// trace('$errorTitle - $errorMsg');
 							continue;
 						}
 
@@ -285,7 +287,8 @@ class Achievements
 							#if windows
 							lime.app.Application.current.window.alert(errorMsg, errorTitle);
 							#end
-							trace('$errorTitle - $errorMsg');
+							Logger.error('$errorTitle - $errorMsg');
+							// trace('$errorTitle - $errorMsg');
 							continue;
 						}
 						key = key.trim();
@@ -303,7 +306,8 @@ class Achievements
 				#if windows
 				lime.app.Application.current.window.alert(errorMsg, errorTitle);
 				#end
-				trace('$errorTitle - $errorMsg');
+				Logger.error('$errorTitle - $errorMsg');
+				// trace('$errorTitle - $errorMsg');
 			}
 		}
 		return retVal;
