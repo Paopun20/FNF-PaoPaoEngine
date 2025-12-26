@@ -336,7 +336,7 @@ class MainMenuState extends MusicBeatState
 							selectedSomethin = false;
 							item.visible = true;
 						default:
-							Logger.warn('Menu Item ${option} doesn\'t do anything');
+							Logger.warning('Menu Item ${option} doesn\'t do anything');
 							selectedSomethin = false;
 							item.visible = true;
 					}

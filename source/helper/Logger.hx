@@ -10,17 +10,19 @@ enum Level
 {
 	DEBUG;
 	INFO;
-	WARN;
+	WARNING;
 	ERROR;
+	CRITICAL;
 }
 
 class Logger
 {
-	static final COLORS:Map<String, String> = [
-		"DEBUG" => "\x1b[36m", // cyan
-		"INFO" => "\x1b[32m", // green
-		"WARN" => "\x1b[33m", // yellow
-		"ERROR" => "\x1b[31m" // red
+	static final COLORS:Map<Level, String> = [
+		DEBUG => "\x1b[36m",
+		INFO => "\x1b[32m",
+		WARNING => "\x1b[33m",
+		ERROR => "\x1b[31m",
+		CRITICAL => "\x1b[41;97m"
 	];
 
 	static final RESET = "\x1b[0m";
@@ -82,10 +84,23 @@ class Logger
 	{
 		return switch (lvl)
 		{
-			case DEBUG: 0;
-			case INFO: 1;
-			case WARN: 2;
-			case ERROR: 3;
+			case DEBUG: 10;
+			case INFO: 20;
+			case WARNING: 30;
+			case ERROR: 40;
+			case CRITICAL: 50;
+		}
+	}
+
+	static function levelTag(lvl:Level):String
+	{
+		return switch (lvl)
+		{
+			case DEBUG: "DEBUG";
+			case INFO: "INFO";
+			case WARNING: "WARNING";
+			case ERROR: "ERROR";
+			case CRITICAL: "CRITICAL";
 		}
 	}
 
@@ -94,25 +109,17 @@ class Logger
 		if (levelToInt(lvl) < levelToInt(level))
 			return;
 
-		var tag = switch (lvl)
-		{
-			case DEBUG: "DEBUG";
-			case INFO: "INFO";
-			case WARN: "WARN";
-			case ERROR: "ERROR";
-		};
+		var tag = levelTag(lvl);
+		var col = COLORS.get(lvl);
+		var msg = Std.string(v);
 
-		var col = COLORS.get(tag);
-		var msg = if (Reflect.isObject(v)) pretty(v) else Std.string(v);
-		var location = "";
-
+		var location = "unknown:0";
 		if (infos != null)
 		{
-			var f = infos.fileName.split("/").pop();
-			location = " " + f + ":" + infos.lineNumber;
+			location = infos.fileName.split("/").pop() + ":" + infos.lineNumber;
 		}
 
-		Sys.println('${col}[${now()}] ${rpad(tag, 5)} |${location} : ${RESET}${msg}');
+		Sys.println('${col}[${now()}] ${tag} ${location} ${msg}${RESET}');
 	}
 
 	public static inline function debug(v:Dynamic, ?infos:PosInfos)
@@ -127,13 +134,18 @@ class Logger
 		log(Level.INFO, v, infos);
 	}
 
-	public static inline function warn(v:Dynamic, ?infos:PosInfos)
-	{
-		log(Level.WARN, v, infos);
-	}
-
 	public static inline function error(v:Dynamic, ?infos:PosInfos)
 	{
 		log(Level.ERROR, v, infos);
+	}
+
+	public static inline function warning(v, ?i)
+	{
+		log(Level.WARNING, v, i);
+	}
+
+	public static inline function critical(v, ?i)
+	{
+		log(Level.CRITICAL, v, i);
 	}
 }
