@@ -22,7 +22,8 @@ class Logger
 		INFO => "\x1b[32m",
 		WARNING => "\x1b[33m",
 		ERROR => "\x1b[31m",
-		CRITICAL => "\x1b[41;97m"
+		CRITICAL => "\x1b[41;97m",
+		RESET => "\x1b[0m"
 	];
 
 	static final RESET = "\x1b[0m";
