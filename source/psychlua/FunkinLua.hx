@@ -441,7 +441,7 @@ class FunkinLua
 				{
 					if (script.origin == scriptPath)
 					{
-						//trace('Closing hscript $scriptPath');
+						// trace('Closing hscript $scriptPath');
 						Logger.info('Closing hscript $scriptPath');
 						script.destroy();
 						foundAny = true;
@@ -477,7 +477,7 @@ class FunkinLua
 				if (foundAny)
 					return true;
 			}
-			
+
 			luaTrace("removePython: Python script $scriptFile isn't running!", false, false, FlxColor.RED);
 			return false;
 			#else
@@ -485,7 +485,7 @@ class FunkinLua
 			return false;
 			#end
 		});
-		
+
 		Lua_helper.add_callback(lua, "loadSong", function(?name:String = null, ?difficultyNum:Int = -1)
 		{
 			if (name == null || name.length < 1)
@@ -1903,7 +1903,7 @@ class FunkinLua
 			var resultStr:String = Lua.tostring(lua, result);
 			if (resultStr != null && result != 0)
 			{
-			    Logger.info(resultStr);
+				Logger.info(resultStr);
 				// trace(resultStr);
 				#if windows
 				lime.app.Application.current.window.alert(resultStr, 'Error on lua script!');
@@ -1980,7 +1980,7 @@ class FunkinLua
 		}
 		catch (e:Dynamic)
 		{
-		    Logger.info(e);
+			Logger.info(e);
 			// trace(e);
 		}
 		return LuaUtils.Function_Continue;

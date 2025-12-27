@@ -585,7 +585,7 @@ class ModsMenuState extends MusicBeatState
 				if (modsList.all.length > 0)
 				{
 					Logger.info('mod(s) found! reloading');
-					//trace('mod(s) found! reloading');
+					// trace('mod(s) found! reloading');
 					reload();
 				}
 			}

@@ -23,10 +23,39 @@ class Logger
 		WARNING => "\x1b[33m",
 		ERROR => "\x1b[31m",
 		CRITICAL => "\x1b[41;97m",
-		RESET => "\x1b[0m"
 	];
 
 	static final RESET = "\x1b[0m";
+
+	public static function getColorByHex(color:String):String
+	{
+		if (color.charAt(0) == "#")
+		{
+			color = color.substr(1);
+		}
+
+		var r = Std.parseInt("0x" + color.substr(0, 2));
+		var g = Std.parseInt("0x" + color.substr(2, 2));
+		var b = Std.parseInt("0x" + color.substr(4, 2));
+		
+		return rgb(r, g, b);
+	}
+
+	static inline function rgb(r:Int, g:Int, b:Int):String
+	{
+		return '\x1b[38;2;${r};${g};${b}m';
+	}
+
+	static inline function bg(r:Int, g:Int, b:Int):String
+	{
+		return '\x1b[48;2;${r};${g};${b}m';
+	}
+
+	static final TIME_COLOR = rgb(160, 120, 255);
+	static final FILE_COLOR = rgb(80, 200, 255);
+	static final LINE_COLOR = rgb(140, 140, 140);
+	static final MSG_COLOR = rgb(230, 230, 230);
+	static final OBJ_COLOR = rgb(120, 220, 220);
 
 	static var level:Level =
 		#if debug
@@ -110,24 +139,34 @@ class Logger
 		if (levelToInt(lvl) < levelToInt(level))
 			return;
 
-		var tag = levelTag(lvl);
-		var col = COLORS.get(lvl);
-		var msg = Std.string(v);
+		var tag = COLORS.get(lvl) + levelTag(lvl) + RESET;
 
-		var location = "unknown:0";
+		var time = TIME_COLOR + "[" + now() + "]" + RESET;
+
+		var file = "unknown";
+		var line = "0";
+
 		if (infos != null)
 		{
-			location = infos.fileName.split("/").pop() + ":" + infos.lineNumber;
+			file = infos.fileName.split("/").pop();
+			line = Std.string(infos.lineNumber);
+			line.replace("\"", "");
 		}
 
-		Sys.println('${col}[${now()}] ${tag} ${location} ${msg}${RESET}');
+		var location = FILE_COLOR + file + RESET + ":" + LINE_COLOR + line + RESET;
+
+		var msg = switch (v)
+		{
+			case String: MSG_COLOR + v + RESET;
+			default: OBJ_COLOR + pretty(v) + RESET;
+		}
+
+		Sys.println('$time $tag $location: $msg');
 	}
 
 	public static inline function debug(v:Dynamic, ?infos:PosInfos)
 	{
-		#if debug
 		log(Level.DEBUG, v, infos);
-		#end
 	}
 
 	public static inline function info(v:Dynamic, ?infos:PosInfos)

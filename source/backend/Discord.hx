@@ -5,6 +5,9 @@ import sys.thread.Thread;
 import lime.app.Application;
 import hxdiscord_rpc.Discord;
 import hxdiscord_rpc.Types;
+#if PYTHON_ALLOWED
+import psychlua.Python;
+#end
 
 class DiscordClient
 {
@@ -19,7 +22,7 @@ class DiscordClient
 
 	public static function initialize():Void
 	{
-		Sys.println('Initializing Discord RPC...');
+		Logger.info("Initializing Discord RPC...");
 
 		final handlers:DiscordEventHandlers = new DiscordEventHandlers();
 		handlers.ready = cpp.Function.fromStaticFunction(onReady);
@@ -54,7 +57,7 @@ class DiscordClient
 	public dynamic static function shutdown()
 	{
 		isInitialized = false;
-		Sys.println('Shutting down Discord RPC...');
+		Logger.info("Shutting down Discord RPC...");
 		Discord.Shutdown();
 	}
 
@@ -66,9 +69,13 @@ class DiscordClient
 		whoIsConnectedTo = request;
 
 		if (discriminator != 0)
-			Sys.println('Discord: Connected to user ${username}#${discriminator} ($globalName)');
+		{
+			Logger.info("Discord: Connected to user ${username}#${discriminator} ($globalName)");
+		}
 		else
-			Sys.println('Discord: Connected to user @${username} ($globalName)');
+		{
+			Logger.info("Discord: Connected to user @${username} ($globalName)");
+		}
 
 		discordPresence = new DiscordRichPresence();
 		discordPresence.type = DiscordActivityType_Playing;
@@ -83,13 +90,13 @@ class DiscordClient
 
 	private static function onDisconnected(errorCode:Int, message:cpp.ConstCharStar):Void
 	{
-		Sys.println('Discord: Disconnected ($errorCode:$message)');
+		Logger.info("Discord: Disconnected ($errorCode:$message)");
 		whoIsConnectedTo = null;
 	}
 
 	private static function onError(errorCode:Int, message:cpp.ConstCharStar):Void
 	{
-		Sys.println('Discord: Error ($errorCode:$message)');
+		Logger.error("Discord: Error ($errorCode:$message)");
 	}
 
 	inline public static function resetClientID()
@@ -176,6 +183,23 @@ class DiscordClient
 			});
 
 		Lua_helper.add_callback(lua, "changeDiscordClientID", function(?newID:String = null)
+		{
+			if (newID == null)
+				newID = _defaultID;
+			clientID = newID;
+		});
+	}
+	#end
+
+	#if PYTHON_ALLOWED
+	public static function addPythonCallbacks(py:Python)
+	{
+		py.set("changeDiscordPresence", function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float)
+		{
+			changePresence(details, state, smallImageKey, hasStartTimestamp, endTimestamp);
+		});
+
+		py.set("changeDiscordClientID", function(?newID:String = null)
 		{
 			if (newID == null)
 				newID = _defaultID;

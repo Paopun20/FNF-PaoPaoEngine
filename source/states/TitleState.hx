@@ -255,7 +255,7 @@ class TitleState extends MusicBeatState
 			}
 			else
 				Logger.info('[WARN] No Title JSON detected, using default values.');
-				// trace('[WARN] No Title JSON detected, using default values.');
+			// trace('[WARN] No Title JSON detected, using default values.');
 		}
 		// else trace('[WARN] No Title JSON detected, using default values.');
 	}

@@ -4032,7 +4032,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 									}
 									else
 										Logger.error('File not found: $chartToFind');
-										// trace('File not found: $chartToFind');
+									// trace('File not found: $chartToFind');
 								}
 
 								var chartToFind:String = parentFolder + 'events.json';

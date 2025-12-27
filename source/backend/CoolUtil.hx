@@ -12,7 +12,7 @@ class CoolUtil
 		var version:String = states.MainMenuState.psychEngineVersion.trim();
 		if (ClientPrefs.data.checkForUpdates)
 		{
-		    Logger.info('checking for updates...');
+			Logger.info('checking for updates...');
 			// trace('checking for updates...');
 			var http = new haxe.Http(url);
 			http.onData = function(data:String)

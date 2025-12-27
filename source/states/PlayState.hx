@@ -1581,7 +1581,7 @@ class PlayState extends MusicBeatState
 				oldNote = swagNote;
 			}
 		}
-		Logger.info('["${SONG.song.toUpperCase()}" CHART INFO]: Ghost Notes Cleared: $ghostNotesCaught');
+		Logger.info('[[${SONG.song.toUpperCase()}] CHART INFO]: Ghost Notes Cleared: $ghostNotesCaught');
 		// trace('["${SONG.song.toUpperCase()}" CHART INFO]: Ghost Notes Cleared: $ghostNotesCaught');
 		for (event in songData.events) // Event Notes
 			for (i in 0...event[1].length)
@@ -3939,6 +3939,7 @@ class PlayState extends MusicBeatState
 			exclusions = [];
 		setOnLuas(variable, arg, exclusions);
 		setOnHScript(variable, arg, exclusions);
+		setOnPython(variable, arg, exclusions);
 	}
 
 	public function setOnLuas(variable:String, arg:Dynamic, exclusions:Array<String> = null)

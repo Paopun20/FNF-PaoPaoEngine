@@ -274,7 +274,7 @@ class Achievements
 							#if windows
 							lime.app.Application.current.window.alert(errorMsg, errorTitle);
 							#end
-			                Logger.error('$errorTitle - $errorMsg');
+							Logger.error('$errorTitle - $errorMsg');
 							// trace('$errorTitle - $errorMsg');
 							continue;
 						}

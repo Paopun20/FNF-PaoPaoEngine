@@ -746,7 +746,7 @@ class LoadingState extends MusicBeatState
 				arr.remove(member);
 				if (doTrace)
 					Logger.info('Removed invalid $prefix: $member');
-					// trace('Removed invalid $prefix: $member');
+				// trace('Removed invalid $prefix: $member');
 			}
 			else
 				i++;
@@ -807,7 +807,7 @@ class LoadingState extends MusicBeatState
 				}
 				else
 					Logger.error('ERROR! fail on preloading $traceData ');
-					// trace('ERROR! fail on preloading $traceData ');
+				// trace('ERROR! fail on preloading $traceData ');
 			}
 			catch (e:Dynamic)
 			{
@@ -950,7 +950,7 @@ class LoadingState extends MusicBeatState
 				}
 				else
 					Logger.error('no such image $key exists');
-					// trace('no such image $key exists');
+				// trace('no such image $key exists');
 			}
 
 			return Paths.currentTrackedAssets.get(requestKey).bitmap;
