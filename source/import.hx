@@ -1,7 +1,7 @@
 #if !macro
 // Discord API
 #if DISCORD_ALLOWED
-import backend.Discord;
+import api.Discord;
 #end
 // Psych
 #if LUA_ALLOWED
@@ -56,5 +56,5 @@ import flixel.addons.transition.FlxTransitionableState;
 
 using StringTools;
 
-import helper.Logger;
+import helper.CoolLog;
 #end

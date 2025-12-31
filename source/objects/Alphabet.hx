@@ -324,13 +324,13 @@ class AlphaCharacter extends FlxSprite
 				}
 			}
 			// trace('Reloaded letters successfully ($path)!');
-			Logger.info('Reloaded letters successfully ($path)!');
+			CoolLog.info('Reloaded letters successfully ($path)!');
 		}
 		catch (e:Dynamic)
 		{
 			FlxG.log.error('Error on loading alphabet data: $e');
 			// trace('Error on loading alphabet data: $e');
-			Logger.error('Error on loading alphabet data: $e');
+			CoolLog.error('Error on loading alphabet data: $e');
 		}
 
 		if (!allLetters.exists('?'))

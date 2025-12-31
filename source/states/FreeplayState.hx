@@ -423,12 +423,12 @@ class FreeplayState extends MusicBeatState
 				PlayState.isStoryMode = false;
 				PlayState.storyDifficulty = curDifficulty;
 
-				Logger.info('CURRENT WEEK: ' + WeekData.getWeekFileName());
+				CoolLog.info('CURRENT WEEK: ' + WeekData.getWeekFileName());
 				// trace('CURRENT WEEK: ' + WeekData.getWeekFileName());
 			}
 			catch (e:haxe.Exception)
 			{
-				Logger.error('ERROR! ${e.message}');
+				CoolLog.error('ERROR! ${e.message}');
 
 				var errorStr:String = e.message;
 				if (errorStr.contains('There is no TEXT asset with an ID of'))

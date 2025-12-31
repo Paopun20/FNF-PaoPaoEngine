@@ -1,6 +1,7 @@
 package psychlua;
 
 import flixel.FlxObject;
+import psychlua.ImplementUtils;
 
 class CustomSubstate extends MusicBeatSubstate
 {
@@ -8,12 +9,12 @@ class CustomSubstate extends MusicBeatSubstate
 	public static var instance:CustomSubstate;
 
 	#if LUA_ALLOWED
-	public static function implement(funk:FunkinLua)
+	public static function implement(funk)
 	{
-		var lua = funk.lua;
-		Lua_helper.add_callback(lua, "openCustomSubstate", openCustomSubstate);
-		Lua_helper.add_callback(lua, "closeCustomSubstate", closeCustomSubstate);
-		Lua_helper.add_callback(lua, "insertToCustomSubstate", insertToCustomSubstate);
+		var impl = ImplementUtils.make(funk);
+		impl("openCustomSubstate", openCustomSubstate);
+		impl("closeCustomSubstate", closeCustomSubstate);
+		impl("insertToCustomSubstate", insertToCustomSubstate);
 	}
 	#end
 

@@ -23,4 +23,8 @@ art/build_html.bat
 art/build_html-debug.bat
 
 # this is testing files!
-example_mods/u-test/
+example_mods/*
+!example_mods/modTemplate.zip
+
+# Environment Variables
+.env

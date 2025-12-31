@@ -851,7 +851,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					strumTime -= strumTime % (Conductor.stepCrochet * 16 / curQuant);
 					strumTime += sectionStart;
 
-					Logger.info('Vortex editor press at time: $strumTime');
+					CoolLog.info('Vortex editor press at time: $strumTime');
 					// trace('Vortex editor press at time: $strumTime');
 					var deletedNotes:Array<MetaNote> = [];
 					var addedNotes:Array<MetaNote> = [];
@@ -1126,7 +1126,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					selectedNotes = curRenderedNotes.members.copy();
 					addUndoAction(SELECT_NOTE, {old: sel, current: selectedNotes.copy()});
 					onSelectNote();
-					Logger.info('Notes selected: ' + selectedNotes.length);
+					CoolLog.info('Notes selected: ' + selectedNotes.length);
 					// trace('Notes selected: ' + selectedNotes.length);
 				}
 				else if (FlxG.keys.justPressed.S) // Save (Ctrl + S)
@@ -1150,7 +1150,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 							continue;
 
 						var kind:String = !note.isEvent ? 'note' : 'event';
-						Logger.info('Removed $kind at time: ${note.strumTime}');
+						CoolLog.info('Removed $kind at time: ${note.strumTime}');
 						// trace('Removed $kind at time: ${note.strumTime}');
 						if (!note.isEvent)
 						{
@@ -1425,13 +1425,13 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 								selectedNotes.remove(closest);
 								addUndoAction(SELECT_NOTE, {old: sel, current: selectedNotes.copy()});
 							}
-							Logger.info('Notes selected: ' + selectedNotes.length);
+							CoolLog.info('Notes selected: ' + selectedNotes.length);
 							// trace('Notes selected: ' + selectedNotes.length);
 						}
 						else if (!FlxG.keys.pressed.CONTROL) // Remove Note/Event
 						{
 							var kind:String = !closest.isEvent ? 'note' : 'event';
-							Logger.info('Removed $kind at time: ${closest.strumTime}');
+							CoolLog.info('Removed $kind at time: ${closest.strumTime}');
 							// trace('Removed $kind at time: ${closest.strumTime}');
 							if (!closest.isEvent)
 								notes.remove(closest);
@@ -1451,7 +1451,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 						var strumTime:Float = (diffY / GRID_SIZE * Conductor.stepCrochet / curZoom) + cachedSectionTimes[curSec];
 						if (noteData >= 0)
 						{
-							Logger.info('Added note at time: $strumTime');
+							CoolLog.info('Added note at time: $strumTime');
 							// trace('Added note at time: $strumTime');
 							var didAdd:Bool = false;
 
@@ -1482,7 +1482,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 						}
 						else if (!lockedEvents)
 						{
-							Logger.info('Added event at time: $strumTime');
+							CoolLog.info('Added event at time: $strumTime');
 							// trace('Added event at time: $strumTime');
 							var didAdd:Bool = false;
 
@@ -1756,7 +1756,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	function showOutput(message:String, isError:Bool = false)
 	{
-		Logger.info(message);
+		CoolLog.info(message);
 		// trace(message);
 		outputTxt.text = message;
 		outputTxt.y = FlxG.height - outputTxt.height - 30;
@@ -1988,7 +1988,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 	function onSongComplete()
 	{
-		Logger.info('song completed');
+		CoolLog.info('song completed');
 		// trace('song completed');
 		setSongPlaying(false);
 		Conductor.songPosition = FlxG.sound.music.time = vocals.time = opponentVocals.time = FlxG.sound.music.length - 1;
@@ -2084,9 +2084,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		notes.sort(PlayState.sortByTime);
 		events.sort(PlayState.sortByTime);
 
-		Logger.info('Note count: ${notes.length}');
+		CoolLog.info('Note count: ${notes.length}');
 		// trace('Note count: ${notes.length}');
-		Logger.info('Events count: ${events.length}');
+		CoolLog.info('Events count: ${events.length}');
 		// trace('Events count: ${events.length}');
 		loadSection();
 	}
@@ -2203,14 +2203,14 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 						PlayState.SONG.notes.pop();
 					}
 
-					Logger.info('breaking at section $secNum');
+					CoolLog.info('breaking at section $secNum');
 					// trace('breaking at section $secNum');
 					reachedLimit = true;
 					break;
 				}
 				else if (secNum == lastSectionNum)
 				{
-					Logger.info('reached limit at section $secNum');
+					CoolLog.info('reached limit at section $secNum');
 					// trace('reached limit at section $secNum');
 					reachedLimit = true;
 				}
@@ -2251,7 +2251,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 				if (time >= FlxG.sound.music.length)
 				{
-					Logger.info('created sections until ${PlayState.SONG.notes.length - 1}');
+					CoolLog.info('created sections until ${PlayState.SONG.notes.length - 1}');
 					// trace('created sections until ${PlayState.SONG.notes.length - 1}');
 					reachedLimit = true;
 				}
@@ -2600,7 +2600,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			PlayState.SONG.gameOverChar = character;
 			if (character.length < 1)
 				Reflect.deleteField(PlayState.SONG, 'gameOverChar');
-			Logger.info('selected $character');
+			CoolLog.info('selected $character');
 			// trace('selected $character');
 		});
 
@@ -2873,7 +2873,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		susLengthStepper.onValueChange = function()
 		{
 			var halfStep:Float = (Conductor.stepCrochet / 2);
-			Logger.info(halfStep + " " + susLengthStepper.value);
+			CoolLog.info(halfStep + " " + susLengthStepper.value);
 			// trace(halfStep, susLengthStepper.value);
 			var val:Float = Math.round(susLengthStepper.value / halfStep) * halfStep;
 			susLengthStepper.value = val;
@@ -3494,14 +3494,14 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			updateJsonData();
 			updateHeads(true);
 			loadMusic();
-			Logger.info('selected $character');
+			CoolLog.info('selected $character');
 			// trace('selected $character');
 		});
 		stageDropDown = new PsychUIDropDownMenu(objX + 140, objY, [''], function(id:Int, stage:String)
 		{
 			PlayState.SONG.stage = stage;
 			StageData.loadDirectory(PlayState.SONG);
-			Logger.info('selected $stage');
+			CoolLog.info('selected $stage');
 			// trace('selected $stage');
 		});
 
@@ -3511,14 +3511,14 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			updateJsonData();
 			updateHeads(true);
 			loadMusic();
-			Logger.info('selected $character');
+			CoolLog.info('selected $character');
 			// trace('selected $character');
 		});
 
 		girlfriendDropDown = new PsychUIDropDownMenu(objX, objY + 80, [''], function(id:Int, character:String)
 		{
 			PlayState.SONG.gfVersion = character;
-			Logger.info('selected $character');
+			CoolLog.info('selected $character');
 			// trace('selected $character');
 		});
 
@@ -3603,7 +3603,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				catch (e:Exception)
 				{
 					showOutput('Error: ${e.message}', true);
-					Logger.error(e.stack);
+					CoolLog.error(e.stack);
 					// trace(e.stack);
 				}
 			});
@@ -3785,7 +3785,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					catch (e:Exception)
 					{
 						showOutput('Error: ${e.message}', true);
-						Logger.error(e.stack);
+						CoolLog.error(e.stack);
 						// trace(e.stack);
 					}
 				});
@@ -3863,7 +3863,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					catch (e:Exception)
 					{
 						showOutput('Error: ${e.message}', true);
-						Logger.error(e.stack);
+						CoolLog.error(e.stack);
 						// trace(e.stack);
 					}
 				}
@@ -3959,7 +3959,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				catch (e:Exception)
 				{
 					showOutput('Error: ${e.message}', true);
-					Logger.error(e.stack);
+					CoolLog.error(e.stack);
 					// trace(e.stack);
 				}
 			});
@@ -4031,7 +4031,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 										}
 									}
 									else
-										Logger.error('File not found: $chartToFind');
+										CoolLog.error('File not found: $chartToFind');
 									// trace('File not found: $chartToFind');
 								}
 
@@ -4079,7 +4079,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 						catch (e:Exception)
 						{
 							showOutput('Error: ${e.message}', true);
-							Logger.error(e.stack);
+							CoolLog.error(e.stack);
 							// trace(e.stack);
 						}
 						state.close();
@@ -4223,7 +4223,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 					catch (e:Exception)
 					{
 						showOutput('Error: ${e.message}', true);
-						Logger.error(e.stack);
+						CoolLog.error(e.stack);
 						// trace(e.stack);
 					}
 				});
@@ -4272,7 +4272,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				catch (e:Exception)
 				{
 					showOutput('Error: ${e.message}', true);
-					Logger.error(e.stack);
+					CoolLog.error(e.stack);
 					// trace(e.stack);
 				}
 			});
@@ -4331,7 +4331,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			selectedNotes = curRenderedNotes.members.copy();
 			addUndoAction(SELECT_NOTE, {old: sel, current: selectedNotes.copy()});
 			onSelectNote();
-			Logger.error('Notes selected: ' + selectedNotes.length);
+			CoolLog.error('Notes selected: ' + selectedNotes.length);
 			// trace('Notes selected: ' + selectedNotes.length);
 		}, btnWid);
 		btn.text.alignment = LEFT;
@@ -4966,7 +4966,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 				if (noteSec + 1 >= cachedSectionTimes.length)
 				{
-					Logger.error('failsafe, cancel early and delete notes after this');
+					CoolLog.error('failsafe, cancel early and delete notes after this');
 					// trace('failsafe, cancel early and delete notes after this');
 					var changedSelected:Bool = false;
 					for (i in num...notes.length)
@@ -5379,7 +5379,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			{
 				if (event != null)
 				{
-					Logger.info(events.remove(event));
+					CoolLog.info(events.remove(event));
 					// trace(events.remove(event));
 					selectedNotes.remove(event);
 

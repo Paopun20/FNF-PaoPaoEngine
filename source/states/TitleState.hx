@@ -249,12 +249,12 @@ class TitleState extends MusicBeatState
 				}
 				catch (e:haxe.Exception)
 				{
-					Logger.info('[WARN] Title JSON might broken, ignoring issue...\n${e.details()}');
+					CoolLog.info('[WARN] Title JSON might broken, ignoring issue...\n${e.details()}');
 					// trace('[WARN] Title JSON might broken, ignoring issue...\n${e.details()}');
 				}
 			}
 			else
-				Logger.info('[WARN] No Title JSON detected, using default values.');
+				CoolLog.info('[WARN] No Title JSON detected, using default values.');
 			// trace('[WARN] No Title JSON detected, using default values.');
 		}
 		// else trace('[WARN] No Title JSON detected, using default values.');

@@ -769,7 +769,7 @@ class DialogueCharacterEditorState extends MusicBeatState implements PsychUIEven
 				if (loadedChar.dialogue_pos != null) // Make sure it's really a dialogue character
 				{
 					var cutName:String = _file.name.substr(0, _file.name.length - 5);
-					Logger.info("Successfully loaded file: " + cutName);
+					CoolLog.info("Successfully loaded file: " + cutName);
 					// trace("Successfully loaded file: " + cutName);
 					character.jsonFile = loadedChar;
 					reloadCharacter();
@@ -788,7 +788,7 @@ class DialogueCharacterEditorState extends MusicBeatState implements PsychUIEven
 		}
 		_file = null;
 		#else
-		Logger.error("File couldn't be loaded! You aren't on Desktop, are you?");
+		CoolLog.error("File couldn't be loaded! You aren't on Desktop, are you?");
 		// trace("File couldn't be loaded! You aren't on Desktop, are you?");
 		#end
 	}
@@ -802,7 +802,7 @@ class DialogueCharacterEditorState extends MusicBeatState implements PsychUIEven
 		_file.removeEventListener(Event.CANCEL, onLoadCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 		_file = null;
-		Logger.error("Cancelled file loading.");
+		CoolLog.error("Cancelled file loading.");
 		// trace("Cancelled file loading.");
 	}
 
@@ -815,7 +815,7 @@ class DialogueCharacterEditorState extends MusicBeatState implements PsychUIEven
 		_file.removeEventListener(Event.CANCEL, onLoadCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 		_file = null;
-		Logger.error("Problem loading file");
+		CoolLog.error("Problem loading file");
 		// trace("Problem loading file");
 	}
 

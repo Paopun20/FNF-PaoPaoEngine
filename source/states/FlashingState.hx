@@ -61,6 +61,11 @@ class FlashingState extends MusicBeatState
 		}
 		if (controls.ACCEPT || back)
 		{
+			texts.forEach(function(text:FlxText)
+			{
+				text.text = "Good luck with your flashing lights!";
+			}, true);
+
 			leftState = true;
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;

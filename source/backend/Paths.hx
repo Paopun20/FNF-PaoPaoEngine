@@ -254,7 +254,7 @@ class Paths
 			if (bitmap == null)
 			{
 				// trace('Bitmap not found: $file | key: $key');
-				Logger.error('Bitmap not found: $file | key: $key');
+				CoolLog.error('Bitmap not found: $file | key: $key');
 				return null;
 			}
 		}
@@ -375,7 +375,7 @@ class Paths
 	{
 		if (key.contains('psychic'))
 			// trace(key, parentFolder, allowGPU);
-			Logger.info(key + " " + parentFolder + " " + allowGPU);
+			CoolLog.info(key + " " + parentFolder + " " + allowGPU);
 		var imageLoaded:FlxGraphic = image(key, parentFolder, allowGPU);
 		#if MODS_ALLOWED
 		var xmlExists:Bool = false;
@@ -451,7 +451,7 @@ class Paths
 			#end
 		else if (beepOnNull)
 		{
-			Logger.error('SOUND NOT FOUND: $key, PATH: $path');
+			CoolLog.error('SOUND NOT FOUND: $key, PATH: $path');
 			// trace('SOUND NOT FOUND: $key, PATH: $path');
 			FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
 			return FlxAssets.getSound('flixel/sounds/beep');

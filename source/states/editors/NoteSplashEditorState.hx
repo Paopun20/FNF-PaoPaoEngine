@@ -858,7 +858,7 @@ class NoteSplashEditorState extends MusicBeatState
 		}
 		catch (e)
 		{
-			Logger.error(e.stack);
+			CoolLog.error(e.stack);
 			// trace(e.stack);
 		}
 	}
@@ -872,7 +872,7 @@ class NoteSplashEditorState extends MusicBeatState
 		_file.removeEventListener(Event.CANCEL, onLoadCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 		_file = null;
-		Logger.error("Cancelled file loading.");
+		CoolLog.error("Cancelled file loading.");
 		// trace("Cancelled file loading.");
 	}
 
@@ -886,7 +886,7 @@ class NoteSplashEditorState extends MusicBeatState
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 		_file = null;
 		// trace("Problem loading file");
-		Logger.error("Problem loading file");
+		CoolLog.error("Problem loading file");
 	}
 
 	override function destroy()

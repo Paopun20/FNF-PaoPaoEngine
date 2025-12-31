@@ -133,7 +133,7 @@ class Character extends FlxSprite
 		catch (e:Dynamic)
 		{
 			// trace('Error loading character file of "$character": $e');
-			Logger.error('Error loading character file of "$character": $e');
+			CoolLog.error('Error loading character file of "$character": $e');
 		}
 
 		skipDance = false;
@@ -172,7 +172,7 @@ class Character extends FlxSprite
 			{
 				FlxG.log.warn('Could not load atlas ${json.image}: $e');
 				// trace(e.stack);
-				Logger.error(e.stack);
+				CoolLog.error(e.stack);
 			}
 		}
 		#end

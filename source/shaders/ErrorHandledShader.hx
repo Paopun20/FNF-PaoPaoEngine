@@ -40,7 +40,7 @@ class ErrorHandledShader extends FlxShader implements IErrorHandler
 		var alertTitle:String = 'Error on Shader: "$shaderName"';
 
 		// trace(error);
-		Logger.error(error);
+		CoolLog.error(error);
 
 		#if !debug
 		// Save a crash log on Release builds

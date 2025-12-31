@@ -88,7 +88,7 @@ class NoteTypesConfig
 			}
 			catch (e)
 				// trace(e);
-				Logger.error(e);
+				CoolLog.error(e);
 		}
 	}
 

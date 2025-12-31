@@ -1,5 +1,6 @@
 package backend;
 
+import lime.system.System;
 import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
 
@@ -12,17 +13,17 @@ class CoolUtil
 		var version:String = states.MainMenuState.psychEngineVersion.trim();
 		if (ClientPrefs.data.checkForUpdates)
 		{
-			Logger.info('checking for updates...');
+			CoolLog.info('checking for updates...');
 			// trace('checking for updates...');
 			var http = new haxe.Http(url);
 			http.onData = function(data:String)
 			{
 				var newVersion:String = data.split('\n')[0].trim();
-				Logger.info('version online: $newVersion, your version: $version');
+				CoolLog.info('version online: $newVersion, your version: $version');
 				// trace('version online: $newVersion, your version: $version');
 				if (newVersion != version)
 				{
-					Logger.info('versions arent matching! please update');
+					CoolLog.info('versions arent matching! please update');
 					// trace('versions arent matching! please update');
 					version = newVersion;
 					http.onData = null;
@@ -32,7 +33,7 @@ class CoolUtil
 			}
 			http.onError = function(error)
 			{
-				Logger.error('error: $error');
+				CoolLog.error('error: $error');
 				// trace('error: $error');
 			}
 			http.request();
@@ -139,11 +140,12 @@ class CoolUtil
 
 	inline public static function browserLoad(site:String)
 	{
-		#if linux
-		Sys.command('/usr/bin/xdg-open', [site]);
-		#else
-		FlxG.openURL(site);
-		#end
+        System.openURL(site);
+		// #if linux
+		// Sys.command('/usr/bin/xdg-open', [site]);
+		// #else
+		// FlxG.openURL(site);
+		// #end
 	}
 
 	inline public static function openFolder(folder:String, absolute:Bool = false)
@@ -163,7 +165,7 @@ class CoolUtil
 		#end
 		Sys.command(command, [folder]);
 		// trace('$command $folder');
-		Logger.info('$command $folder');
+		CoolLog.info('$command $folder');
 		#else
 		FlxG.error("Platform is not supported for CoolUtil.openFolder");
 		#end

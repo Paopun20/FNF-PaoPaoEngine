@@ -1,43 +1,43 @@
 package psychlua;
 
 #if PYTHON_ALLOWED
-import backend.WeekData;
 import backend.Highscore;
 import backend.Song;
-import openfl.Lib;
-import openfl.utils.Assets;
-import openfl.display.BitmapData;
+import backend.WeekData;
+import cutscenes.DialogueBoxPsych;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.FlxState;
+import flixel.input.gamepad.FlxGamepadInputID;
+import flixel.input.keyboard.FlxKey;
+import haxe.Json;
+import objects.Character;
+import objects.Note;
+import objects.NoteSplash;
+import objects.StrumNote;
+import openfl.Lib;
+import openfl.display.BitmapData;
+import openfl.utils.Assets;
+import paopao.hython.Interp as PyInterp;
+import paopao.hython.Parser as PyParser;
+import psychlua.DebugLuaText;
+import psychlua.LuaUtils.LuaTweenOptions;
+import psychlua.LuaUtils;
+import psychlua.ModchartSprite;
+import states.FreeplayState;
+import states.MainMenuState;
+import states.StoryMenuState;
+import substates.GameOverSubstate;
+import substates.PauseSubState;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 #end
-import cutscenes.DialogueBoxPsych;
-import objects.StrumNote;
-import objects.Note;
-import objects.NoteSplash;
-import objects.Character;
-import states.MainMenuState;
-import states.StoryMenuState;
-import states.FreeplayState;
-import substates.PauseSubState;
-import substates.GameOverSubstate;
-import psychlua.LuaUtils;
-import psychlua.LuaUtils.LuaTweenOptions;
 #if HSCRIPT_ALLOWED
 import psychlua.HScript;
 #end
 #if LUA_ALLOWED
 import psychlua.FunkinLua;
 #end
-import psychlua.DebugLuaText;
-import psychlua.ModchartSprite;
-import flixel.input.keyboard.FlxKey;
-import flixel.input.gamepad.FlxGamepadInputID;
-import haxe.Json;
-import paopao.hython.Interp as PyInterp;
-import paopao.hython.Parser as PyParser;
 
 class Python
 {
@@ -54,6 +54,11 @@ class Python
 
 	#if LUA_ALLOWED
 	public var parentLua:FunkinLua;
+	#end
+
+	#if HSCRIPT_ALLOWED
+	public var hscript:HScript;
+	public var lastCalledFunction:String;
 	#end
 
 	public static var customFunctions:Map<String, Dynamic> = new Map<String, Dynamic>();
@@ -160,6 +165,13 @@ class Python
 	{
 		if (interp != null)
 			interp.setVar(variable, arg);
+	}
+
+	public function get(variable:String):Dynamic
+	{
+		if (interp != null)
+			return interp.getVar(variable);
+		return null;
 	}
 
 	private function noteTweenFunction(tag:String, note:Int, data:Dynamic, duration:Float, ease:String)
@@ -1371,7 +1383,7 @@ class Python
 		set("close", function()
 		{
 			closed = true;
-			Logger.info('Closing Python script $origin');
+			CoolLog.info('Closing Python script $origin');
 			return closed;
 		});
 
@@ -1385,11 +1397,12 @@ class Python
 		#if DISCORD_ALLOWED DiscordClient.addPythonCallbacks(this); #end
 		// #if ACHIEVEMENTS_ALLOWED Achievements.addPythonCallbacks(this); #end // wip
 		// #if TRANSLATIONS_ALLOWED Language.addPythonCallbacks(this); #end // wip
-		ReflectionFunctions.implementPython(this);
-		// TextFunctions.implementPython(this); // wip
-		// ExtraFunctions.implementPython(this); // wip
-		// CustomSubstate.implementPython(this); // wip
-		// ShaderFunctions.implementPython(this); // wip
+		HScript.pyimplement(this);
+		ReflectionFunctions.implement(this);
+		TextFunctions.implement(this);
+		ExtraFunctions.implement(this);
+		CustomSubstate.implement(this);
+		ShaderFunctions.pyimplement(this);
 	}
 
 	public static function pythonTrace(text:String, ignoreCheck:Bool = false, deprecated:Bool = false, color:FlxColor = FlxColor.WHITE)
@@ -1426,14 +1439,14 @@ class Python
 
 	public function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?manualRun:Bool = false)
 	{
-		Logger.error("[Python] Python is not allowed on this platform!");
+		CoolLog.error("[Python] Python is not allowed on this platform!");
 		if (PlayState.instance != null)
 			PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
 	}
 
 	public function execute(code:String):Dynamic
 	{
-		Logger.error("[Python] Python is not allowed on this platform!");
+		CoolLog.error("[Python] Python is not allowed on this platform!");
 		if (PlayState.instance != null)
 			PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
 		return null;
@@ -1461,7 +1474,7 @@ class Python
 	{
 		if (PlayState.instance != null)
 			PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
-		Logger.error("[Python] Python is not allowed on this platform!");
+		CoolLog.error("[Python] Python is not allowed on this platform!");
 	}
 }
 #end

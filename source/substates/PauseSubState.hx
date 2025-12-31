@@ -247,7 +247,7 @@ class PauseSubState extends MusicBeatSubstate
 				}
 				catch (e:haxe.Exception)
 				{
-					Logger.error('ERROR! ${e.message}');
+					CoolLog.error('ERROR! ${e.message}');
 					// trace('ERROR! ${e.message}');
 
 					var errorStr:String = e.message;

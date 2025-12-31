@@ -150,7 +150,7 @@ class ModSettingsSubState extends BaseOptionsMenu
 			#if windows
 			lime.app.Application.current.window.alert(errorMsg, errorTitle);
 			#end
-			Logger.error('$errorTitle - $errorMsg');
+			CoolLog.error('$errorTitle - $errorMsg');
 
 			_crashed = true;
 			close();

@@ -37,18 +37,18 @@ class HScript extends Iris
 	{
 		if (parent.hscript == null)
 		{
-			Logger.info('initializing haxe interp for: ${parent.scriptName}');
+			CoolLog.info('initializing haxe interp for: ${parent.scriptName}');
 			// trace('initializing haxe interp for: ${parent.scriptName}');
 			parent.hscript = new HScript(parent);
 		}
 	}
 
-	public static function initHaxeModuleCode(parent:FunkinLua, code:String, ?varsToBring:Any = null)
+	public static function initHaxeModuleCode(parent:Dynamic, code:String, ?varsToBring:Any = null)
 	{
 		var hs:HScript = try parent.hscript catch (e) null;
 		if (hs == null)
 		{
-			Logger.info('initializing haxe interp for: ${parent.scriptName}');
+			CoolLog.info('initializing haxe interp for: ${parent.scriptName}');
 			// trace('initializing haxe interp for: ${parent.scriptName}');
 			try
 			{
@@ -480,6 +480,83 @@ class HScript extends Iris
 	}
 	#end
 
+	#if PYTHON_ALLOWED
+	public static function pyimplement(python:Python):Void
+	{
+		python.set("runHaxeCode", function(codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):Dynamic
+		{
+			initHaxeModuleCode(python, codeToRun, varsToBring);
+			if (python.hscript != null)
+			{
+				final retVal:IrisCall = python.hscript.call(funcToRun, funcArgs);
+				if (retVal != null)
+				{
+					return (LuaUtils.isLuaSupported(retVal.returnValue)) ? retVal.returnValue : null;
+				}
+				else if (python.hscript.returnValue != null)
+				{
+					return python.hscript.returnValue;
+				}
+			}
+			return null;
+		});
+
+		python.set("runHaxeFunction", function(funcToRun:String, ?funcArgs:Array<Dynamic> = null)
+		{
+			if (python.hscript != null)
+			{
+				final retVal:IrisCall = python.hscript.call(funcToRun, funcArgs);
+				if (retVal != null)
+				{
+					return (LuaUtils.isLuaSupported(retVal.returnValue)) ? retVal.returnValue : null;
+				}
+			}
+			else
+			{
+				var pos:HScriptInfos = cast {fileName: python.origin, showLine: false};
+				if (python.lastCalledFunction != '')
+					pos.funcName = python.lastCalledFunction;
+				Iris.error("runHaxeFunction: HScript has not been initialized yet! Use \"runHaxeCode\" to initialize it", pos);
+			}
+			return null;
+		});
+
+		python.set("addHaxeLibrary", function(libName:String, ?libPackage:String = '')
+		{
+			var str:String = '';
+			if (libPackage.length > 0)
+				str = libPackage + '.';
+			else if (libName == null)
+				libName = '';
+
+			var c:Dynamic = Type.resolveClass(str + libName);
+			if (c == null)
+				c = Type.resolveEnum(str + libName);
+
+			if (python.hscript == null)
+				initHaxeModule(cast python);
+
+			var pos:HScriptInfos = cast python.hscript.interp.posInfos();
+			pos.showLine = false;
+			if (python.lastCalledFunction != '')
+				pos.funcName = python.lastCalledFunction;
+
+			try
+			{
+				if (c != null)
+					python.hscript.set(libName, c);
+			}
+			catch (e:IrisError)
+			{
+				Iris.error(Printer.errorToString(e, false), pos);
+			}
+			// FunkinLua.lastCalledScript = python;
+			if (python.get('pythonDebugMode') && python.get('pythonDeprecatedWarnings'))
+				Iris.warn("addHaxeLibrary is deprecated! Import classes through \"import\" in HScript!", pos);
+		});
+	}
+	#end
+
 	override function call(funcToRun:String, ?args:Array<Dynamic>):IrisCall
 	{
 		if (funcToRun == null || interp == null)
@@ -688,6 +765,27 @@ class HScript
 			return null;
 		});
 		funk.addLocalCallback("addHaxeLibrary", function(libName:String, ?libPackage:String = '')
+		{
+			PlayState.instance.addTextToDebug('HScript is not supported on this platform!', FlxColor.RED);
+			return null;
+		});
+	}
+	#end
+
+	#if PYTHON_ALLOWED
+	public static function pyimplement(python:Python)
+	{
+		python.set("runHaxeCode", function(codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):Dynamic
+		{
+			PlayState.instance.addTextToDebug('HScript is not supported on this platform!', FlxColor.RED);
+			return null;
+		});
+		python.set("runHaxeFunction", function(funcToRun:String, ?funcArgs:Array<Dynamic> = null)
+		{
+			PlayState.instance.addTextToDebug('HScript is not supported on this platform!', FlxColor.RED);
+			return null;
+		});
+		python.set("addHaxeLibrary", function(libName:String, ?libPackage:String = '')
 		{
 			PlayState.instance.addTextToDebug('HScript is not supported on this platform!', FlxColor.RED);
 			return null;

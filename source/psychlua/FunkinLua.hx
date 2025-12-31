@@ -1,38 +1,38 @@
 #if LUA_ALLOWED
 package psychlua;
 
-import backend.WeekData;
 import backend.Highscore;
 import backend.Song;
-import openfl.Lib;
-import openfl.utils.Assets;
-import openfl.display.BitmapData;
+import backend.WeekData;
+import cutscenes.DialogueBoxPsych;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.FlxState;
+import flixel.input.gamepad.FlxGamepadInputID;
+import flixel.input.keyboard.FlxKey;
+import haxe.Json;
+import objects.Character;
+import objects.Note;
+import objects.NoteSplash;
+import objects.StrumNote;
+import openfl.Lib;
+import openfl.display.BitmapData;
+import openfl.utils.Assets;
+import psychlua.DebugLuaText;
+import psychlua.LuaUtils.LuaTweenOptions;
+import psychlua.LuaUtils;
+import psychlua.ModchartSprite;
+import states.FreeplayState;
+import states.MainMenuState;
+import states.StoryMenuState;
+import substates.GameOverSubstate;
+import substates.PauseSubState;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 #end
-import cutscenes.DialogueBoxPsych;
-import objects.StrumNote;
-import objects.Note;
-import objects.NoteSplash;
-import objects.Character;
-import states.MainMenuState;
-import states.StoryMenuState;
-import states.FreeplayState;
-import substates.PauseSubState;
-import substates.GameOverSubstate;
-import psychlua.LuaUtils;
-import psychlua.LuaUtils.LuaTweenOptions;
 #if HSCRIPT_ALLOWED
 import psychlua.HScript;
 #end
-import psychlua.DebugLuaText;
-import psychlua.ModchartSprite;
-import flixel.input.keyboard.FlxKey;
-import flixel.input.gamepad.FlxGamepadInputID;
-import haxe.Json;
 
 class FunkinLua
 {
@@ -418,7 +418,7 @@ class FunkinLua
 					if (luaInstance.scriptName == luaPath)
 					{
 						// trace('Closing lua script $luaPath');
-						Logger.info('Closing lua script $luaPath');
+						CoolLog.info('Closing lua script $luaPath');
 						luaInstance.stop();
 						foundAny = true;
 					}
@@ -442,7 +442,7 @@ class FunkinLua
 					if (script.origin == scriptPath)
 					{
 						// trace('Closing hscript $scriptPath');
-						Logger.info('Closing hscript $scriptPath');
+						CoolLog.info('Closing hscript $scriptPath');
 						script.destroy();
 						foundAny = true;
 					}
@@ -469,7 +469,7 @@ class FunkinLua
 					if (script.origin == scriptPath)
 					{
 						// trace('Closing python script $scriptPath');
-						Logger.info('Closing python script $scriptPath');
+						CoolLog.info('Closing python script $scriptPath');
 						script.destroy();
 						foundAny = true;
 					}
@@ -1869,21 +1869,21 @@ class FunkinLua
 		{
 			closed = true;
 			// trace('Closing script $scriptName');
-			Logger.info('Closing script $scriptName');
+			CoolLog.info('Closing script $scriptName');
 			return closed;
 		});
 
 		#if DISCORD_ALLOWED DiscordClient.addLuaCallbacks(lua); #end
 		#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(lua); #end
 		#if TRANSLATIONS_ALLOWED Language.addLuaCallbacks(lua); #end
-		HScript.implement(this);
-		#if flxanimate FlxAnimateFunctions.implement(this); #end
-		ReflectionFunctions.implement(this);
-		TextFunctions.implement(this);
-		ExtraFunctions.implement(this);
-		CustomSubstate.implement(this);
-		ShaderFunctions.implement(this);
-		DeprecatedFunctions.implement(this);
+		HScript.implement(cast this);
+		#if flxanimate FlxAnimateFunctions.implement(cast this); #end
+		ReflectionFunctions.implement(cast this);
+		TextFunctions.implement(cast this);
+		ExtraFunctions.implement(cast this);
+		CustomSubstate.implement(cast this);
+		ShaderFunctions.implement(cast this);
+		DeprecatedFunctions.implement(cast this);
 
 		for (name => func in customFunctions)
 		{
@@ -1903,7 +1903,7 @@ class FunkinLua
 			var resultStr:String = Lua.tostring(lua, result);
 			if (resultStr != null && result != 0)
 			{
-				Logger.info(resultStr);
+				CoolLog.info(resultStr);
 				// trace(resultStr);
 				#if windows
 				lime.app.Application.current.window.alert(resultStr, 'Error on lua script!');
@@ -1921,7 +1921,7 @@ class FunkinLua
 			trace(e);
 			return;
 		}
-		Logger.info('lua file loaded succesfully:' + scriptName);
+		CoolLog.info('lua file loaded succesfully:' + scriptName);
 		// trace('lua file loaded succesfully:' + scriptName);
 
 		call('onCreate', []);
@@ -1980,7 +1980,7 @@ class FunkinLua
 		}
 		catch (e:Dynamic)
 		{
-			Logger.info(e);
+			CoolLog.info(e);
 			// trace(e);
 		}
 		return LuaUtils.Function_Continue;

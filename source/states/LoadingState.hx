@@ -39,7 +39,36 @@ class LoadingState extends MusicBeatState
 	static var originalBitmapKeys:Map<String, String> = [];
 	static var requestedBitmaps:Map<String, BitmapData> = [];
 	static var mutex:Mutex;
+	static var arrayMutex:Mutex; // Separate mutex for array operations
 	static var threadPool:FixedThreadPool = null;
+
+	inline static private function safeIncrementLoaded():Void
+	{
+		if (mutex == null)
+			mutex = new Mutex();
+		mutex.acquire();
+		loaded++;
+		mutex.release();
+	}
+
+	inline static private function safeGetLoadProgress():{loaded:Int, max:Int}
+	{
+		if (mutex == null)
+			return {loaded: 0, max: 0};
+		mutex.acquire();
+		var result = {loaded: loaded, max: loadMax};
+		mutex.release();
+		return result;
+	}
+
+	inline static private function safeSetLoadMax(value:Int):Void
+	{
+		if (mutex == null)
+			mutex = new Mutex();
+		mutex.acquire();
+		loadMax = value;
+		mutex.release();
+	}
 
 	function new(target:FlxState, stopMusic:Bool)
 	{
@@ -118,13 +147,13 @@ class LoadingState extends MusicBeatState
 					if (hscript.exists('onCreate'))
 					{
 						hscript.call('onCreate');
-						Logger.info('initialized hscript interp successfully: $scriptPath');
+						CoolLog.info('initialized hscript interp successfully: $scriptPath');
 						// trace('initialized hscript interp successfully: $scriptPath');
 						return super.create();
 					}
 					else
 					{
-						Logger.error('"$scriptPath" contains no \"onCreate" function, stopping script.');
+						CoolLog.error('"$scriptPath" contains no \"onCreate" function, stopping script.');
 						// trace('"$scriptPath" contains no \"onCreate" function, stopping script.');
 					}
 				}
@@ -337,63 +366,59 @@ class LoadingState extends MusicBeatState
 
 	static function _loaded()
 	{
+		if (mutex != null)
+			mutex.acquire();
 		loaded = 0;
 		loadMax = 0;
 		initialThreadCompleted = true;
 		isIntrusive = false;
+		if (mutex != null)
+			mutex.release();
 
 		FlxTransitionableState.skipNextTransIn = true;
 		if (threadPool != null)
-			threadPool.shutdown(); // kill all workers safely
+			threadPool.shutdown();
 		threadPool = null;
 		mutex = null;
+		arrayMutex = null;
 	}
 
 	public static function checkLoaded():Bool
 	{
-		// Acquire mutex before accessing shared data
-		if (mutex != null)
-			mutex.acquire();
+		// Thread-safe: Copy and clear maps atomically
+		if (mutex == null)
+			return false;
+
+		mutex.acquire();
 		var localRequestedBitmaps = requestedBitmaps.copy();
 		var localOriginalBitmapKeys = originalBitmapKeys.copy();
-		if (mutex != null)
-			mutex.release();
+		// Clear immediately to prevent lost updates
+		requestedBitmaps.clear();
+		originalBitmapKeys.clear();
+		mutex.release();
 
-		// Process bitmaps outside the mutex lock to avoid blocking threads
+		// Process bitmaps outside the mutex lock
 		for (key => bitmap in localRequestedBitmaps)
 		{
 			if (bitmap != null && Paths.cacheBitmap(localOriginalBitmapKeys.get(key), bitmap) != null)
 			{
-				Logger.info('finished preloading image $key');
-				// trace('finished preloading image $key');
+				CoolLog.info('finished preloading image $key');
 			}
 			else if (bitmap != null)
 			{
-				Logger.error('failed to cache image $key');
-				// trace('failed to cache image $key');
+				CoolLog.error('failed to cache image $key');
 			}
 			else
 			{
-				Logger.error('failed to load image $key');
-				// trace('failed to load image $key');
+				CoolLog.error('failed to load image $key');
 			}
 		}
 
-		// Clear the maps in a thread-safe way
-		if (mutex != null)
-			mutex.acquire();
-		requestedBitmaps.clear();
-		originalBitmapKeys.clear();
-		if (mutex != null)
-			mutex.release();
+		// Thread-safe check of completion status
+		mutex.acquire();
+		var result = (loaded >= loadMax && initialThreadCompleted);
+		mutex.release();
 
-		// Return the condition in a thread-safe way
-		var result = false;
-		if (mutex != null)
-			mutex.acquire();
-		result = (loaded >= loadMax && initialThreadCompleted);
-		if (mutex != null)
-			mutex.release();
 		return result;
 	}
 
@@ -407,7 +432,7 @@ class LoadingState extends MusicBeatState
 			directory = weekDir;
 
 		Paths.setCurrentLevel(directory);
-		Logger.info('Setting asset folder to ' + directory);
+		CoolLog.info('Setting asset folder to ' + directory);
 		// trace('Setting asset folder to ' + directory);
 	}
 
@@ -449,13 +474,18 @@ class LoadingState extends MusicBeatState
 
 	public static function prepare(images:Array<String> = null, sounds:Array<String> = null, music:Array<String> = null)
 	{
-		// This function is called before threading starts, so no mutex needed
+		// Initialize array mutex if needed
+		if (arrayMutex == null)
+			arrayMutex = new Mutex();
+
+		arrayMutex.acquire();
 		if (images != null)
 			imagesToPrepare = imagesToPrepare.concat(images);
 		if (sounds != null)
 			soundsToPrepare = soundsToPrepare.concat(sounds);
 		if (music != null)
 			musicToPrepare = musicToPrepare.concat(music);
+		arrayMutex.release();
 	}
 
 	static var initialThreadCompleted:Bool = true;
@@ -476,28 +506,48 @@ class LoadingState extends MusicBeatState
 	{
 		if (PlayState.SONG == null)
 		{
-			// Reset arrays and counters - called from main thread
+			// Reset state safely
+			arrayMutex = new Mutex();
+			arrayMutex.acquire();
 			imagesToPrepare = [];
 			soundsToPrepare = [];
 			musicToPrepare = [];
 			songsToPrepare = [];
+			arrayMutex.release();
+
+			mutex = new Mutex();
+			mutex.acquire();
 			loaded = 0;
 			loadMax = 0;
 			initialThreadCompleted = true;
 			isIntrusive = false;
+			mutex.release();
 			return;
 		}
 
 		_startPool();
+
+		// Initialize mutexes before any threading
+		if (arrayMutex == null)
+			arrayMutex = new Mutex();
+		if (mutex == null)
+			mutex = new Mutex();
+
+		arrayMutex.acquire();
 		imagesToPrepare = [];
 		soundsToPrepare = [];
 		musicToPrepare = [];
 		songsToPrepare = [];
+		arrayMutex.release();
 
+		mutex.acquire();
 		initialThreadCompleted = false;
+		mutex.release();
+
 		var threadsCompleted:Int = 0;
 		var threadsMax:Int = 0;
-		var threadMutex = new Mutex(); // Local mutex for thread completion tracking
+		var threadMutex = new Mutex(); // Local mutex for thread completion
+
 		function completedThread()
 		{
 			threadMutex.acquire();
@@ -509,12 +559,20 @@ class LoadingState extends MusicBeatState
 			{
 				clearInvalids();
 				startThreads();
-				initialThreadCompleted = true;
+
+				// Thread-safe flag update
+				if (mutex != null)
+				{
+					mutex.acquire();
+					initialThreadCompleted = true;
+					mutex.release();
+				}
 			}
 		}
 
 		var song:SwagSong = PlayState.SONG;
 		var folder:String = Paths.formatToSongPath(Song.loadedSongName);
+
 		new Future<Bool>(() ->
 		{
 			// LOAD NOTE IMAGE
@@ -525,8 +583,11 @@ class LoadingState extends MusicBeatState
 			var customSkin:String = noteSkin + Note.getNoteSkinPostfix();
 			if (Paths.fileExists('images/$customSkin.png', IMAGE))
 				noteSkin = customSkin;
+
+			// Thread-safe array access
+			arrayMutex.acquire();
 			imagesToPrepare.push(noteSkin);
-			//
+			arrayMutex.release();
 
 			// LOAD NOTE SPLASH IMAGE
 			var noteSplash:String = NoteSplash.defaultNoteSplash;
@@ -534,7 +595,10 @@ class LoadingState extends MusicBeatState
 				noteSplash = PlayState.SONG.splashSkin;
 			else
 				noteSplash += NoteSplash.getSplashSkinPostfix();
+
+			arrayMutex.acquire();
 			imagesToPrepare.push(noteSplash);
+			arrayMutex.release();
 
 			try
 			{
@@ -577,6 +641,7 @@ class LoadingState extends MusicBeatState
 			catch (e:Dynamic)
 			{
 			}
+
 			return true;
 		}, isIntrusive).then((_) -> new Future<Bool>(() ->
 			{
@@ -620,7 +685,10 @@ class LoadingState extends MusicBeatState
 					prepare(imgs, snds, mscs);
 				}
 
+				// Thread-safe array operations
+				arrayMutex.acquire();
 				songsToPrepare.push('$folder/Inst');
+				arrayMutex.release();
 
 				var player1:String = song.player1;
 				var player2:String = song.player2;
@@ -631,21 +699,31 @@ class LoadingState extends MusicBeatState
 
 				dontPreloadDefaultVoices = false;
 				preloadCharacter(player1, prefixVocals);
+
 				if (!dontPreloadDefaultVoices && prefixVocals != null)
 				{
 					if (Paths.fileExists('$prefixVocals-Player.${Paths.SOUND_EXT}', SOUND, false, 'songs')
 						&& Paths.fileExists('$prefixVocals-Opponent.${Paths.SOUND_EXT}', SOUND, false, 'songs'))
 					{
+						arrayMutex.acquire();
 						songsToPrepare.push('$prefixVocals-Player');
 						songsToPrepare.push('$prefixVocals-Opponent');
+						arrayMutex.release();
 					}
 					else if (Paths.fileExists('$prefixVocals.${Paths.SOUND_EXT}', SOUND, false, 'songs'))
+					{
+						arrayMutex.acquire();
 						songsToPrepare.push(prefixVocals);
+						arrayMutex.release();
+					}
 				}
 
 				if (player2 != player1)
 				{
+					threadMutex.acquire();
 					threadsMax++;
+					threadMutex.release();
+
 					threadPool.run(() ->
 					{
 						try
@@ -658,9 +736,13 @@ class LoadingState extends MusicBeatState
 						completedThread();
 					});
 				}
+
 				if (!stageData.hide_girlfriend && gfVersion != player2 && gfVersion != player1)
 				{
+					threadMutex.acquire();
 					threadsMax++;
+					threadMutex.release();
+
 					threadPool.run(() ->
 					{
 						try
@@ -674,6 +756,7 @@ class LoadingState extends MusicBeatState
 					});
 				}
 
+				// Final check for completion
 				threadMutex.acquire();
 				var allCompleted = (threadsCompleted == threadsMax);
 				threadMutex.release();
@@ -682,13 +765,18 @@ class LoadingState extends MusicBeatState
 				{
 					clearInvalids();
 					startThreads();
-					initialThreadCompleted = true;
+
+					if (mutex != null)
+					{
+						mutex.acquire();
+						initialThreadCompleted = true;
+						mutex.release();
+					}
 				}
 				return true;
 			}, isIntrusive)).onError((err:Dynamic) ->
 			{
-				// trace('ERROR! while preparing song: $err');
-				Logger.error('ERROR! while preparing song: $err');
+				CoolLog.error('ERROR! while preparing song: $err');
 			});
 	}
 
@@ -745,7 +833,7 @@ class LoadingState extends MusicBeatState
 			{
 				arr.remove(member);
 				if (doTrace)
-					Logger.info('Removed invalid $prefix: $member');
+					CoolLog.info('Removed invalid $prefix: $member');
 				// trace('Removed invalid $prefix: $member');
 			}
 			else
@@ -783,16 +871,15 @@ class LoadingState extends MusicBeatState
 
 	static function initThread(func:Void->Dynamic, traceData:String)
 	{
-		// trace('scheduled $func in threadPool');
 		#if debug
 		var threadSchedule = Sys.time();
 		#end
+
 		threadPool.run(() ->
 		{
 			#if debug
 			var threadStart = Sys.time();
-			Logger.info('$traceData took ${threadStart - threadSchedule}s to start preloading');
-			// trace('$traceData took ${threadStart - threadSchedule}s to start preloading');
+			CoolLog.info('$traceData took ${threadStart - threadSchedule}s to start preloading');
 			#end
 
 			try
@@ -801,25 +888,19 @@ class LoadingState extends MusicBeatState
 				{
 					#if debug
 					var diff = Sys.time() - threadStart;
-					Logger.info('finished preloading $traceData in ${diff}s');
-					// trace('finished preloading $traceData in ${diff}s');
+					CoolLog.info('finished preloading $traceData in ${diff}s');
 					#end
 				}
 				else
-					Logger.error('ERROR! fail on preloading $traceData ');
-				// trace('ERROR! fail on preloading $traceData ');
+					CoolLog.error('ERROR! fail on preloading $traceData');
 			}
 			catch (e:Dynamic)
 			{
-				Logger.error('ERROR! fail on preloading $traceData: $e');
-				// trace('ERROR! fail on preloading $traceData: $e');
+				CoolLog.error('ERROR! fail on preloading $traceData: $e');
 			}
-			// Thread-safe increment of loaded counter
-			if (mutex != null)
-				mutex.acquire();
-			loaded++;
-			if (mutex != null)
-				mutex.release();
+
+			// Use thread-safe increment
+			safeIncrementLoaded();
 		});
 	}
 
@@ -837,6 +918,7 @@ class LoadingState extends MusicBeatState
 			var isAnimateAtlas:Bool = false;
 			var img:String = character.image;
 			img = img.trim();
+
 			#if flxanimate
 			var animToFind:String = Paths.getPath('images/$img/Animation.json', TEXT);
 			if (#if MODS_ALLOWED FileSystem.exists(animToFind) || #end Assets.exists(animToFind))
@@ -846,14 +928,20 @@ class LoadingState extends MusicBeatState
 			if (!isAnimateAtlas)
 			{
 				var split:Array<String> = img.split(',');
+				if (arrayMutex != null)
+					arrayMutex.acquire();
 				for (file in split)
 				{
 					imagesToPrepare.push(file.trim());
 				}
+				if (arrayMutex != null)
+					arrayMutex.release();
 			}
 			#if flxanimate
 			else
 			{
+				if (arrayMutex != null)
+					arrayMutex.acquire();
 				for (i in 0...10)
 				{
 					var st:String = '$i';
@@ -862,25 +950,30 @@ class LoadingState extends MusicBeatState
 
 					if (Paths.fileExists('images/$img/spritemap$st.png', IMAGE))
 					{
-						// trace('found Sprite PNG');
 						imagesToPrepare.push('$img/spritemap$st');
 						break;
 					}
 				}
+				if (arrayMutex != null)
+					arrayMutex.release();
 			}
 			#end
 
 			if (prefixVocals != null && character.vocals_file != null && character.vocals_file.length > 0)
 			{
+				if (arrayMutex != null)
+					arrayMutex.acquire();
 				songsToPrepare.push(prefixVocals + "-" + character.vocals_file);
+				if (arrayMutex != null)
+					arrayMutex.release();
+
 				if (char == PlayState.SONG.player1)
 					dontPreloadDefaultVoices = true;
 			}
 		}
 		catch (e:haxe.Exception)
 		{
-			// trace(e.details());
-			Logger.error(e.details());
+			CoolLog.error(e.details());
 		}
 	}
 
@@ -903,7 +996,7 @@ class LoadingState extends MusicBeatState
 			}
 			else if (beepOnNull)
 			{
-				Logger.error('SOUND NOT FOUND: $key, PATH: $path');
+				CoolLog.error('SOUND NOT FOUND: $key, PATH: $path');
 				// trace('SOUND NOT FOUND: $key, PATH: $path');
 				FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
 				return FlxAssets.getSound('flixel/sounds/beep');
@@ -939,25 +1032,25 @@ class LoadingState extends MusicBeatState
 					var bitmap:BitmapData = OpenFlAssets.getBitmapData(file, false);
 					#end
 
-					// Store in temporary map for later processing in checkLoaded
-					if (mutex != null)
-						mutex.acquire();
+					// Thread-safe storage
+					if (mutex == null)
+						mutex = new Mutex();
+					mutex.acquire();
 					requestedBitmaps.set(file, bitmap);
 					originalBitmapKeys.set(file, requestKey);
-					if (mutex != null)
-						mutex.release();
+					mutex.release();
+
 					return bitmap;
 				}
 				else
-					Logger.error('no such image $key exists');
-				// trace('no such image $key exists');
+					CoolLog.error('no such image $key exists');
 			}
 
 			return Paths.currentTrackedAssets.get(requestKey).bitmap;
 		}
 		catch (e:haxe.Exception)
 		{
-			Logger.error('ERROR! fail on preloading image $key');
+			CoolLog.error('ERROR! fail on preloading image $key');
 		}
 
 		return null;

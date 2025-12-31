@@ -1,4 +1,4 @@
-package backend;
+package api;
 
 #if DISCORD_ALLOWED
 import sys.thread.Thread;
@@ -9,20 +9,32 @@ import hxdiscord_rpc.Types;
 import psychlua.Python;
 #end
 
+@:build(macro.DotEnvMacro.build())
 class DiscordClient
 {
-	public static var isInitialized:Bool = false;
-	private inline static final _defaultID:String = "863222024192262205";
-	public static var clientID(default, set):String = _defaultID;
-	public static var whoIsConnectedTo:Null<cpp.RawConstPointer<DiscordUser>>;
+	@:env("DISCORD_RPC_ID", {
+		required: true
+	})
+	private inline static final _defaultID:Null<String>;
 	private static var discordPresence:DiscordRichPresence;
-
 	private static final button1:DiscordButton = new DiscordButton();
 	private static final button2:DiscordButton = new DiscordButton();
 
+	public static var clientID(default, set):Null<String> = _defaultID;
+	public static var whoIsConnectedTo:Null<cpp.RawConstPointer<DiscordUser>>;
+	public static var isInitialized:Bool = false;
+
 	public static function initialize():Void
 	{
-		Logger.info("Initializing Discord RPC...");
+		if (clientID == null)
+		{
+			CoolLog.error("Discord client ID is not set!");
+			clientID = _defaultID;
+			CoolLog.info("Discord client ID set to default.");
+			return;
+		}
+
+		CoolLog.info("Initializing Discord RPC...");
 
 		final handlers:DiscordEventHandlers = new DiscordEventHandlers();
 		handlers.ready = cpp.Function.fromStaticFunction(onReady);
@@ -39,7 +51,7 @@ class DiscordClient
 
 		Thread.create(function():Void
 		{
-			while (true)
+			while (isInitialized)
 			{
 				#if DISCORD_DISABLE_IO_THREAD
 				Discord.UpdateConnection();
@@ -47,7 +59,7 @@ class DiscordClient
 
 				Discord.RunCallbacks();
 
-				Sys.sleep(2);
+				Sys.sleep(1);
 			}
 		});
 
@@ -57,7 +69,7 @@ class DiscordClient
 	public dynamic static function shutdown()
 	{
 		isInitialized = false;
-		Logger.info("Shutting down Discord RPC...");
+		CoolLog.info("Shutting down Discord RPC...");
 		Discord.Shutdown();
 	}
 
@@ -70,11 +82,11 @@ class DiscordClient
 
 		if (discriminator != 0)
 		{
-			Logger.info("Discord: Connected to user ${username}#${discriminator} ($globalName)");
+			CoolLog.info('Discord: Connected to user ${username}#${discriminator} ($globalName)');
 		}
 		else
 		{
-			Logger.info("Discord: Connected to user @${username} ($globalName)");
+			CoolLog.info('Discord: Connected to user @${username} ($globalName)');
 		}
 
 		discordPresence = new DiscordRichPresence();
@@ -90,13 +102,13 @@ class DiscordClient
 
 	private static function onDisconnected(errorCode:Int, message:cpp.ConstCharStar):Void
 	{
-		Logger.info("Discord: Disconnected ($errorCode:$message)");
+		CoolLog.info("Discord: Disconnected ($errorCode:$message)");
 		whoIsConnectedTo = null;
 	}
 
 	private static function onError(errorCode:Int, message:cpp.ConstCharStar):Void
 	{
-		Logger.error("Discord: Error ($errorCode:$message)");
+		CoolLog.error("Discord: Error ($errorCode:$message)");
 	}
 
 	inline public static function resetClientID()

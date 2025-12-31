@@ -1,49 +1,49 @@
 package states;
 
 import backend.Highscore;
+import backend.Rating;
+import backend.Song;
 import backend.StageData;
 import backend.WeekData;
-import backend.Song;
-import backend.Rating;
+import cutscenes.DialogueBoxPsych;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.FlxSubState;
+import flixel.animation.FlxAnimationController;
+import flixel.input.keyboard.FlxKey;
+import flixel.util.FlxSave;
 import flixel.util.FlxSort;
 import flixel.util.FlxStringUtil;
-import flixel.util.FlxSave;
-import flixel.input.keyboard.FlxKey;
-import flixel.animation.FlxAnimationController;
-import lime.utils.Assets;
-import openfl.utils.Assets as OpenFlAssets;
-import openfl.events.KeyboardEvent;
 import haxe.Json;
-import cutscenes.DialogueBoxPsych;
-import states.StoryMenuState;
+import lime.utils.Assets;
+import objects.*;
+import objects.Note.EventNote;
+import objects.VideoSprite;
+import openfl.events.KeyboardEvent;
+import openfl.utils.Assets as OpenFlAssets;
+import shaders.ErrorHandledShader;
 import states.FreeplayState;
-import states.editors.ChartingState;
+import states.StoryMenuState;
 import states.editors.CharacterEditorState;
-import substates.PauseSubState;
+import states.editors.ChartingState;
+import states.stages.*;
+import states.stages.objects.*;
 import substates.GameOverSubstate;
+import substates.PauseSubState;
 #if !flash
 import openfl.filters.ShaderFilter;
 #end
-import shaders.ErrorHandledShader;
-import objects.VideoSprite;
-import objects.Note.EventNote;
-import objects.*;
-import states.stages.*;
-import states.stages.objects.*;
 #if LUA_ALLOWED
 import psychlua.*;
 #else
-import psychlua.LuaUtils;
 import psychlua.HScript;
+import psychlua.LuaUtils;
 #end
 #if HSCRIPT_ALLOWED
-import psychlua.HScript.HScriptInfos;
-import crowplexus.iris.Iris;
 import crowplexus.hscript.Expr.Error as IrisError;
 import crowplexus.hscript.Printer;
+import crowplexus.iris.Iris;
+import psychlua.HScript.HScriptInfos;
 #end
 #if PYTHON_ALLOWED
 import psychlua.Python;
@@ -1581,7 +1581,7 @@ class PlayState extends MusicBeatState
 				oldNote = swagNote;
 			}
 		}
-		Logger.info('[[${SONG.song.toUpperCase()}] CHART INFO]: Ghost Notes Cleared: $ghostNotesCaught');
+		CoolLog.info('["${SONG.song.toUpperCase()}" CHART INFO]: Ghost Notes Cleared: $ghostNotesCaught');
 		// trace('["${SONG.song.toUpperCase()}" CHART INFO]: Ghost Notes Cleared: $ghostNotesCaught');
 		for (event in songData.events) // Event Notes
 			for (i in 0...event[1].length)
@@ -1810,7 +1810,7 @@ class PlayState extends MusicBeatState
 		if (finishTimer != null)
 			return;
 
-		Logger.info('resynced vocals at ' + Math.floor(Conductor.songPosition));
+		CoolLog.info('resynced vocals at ' + Math.floor(Conductor.songPosition));
 		// trace('resynced vocals at ' + Math.floor(Conductor.songPosition));
 
 		FlxG.sound.music.play();
@@ -1949,7 +1949,7 @@ class PlayState extends MusicBeatState
 		{
 			health = 0;
 			// trace("RESET = True");
-			Logger.info("RESET = True");
+			CoolLog.info("RESET = True");
 		}
 		doDeathCheck();
 
@@ -2765,9 +2765,9 @@ class PlayState extends MusicBeatState
 					var difficulty:String = Difficulty.getFilePath();
 
 					// trace('LOADING NEXT SONG');
-					Logger.info('LOADING NEXT SONG');
+					CoolLog.info('LOADING NEXT SONG');
 					// trace(Paths.formatToSongPath(PlayState.storyPlaylist[0]) + difficulty);
-					Logger.info(Paths.formatToSongPath(PlayState.storyPlaylist[0]) + difficulty);
+					CoolLog.info(Paths.formatToSongPath(PlayState.storyPlaylist[0]) + difficulty);
 
 					FlxTransitionableState.skipNextTransIn = true;
 					FlxTransitionableState.skipNextTransOut = true;
@@ -2783,7 +2783,7 @@ class PlayState extends MusicBeatState
 			}
 			else
 			{
-				Logger.info('WENT BACK TO FREEPLAY??');
+				CoolLog.info('WENT BACK TO FREEPLAY??');
 				// trace('WENT BACK TO FREEPLAY??');
 				Mods.loadTopMod();
 				#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
@@ -3737,7 +3737,7 @@ class PlayState extends MusicBeatState
 			if (newScript.exists('onCreate'))
 				newScript.call('onCreate');
 			// trace('initialized hscript interp successfully: $file');
-			Logger.info('initialized hscript interp successfully: $file');
+			CoolLog.info('initialized hscript interp successfully: $file');
 			hscriptArray.push(newScript);
 		}
 		catch (e:IrisError)
@@ -3757,13 +3757,13 @@ class PlayState extends MusicBeatState
 		try
 		{
 			var newScript:Python = new Python(null, file);
-			Logger.info('initialized python interp successfully: $file');
+			CoolLog.info('initialized python interp successfully: $file');
 			// trace('initialized python interp successfully: $file');
 			pythonArray.push(newScript);
 		}
 		catch (e:Dynamic)
 		{
-			Logger.info('[Python] Runtime error: "' + e + '" at ' + file);
+			CoolLog.info('[Python] Runtime error: "' + e + '" at ' + file);
 			// trace('[Python] Runtime error: "' + e + '" at ' + file);
 			PlayState.instance.addTextToDebug('[Python] Runtime error: "' + e + '" at ' + file, FlxColor.RED);
 

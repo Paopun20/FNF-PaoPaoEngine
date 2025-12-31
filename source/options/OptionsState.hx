@@ -104,6 +104,7 @@ class OptionsState extends MusicBeatState
 			if (onPlayState)
 			{
 				StageData.loadDirectory(PlayState.SONG);
+				LoadingState.prepareToSong(); // fix softlock
 				LoadingState.loadAndSwitchState(new PlayState());
 				FlxG.sound.music.volume = 0;
 			}

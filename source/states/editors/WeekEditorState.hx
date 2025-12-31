@@ -503,7 +503,7 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 				if (loadedWeek.weekCharacters != null && loadedWeek.weekName != null) // Make sure it's really a week
 				{
 					var cutName:String = _file.name.substr(0, _file.name.length - 5);
-					Logger.info("Successfully loaded file: " + cutName);
+					CoolLog.info("Successfully loaded file: " + cutName);
 					// trace("Successfully loaded file: " + cutName);
 					loadError = false;
 
@@ -518,7 +518,7 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 		loadedWeek = null;
 		_file = null;
 		#else
-		Logger.error("File couldn't be loaded! You aren't on Desktop, are you?");
+		CoolLog.error("File couldn't be loaded! You aren't on Desktop, are you?");
 		// trace("File couldn't be loaded! You aren't on Desktop, are you?");
 		#end
 	}
@@ -533,7 +533,7 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 		_file = null;
 		// trace("Cancelled file loading.");
-		Logger.error("Cancelled file loading.");
+		CoolLog.error("Cancelled file loading.");
 	}
 
 	/**
@@ -545,7 +545,7 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 		_file.removeEventListener(Event.CANCEL, onLoadCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 		_file = null;
-		Logger.info("Problem loading file");
+		CoolLog.info("Problem loading file");
 		// trace("Problem loading file");
 	}
 
@@ -581,7 +581,7 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 		_file.removeEventListener(Event.CANCEL, onSaveCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 		_file = null;
-		Logger.info("Cancelled file saving.");
+		CoolLog.info("Cancelled file saving.");
 		// trace("Cancelled file saving.");
 	}
 

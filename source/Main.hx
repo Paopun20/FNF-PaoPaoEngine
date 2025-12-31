@@ -67,7 +67,7 @@ class Main extends Sprite
 		backend.Native.fixScaling();
 		#end
 
-		Logger.init();
+		CoolLog.init();
 
 		// Credits to MAJigsaw77 (he's the og author for this code)
 		#if android
@@ -230,6 +230,9 @@ class Main extends Sprite
 		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
 		var dateNow:String = Date.now().toString();
 
+		Application.current.window.close();
+		CoolLog.critical("Crash detected!");
+
 		dateNow = dateNow.replace(" ", "_").replace(":", "-");
 
 		path = "./crash/" + "PsychEngine_" + dateNow + ".txt";
@@ -257,11 +260,8 @@ class Main extends Sprite
 			FileSystem.createDirectory("./crash/");
 
 		File.saveContent(path, errMsg + "\n");
-
-		Sys.println(errMsg);
-		Sys.println("Crash dump saved in " + Path.normalize(path));
-
-		Application.current.window.alert(errMsg, "Error!");
+		CoolLog.critical("Crash dump saved in " + Path.normalize(path));
+		Application.current.window.alert(errMsg, "Critical Error!");
 		#if DISCORD_ALLOWED
 		DiscordClient.shutdown();
 		#end

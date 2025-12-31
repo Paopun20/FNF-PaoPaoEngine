@@ -136,7 +136,7 @@ class DialogueCharacter extends FlxSprite
 		else
 		{
 			offset.set(0, 0);
-			Logger.info('Offsets not found! Dialogue character is badly formatted, anim: '
+			CoolLog.info('Offsets not found! Dialogue character is badly formatted, anim: '
 				+ leAnim
 				+ ', '
 				+ (playIdle ? 'idle anim' : 'loop anim'));

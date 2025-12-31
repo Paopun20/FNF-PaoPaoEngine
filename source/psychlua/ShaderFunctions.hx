@@ -285,6 +285,129 @@ class ShaderFunctions
 		});
 	}
 
+	public static function pyimplement(python:Python)
+	{
+		#if (!flash && MODS_ALLOWED && sys)
+		inline function get(obj:String):FlxRuntimeShader
+		{
+			var shader = getShader(obj);
+			if (shader == null)
+			{
+				Python.pythonTrace("Shader is not FlxRuntimeShader!", false, false, FlxColor.RED);
+				return null;
+			}
+			return shader;
+		}
+
+		python.set("getShaderBool", (obj:String, prop:String) ->
+		{
+			var s = get(obj);
+			return s != null ? s.getBool(prop) : null;
+		});
+
+		python.set("getShaderBoolArray", (obj:String, prop:String) ->
+		{
+			var s = get(obj);
+			return s != null ? s.getBoolArray(prop) : null;
+		});
+
+		python.set("getShaderInt", (obj:String, prop:String) ->
+		{
+			var s = get(obj);
+			return s != null ? s.getInt(prop) : null;
+		});
+
+		python.set("getShaderIntArray", (obj:String, prop:String) ->
+		{
+			var s = get(obj);
+			return s != null ? s.getIntArray(prop) : null;
+		});
+
+		python.set("getShaderFloat", (obj:String, prop:String) ->
+		{
+			var s = get(obj);
+			return s != null ? s.getFloat(prop) : null;
+		});
+
+		python.set("getShaderFloatArray", (obj:String, prop:String) ->
+		{
+			var s = get(obj);
+			return s != null ? s.getFloatArray(prop) : null;
+		});
+
+		python.set("setShaderBool", (obj:String, prop:String, value:Bool) ->
+		{
+			var s = get(obj);
+			if (s == null)
+				return false;
+			s.setBool(prop, value);
+			return true;
+		});
+
+		python.set("setShaderBoolArray", (obj:String, prop:String, values:Dynamic) ->
+		{
+			var s = get(obj);
+			if (s == null)
+				return false;
+			s.setBoolArray(prop, values);
+			return true;
+		});
+
+		python.set("setShaderInt", (obj:String, prop:String, value:Int) ->
+		{
+			var s = get(obj);
+			if (s == null)
+				return false;
+			s.setInt(prop, value);
+			return true;
+		});
+
+		python.set("setShaderIntArray", (obj:String, prop:String, values:Dynamic) ->
+		{
+			var s = get(obj);
+			if (s == null)
+				return false;
+			s.setIntArray(prop, values);
+			return true;
+		});
+
+		python.set("setShaderFloat", (obj:String, prop:String, value:Float) ->
+		{
+			var s = get(obj);
+			if (s == null)
+				return false;
+			s.setFloat(prop, value);
+			return true;
+		});
+
+		python.set("setShaderFloatArray", (obj:String, prop:String, values:Dynamic) ->
+		{
+			var s = get(obj);
+			if (s == null)
+				return false;
+			s.setFloatArray(prop, values);
+			return true;
+		});
+
+		python.set("setShaderSampler2D", (obj:String, prop:String, bitmapdataPath:String) ->
+		{
+			var s = get(obj);
+			if (s == null)
+				return false;
+
+			var value = Paths.image(bitmapdataPath);
+			if (value != null && value.bitmap != null)
+			{
+				s.setSampler2D(prop, value.bitmap);
+				return true;
+			}
+			return false;
+		});
+		#else
+		python.pythonTrace("Runtime Shaders unsupported on this platform!", false, false, FlxColor.RED);
+		#end
+	}
+
 	#if (!flash && MODS_ALLOWED && sys)
 	public static function getShader(obj:String):FlxRuntimeShader
 	{
