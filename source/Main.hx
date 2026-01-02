@@ -3,8 +3,8 @@ package;
 #if android
 import android.content.Context;
 #end
-import backend.Highscore;
-import debug.FPSCounter;
+import funkin.backend.Highscore;
+import funkin.debug.FPSCounter;
 import flixel.FlxGame;
 import flixel.FlxState;
 import flixel.graphics.FlxGraphic;
@@ -15,16 +15,16 @@ import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
 import openfl.events.Event;
-import states.TitleState;
+import funkin.states.TitleState;
 #if HSCRIPT_ALLOWED
 import crowplexus.iris.Iris;
-import psychlua.HScript.HScriptInfos;
+import funkin.psychlua.HScript.HScriptInfos;
 #end
 #if (linux || mac)
 import lime.graphics.Image;
 #end
 #if desktop
-import backend.ALSoftConfig; // Just to make sure DCE doesn't remove this, since it's not directly referenced anywhere else.
+import funkin.backend.ALSoftConfig; // Just to make sure DCE doesn't remove this, since it's not directly referenced anywhere else.
 #end
 // crash handler stuff
 #if CRASH_HANDLER
@@ -64,7 +64,7 @@ class Main extends Sprite
 		super();
 
 		#if (cpp && windows)
-		backend.Native.fixScaling();
+		funkin.backend.Native.fixScaling();
 		#end
 
 		CoolLog.init();
@@ -156,7 +156,7 @@ class Main extends Sprite
 		}
 		#end
 
-		#if LUA_ALLOWED Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(psychlua.CallbackHandler.call)); #end
+		#if LUA_ALLOWED Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(funkin.psychlua.CallbackHandler.call)); #end
 		Controls.instance = new Controls();
 		ClientPrefs.loadDefaultKeys();
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
