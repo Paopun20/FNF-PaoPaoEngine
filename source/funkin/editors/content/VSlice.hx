@@ -1,9 +1,10 @@
-package funkin.states.editors.content;
+package funkin.editors.content;
 
 import funkin.backend.Song;
 import funkin.backend.Difficulty;
 import flixel.math.FlxMath;
 import flixel.util.FlxSort;
+import funkin.states.MainMenuState;
 
 // Chart
 typedef VSliceChart =

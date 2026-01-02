@@ -1,4 +1,4 @@
-package funkin.states.editors.content;
+package funkin.editors.content;
 
 import haxe.io.Path;
 import flixel.util.FlxDestroyUtil;
@@ -8,7 +8,7 @@ import funkin.backend.ui.PsychUIButton;
 import funkin.backend.ui.PsychUIRadioGroup;
 import funkin.backend.ui.PsychUICheckBox;
 import funkin.backend.ui.PsychUIEventHandler;
-import funkin.states.editors.content.FileDialogHandler;
+import funkin.editors.content.FileDialogHandler;
 
 class PreloadListSubState extends MusicBeatSubstate implements PsychUIEvent
 {

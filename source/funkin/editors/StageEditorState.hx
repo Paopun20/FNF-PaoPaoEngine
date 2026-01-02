@@ -1,4 +1,4 @@
-package funkin.states.editors;
+package funkin.editors;
 
 import funkin.backend.StageData;
 import funkin.backend.PsychCamera;
@@ -16,8 +16,8 @@ import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import funkin.psychlua.ModchartSprite;
 import flash.net.FileFilter;
-import funkin.states.editors.content.Prompt;
-import funkin.states.editors.content.PreloadListSubState;
+import funkin.editors.content.Prompt;
+import funkin.editors.content.PreloadListSubState;
 
 class StageEditorState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
 {
@@ -1415,7 +1415,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 		{
 			if (!unsavedProgress)
 			{
-				MusicBeatState.switchState(new funkin.states.editors.MasterEditorMenu());
+				MusicBeatState.switchState(new funkin.editors.MasterEditorMenu());
 				FlxG.sound.playMusic(Paths.music('freakyMenu'));
 			}
 			else

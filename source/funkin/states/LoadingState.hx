@@ -91,7 +91,6 @@ class LoadingState extends MusicBeatState
 
 	var loadingText:FlxText;
 	var assetText:FlxText;
-	var funkay:FlxSprite;
 
 	var timePassed:Float = 0;
 
@@ -163,12 +162,6 @@ class LoadingState extends MusicBeatState
 		bg.color = 0xFFD16FFF;
 		bg.updateHitbox();
 		addBehindBar(bg);
-
-		funkay = new FlxSprite(0, 0).loadGraphic(Paths.image('funkay'));
-		funkay.antialiasing = ClientPrefs.data.antialiasing;
-		funkay.setGraphicSize(0, FlxG.height);
-		funkay.updateHitbox();
-		addBehindBar(funkay);
 		
 		loadingText = new FlxText(520, 550, 400, Language.getPhrase('now_loading', 'Now Loading', ['...']), 32);
 		loadingText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, LEFT, OUTLINE_FAST, FlxColor.BLACK);

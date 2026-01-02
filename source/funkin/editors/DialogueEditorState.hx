@@ -1,4 +1,4 @@
-package funkin.states.editors;
+package funkin.editors;
 
 import openfl.net.FileReference;
 import openfl.events.Event;
@@ -8,7 +8,7 @@ import haxe.Json;
 import funkin.objects.TypedAlphabet;
 import funkin.cutscenes.DialogueBoxPsych;
 import funkin.cutscenes.DialogueCharacter;
-import funkin.states.editors.content.Prompt;
+import funkin.editors.content.Prompt;
 
 class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
 {
@@ -371,7 +371,7 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 			{
 				if (!unsavedProgress)
 				{
-					MusicBeatState.switchState(new funkin.states.editors.MasterEditorMenu());
+					MusicBeatState.switchState(new funkin.editors.MasterEditorMenu());
 					FlxG.sound.playMusic(Paths.music('freakyMenu'));
 					transitioning = true;
 				}

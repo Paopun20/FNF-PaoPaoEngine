@@ -1,4 +1,4 @@
-package funkin.states.editors;
+package funkin.editors;
 
 import funkin.backend.WeekData;
 import openfl.utils.Assets;
@@ -11,8 +11,8 @@ import haxe.Json;
 import funkin.objects.HealthIcon;
 import funkin.objects.MenuCharacter;
 import funkin.objects.MenuItem;
-import funkin.states.editors.MasterEditorMenu;
-import funkin.states.editors.content.Prompt;
+import funkin.editors.MasterEditorMenu;
+import funkin.editors.content.Prompt;
 
 class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
 {

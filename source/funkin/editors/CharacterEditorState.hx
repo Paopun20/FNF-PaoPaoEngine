@@ -1,4 +1,4 @@
-package funkin.states.editors;
+package funkin.editors;
 
 import flixel.graphics.FlxGraphic;
 import flixel.system.debug.interaction.tools.Pointer.GraphicCursorCross;
@@ -10,8 +10,8 @@ import openfl.utils.Assets;
 import funkin.objects.Character;
 import funkin.objects.HealthIcon;
 import funkin.objects.Bar;
-import funkin.states.editors.content.Prompt;
-import funkin.states.editors.content.PsychJsonPrinter;
+import funkin.editors.content.Prompt;
+import funkin.editors.content.PsychJsonPrinter;
 
 class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
 {
@@ -1125,7 +1125,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			{
 				if (!unsavedProgress)
 				{
-					MusicBeatState.switchState(new funkin.states.editors.MasterEditorMenu());
+					MusicBeatState.switchState(new funkin.editors.MasterEditorMenu());
 					FlxG.sound.playMusic(Paths.music('freakyMenu'));
 				}
 				else

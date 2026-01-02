@@ -3,7 +3,7 @@ package funkin.states;
 import flixel.FlxObject;
 import flixel.effects.FlxFlicker;
 import lime.app.Application;
-import funkin.states.editors.MasterEditorMenu;
+import funkin.editors.MasterEditorMenu;
 import funkin.options.OptionsState;
 
 enum MainMenuColumn
