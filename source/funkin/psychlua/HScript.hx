@@ -340,6 +340,11 @@ class HScript extends Iris
 			}
 			return false;
 		});
+		
+		set("FlxView3D", flx3d.FlxView3D);
+		set("Flx3DView", flx3d.Flx3DView);
+		set("Flx3DUtil", flx3d.Flx3DUtil);
+		set("Flx3DCamera", flx3d.Flx3DCamera);
 
 		// For adding your own callbacks
 		// not very tested but should work

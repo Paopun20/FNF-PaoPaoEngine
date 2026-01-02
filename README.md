@@ -10,10 +10,11 @@
 - Fixed Loading Screen race condition and made it thread-safe
   > A race condition occurs when two or more threads access a shared resource simultaneously, leading to unpredictable behavior, data corruption, or a stuck loading screen.\
   More details? [here](https://www.youtube.com/watch?v=bhpzTWtee2A)
+- 3D support
+  > Note: bug at enter the song for the second time (or restart song), can make the game crash if mods use 3D models.
 - Open mod folder by clicking the "Open Mod Folder" button in the mod menu.
 - Format all files to make them more readable and easier to understand
 - Fixed some Psych Engine Bugs
-- Discord RPC to make it more interactive and engaging
 - Updated dependencies to the most compatible versions
 - Removed obsolete features from the Psych Engine, such as the **Easter Egg** in the loading screen, due to their redundancy.
 - Add HXCPP\_[NAME] - Haxe Cross-Platform Compiler for Native Code
