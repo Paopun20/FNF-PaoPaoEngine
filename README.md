@@ -12,8 +12,6 @@ Crossover between **Codename Engine**, **FNF V-Slice**, and **Psych Engine**
 - Fixed Loading Screen race condition and made it thread-safe
   > A race condition occurs when two or more threads access a shared resource simultaneously, leading to unpredictable behavior, data corruption, or a stuck loading screen.
   >> More details? [here](https://www.youtube.com/watch?v=bhpzTWtee2A)
-- 3D support [Buggy^2, HScript Only]
-  > Note: bug at enter the song for the second time (or restart song) or has 2 models at the same time for some reason, can make the game crash if mods use 3D models. (I got headache, I try everything, it's not working)
 - Open mod folder by clicking the "Open Mod Folder" button in the mod menu.
 - Format all files to make them more readable and easier to understand
 - Fixed Psych Engine Bugs

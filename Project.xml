@@ -4,7 +4,7 @@
 
 	<app
         title="Friday Night Funkin': PaoPao Engine"
-        file="PsychEngine"
+        file="PaoPaoEngine"
         packageName="com.paopa.paopaoengine"
         package="com.paopa.paopaoengine"
         main="Main"
@@ -31,7 +31,6 @@
 	<!-- ______________________ PSYCH ENGINE CUSTOMIZATION ______________________ -->
 
 	<define name="MODS_ALLOWED" if="desktop" />
-	<define name="THREE_D_SUPPORT" />
 	<define name="HSCRIPT_ALLOWED" if="desktop" />
 	<define name="PYTHON_ALLOWED" if="desktop" />
 	<define name="LUA_ALLOWED" if="desktop" />
@@ -199,7 +198,6 @@
 	<haxelib name="hscript-iris" if="HSCRIPT_ALLOWED" version="1.1.3" />
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED" version="2.2.5" />
 	<haxelib name="hxdiscord_rpc" version="git" if="DISCORD_ALLOWED" />
-	<haxelib name="away3d" version="git" />
 	<haxelib name="flxanimate" />
 
 	<!-- Disable Discord IO Thread -->

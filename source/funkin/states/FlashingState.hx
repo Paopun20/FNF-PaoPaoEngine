@@ -7,44 +7,50 @@ import lime.app.Application;
 class FlashingState extends MusicBeatState
 {
 	public static var leftState:Bool = false;
-
 	var isYes:Bool = true;
 	var texts:FlxTypedSpriteGroup<FlxText>;
 	var bg:FlxSprite;
-
+	var buttons:Array<FlxText> = [];
+	
 	override function create()
 	{
 		super.create();
-
+		
 		bg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		add(bg);
-
+		
 		texts = new FlxTypedSpriteGroup<FlxText>();
 		texts.alpha = 0.0;
 		add(texts);
-
-		var warnText:FlxText = new FlxText(0, 0, FlxG.width, "Hey, watch out!\n
+		
+		var text:String = "Hey, watch out!\n
 			This Mod contains some flashing lights!\n
-			Do you wish to disable them?");
+			Do you wish to disable them?";
+		
+		var warnText:FlxText = new FlxText(0, 0, FlxG.width, text);
 		warnText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER);
 		warnText.screenCenter(Y);
 		texts.add(warnText);
-
-		final keys = ["Yes", "No"];
-		for (i in 0...keys.length)
+		
+		final buttonLabels = ["Yes", "No"];
+		final buttonSpacing = 160;
+		final startX = (FlxG.width - buttonSpacing) / 2;
+		
+		for (i in 0...buttonLabels.length)
 		{
-			final button = new FlxText(0, 0, FlxG.width, keys[i]);
+			var button = new FlxText(0, 0, 0, buttonLabels[i]);
 			button.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER);
-			button.y = (warnText.y + warnText.height) + 24;
-			button.x += (128 * i) - 80;
+			button.y = warnText.y + warnText.height + 24;
+			button.x = startX + (i * buttonSpacing);
+			buttons.push(button);
 			texts.add(button);
 		}
-
+		
 		FlxTween.tween(texts, {alpha: 1.0}, 0.5, {
 			onComplete: (_) -> updateItems()
 		});
 	}
-
+	
 	override function update(elapsed:Float)
 	{
 		if (leftState)
@@ -52,30 +58,30 @@ class FlashingState extends MusicBeatState
 			super.update(elapsed);
 			return;
 		}
+		
 		var back:Bool = controls.BACK;
+		
 		if (controls.UI_LEFT_P || controls.UI_RIGHT_P)
 		{
 			FlxG.sound.play(Paths.sound("scrollMenu"), 0.7);
 			isYes = !isYes;
 			updateItems();
 		}
+		
 		if (controls.ACCEPT || back)
 		{
-			texts.forEach(function(text:FlxText)
-			{
-				text.text = "Good luck with your flashing lights!";
-			}, true);
-
 			leftState = true;
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
+			
 			if (!back)
 			{
 				ClientPrefs.data.flashing = !isYes;
 				ClientPrefs.saveSettings();
 				FlxG.sound.play(Paths.sound('confirmMenu'));
-				final button = texts.members[isYes ? 1 : 2];
-				FlxFlicker.flicker(button, 1, 0.1, false, true, function(flk:FlxFlicker)
+				
+				final selectedButton = buttons[isYes ? 0 : 1];
+				FlxFlicker.flicker(selectedButton, 1, 0.1, false, true, function(flk:FlxFlicker)
 				{
 					new FlxTimer().start(0.5, function(tmr:FlxTimer)
 					{
@@ -93,13 +99,13 @@ class FlashingState extends MusicBeatState
 				});
 			}
 		}
+		
 		super.update(elapsed);
 	}
-
+	
 	function updateItems()
 	{
-		// it's clunky but it works.
-		texts.members[1].alpha = isYes ? 1.0 : 0.6;
-		texts.members[2].alpha = isYes ? 0.6 : 1.0;
+		buttons[0].alpha = isYes ? 1.0 : 0.6;
+		buttons[1].alpha = isYes ? 0.6 : 1.0;
 	}
 }
