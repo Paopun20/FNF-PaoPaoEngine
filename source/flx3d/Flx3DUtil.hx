@@ -1,22 +1,19 @@
 package flx3d;
 
-#if THREE_D_SUPPORT
 import away3d.core.managers.Stage3DManager;
 import away3d.library.assets.IAsset;
 import flixel.FlxG;
-#end
 
 /**
- * @author lunarcleint
+ * @author lunarclient
  * @see https://twitter.com/lunarcleint
  *
  * Help from Ne_Eo
  * @see https://twitter.com/Ne_Eo_Twitch
  */
 @:access(away3d.core.managers.Stage3DManager)
-final class Flx3DUtil
+class Flx3DUtil
 {
-	#if THREE_D_SUPPORT
 	/**
 	 * Returns the total amount of 3D stages (not excluding the ones in use)
 	 * @return Int
@@ -59,5 +56,4 @@ final class Flx3DUtil
 
 		return null;
 	}
-	#end
 }

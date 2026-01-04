@@ -1,4 +1,4 @@
-package funkin.backend;
+package backend;
 
 import openfl.utils._internal.Log;
 import openfl.display.BitmapData;
@@ -8,12 +8,14 @@ import openfl.events.Event;
 import openfl.events.EventDispatcher;
 import openfl.media.Sound;
 import openfl.text.Font;
+
 import openfl.utils.IAssetCache;
 import openfl.utils.AssetCache;
 import openfl.utils.AssetLibrary;
 import openfl.utils.AssetType;
 import openfl.utils.ByteArray;
-import lime.app.Future;
+import openfl.utils.Future;
+
 #if lime
 import lime.app.Promise;
 import lime.utils.AssetLibrary as LimeAssetLibrary;
@@ -116,18 +118,11 @@ class Assets
 			var bitmapData = image.src;
 			#else
 			var bitmapData:BitmapData = null;
-			// #if !macro if (pushToGPU) {
-			//	bitmapData = new OptimizedBitmapData(0, 0, true, 0);
-			//	bitmapData.__fromImage(image);
-			// } else #end {
 			bitmapData = BitmapData.fromImage(image);
-			// }
 			#end
 
 			if (useCache && cache.enabled)
-			{
 				cache.setBitmapData(id, bitmapData);
-			}
 
 			return bitmapData;
 		}
@@ -395,20 +390,17 @@ class Assets
 		{
 			if (type == AssetType.IMAGE || type == null)
 			{
-				if (cache.hasBitmapData(id))
-					return true;
+				if (cache.hasBitmapData(id)) return true;
 			}
 
 			if (type == AssetType.FONT || type == null)
 			{
-				if (cache.hasFont(id))
-					return true;
+				if (cache.hasFont(id)) return true;
 			}
 
 			if (type == AssetType.SOUND || type == AssetType.MUSIC || type == null)
 			{
-				if (cache.hasSound(id))
-					return true;
+				if (cache.hasSound(id)) return true;
 			}
 		}
 
@@ -479,8 +471,7 @@ class Assets
 	**/
 	public static function loadBitmapData(id:String, useCache:Null<Bool> = true):Future<BitmapData>
 	{
-		if (useCache == null)
-			useCache = true;
+		if (useCache == null) useCache = true;
 
 		#if (lime && tools && !display)
 		var promise = new Promise<BitmapData>();
@@ -504,12 +495,12 @@ class Assets
 				var bitmapData = image.src;
 				#else
 				var bitmapData:BitmapData = null;
-				// #if !macro if (!Main.forceGPUOnlyBitmapsOff && Options.gpuOnlyBitmaps) {
+				//#if !macro if (!Main.forceGPUOnlyBitmapsOff && Options.gpuOnlyBitmaps) {
 				//	bitmapData = new OptimizedBitmapData(0, 0, true, 0);
 				//	bitmapData.__fromImage(image);
-				// } else #end {
-				bitmapData = BitmapData.fromImage(image);
-				// }
+				//} else #end {
+					bitmapData = BitmapData.fromImage(image);
+				//}
 				#end
 
 				if (useCache && cache.enabled)
@@ -562,8 +553,7 @@ class Assets
 	**/
 	public static function loadFont(id:String, useCache:Null<Bool> = true):Future<Font>
 	{
-		if (useCache == null)
-			useCache = true;
+		if (useCache == null) useCache = true;
 
 		#if (lime && tools && !display && !macro)
 		var promise = new Promise<Font>();
@@ -642,8 +632,7 @@ class Assets
 	**/
 	public static function loadMusic(id:String, useCache:Null<Bool> = true):Future<Sound>
 	{
-		if (useCache == null)
-			useCache = true;
+		if (useCache == null) useCache = true;
 
 		#if lime
 		#if !html5
@@ -735,8 +724,7 @@ class Assets
 	**/
 	public static function loadSound(id:String, useCache:Null<Bool> = true):Future<Sound>
 	{
-		if (useCache == null)
-			useCache = true;
+		if (useCache == null) useCache = true;
 
 		#if lime
 		var promise = new Promise<Sound>();

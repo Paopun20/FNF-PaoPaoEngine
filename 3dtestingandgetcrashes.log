@@ -1,0 +1,74 @@
+[22:20:44.500] INFO Discord.hx:37: Initializing Discord RPC...
+[22:20:44.515] INFO Discord.hx:37: Initializing Discord RPC...
+[22:20:44.526] INFO Alphabet.hx:327: Reloaded letters successfully (assets/shared/images/alphabet.json)!
+[22:20:45.527] INFO Discord.hx:89: Discord: Connected to user @paopaodev (paopaodev)
+[22:21:26.238] INFO FreeplayState.hx:426: CURRENT WEEK: week1
+[22:21:26.254] INFO LoadingState.hx:865: Removed invalid images: stage_light
+[22:21:26.255] INFO LoadingState.hx:373: Setting asset folder to week1
+[22:21:27.323] INFO LoadingState.hx:339: finished preloading image assets/shared/images/characters/DADDY_DEAREST.png
+[22:21:27.339] INFO LoadingState.hx:339: finished preloading image assets/shared/images/noteSplashes/noteSplashes.png
+[22:21:27.401] INFO LoadingState.hx:339: finished preloading image assets/week1/images/stagecurtains.png
+[22:21:27.562] INFO LoadingState.hx:339: finished preloading image assets/shared/images/characters/BOYFRIEND.png
+[22:21:28.184] INFO LoadingState.hx:339: finished preloading image assets/shared/images/characters/GF_assets.png
+[22:21:28.257] INFO LoadingState.hx:339: finished preloading image assets/week1/images/stageback.png
+[22:21:28.271] INFO LoadingState.hx:339: finished preloading image assets/shared/images/noteSkins/NOTE_assets.png
+[22:21:28.291] INFO LoadingState.hx:339: finished preloading image assets/week1/images/stagefront.png
+[22:21:28.313] INFO Conductor.hx:133: new BPM map BUDDY []
+[22:21:28.345] INFO PlayState.hx:3740: initialized hscript interp successfully: mods/u-test/scripts/3d.hx
+Hello, World!
+Hello, World!
+Hello, World!
+Hello, World!
+Hello, World!
+is true
+yes
+0
+1
+2
+3
+4
+0
+1
+2
+3
+4
+1
+2
+4
+6
+[22:21:28.372] INFO PlayState.hx:3760: initialized python interp successfully: mods/u-test/scripts/test.py
+[22:21:28.418] INFO PlayState.hx:1584: ["BOPEEBO" CHART INFO]: Ghost Notes Cleared: 0
+[22:21:28.653] TRACE Flx3DView.hx:57: mods/u-test/models/flixel
+[22:21:28.667] TRACE Flx3DView.hx:57: mods/u-test/models/teapot
+[22:21:28.845] TRACE Flx3DView.hx:123: Loader Finished...
+[openfl.display3D.Program3D] // AGAL vertex shader
+#version 120
+attribute vec4 va0;
+attribute vec4 va1;
+uniform mat4 vc0;
+varying vec4 v0;
+uniform vec4 vcPositionScale;
+void main() {
+	vec4 vt0;
+	vt0 = va0; // mov
+	v0 = va1; // mov
+	gl_Position = vt0 * vc0; // m44
+	gl_Position *= vcPositionScale;
+}
+
+[openfl.display3D.Program3D] // AGAL fragment shader
+#version 120
+uniform vec4 fc1;
+varying vec4 v0;
+uniform sampler2D sampler0;
+void main() {
+	vec4 ft0;
+	ft0 = fc1; // mov
+	ft0 = texture2D(sampler0, v0.xy); // tex
+	gl_FragColor = ft0; // mov
+}
+
+[openfl.display3D.Program3D] 0 name:vc0 type:35676 size:1 location:0
+[openfl.display3D.Program3D] 1 name:vcPositionScale type:35666 size:1 location:1
+[openfl.display3D.Program3D] 2 name:fc1 type:35666 size:1 location:2
+[openfl.display3D.Program3D] 3 name:sampler0 type:35678 size:1 location:3
