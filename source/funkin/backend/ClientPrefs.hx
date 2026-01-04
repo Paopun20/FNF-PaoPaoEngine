@@ -104,6 +104,7 @@ class ClientPrefs
 		'volume_mute' => [ZERO],
 		'volume_up' => [NUMPADPLUS, PLUS],
 		'volume_down' => [NUMPADMINUS, MINUS],
+		// 'screenshot' => [F12],
 		'debug_1' => [SEVEN],
 		'debug_2' => [EIGHT]
 	];

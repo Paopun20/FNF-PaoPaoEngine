@@ -1060,12 +1060,12 @@ class FunkinLua
 		Lua_helper.add_callback(lua, "getMouseX", function(?camera:String = 'game')
 		{
 			var cam:FlxCamera = LuaUtils.cameraFromString(camera);
-			return FlxG.mouse.getScreenPosition(cam).x;
+			return FlxG.mouse.getViewPosition(cam).x;
 		});
 		Lua_helper.add_callback(lua, "getMouseY", function(?camera:String = 'game')
 		{
 			var cam:FlxCamera = LuaUtils.cameraFromString(camera);
-			return FlxG.mouse.getScreenPosition(cam).y;
+			return FlxG.mouse.getViewPosition(cam).y;
 		});
 
 		Lua_helper.add_callback(lua, "getMidpointX", function(variable:String)

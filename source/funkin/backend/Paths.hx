@@ -196,6 +196,24 @@ class Paths
 	inline static public function lua(key:String, ?folder:String)
 		return getPath('$key.lua', TEXT, folder, true);
 
+	public static inline function obj(key:String)
+		return getPath('models/$key.obj');
+
+	public static inline function dae(key:String)
+		return getPath('models/$key.dae');
+
+	public static inline function md2(key:String)
+		return getPath('models/$key.md2');
+
+	public static inline function md5(key:String)
+		return getPath('models/$key.md5');
+
+	public static inline function awd(key:String)
+		return getPath('models/$key.awd');
+
+	public static inline function fbx(key:String)
+		return getPath('models/$key.fbx');
+
 	static public function video(key:String)
 	{
 		#if MODS_ALLOWED
@@ -239,6 +257,13 @@ class Paths
 			return currentTrackedAssets.get(key);
 		}
 		return cacheBitmap(key, parentFolder, bitmap, allowGPU);
+	}
+
+
+	static public function onlyImageFile(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true):String
+	{
+		key = Language.getFileTranslation('images/$key') + '.png';
+		return getPath(key, IMAGE, parentFolder, true);
 	}
 
 	public static function cacheBitmap(key:String, ?parentFolder:String = null, ?bitmap:BitmapData, ?allowGPU:Bool = true):FlxGraphic

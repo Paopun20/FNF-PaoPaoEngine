@@ -176,12 +176,12 @@ class LoadingState extends MusicBeatState
 		bg.color = 0xFFD16FFF;
 		bg.updateHitbox();
 		addBehindBar(bg);
-		
+
 		loadingText = new FlxText(520, 550, 400, Language.getPhrase('now_loading', 'Now Loading', ['...']), 32);
 		loadingText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, LEFT, OUTLINE_FAST, FlxColor.BLACK);
 		loadingText.borderSize = 2;
 		addBehindBar(loadingText);
-		
+
 		assetText = new FlxText(520, 580, 400, Language.getPhrase('asset_loading', 'Asset Loading: ', ['N/A', '(0/67)']), 32);
 		assetText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, LEFT, OUTLINE_FAST, FlxColor.BLACK);
 		assetText.borderSize = 2;
@@ -244,7 +244,7 @@ class LoadingState extends MusicBeatState
 			return;
 		}
 		#end
-		
+
 		timePassed += elapsed;
 		var dots:String = '';
 		switch (Math.floor(timePassed % 1 * 3))

@@ -1,10 +1,11 @@
 package flx3d;
 
+#if THREE_D_SUPPORT
 import away3d.containers.View3D;
 import away3d.library.assets.IAsset;
 import flixel.FlxG;
 import openfl.display.BitmapData;
-
+#end
 import flixel.FlxSprite;
 
 /**
@@ -16,6 +17,7 @@ import flixel.FlxSprite;
  */
 class FlxView3D extends FlxSprite
 {
+	#if THREE_D_SUPPORT
 	@:noCompletion private var bmp:BitmapData;
 
 	/**
@@ -115,4 +117,5 @@ class FlxView3D extends FlxSprite
 		super.set_height(newHeight);
 		return view != null ? view.height = height : height;
 	}
+	#end
 }

@@ -340,7 +340,7 @@ class HScript extends Iris
 			}
 			return false;
 		});
-		
+
 		set("FlxView3D", flx3d.FlxView3D);
 		set("Flx3DView", flx3d.Flx3DView);
 		set("Flx3DUtil", flx3d.Flx3DUtil);

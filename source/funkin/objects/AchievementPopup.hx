@@ -158,7 +158,7 @@ class AchievementPopup extends openfl.display.Sprite
 		y = (mult / lastScale) * y;
 		lastScale = mult;
 	}
-	
+
 	public function destroy()
 	{
 		@:privateAccess Achievements._popups.remove(this);

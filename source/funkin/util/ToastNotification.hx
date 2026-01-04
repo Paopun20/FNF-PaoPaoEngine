@@ -96,14 +96,16 @@ class ToastNotification
 	@:functionCode('
 		return ShowNotification(title.c_str(), message.c_str());
 	')
-	public static function show(title:String, message:String):Bool {
+	public static function show(title:String, message:String):Bool
+	{
 		return false;
 	}
 }
 #else
 class ToastNotification
 {
-	public static function show(title:String, message:String):Bool {
+	public static function show(title:String, message:String):Bool
+	{
 		return false;
 	}
 }

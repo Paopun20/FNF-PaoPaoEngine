@@ -8,7 +8,7 @@ import funkin.psychlua.ImplementUtils;
 
 class DeprecatedFunctions
 {
-	public static function implement(funk:FunkinLua)
+	public static function implement(funk)
 	{
 		var impl = ImplementUtils.make(funk);
 

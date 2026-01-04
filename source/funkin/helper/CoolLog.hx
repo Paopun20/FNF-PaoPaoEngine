@@ -8,7 +8,8 @@ import funkin.util.AnsiUtil.AnsiCode;
 
 using StringTools;
 
-enum Level {
+enum Level
+{
 	DEBUG;
 	INFO;
 	WARNING;
@@ -17,7 +18,8 @@ enum Level {
 	TRACE;
 }
 
-class CoolLog {
+class CoolLog
+{
 	private static final COLORS:Map<Level, Array<AnsiCode>> = [
 		DEBUG => [AnsiCode.CYAN],
 		INFO => [AnsiCode.GREEN],
@@ -42,39 +44,44 @@ class CoolLog {
 
 	private static var nativeTrace:(Dynamic, ?PosInfos) -> Void;
 
-	public static function init() {
+	public static function init()
+	{
 		nativeTrace = Log.trace;
 		Log.trace = (v, ?infos) -> log(Level.TRACE, v, infos); // Fixed
 	}
 
-	public static function uninit() {
+	public static function uninit()
+	{
 		if (nativeTrace != null)
 			Log.trace = nativeTrace;
 	}
 
-	public static function setLevel(lvl:Level) {
+	public static function setLevel(lvl:Level)
+	{
 		level = lvl;
 	}
 
-	public static function getLevel():Level {
+	public static function getLevel():Level
+	{
 		return level;
 	}
 
-	private static inline function now():String {
+	private static inline function now():String
+	{
 		var t = Date.now();
-		return lpad('${t.getHours()}', 2, "0") + ":" + 
-		       lpad('${t.getMinutes()}', 2, "0") + ":" + 
-		       lpad('${t.getSeconds()}', 2, "0") + "." +
-		       lpad('${Std.int(t.getTime() % 1000)}', 3, "0");
+		return lpad('${t.getHours()}', 2, "0") + ":" + lpad('${t.getMinutes()}', 2, "0") + ":" + lpad('${t.getSeconds()}', 2, "0") + "."
+			+ lpad('${Std.int(t.getTime() % 1000)}', 3, "0");
 	}
 
-	private static inline function lpad(s:String, len:Int, c:String):String {
+	private static inline function lpad(s:String, len:Int, c:String):String
+	{
 		while (s.length < len)
 			s = c + s;
 		return s;
 	}
 
-	public static function getColorByHex(hex:String):AnsiCode {
+	public static function getColorByHex(hex:String):AnsiCode
+	{
 		if (hex.startsWith("#"))
 			hex = hex.substr(1);
 		if (hex.length != 6)
@@ -93,16 +100,22 @@ class CoolLog {
 	private static inline function rgb(r:Int, g:Int, b:Int):String
 		return '\x1b[38;2;${r};${g};${b}m';
 
-	private static inline function pretty(v:Dynamic):String {
-		try {
+	private static inline function pretty(v:Dynamic):String
+	{
+		try
+		{
 			return JsonPrinter.print(v, null, "  ");
-		} catch (_) {
+		}
+		catch (_)
+		{
 			return Std.string(v);
 		}
 	}
 
-	private static function levelToInt(lvl:Level):Int {
-		return switch (lvl) {
+	private static function levelToInt(lvl:Level):Int
+	{
+		return switch (lvl)
+		{
 			case DEBUG: 10;
 			case INFO: 20;
 			case WARNING: 30;
@@ -112,8 +125,10 @@ class CoolLog {
 		}
 	}
 
-	private static function levelTag(lvl:Level):String {
-		return switch (lvl) {
+	private static function levelTag(lvl:Level):String
+	{
+		return switch (lvl)
+		{
 			case DEBUG: "DEBUG";
 			case INFO: "INFO";
 			case WARNING: "WARNING";
@@ -123,7 +138,8 @@ class CoolLog {
 		}
 	}
 
-	private static function log(lvl:Level, v:Dynamic, ?infos:PosInfos) {
+	private static function log(lvl:Level, v:Dynamic, ?infos:PosInfos)
+	{
 		if (levelToInt(lvl) < levelToInt(level))
 			return;
 
@@ -131,11 +147,8 @@ class CoolLog {
 		var tag = AnsiUtil.apply(levelTag(lvl), COLORS.get(lvl));
 		var file = infos != null ? infos.fileName.split("/").pop() : "unknown";
 		var line = infos != null ? '${infos.lineNumber}' : "0";
-		var location = AnsiUtil.apply(file, [cast FILE_COLOR]) + ":" + 
-		               AnsiUtil.apply(line, [cast LINE_COLOR]);
-		var msg = Std.isOfType(v, String) 
-			? AnsiUtil.apply(v, [cast MSG_COLOR]) 
-			: AnsiUtil.apply(pretty(v), [cast OBJ_COLOR]);
+		var location = AnsiUtil.apply(file, [cast FILE_COLOR]) + ":" + AnsiUtil.apply(line, [cast LINE_COLOR]);
+		var msg = Std.isOfType(v, String) ? AnsiUtil.apply(v, [cast MSG_COLOR]) : AnsiUtil.apply(pretty(v), [cast OBJ_COLOR]);
 
 		Sys.println('$time $tag $location: $msg');
 	}

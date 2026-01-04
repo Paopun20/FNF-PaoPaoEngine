@@ -1,12 +1,13 @@
 package funkin.psychlua;
 
+#if (LUA_ALLOWED || PYTHON_ALLOWED)
 #if LUA_ALLOWED
 import funkin.psychlua.FunkinLua;
 #end
 #if PYTHON_ALLOWED
 import funkin.psychlua.Python;
 #end
-
+#end
 class ImplementUtils
 {
 	public static function make(interpreter:Dynamic):(String, Dynamic) -> Void
@@ -44,6 +45,6 @@ class ImplementUtils
 
 		return function(name:String, value:Dynamic):Void
 		{
-		} // do nothing, yet
+		}
 	}
 }

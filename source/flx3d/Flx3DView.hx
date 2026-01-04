@@ -1,33 +1,34 @@
 package flx3d;
 
-import away3d.entities.SegmentSet;
-import away3d.cameras.Camera3D;
-import away3d.entities.TextureProjector;
-import away3d.primitives.SkyBox;
-import away3d.lights.LightBase;
-import away3d.containers.ObjectContainer3D;
-import away3d.library.Asset3DLibraryBundle;
-import away3d.events.LoaderEvent;
-import away3d.loaders.AssetLoader;
-import away3d.loaders.misc.AssetLoaderToken;
-import flixel.FlxG;
-import flx3d.Flx3DUtil;
-import away3d.library.assets.Asset3DType;
-import away3d.library.Asset3DLibrary;
-import away3d.events.Asset3DEvent;
-import away3d.loaders.parsers.*;
-import away3d.utils.Cast;
-import away3d.materials.TextureMaterial;
-import haxe.io.Path;
-import away3d.loaders.misc.AssetLoaderContext;
-import openfl.Assets;
-import away3d.entities.Mesh;
-import away3d.loaders.Loader3D;
+#if THREE_D_SUPPORT
 import flixel.graphics.FlxGraphic;
+import away3d.cameras.Camera3D;
+import away3d.containers.ObjectContainer3D;
+import away3d.entities.Mesh;
+import away3d.entities.SegmentSet;
+import away3d.entities.TextureProjector;
+import away3d.events.Asset3DEvent;
+import away3d.events.LoaderEvent;
+import away3d.library.Asset3DLibrary;
+import away3d.library.Asset3DLibraryBundle;
+import away3d.library.assets.Asset3DType;
+import away3d.lights.LightBase;
+import away3d.loaders.misc.AssetLoaderContext;
+import away3d.loaders.misc.AssetLoaderToken;
+import away3d.loaders.parsers.*;
+import away3d.materials.TextureMaterial;
+import away3d.primitives.SkyBox;
+import away3d.utils.Cast;
+import flx3d.Flx3DUtil;
+import haxe.io.Path;
+import openfl.Assets;
+import away3d.utils.Utils.expect;
+#end
 
 // FlxView3D with helpers for easier updating
 class Flx3DView extends FlxView3D
 {
+	#if THREE_D_SUPPORT
 	private static var __3DIDS:Int = 0;
 
 	var meshes:Array<Mesh> = [];
@@ -44,51 +45,35 @@ class Flx3DView extends FlxView3D
 		__cur3DStageID = __3DIDS++;
 	}
 
-	// public function addModel(assetPath:String, callback:Asset3DEvent->Void, ?texturePath:String, smoothTexture:Bool = true) {
-	public function addModel(assetPath:String, callback:Asset3DEvent->Void, #if sys ?texturePath:FlxGraphic #else ?texturePath:String #end,
-			smoothTexture:Bool = true)
-	{
-		#if sys
-		var model = openfl.utils.ByteArray.fromBytes(sys.io.File.getBytes(assetPath)); // Lets you add model files without having to recompile
-		#else
-		var model = Assets.getBytes(assetPath); // Works with stuff like html, but you need to recompile in order to register the model file.
-		#end
-
+	public function addModel(assetPath:String, callback:Asset3DEvent->Void, ?texturePath:String, smoothTexture:Bool = true) {
+		var model = Assets.getBytes(assetPath);
 		if (model == null)
 			throw 'Model at ${assetPath} was not found.';
 
 		var context = new AssetLoaderContext();
 		var noExt = Path.withoutExtension(assetPath);
 		trace(noExt);
-		context.mapUrlToData('${Path.withoutDirectory(noExt)}.mtl', '$noExt.mtl');
+		context.mapUrlToData(Path.withoutDirectory(noExt) + '.mtl', noExt + '.mtl');
 
 		var material:TextureMaterial = null;
-		#if sys
 		if (texturePath != null)
-			material = new TextureMaterial(Cast.bitmapTexture(texturePath.bitmap), smoothTexture);
-		#else
-		if (texturePath != null)
-			material = new TextureMaterial(Cast.bitmapTexture(funkin.backend.BitmapAssets.getBitmapData(texturePath, true, false)), smoothTexture);
-		#end
+			material = new TextureMaterial(Cast.bitmapTexture(Assets.getBitmapData(texturePath, true)), smoothTexture);
 
-		return loadData(model, context, switch (Path.extension(assetPath).toLowerCase())
-		{
+		return loadData(model, context, switch(Path.extension(assetPath).toLowerCase()) {
 			case "dae": new DAEParser();
 			case "md2": new MD2Parser();
 			case "md5": new MD5MeshParser();
 			case "awd": new AWDParser();
-			default: new OBJParser();
-		}, (event:Asset3DEvent) ->
-			{
-				if (event.asset != null && event.asset.assetType == Asset3DType.MESH)
-				{
-					var mesh:Mesh = cast(event.asset, Mesh);
-					if (material != null)
-						mesh.material = material;
-					meshes.push(mesh);
-				}
-				callback(event);
-			});
+			default:	new OBJParser();
+		}, (event:Asset3DEvent) -> {
+			if (event.asset != null && event.asset.assetType == Asset3DType.MESH) {
+				var mesh:Mesh = cast event.asset;
+				if (material != null)
+					mesh.material = material;
+				meshes.push(mesh);
+			}
+			callback(event);
+		});
 	}
 
 	private var __cur3DStageID:Int;
@@ -107,23 +92,16 @@ class Flx3DView extends FlxView3D
 			// ! Taken from Loader3D https://github.com/openfl/away3d/blob/master/away3d/loaders/Loader3D.hx#L207-L232
 			if (event.type == Asset3DEvent.ASSET_COMPLETE)
 			{
-				var obj:ObjectContainer3D = null;
-				switch (event.asset.assetType)
+				var obj:ObjectContainer3D = switch (event.asset.assetType)
 				{
-					case Asset3DType.LIGHT:
-						obj = #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (event.asset, LightBase) ? cast event.asset : null;
-					case Asset3DType.CONTAINER:
-						obj = #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (event.asset, ObjectContainer3D) ? cast event.asset : null;
-					case Asset3DType.MESH:
-						obj = #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (event.asset, Mesh) ? cast event.asset : null;
-					case Asset3DType.SKYBOX:
-						obj = #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (event.asset, SkyBox) ? cast event.asset : null;
-					case Asset3DType.TEXTURE_PROJECTOR:
-						obj = #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (event.asset, TextureProjector) ? cast event.asset : null;
-					case Asset3DType.CAMERA:
-						obj = #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (event.asset, Camera3D) ? cast event.asset : null;
-					case Asset3DType.SEGMENT_SET:
-						obj = #if (haxe_ver >= 4.2) Std.isOfType #else Std.is #end (event.asset, SegmentSet) ? cast event.asset : null;
+					case Asset3DType.LIGHT: expect(event.asset, LightBase);
+					case Asset3DType.CONTAINER: expect(event.asset, ObjectContainer3D);
+					case Asset3DType.MESH: expect(event.asset, Mesh);
+					case Asset3DType.SKYBOX: expect(event.asset, SkyBox);
+					case Asset3DType.TEXTURE_PROJECTOR: expect(event.asset, TextureProjector);
+					case Asset3DType.CAMERA: expect(event.asset, Camera3D);
+					case Asset3DType.SEGMENT_SET: expect(event.asset, SegmentSet);
+					default: null;
 				}
 				if (obj != null && obj.parent == null)
 					view.scene.addChild(obj);
@@ -162,25 +140,10 @@ class Flx3DView extends FlxView3D
 			Asset3DLibrary._instances.remove('Flx3DView-${__cur3DStageID}');
 		}
 
-		// ADD THIS: Properly dispose Stage3D proxy
-		if (view != null && view.stage3DProxy != null)
-		{
-			view.stage3DProxy.dispose();
-		}
-
-		FlxG.stage.removeChild(view);
-		try
-		{
-			view.dispose();
-		}
-		catch (e)
-		{
-			// Silent catch
-		}
-
 		super.destroy();
 	}
 
 	public function addChild(c)
 		view.scene.addChild(c);
+	#end
 }
