@@ -33,6 +33,10 @@ import haxe.io.Path;
 import openfl.events.UncaughtErrorEvent;
 #end
 
+#if (windows || desktop)
+import hxwindowmode.WindowColorMode;
+#end
+
 // NATIVE API STUFF, YOU CAN IGNORE THIS AND SCROLL //
 #if (linux && !debug)
 @:cppInclude('./external/gamemode_client.h')
@@ -56,6 +60,13 @@ class Main extends Sprite
 
 	public static function main():Void
 	{
+		CoolLog.init(); // Initialize the logging system
+		#if (windows || desktop)
+		WindowColorMode.setDarkMode();
+		if (WindowColorMode.isWindows10) {
+		    WindowColorMode.redrawWindowHeader();
+		}
+		#end
 		Lib.current.addChild(new Main());
 	}
 
@@ -66,8 +77,6 @@ class Main extends Sprite
 		#if (cpp && windows)
 		funkin.backend.Native.fixScaling();
 		#end
-
-		CoolLog.init();
 
 		// Credits to MAJigsaw77 (he's the og author for this code)
 		#if android

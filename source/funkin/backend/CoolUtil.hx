@@ -3,46 +3,41 @@ package funkin.backend;
 import lime.system.System;
 import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
-import funkin.helper.HttpClient as Client;
+import funkin.net.HttpClient as Client;
+import funkin.helper.Version;
 
 class CoolUtil
 {
-	public static function checkForUpdates(url:String = null):String
+	public static function checkForUpdates():String
 	{
-		if (url == null || url == '')
-			url = 'https://github.com/Paopun20/FNF-PaoPaoEngine/raw/refs/heads/main/gitVersion.txt';
+		var url:String = 'https://github.com/Paopun20/FNF-PaoPaoEngine/raw/refs/heads/main/gitVersion.txt';
 		var version:String = funkin.states.MainMenuState.psychEngineVersion.trim();
 		var done = false;
 		if (ClientPrefs.data.checkForUpdates)
 		{
-			trace('checking for updates...');
+			CoolLog.info('checking for updates...');
 			Client.getRequest(url, function(suss, data)
 			{
-				done = true;
 				if (suss)
 				{
-					// data = data;
 					if (data != null && data.length > 0)
 					{
-						var newVersion:String = data.split('\n')[0].trim();
-						trace('version online: $newVersion, your version: $version');
-						if (newVersion != version)
+						CoolLog.info('received data: ' + data);
+						var check = Version.isOutdated(version, data.split('\n')[0].trim());
+						if (check)
 						{
-							trace('versions arent matching! please update');
-							version = newVersion;
+							CoolLog.info('versions arent matching! please update');
+							version = data.split('\n')[0].trim();
 						}
 					}
 				}
 				else
 				{
-					trace('failed to check for updates (error type: ' + data.error + ')');
+					if (data != null)
+						CoolLog.error('failed to check for updates (error type: ' + data + ')');
 				}
 			});
 		}
-		#if sys
-		while (!done)
-			Sys.sleep(0.01);
-		#end
 		return version;
 	}
 

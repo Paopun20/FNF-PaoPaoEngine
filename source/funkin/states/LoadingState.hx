@@ -34,6 +34,7 @@ class LoadingState extends MusicBeatState
 {
 	public static var loaded:Int = 0;
 	public static var loadMax:Int = 0;
+	static var currentAssetName:String = "...";
 
 	static var originalBitmapKeys:Map<String, String> = [];
 	static var requestedBitmaps:Map<String, BitmapData> = [];
@@ -43,7 +44,7 @@ class LoadingState extends MusicBeatState
 	static var threadPool:FixedThreadPool = null;
 	#end
 
-	inline static private function safeIncrementLoaded():Void
+	inline static private function safeIncrementLoaded(?assetName:String):Void
 	{
 		#if sys
 		if (mutex == null)
@@ -51,22 +52,24 @@ class LoadingState extends MusicBeatState
 		mutex.acquire();
 		#end
 		loaded++;
+		if (assetName != null)
+			currentAssetName = assetName;
 		#if sys
 		mutex.release();
 		#end
 	}
 
-	inline static private function safeGetLoadProgress():{loaded:Int, max:Int}
+	inline static private function safeGetLoadProgress():{loaded:Int, max:Int, assetName:String}
 	{
 		#if sys
 		if (mutex == null)
-			return {loaded: 0, max: 0};
+			return {loaded: 0, max: 0, assetName: "..."};
 		mutex.acquire();
-		var result = {loaded: loaded, max: loadMax};
+		var result = {loaded: loaded, max: loadMax, assetName: currentAssetName};
 		mutex.release();
 		return result;
 		#else
-		return {loaded: loaded, max: loadMax};
+		return {loaded: loaded, max: loadMax, assetName: currentAssetName};
 		#end
 	}
 
@@ -257,6 +260,11 @@ class LoadingState extends MusicBeatState
 				dots = '...';
 		}
 		loadingText.text = Language.getPhrase('now_loading', 'Now Loading{1}', [dots]);
+		
+		// Update asset loading text
+		var progress = safeGetLoadProgress();
+		assetText.text = Language.getPhrase('asset_loading', 'Asset Loading: {1} {2}', 
+			[progress.assetName, '(${progress.loaded}/${progress.max})']);
 	}
 
 	#if HSCRIPT_ALLOWED
@@ -296,6 +304,7 @@ class LoadingState extends MusicBeatState
 		#end
 		loaded = 0;
 		loadMax = 0;
+		currentAssetName = "...";
 		initialThreadCompleted = true;
 		isIntrusive = false;
 		#if sys
@@ -336,7 +345,7 @@ class LoadingState extends MusicBeatState
 		{
 			if (bitmap != null && Paths.cacheBitmap(localOriginalBitmapKeys.get(key), bitmap) != null)
 			{
-				CoolLog.info('finished preloading image $key');
+				// CoolLog.info('finished preloading image $key');
 			}
 			else if (bitmap != null)
 			{
@@ -475,6 +484,7 @@ class LoadingState extends MusicBeatState
 			#end
 			loaded = 0;
 			loadMax = 0;
+			currentAssetName = "...";
 			initialThreadCompleted = true;
 			isIntrusive = false;
 			#if sys
@@ -504,6 +514,7 @@ class LoadingState extends MusicBeatState
 		mutex.acquire();
 		#end
 		initialThreadCompleted = false;
+		currentAssetName = "...";
 		#if sys
 		mutex.release();
 		#end
@@ -878,6 +889,7 @@ class LoadingState extends MusicBeatState
 		#end
 		loadMax = imagesToPrepare.length + soundsToPrepare.length + musicToPrepare.length + songsToPrepare.length;
 		loaded = 0;
+		currentAssetName = "...";
 		#if sys
 		mutex.release();
 		#end
@@ -933,7 +945,7 @@ class LoadingState extends MusicBeatState
 			}
 
 			// Use thread-safe increment
-			safeIncrementLoaded();
+			safeIncrementLoaded(traceData);
 		});
 		#else
 		// HTML5: run synchronously
@@ -953,7 +965,7 @@ class LoadingState extends MusicBeatState
 			CoolLog.error('ERROR! fail on preloading $traceData: $e');
 		}
 
-		safeIncrementLoaded();
+		safeIncrementLoaded(traceData);
 		#end
 	}
 

@@ -1,7 +1,6 @@
-package funkin.helper;
+package funkin.net;
 
-import haxe.Http;
-import haxe.http.HttpStatus;
+import sys.Http;
 import haxe.Json;
 import haxe.ds.StringMap;
 
@@ -53,7 +52,7 @@ class HttpClient
 		if (retries > MAX_RETRIES)
 		{
 			logError("Max retries exceeded", url, retries);
-			safeCallback(callback, false, {error: "Max retries exceeded", url: url});
+			safeCallback(callback, false, "Max retries exceeded");
 			return;
 		}
 
@@ -61,7 +60,7 @@ class HttpClient
 		if (parsedUrl == null)
 		{
 			logError("Invalid URL", url);
-			safeCallback(callback, false, {error: "Invalid URL", url: url});
+			safeCallback(callback, false, "Invalid URL");
 			return;
 		}
 
@@ -90,7 +89,6 @@ class HttpClient
 		http.onStatus = status ->
 		{
 			statusCode = status;
-			httptrace('$method Status: $status');
 		};
 		http.onData = response ->
 		{
@@ -103,7 +101,20 @@ class HttpClient
 			}
 			else
 			{
-				handleSuccess(response, callback);
+				httptrace('$method Status: $statusCode');
+				if (statusCode >= 300 && statusCode < 400)
+				{
+					final location = http.responseHeaders.get("Location");
+					if (location != null)
+					{
+						CoolLog.debug('Redirecting to $location');
+						sendRequest(location, data, callback, hasPayload, headers, retries + 1, method, queryParams, contentType);
+					}
+				}
+				else if (statusCode >= 200 && statusCode < 300)
+				{
+					handleSuccess(response, callback);
+				}
 			}
 		};
 		http.onError = error -> handleError(error, url, retries, () ->
@@ -142,7 +153,8 @@ class HttpClient
 		if (queryParams == null)
 			return baseUrl;
 		return baseUrl + "?" + [
-			for (key in queryParams.keys()) '$key=${StringTools.urlEncode(queryParams.get(key))}'
+			for (key in queryParams.keys())
+				'$key=${StringTools.urlEncode(queryParams.get(key))}'
 		].join("&");
 	}
 
@@ -158,15 +170,14 @@ class HttpClient
 
 	private static function handleSuccess(response:String, callback:(Bool, Dynamic) -> Void):Void
 	{
+		if (callback == null)
+		{
+			httptrace("Warning: Callback is null, skipping execution");
+			return;
+		}
+
 		httptrace("Response received: " + response);
-		try
-		{
-			safeCallback(callback, true, Json.parse(response));
-		}
-		catch (e:Dynamic)
-		{
-			safeCallback(callback, true, response);
-		}
+		safeCallback(callback, true, response);
 	}
 
 	private static function handleError(error:String, url:String, retries:Int, retryCallback:Void->Void, callback:(Bool, Dynamic) -> Void):Void
@@ -181,7 +192,7 @@ class HttpClient
 		}
 		else
 		{
-			safeCallback(callback, false, {error: errorType, details: error, url: url});
+			safeCallback(callback, false, 'http error ($errorType): $error');
 		}
 	}
 
@@ -247,7 +258,7 @@ class HttpClient
 
 	private static function logError(error:String, url:String, retries:Int = 0):Void
 	{
-		httptrace('Error occurred: $error | URL: $url | Retry: $retries');
+		CoolLog.error('Error occurred: $error | URL: $url | Retry: $retries');
 	}
 
 	private static function validateUrl(url:String):String
@@ -260,7 +271,7 @@ class HttpClient
 
 	private static function httptrace(msg:String):Void
 	{
-		trace(msg);
+		CoolLog.info(msg);
 	}
 }
 

@@ -261,6 +261,7 @@ description_sustains_as_one_note: "Se marcado, notas longas não poderão ser ac
 
 // Loading Screen
 now_loading: "Carregando{1}"
+asset_loading: "Carregamento de ativos: {1} {2}"
 
 // Difficulties
 difficulty_easy: "Fácil"

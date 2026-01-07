@@ -4,6 +4,7 @@ import flixel.FlxBasic;
 import funkin.objects.Character;
 import funkin.psychlua.LuaUtils;
 import funkin.psychlua.CustomSubstate;
+import funkin.util.PlatformDex;
 #if LUA_ALLOWED
 import funkin.psychlua.FunkinLua;
 #end
@@ -193,6 +194,7 @@ class HScript extends Iris
 		#if flxanimate
 		set('FlxAnimate', FlxAnimate);
 		#end
+		set("PlatformDex", PlatformDex);
 
 		// Functions & Variables
 		set('setVar', function(name:String, value:Dynamic)
