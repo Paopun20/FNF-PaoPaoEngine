@@ -97,6 +97,14 @@ class PlayState extends MusicBeatState
 	#if PYTHON_ALLOWED
 	public var pythonArray:Array<Python> = [];
 	#end
+	
+	#if LUA_ALLOWED
+	public var luaArray:Array<FunkinLua> = [];
+	#end
+
+	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+	private var luaDebugGroup:FlxTypedGroup<funkin.psychlua.DebugLuaText>;
+	#end
 
 	public var BF_X:Float = 770;
 	public var BF_Y:Float = 100;
@@ -258,12 +266,6 @@ class PlayState extends MusicBeatState
 
 	// Lua shit
 	public static var instance:PlayState;
-
-	#if LUA_ALLOWED public var luaArray:Array<FunkinLua> = []; #end
-
-	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-	private var luaDebugGroup:FlxTypedGroup<funkin.psychlua.DebugLuaText>;
-	#end
 
 	public var introSoundsSuffix:String = '';
 
@@ -491,7 +493,7 @@ class PlayState extends MusicBeatState
 		// STAGE SCRIPTS
 		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua'); #end
 		#if HSCRIPT_ALLOWED startHScriptsNamed('stages/' + curStage + '.hx'); #end
-		// #if PYTHON_ALLOWED startPythonScriptsNamed('stages/' + curStage + '.py'); #end
+		#if PYTHON_ALLOWED startPythonNamed('stages/' + curStage + '.py'); #end
 
 		// CHARACTER SCRIPTS
 		if (gf != null)
@@ -614,6 +616,14 @@ class PlayState extends MusicBeatState
 		for (event in eventsPushed)
 			startHScriptsNamed('custom_events/' + event + '.hx');
 		#end
+
+		#if PYTHON_ALLOWED
+		for (notetype in noteTypes)
+			startPythonNamed('custom_notetypes/' + notetype + '.py');
+		for (event in eventsPushed)
+			startPythonNamed('custom_events/' + event + '.py');
+		#end
+
 		noteTypes = null;
 		eventsPushed = null;
 
@@ -3752,6 +3762,27 @@ class PlayState extends MusicBeatState
 	#end
 
 	#if PYTHON_ALLOWED
+	public function startPythonNamed(scriptFile:String)
+	{
+		#if MODS_ALLOWED
+		var scriptToLoad:String = Paths.modFolders(scriptFile);
+		if (!FileSystem.exists(scriptToLoad))
+			scriptToLoad = Paths.getSharedPath(scriptFile);
+		#else
+		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
+		#end
+
+		if (FileSystem.exists(scriptToLoad))
+		{
+			if (Iris.instances.exists(scriptToLoad))
+				return false;
+
+			initPython(scriptToLoad);
+			return true;
+		}
+		return false;
+	}
+
 	public function initPython(file:String)
 	{
 		try

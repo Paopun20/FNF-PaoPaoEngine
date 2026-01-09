@@ -98,7 +98,8 @@ class FlxSoundTray extends Sprite
 		var by:Int = 14;
 		_bars = new Array();
 
-		for (i in 0...10) {
+		for (i in 0...10)
+		{
 			tmp = new Bitmap(new BitmapData(4, i + 1, false, FlxColor.WHITE));
 			tmp.x = bx;
 			tmp.y = by;
@@ -118,18 +119,23 @@ class FlxSoundTray extends Sprite
 	public function update(MS:Float):Void
 	{
 		// Animate sound tray thing
-		if (_timer > 0) {
+		if (_timer > 0)
+		{
 			_timer -= (MS / 1000);
-		} else if (y > -height) {
+		}
+		else if (y > -height)
+		{
 			y -= (MS / 1000) * height * 0.5;
 
-			if (y <= -height) {
+			if (y <= -height)
+			{
 				visible = false;
 				active = false;
 
 				#if FLX_SAVE
 				// Save sound preferences
-				if (FlxG.save.isBound) {
+				if (FlxG.save.isBound)
+				{
 					FlxG.save.data.mute = FlxG.sound.muted;
 					FlxG.save.data.volume = FlxG.sound.volume;
 					FlxG.save.flush();
@@ -146,10 +152,12 @@ class FlxSoundTray extends Sprite
 	 */
 	public function show(up:Bool = false):Void
 	{
-		if (!silent) {
+		if (!silent)
+		{
 			var sound = FlxAssets.getSound(up ? volumeUpSound : volumeDownSound);
-			//if (sound != null) FlxG.sound.load(sound).play();
-			if(sound != null) FlxG.sound.play(sound);
+			// if (sound != null) FlxG.sound.load(sound).play();
+			if (sound != null)
+				FlxG.sound.play(sound);
 		}
 
 		_timer = 1;
@@ -158,11 +166,13 @@ class FlxSoundTray extends Sprite
 		active = true;
 		var globalVolume:Int = Math.round(FlxG.sound.volume * 10);
 
-		if (FlxG.sound.muted) {
+		if (FlxG.sound.muted)
+		{
 			globalVolume = 0;
 		}
 
-		for (i in 0..._bars.length) {
+		for (i in 0..._bars.length)
+		{
 			if (i < globalVolume)
 				_bars[i].alpha = 1;
 			else

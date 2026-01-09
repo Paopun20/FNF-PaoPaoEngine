@@ -22,14 +22,14 @@ import funkin.backend.Controls;
 import funkin.backend.CoolUtil;
 import funkin.backend.MusicBeatState;
 import funkin.backend.MusicBeatSubstate;
-import funkin.backend.CustomFadeTransition;
+import funkin.frontend.CustomFadeTransition;
 import funkin.backend.ClientPrefs;
 import funkin.backend.Conductor;
 import funkin.backend.BaseStage;
 import funkin.backend.Difficulty;
 import funkin.backend.Mods;
 import funkin.backend.Language;
-import funkin.backend.ui.*; // Psych-UI
+import funkin.frontend.ui.*; // Psych-UI
 import funkin.objects.Alphabet;
 import funkin.objects.BGSprite;
 import funkin.states.PlayState;

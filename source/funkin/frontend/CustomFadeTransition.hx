@@ -1,4 +1,4 @@
-package funkin.backend;
+package funkin.frontend;
 
 import flixel.util.FlxGradient;
 

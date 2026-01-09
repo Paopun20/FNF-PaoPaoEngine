@@ -1,4 +1,4 @@
-package funkin.backend.ui;
+package funkin.frontend.ui;
 
 import flixel.util.FlxDestroyUtil;
 import flixel.FlxObject;

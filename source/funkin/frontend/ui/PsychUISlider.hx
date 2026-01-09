@@ -1,4 +1,4 @@
-package funkin.backend.ui;
+package funkin.frontend.ui;
 
 class PsychUISlider extends FlxSpriteGroup
 {

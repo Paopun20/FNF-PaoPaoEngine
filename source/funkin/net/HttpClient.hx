@@ -1,6 +1,6 @@
 package funkin.net;
 
-import sys.Http;
+import haxe.Http;
 import haxe.Json;
 import haxe.ds.StringMap;
 

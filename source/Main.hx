@@ -32,7 +32,6 @@ import haxe.CallStack;
 import haxe.io.Path;
 import openfl.events.UncaughtErrorEvent;
 #end
-
 #if (windows || desktop)
 import hxwindowmode.WindowColorMode;
 #end
@@ -63,8 +62,9 @@ class Main extends Sprite
 		CoolLog.init(); // Initialize the logging system
 		#if (windows || desktop)
 		WindowColorMode.setDarkMode();
-		if (WindowColorMode.isWindows10) {
-		    WindowColorMode.redrawWindowHeader();
+		if (WindowColorMode.isWindows10)
+		{
+			WindowColorMode.redrawWindowHeader();
 		}
 		#end
 		Lib.current.addChild(new Main());

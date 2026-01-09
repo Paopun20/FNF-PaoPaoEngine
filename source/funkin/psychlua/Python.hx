@@ -20,6 +20,9 @@ import openfl.display.BitmapData;
 import openfl.utils.Assets;
 import paopao.hython.Interp as PyInterp;
 import paopao.hython.Parser as PyParser;
+import paopao.hython.Printer as PyPrinter;
+import paopao.hython.Expr.Error as PyError;
+import paopao.hython.Expr as PyExpr;
 import funkin.psychlua.DebugLuaText;
 import funkin.psychlua.LuaUtils.LuaTweenOptions;
 import funkin.psychlua.LuaUtils;
@@ -29,6 +32,7 @@ import funkin.states.MainMenuState;
 import funkin.states.StoryMenuState;
 import funkin.substates.GameOverSubstate;
 import funkin.substates.PauseSubState;
+import funkin.util.NdllUtil;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 #end
@@ -42,6 +46,7 @@ import funkin.psychlua.FunkinLua;
 class Python
 {
 	public var parser:PyParser;
+	public var printer:PyPrinter;
 	public var interp:PyInterp;
 	public var origin:Null<String>;
 	public var returnValue:Dynamic;
@@ -67,6 +72,7 @@ class Python
 	{
 		parser = new PyParser();
 		interp = new PyInterp();
+		printer = new PyPrinter();
 		origin = file;
 
 		var game:PlayState = PlayState.instance;
@@ -123,9 +129,9 @@ class Python
 			returnValue = interp.execute(expr);
 			return returnValue;
 		}
-		catch (e:Dynamic)
+		catch (e:PyExpr)
 		{
-			pythonTrace('Execute Error: ' + e, false, false, FlxColor.RED);
+			pythonTrace('Execute Error: ' + printer.exprToString(e), false, false, FlxColor.RED);
 			return null;
 		}
 	}
@@ -318,6 +324,8 @@ class Python
 		// Screen
 		set('screenWidth', FlxG.width);
 		set('screenHeight', FlxG.height);
+
+		set("NdllUtil", NdllUtil);
 
 		// PlayState variables
 		if (game != null)
@@ -1454,20 +1462,33 @@ class Python
 
 	public function call(func:String, ?args:Array<Dynamic>):Dynamic
 	{
+		if (PlayState.instance != null)
+			PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
+		CoolLog.error("[Python] Python is not allowed on this platform!");
 		return null;
 	}
 
 	public function exists(func:String):Bool
 	{
+		if (PlayState.instance != null)
+			PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
+		CoolLog.error("[Python] Python is not allowed on this platform!");
 		return false;
 	}
 
 	public function set(variable:String, arg:Dynamic)
 	{
+		if (PlayState.instance != null)
+			PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
+		CoolLog.error("[Python] Python is not allowed on this platform!");
+		return null;
 	}
 
 	public function stop()
 	{
+		if (PlayState.instance != null)
+			PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
+		CoolLog.error("[Python] Python is not allowed on this platform!");
 	}
 
 	public function destroy()

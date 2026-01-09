@@ -61,12 +61,13 @@ bool ShowNotification(const std::string& title, const std::string& desc) {
 #end
 class PlatformDex
 {
-    #if windows
-    @:functionCode('
+	#if windows
+	@:functionCode('
         return ShowNotification(title.c_str(), desc.c_str());
     ')
-    #end
-    static public function sendNotification(title:String = "", desc:String = ""):Bool {
-        return true;
-    }
+	#end
+	static public function sendNotification(title:String = "", desc:String = ""):Bool
+	{
+		return true;
+	}
 }

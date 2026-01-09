@@ -181,6 +181,9 @@ class Paths
 	inline static public function txt(key:String, ?folder:String)
 		return getPath('data/$key.txt', TEXT, folder, true);
 
+	inline static public function ndll(key:String, ?folder:String)
+		return getPath('/$key.ndll', TEXT, folder, true);
+
 	inline static public function xml(key:String, ?folder:String)
 		return getPath('data/$key.xml', TEXT, folder, true);
 
@@ -240,7 +243,6 @@ class Paths
 		}
 		return cacheBitmap(key, parentFolder, bitmap, allowGPU);
 	}
-
 
 	static public function onlyImageFile(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true):String
 	{

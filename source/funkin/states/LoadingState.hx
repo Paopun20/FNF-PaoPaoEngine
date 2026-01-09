@@ -1,7 +1,7 @@
 package funkin.states;
 
 import lime.app.Future;
-#if sys
+#if (sys || MULTITHREADED_LOADING)
 import sys.thread.FixedThreadPool;
 import sys.thread.Mutex;
 #end
@@ -24,7 +24,7 @@ import crowplexus.hscript.Expr.Error as IrisError;
 import crowplexus.hscript.Printer;
 #end
 
-#if cpp
+#if (cpp || MULTITHREADED_LOADING)
 @:headerCode('
 #include <iostream>
 #include <thread>
@@ -38,7 +38,7 @@ class LoadingState extends MusicBeatState
 
 	static var originalBitmapKeys:Map<String, String> = [];
 	static var requestedBitmaps:Map<String, BitmapData> = [];
-	#if sys
+	#if (sys || MULTITHREADED_LOADING)
 	static var mutex:Mutex;
 	static var arrayMutex:Mutex; // Separate mutex for array operations
 	static var threadPool:FixedThreadPool = null;
@@ -46,7 +46,7 @@ class LoadingState extends MusicBeatState
 
 	inline static private function safeIncrementLoaded(?assetName:String):Void
 	{
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		if (mutex == null)
 			mutex = new Mutex();
 		mutex.acquire();
@@ -54,14 +54,14 @@ class LoadingState extends MusicBeatState
 		loaded++;
 		if (assetName != null)
 			currentAssetName = assetName;
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		mutex.release();
 		#end
 	}
 
 	inline static private function safeGetLoadProgress():{loaded:Int, max:Int, assetName:String}
 	{
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		if (mutex == null)
 			return {loaded: 0, max: 0, assetName: "..."};
 		mutex.acquire();
@@ -75,13 +75,13 @@ class LoadingState extends MusicBeatState
 
 	inline static private function safeSetLoadMax(value:Int):Void
 	{
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		if (mutex == null)
 			mutex = new Mutex();
 		mutex.acquire();
 		#end
 		loadMax = value;
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		mutex.release();
 		#end
 	}
@@ -180,13 +180,13 @@ class LoadingState extends MusicBeatState
 		bg.updateHitbox();
 		addBehindBar(bg);
 
-		loadingText = new FlxText(520, 550, 400, Language.getPhrase('now_loading', 'Now Loading', ['...']), 32);
-		loadingText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, LEFT, OUTLINE_FAST, FlxColor.BLACK);
+		loadingText = new FlxText(0, 550, FlxG.width, Language.getPhrase('now_loading', 'Now Loading', ['...']), 32);
+		loadingText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
 		loadingText.borderSize = 2;
 		addBehindBar(loadingText);
 
-		assetText = new FlxText(520, 580, 400, Language.getPhrase('asset_loading', 'Asset Loading: ', ['N/A', '(0/67)']), 32);
-		assetText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, LEFT, OUTLINE_FAST, FlxColor.BLACK);
+		assetText = new FlxText(0, 580, FlxG.width, Language.getPhrase('asset_loading', 'Asset Loading: ', ['N/A', '(67/[N/A])']), 32);
+		assetText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
 		assetText.borderSize = 2;
 		addBehindBar(assetText);
 
@@ -260,11 +260,10 @@ class LoadingState extends MusicBeatState
 				dots = '...';
 		}
 		loadingText.text = Language.getPhrase('now_loading', 'Now Loading{1}', [dots]);
-		
+
 		// Update asset loading text
 		var progress = safeGetLoadProgress();
-		assetText.text = Language.getPhrase('asset_loading', 'Asset Loading: {1} {2}', 
-			[progress.assetName, '(${progress.loaded}/${progress.max})']);
+		assetText.text = Language.getPhrase('asset_loading', 'Asset Loading: {1} {2}', [progress.assetName, '(${progress.loaded}/${progress.max})']);
 	}
 
 	#if HSCRIPT_ALLOWED
@@ -298,7 +297,7 @@ class LoadingState extends MusicBeatState
 
 	static function _loaded()
 	{
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		if (mutex != null)
 			mutex.acquire();
 		#end
@@ -307,13 +306,13 @@ class LoadingState extends MusicBeatState
 		currentAssetName = "...";
 		initialThreadCompleted = true;
 		isIntrusive = false;
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		if (mutex != null)
 			mutex.release();
 		#end
 
 		FlxTransitionableState.skipNextTransIn = true;
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		if (threadPool != null)
 			threadPool.shutdown();
 		threadPool = null;
@@ -325,7 +324,7 @@ class LoadingState extends MusicBeatState
 	public static function checkLoaded():Bool
 	{
 		// Thread-safe: Copy and clear maps atomically
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		if (mutex == null)
 			return false;
 
@@ -336,7 +335,7 @@ class LoadingState extends MusicBeatState
 		// Clear immediately to prevent lost updates
 		requestedBitmaps.clear();
 		originalBitmapKeys.clear();
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		mutex.release();
 		#end
 
@@ -358,11 +357,11 @@ class LoadingState extends MusicBeatState
 		}
 
 		// Thread-safe check of completion status
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		mutex.acquire();
 		#end
 		var result = (loaded >= loadMax && initialThreadCompleted);
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		mutex.release();
 		#end
 
@@ -400,7 +399,7 @@ class LoadingState extends MusicBeatState
 		if (stopMusic && FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		while (true)
 		{
 			if (checkLoaded())
@@ -430,7 +429,7 @@ class LoadingState extends MusicBeatState
 	public static function prepare(images:Array<String> = null, sounds:Array<String> = null, music:Array<String> = null)
 	{
 		// Initialize array mutex if needed
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		if (arrayMutex == null)
 			arrayMutex = new Mutex();
 
@@ -442,7 +441,7 @@ class LoadingState extends MusicBeatState
 			soundsToPrepare = soundsToPrepare.concat(sounds);
 		if (music != null)
 			musicToPrepare = musicToPrepare.concat(music);
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		arrayMutex.release();
 		#end
 	}
@@ -452,7 +451,7 @@ class LoadingState extends MusicBeatState
 
 	static function _startPool()
 	{
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		#if MULTITHREADED_LOADING
 		// Due to the Main thread and Discord thread, we decrease it by 2.
 		var threadCount:Int = Std.int(Math.max(1, getCPUThreadsCount() - #if DISCORD_ALLOWED 2 #else 1 #end));
@@ -468,7 +467,7 @@ class LoadingState extends MusicBeatState
 		if (PlayState.SONG == null)
 		{
 			// Reset state safely
-			#if sys
+			#if (sys || MULTITHREADED_LOADING)
 			arrayMutex = new Mutex();
 			arrayMutex.acquire();
 			#end
@@ -476,7 +475,7 @@ class LoadingState extends MusicBeatState
 			soundsToPrepare = [];
 			musicToPrepare = [];
 			songsToPrepare = [];
-			#if sys
+			#if (sys || MULTITHREADED_LOADING)
 			arrayMutex.release();
 
 			mutex = new Mutex();
@@ -487,7 +486,7 @@ class LoadingState extends MusicBeatState
 			currentAssetName = "...";
 			initialThreadCompleted = true;
 			isIntrusive = false;
-			#if sys
+			#if (sys || MULTITHREADED_LOADING)
 			mutex.release();
 			#end
 			return;
@@ -496,7 +495,7 @@ class LoadingState extends MusicBeatState
 		_startPool();
 
 		// Initialize mutexes before any threading
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		if (arrayMutex == null)
 			arrayMutex = new Mutex();
 		if (mutex == null)
@@ -508,31 +507,31 @@ class LoadingState extends MusicBeatState
 		soundsToPrepare = [];
 		musicToPrepare = [];
 		songsToPrepare = [];
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		arrayMutex.release();
 
 		mutex.acquire();
 		#end
 		initialThreadCompleted = false;
 		currentAssetName = "...";
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		mutex.release();
 		#end
 
 		var threadsCompleted:Int = 0;
 		var threadsMax:Int = 0;
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		var threadMutex = new Mutex(); // Local mutex for thread completion
 		#end
 
 		function completedThread()
 		{
-			#if sys
+			#if (sys || MULTITHREADED_LOADING)
 			threadMutex.acquire();
 			#end
 			threadsCompleted++;
 			var allCompleted = (threadsCompleted == threadsMax);
-			#if sys
+			#if (sys || MULTITHREADED_LOADING)
 			threadMutex.release();
 			#end
 
@@ -542,7 +541,7 @@ class LoadingState extends MusicBeatState
 				startThreads();
 
 				// Thread-safe flag update
-				#if sys
+				#if (sys || MULTITHREADED_LOADING)
 				if (mutex != null)
 				{
 					mutex.acquire();
@@ -570,11 +569,11 @@ class LoadingState extends MusicBeatState
 				noteSkin = customSkin;
 
 			// Thread-safe array access
-			#if sys
+			#if (sys || MULTITHREADED_LOADING)
 			arrayMutex.acquire();
 			#end
 			imagesToPrepare.push(noteSkin);
-			#if sys
+			#if (sys || MULTITHREADED_LOADING)
 			arrayMutex.release();
 			#end
 
@@ -585,11 +584,11 @@ class LoadingState extends MusicBeatState
 			else
 				noteSplash += NoteSplash.getSplashSkinPostfix();
 
-			#if sys
+			#if (sys || MULTITHREADED_LOADING)
 			arrayMutex.acquire();
 			#end
 			imagesToPrepare.push(noteSplash);
-			#if sys
+			#if (sys || MULTITHREADED_LOADING)
 			arrayMutex.release();
 			#end
 
@@ -679,11 +678,11 @@ class LoadingState extends MusicBeatState
 				}
 
 				// Thread-safe array operations
-				#if sys
+				#if (sys || MULTITHREADED_LOADING)
 				arrayMutex.acquire();
 				#end
 				songsToPrepare.push('$folder/Inst');
-				#if sys
+				#if (sys || MULTITHREADED_LOADING)
 				arrayMutex.release();
 				#end
 
@@ -702,22 +701,22 @@ class LoadingState extends MusicBeatState
 					if (Paths.fileExists('$prefixVocals-Player.${Paths.SOUND_EXT}', SOUND, false, 'songs')
 						&& Paths.fileExists('$prefixVocals-Opponent.${Paths.SOUND_EXT}', SOUND, false, 'songs'))
 					{
-						#if sys
+						#if (sys || MULTITHREADED_LOADING)
 						arrayMutex.acquire();
 						#end
 						songsToPrepare.push('$prefixVocals-Player');
 						songsToPrepare.push('$prefixVocals-Opponent');
-						#if sys
+						#if (sys || MULTITHREADED_LOADING)
 						arrayMutex.release();
 						#end
 					}
 					else if (Paths.fileExists('$prefixVocals.${Paths.SOUND_EXT}', SOUND, false, 'songs'))
 					{
-						#if sys
+						#if (sys || MULTITHREADED_LOADING)
 						arrayMutex.acquire();
 						#end
 						songsToPrepare.push(prefixVocals);
-						#if sys
+						#if (sys || MULTITHREADED_LOADING)
 						arrayMutex.release();
 						#end
 					}
@@ -725,11 +724,11 @@ class LoadingState extends MusicBeatState
 
 				if (player2 != player1)
 				{
-					#if sys
+					#if (sys || MULTITHREADED_LOADING)
 					threadMutex.acquire();
 					#end
 					threadsMax++;
-					#if sys
+					#if (sys || MULTITHREADED_LOADING)
 					threadMutex.release();
 
 					threadPool.run(() ->
@@ -758,11 +757,11 @@ class LoadingState extends MusicBeatState
 
 				if (!stageData.hide_girlfriend && gfVersion != player2 && gfVersion != player1)
 				{
-					#if sys
+					#if (sys || MULTITHREADED_LOADING)
 					threadMutex.acquire();
 					#end
 					threadsMax++;
-					#if sys
+					#if (sys || MULTITHREADED_LOADING)
 					threadMutex.release();
 
 					threadPool.run(() ->
@@ -790,11 +789,11 @@ class LoadingState extends MusicBeatState
 				}
 
 				// Final check for completion
-				#if sys
+				#if (sys || MULTITHREADED_LOADING)
 				threadMutex.acquire();
 				#end
 				var allCompleted = (threadsCompleted == threadsMax);
-				#if sys
+				#if (sys || MULTITHREADED_LOADING)
 				threadMutex.release();
 				#end
 
@@ -803,7 +802,7 @@ class LoadingState extends MusicBeatState
 					clearInvalids();
 					startThreads();
 
-					#if sys
+					#if (sys || MULTITHREADED_LOADING)
 					if (mutex != null)
 					{
 						mutex.acquire();
@@ -844,7 +843,7 @@ class LoadingState extends MusicBeatState
 			{
 				for (subfolder in Mods.directoriesWithFile(Paths.getSharedPath(), '$prefix/$nam'))
 				{
-					#if sys
+					#if (sys || MULTITHREADED_LOADING)
 					for (file in FileSystem.readDirectory(subfolder))
 					{
 						if (file.endsWith(ext))
@@ -882,7 +881,7 @@ class LoadingState extends MusicBeatState
 
 	public static function startThreads()
 	{
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		mutex = new Mutex();
 		// Set loadMax in a thread-safe way
 		mutex.acquire();
@@ -890,7 +889,7 @@ class LoadingState extends MusicBeatState
 		loadMax = imagesToPrepare.length + soundsToPrepare.length + musicToPrepare.length + songsToPrepare.length;
 		loaded = 0;
 		currentAssetName = "...";
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		mutex.release();
 		#end
 
@@ -919,7 +918,7 @@ class LoadingState extends MusicBeatState
 		var threadSchedule = Sys.time();
 		#end
 
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		threadPool.run(() ->
 		{
 			#if debug
@@ -993,7 +992,7 @@ class LoadingState extends MusicBeatState
 			if (!isAnimateAtlas)
 			{
 				var split:Array<String> = img.split(',');
-				#if sys
+				#if (sys || MULTITHREADED_LOADING)
 				if (arrayMutex != null)
 					arrayMutex.acquire();
 				#end
@@ -1001,7 +1000,7 @@ class LoadingState extends MusicBeatState
 				{
 					imagesToPrepare.push(file.trim());
 				}
-				#if sys
+				#if (sys || MULTITHREADED_LOADING)
 				if (arrayMutex != null)
 					arrayMutex.release();
 				#end
@@ -1009,7 +1008,7 @@ class LoadingState extends MusicBeatState
 			#if flxanimate
 			else
 			{
-				#if sys
+				#if (sys || MULTITHREADED_LOADING)
 				if (arrayMutex != null)
 					arrayMutex.acquire();
 				#end
@@ -1025,7 +1024,7 @@ class LoadingState extends MusicBeatState
 						break;
 					}
 				}
-				#if sys
+				#if (sys || MULTITHREADED_LOADING)
 				if (arrayMutex != null)
 					arrayMutex.release();
 				#end
@@ -1034,12 +1033,12 @@ class LoadingState extends MusicBeatState
 
 			if (prefixVocals != null && character.vocals_file != null && character.vocals_file.length > 0)
 			{
-				#if sys
+				#if (sys || MULTITHREADED_LOADING)
 				if (arrayMutex != null)
 					arrayMutex.acquire();
 				#end
 				songsToPrepare.push(prefixVocals + "-" + character.vocals_file);
-				#if sys
+				#if (sys || MULTITHREADED_LOADING)
 				if (arrayMutex != null)
 					arrayMutex.release();
 				#end
@@ -1061,15 +1060,15 @@ class LoadingState extends MusicBeatState
 
 		if (!Paths.currentTrackedSounds.exists(file))
 		{
-			if (#if sys FileSystem.exists(file) || #end OpenFlAssets.exists(file, SOUND))
+			if (#if (sys || MULTITHREADED_LOADING) FileSystem.exists(file) || #end OpenFlAssets.exists(file, SOUND))
 			{
-				var sound:Sound = #if sys Sound.fromFile(file) #else OpenFlAssets.getSound(file, false) #end;
-				#if sys
+				var sound:Sound = #if (sys || MULTITHREADED_LOADING) Sound.fromFile(file) #else OpenFlAssets.getSound(file, false) #end;
+				#if (sys || MULTITHREADED_LOADING)
 				if (mutex != null)
 					mutex.acquire();
 				#end
 				Paths.currentTrackedSounds.set(file, sound);
-				#if sys
+				#if (sys || MULTITHREADED_LOADING)
 				if (mutex != null)
 					mutex.release();
 				#end
@@ -1081,12 +1080,12 @@ class LoadingState extends MusicBeatState
 				return FlxAssets.getSound('flixel/sounds/beep');
 			}
 		}
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		if (mutex != null)
 			mutex.acquire();
 		#end
 		Paths.localTrackedAssets.push(file);
-		#if sys
+		#if (sys || MULTITHREADED_LOADING)
 		if (mutex != null)
 			mutex.release();
 		#end
@@ -1107,23 +1106,23 @@ class LoadingState extends MusicBeatState
 			if (!Paths.currentTrackedAssets.exists(requestKey))
 			{
 				var file:String = Paths.getPath(requestKey, IMAGE);
-				if (#if sys FileSystem.exists(file) || #end OpenFlAssets.exists(file, IMAGE))
+				if (#if (sys || MULTITHREADED_LOADING) FileSystem.exists(file) || #end OpenFlAssets.exists(file, IMAGE))
 				{
-					#if sys
+					#if (sys || MULTITHREADED_LOADING)
 					var bitmap:BitmapData = BitmapData.fromFile(file);
 					#else
 					var bitmap:BitmapData = OpenFlAssets.getBitmapData(file, false);
 					#end
 
 					// Thread-safe storage
-					#if sys
+					#if (sys || MULTITHREADED_LOADING)
 					if (mutex == null)
 						mutex = new Mutex();
 					mutex.acquire();
 					#end
 					requestedBitmaps.set(file, bitmap);
 					originalBitmapKeys.set(file, requestKey);
-					#if sys
+					#if (sys || MULTITHREADED_LOADING)
 					mutex.release();
 					#end
 
@@ -1143,7 +1142,7 @@ class LoadingState extends MusicBeatState
 		return null;
 	}
 
-	#if cpp
+	#if (cpp || MULTITHREADED_LOADING)
 	@:functionCode('
 		return std::thread::hardware_concurrency();
     	')

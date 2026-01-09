@@ -1,6 +1,6 @@
 package funkin.objects;
 
-import funkin.backend.animation.PsychAnimationController;
+import funkin.frontend.animation.PsychAnimationController;
 import funkin.shaders.RGBPalette;
 import funkin.shaders.RGBPalette.RGBShaderReference;
 

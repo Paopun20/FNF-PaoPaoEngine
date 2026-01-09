@@ -1,6 +1,6 @@
 package funkin.objects;
 
-import funkin.backend.animation.PsychAnimationController;
+import funkin.frontend.animation.PsychAnimationController;
 import flixel.util.FlxSort;
 import flixel.util.FlxDestroyUtil;
 import openfl.utils.AssetType;

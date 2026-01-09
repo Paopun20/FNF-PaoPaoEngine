@@ -1,6 +1,6 @@
-package funkin.backend.ui;
+package funkin.frontend.ui;
 
-import funkin.backend.ui.PsychUIBox.UIStyleData;
+import funkin.frontend.ui.PsychUIBox.UIStyleData;
 
 class PsychUIDropDownMenu extends PsychUIInputText
 {
