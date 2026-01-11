@@ -1,82 +1,79 @@
-package funkin.frontend;
+package funkin.frontend.transition;
 
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.util.FlxColor;
 import flixel.util.FlxGradient;
 
-class CustomFadeTransition extends MusicBeatSubstate
+/**
+ * Gradient fade transition effect
+ * Creates a smooth fade using a gradient overlay
+ */
+class CustomFadeTransition extends BaseTransition
 {
-	public static var finishCallback:Void->Void;
-
-	var isTransIn:Bool = false;
-	var transBlack:FlxSprite;
-	var transGradient:FlxSprite;
-
-	var duration:Float;
-
+	private var transBlack:FlxSprite;
+	private var transGradient:FlxSprite;
+	
 	public function new(duration:Float, isTransIn:Bool)
 	{
-		this.duration = duration;
-		this.isTransIn = isTransIn;
-		super();
+		super(duration, isTransIn);
 	}
-
+	
 	override function create()
 	{
-		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-		var width:Int = Std.int(FlxG.width / Math.max(camera.zoom, 0.001));
-		var height:Int = Std.int(FlxG.height / Math.max(camera.zoom, 0.001));
-		transGradient = FlxGradient.createGradientFlxSprite(1, height, (isTransIn ? [0x0, FlxColor.BLACK] : [FlxColor.BLACK, 0x0]));
+		super.create();
+		
+		var width:Int = getScreenWidth();
+		var height:Int = getScreenHeight();
+		
+		// Create gradient sprite
+		transGradient = FlxGradient.createGradientFlxSprite(
+			1, 
+			height, 
+			isTransIn ? [0x0, FlxColor.BLACK] : [FlxColor.BLACK, 0x0]
+		);
 		transGradient.scale.x = width;
 		transGradient.updateHitbox();
 		transGradient.scrollFactor.set();
 		transGradient.screenCenter(X);
 		add(transGradient);
-
+		
+		// Create black backdrop
 		transBlack = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
 		transBlack.scale.set(width, height + 400);
 		transBlack.updateHitbox();
 		transBlack.scrollFactor.set();
 		transBlack.screenCenter(X);
 		add(transBlack);
-
+		
+		// Position elements based on transition direction
 		if (isTransIn)
 			transGradient.y = transBlack.y - transBlack.height;
 		else
 			transGradient.y = -transGradient.height;
-
-		super.create();
 	}
-
-	override function update(elapsed:Float)
+	
+	override private function updateTransition(elapsed:Float):Void
 	{
-		super.update(elapsed);
-
 		final height:Float = FlxG.height * Math.max(camera.zoom, 0.001);
 		final targetPos:Float = transGradient.height + 50 * Math.max(camera.zoom, 0.001);
+		
+		// Move gradient based on duration
 		if (duration > 0)
 			transGradient.y += (height + targetPos) * elapsed / duration;
 		else
 			transGradient.y = (targetPos) * elapsed;
-
+		
+		// Update black backdrop position
 		if (isTransIn)
 			transBlack.y = transGradient.y + transGradient.height;
 		else
 			transBlack.y = transGradient.y - transBlack.height;
-
-		if (transGradient.y >= targetPos)
-		{
-			close();
-		}
 	}
-
-	// Don't delete this
-	override function close():Void
+	
+	override private function shouldComplete():Bool
 	{
-		super.close();
-
-		if (finishCallback != null)
-		{
-			finishCallback();
-			finishCallback = null;
-		}
+		final targetPos:Float = transGradient.height + 50 * Math.max(camera.zoom, 0.001);
+		return transGradient.y >= targetPos;
 	}
 }

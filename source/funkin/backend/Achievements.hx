@@ -8,6 +8,8 @@ import haxe.Json;
 import funkin.psychlua.FunkinLua;
 #end
 
+import funkin.psychlua.ImplementUtils;
+
 typedef Achievement =
 {
 	var name:String;
@@ -311,10 +313,11 @@ class Achievements
 	}
 	#end
 
-	#if LUA_ALLOWED
-	public static function addLuaCallbacks(lua:State)
+	#if (LUA_ALLOWED || PYTHON_ALLOWED)
+	public static function addCallbacks(funk)
 	{
-		Lua_helper.add_callback(lua, "getAchievementScore", function(name:String):Float
+	    var impl = ImplementUtils.make(funk);
+		impl("getAchievementScore", function(name:String):Float
 		{
 			if (!achievements.exists(name))
 			{
@@ -323,7 +326,7 @@ class Achievements
 			}
 			return getScore(name);
 		});
-		Lua_helper.add_callback(lua, "setAchievementScore", function(name:String, ?value:Float = 0, ?saveIfNotUnlocked:Bool = true):Float
+		impl("setAchievementScore", function(name:String, ?value:Float = 0, ?saveIfNotUnlocked:Bool = true):Float
 		{
 			if (!achievements.exists(name))
 			{
@@ -332,7 +335,7 @@ class Achievements
 			}
 			return setScore(name, value, saveIfNotUnlocked);
 		});
-		Lua_helper.add_callback(lua, "addAchievementScore", function(name:String, ?value:Float = 1, ?saveIfNotUnlocked:Bool = true):Float
+		impl("addAchievementScore", function(name:String, ?value:Float = 1, ?saveIfNotUnlocked:Bool = true):Float
 		{
 			if (!achievements.exists(name))
 			{
@@ -341,7 +344,7 @@ class Achievements
 			}
 			return addScore(name, value, saveIfNotUnlocked);
 		});
-		Lua_helper.add_callback(lua, "unlockAchievement", function(name:String):Dynamic
+		impl("unlockAchievement", function(name:String):Dynamic
 		{
 			if (!achievements.exists(name))
 			{
@@ -350,7 +353,7 @@ class Achievements
 			}
 			return unlock(name);
 		});
-		Lua_helper.add_callback(lua, "isAchievementUnlocked", function(name:String):Dynamic
+		impl("isAchievementUnlocked", function(name:String):Dynamic
 		{
 			if (!achievements.exists(name))
 			{
@@ -359,7 +362,7 @@ class Achievements
 			}
 			return isUnlocked(name);
 		});
-		Lua_helper.add_callback(lua, "achievementExists", function(name:String) return achievements.exists(name));
+		impl("achievementExists", function(name:String) return achievements.exists(name));
 	}
 	#end
 }

@@ -1403,7 +1403,7 @@ class Python
 		}
 
 		#if DISCORD_ALLOWED DiscordClient.addPythonCallbacks(this); #end
-		// #if ACHIEVEMENTS_ALLOWED Achievements.addPythonCallbacks(this); #end // wip
+		#if ACHIEVEMENTS_ALLOWED Achievements.addCallbacks(this); #end // wip
 		// #if TRANSLATIONS_ALLOWED Language.addPythonCallbacks(this); #end // wip
 		HScript.pyimplement(this);
 		ReflectionFunctions.implement(this);

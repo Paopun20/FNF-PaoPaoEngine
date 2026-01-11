@@ -1,4 +1,5 @@
 package funkin.psychlua;
+
 #if (LUA_ALLOWED || PYTHON_ALLOWED)
 #if LUA_ALLOWED
 import funkin.psychlua.FunkinLua;
@@ -9,7 +10,7 @@ import funkin.psychlua.Python;
 #end
 class ImplementUtils
 {
-    public static function make(interpreter:Dynamic): (String, Dynamic) -> Null<Dynamic>
+	public static function make(interpreter:Dynamic):(String, Dynamic) -> Null<Dynamic>
 	{
 		#if LUA_ALLOWED
 		if (Std.isOfType(interpreter, FunkinLua))

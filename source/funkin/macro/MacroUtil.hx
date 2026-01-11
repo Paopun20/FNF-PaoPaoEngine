@@ -71,6 +71,7 @@ class MacroUtil
 			Compiler.include(classPackage);
 		#end
 	}
+
 	@:unreflective public static function compileMacros()
 	{
 		#if macro

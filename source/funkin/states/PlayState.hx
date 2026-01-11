@@ -97,7 +97,7 @@ class PlayState extends MusicBeatState
 	#if PYTHON_ALLOWED
 	public var pythonArray:Array<Python> = [];
 	#end
-	
+
 	#if LUA_ALLOWED
 	public var luaArray:Array<FunkinLua> = [];
 	#end

@@ -1,5 +1,7 @@
 /* ThreadScript is a class that represents a thread script to be executed in a separate thread. */
+
 package funkin.psychlua;
+
 #if sys
 import sys.thread.Thread;
 import sys.thread.Mutex;
@@ -23,7 +25,7 @@ class ThreadScript
 	private var mutex:Mutex;
 	private var initialized:Bool = false;
 	private var initError:String = null;
-	
+
 	public function new(script:String, type:String)
 	{
 		this.scriptPath = script;
@@ -31,12 +33,12 @@ class ThreadScript
 		this.mutex = new Mutex();
 		this.thread = Thread.create(initializeScript);
 	}
-	
+
 	private function initializeScript():Void
 	{
 		var instance:Dynamic = null;
 		var error:String = null;
-		
+
 		try
 		{
 			switch (type)
@@ -62,7 +64,7 @@ class ThreadScript
 			error = "Error initializing script: " + e;
 			trace(error);
 		}
-		
+
 		// Update shared state with mutex protection
 		mutex.acquire();
 		this.scriptInstance = instance;
@@ -70,7 +72,7 @@ class ThreadScript
 		this.initialized = true;
 		mutex.release();
 	}
-	
+
 	private function waitForInit():Void
 	{
 		// Wait for initialization to complete
@@ -79,16 +81,17 @@ class ThreadScript
 			mutex.acquire();
 			var done = initialized;
 			mutex.release();
-			
-			if (done) break;
+
+			if (done)
+				break;
 			Sys.sleep(0.001); // 1ms sleep to avoid busy waiting
 		}
 	}
-	
+
 	public function call(name:String, args:Array<Dynamic>):Dynamic
 	{
 		waitForInit();
-		
+
 		mutex.acquire();
 		var result:Dynamic = null;
 		if (scriptInstance != null)
@@ -103,14 +106,14 @@ class ThreadScript
 			}
 		}
 		mutex.release();
-		
+
 		return result;
 	}
-	
+
 	public function exists(name:String):Bool
 	{
 		waitForInit();
-		
+
 		mutex.acquire();
 		var result:Bool = false;
 		if (scriptInstance != null)
@@ -125,14 +128,14 @@ class ThreadScript
 			}
 		}
 		mutex.release();
-		
+
 		return result;
 	}
-	
+
 	public function get(name:String):Dynamic
 	{
 		waitForInit();
-		
+
 		mutex.acquire();
 		var result:Dynamic = null;
 		if (scriptInstance != null)
@@ -147,14 +150,14 @@ class ThreadScript
 			}
 		}
 		mutex.release();
-		
+
 		return result;
 	}
-	
+
 	public function set(name:String, value:Dynamic):Void
 	{
 		waitForInit();
-		
+
 		mutex.acquire();
 		if (scriptInstance != null)
 		{
@@ -169,7 +172,7 @@ class ThreadScript
 		}
 		mutex.release();
 	}
-	
+
 	public function isReady():Bool
 	{
 		mutex.acquire();
@@ -177,7 +180,7 @@ class ThreadScript
 		mutex.release();
 		return ready;
 	}
-	
+
 	public function getInitError():String
 	{
 		mutex.acquire();
@@ -185,11 +188,11 @@ class ThreadScript
 		mutex.release();
 		return error;
 	}
-	
+
 	public function destroy():Void
 	{
 		waitForInit(); // Make sure initialization is complete
-		
+
 		mutex.acquire();
 		if (scriptInstance != null)
 		{
