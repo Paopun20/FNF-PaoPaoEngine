@@ -4,13 +4,16 @@ Crossover between **Codename Engine**, **FNF V-Slice**, and **Psych Engine**
 
 This engine, I focus at 4th wall breaking features and some cool stuff.
 
+> [!WARNING]
+> This engine is still in heavy development, so some features may not work as expected like Python.
+
 ## Features/Changes
 
 - Python [Beta] - Introduction of Python as a mod scripting language
-  > Python is a high-level, interpreted language that offers greater readability and ease of learning compared to Lua. It also provides enhanced power and flexibility.\
-  > Why is it a work in progress? Because some Python feature contracts are yet to be completed.\
+  > Python is a high-level, interpreted language that offers greater readability and ease of learning compared to Lua. It also provides enhanced power, flexibility, and it lightweight too.\
+  > Work in progress, OK? Because some Python feature contracts are yet to be completed.\
   > For assistance, please submit a pull request [here](https://github.com/Paopun20/Hython).
-  > > Note: this Hython is a Python interpreter written entirely in **Haxe** and you can use it for your own projects too, it is also open source.
+  > Note: this Hython is a Python interpreter written entirely in **Haxe** and you can use it for your own projects too, it is also open source.
 - Hscript (Improved)
   > It took forever to rewrite this.
 - Ndll Support (HScript/Python only)
@@ -24,6 +27,9 @@ This engine, I focus at 4th wall breaking features and some cool stuff.
 - Fixed Psych Engine Bugs
 - Updated dependencies to the most compatible versions
 - Removed obsolete features from the Psych Engine, such as the Easter Egg.
-- Organize files and folders for better readability and maintainability (I don't know, It's broken some Psych mods?)
+- Organize files and folders for better readability and maintainability
+
+> [!NOTE]
+> It's broken some psych mods, wait I add backwards compatibility any time soon
 
 > (I haven't finished writing the README yet.)

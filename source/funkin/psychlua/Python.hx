@@ -125,7 +125,7 @@ class Python
 
 		try
 		{
-			var expr = parser.parseString(code);
+			var expr = parser.parseString(code.trim()); // fix for teb on no code
 			returnValue = interp.execute(expr);
 			return returnValue;
 		}
