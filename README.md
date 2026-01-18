@@ -11,8 +11,9 @@ This engine, I focus at 4th wall breaking features and some cool stuff.
 
 - Python [Beta] - Introduction of Python as a mod scripting language
   > Python is a high-level, interpreted language that offers greater readability and ease of learning compared to Lua. It also provides enhanced power, flexibility, and it lightweight too.\
+  > btw, You can all lua functions and haxe functions too. (has some rename lua to python in func name, ex: makeLuaSprite to makePythonSprite in python only)\
   > Work in progress, OK? Because some Python feature contracts are yet to be completed.\
-  > For assistance, please submit a pull request [here](https://github.com/Paopun20/Hython).
+  > For assistance, please submit a pull request [here](https://github.com/Paopun20/Hython).\
   > Note: this Hython is a Python interpreter written entirely in **Haxe** and you can use it for your own projects too, it is also open source.
 - Hscript (Improved)
   > It took forever to rewrite this.

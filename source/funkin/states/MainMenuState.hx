@@ -12,11 +12,12 @@ enum MainMenuColumn
 	CENTER;
 	RIGHT;
 }
+
 @:build(funkin.macro.VersionMacro.build())
 class MainMenuState extends MusicBeatState
 {
-    public static var psychEngineVersion:String = '1.0.4'; // This is also used legacy mods from Psych Engine
-    @:injectvar
+	public static var psychEngineVersion:String = '1.0.4'; // This is also used legacy mods from Psych Engine
+	@:injectvar
 	public static var paopaoEngineVersion:String = '';
 	public static var curSelected:Int = 0;
 	public static var curColumn:MainMenuColumn = CENTER;

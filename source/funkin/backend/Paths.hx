@@ -462,8 +462,8 @@ class Paths
 		{
 			CoolLog.error('SOUND NOT FOUND: $key, PATH: $path');
 			// trace('SOUND NOT FOUND: $key, PATH: $path');
-			FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
-			return FlxAssets.getSound('flixel/sounds/beep');
+			// FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
+			return FlxAssets.getSoundAddExtension('flixel/sounds/beep', true);
 		}
 		}
 		localTrackedAssets.push(file);

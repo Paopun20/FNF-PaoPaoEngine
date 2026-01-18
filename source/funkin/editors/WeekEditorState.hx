@@ -142,6 +142,7 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 	var opponentInputText:PsychUIInputText;
 	var boyfriendInputText:PsychUIInputText;
 	var girlfriendInputText:PsychUIInputText;
+	var albumInputText:PsychUIInputText;
 
 	var hideCheckbox:PsychUICheckBox;
 
@@ -161,6 +162,7 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 		displayNameInputText = new PsychUIInputText(10, backgroundInputText.y + 60, 200, '', 8);
 		weekNameInputText = new PsychUIInputText(10, displayNameInputText.y + 60, 150, '', 8);
 		weekFileInputText = new PsychUIInputText(10, weekNameInputText.y + 40, 100, '', 8);
+		albumInputText = new PsychUIInputText(10, weekFileInputText.y + 40, 150, '', 8);
 		reloadWeekThing();
 
 		hideCheckbox = new PsychUICheckBox(10, weekFileInputText.y + 40, "Hide Week from Story Mode?", 100);
@@ -176,6 +178,7 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 		tab_group.add(new FlxText(displayNameInputText.x, displayNameInputText.y - 18, 0, 'Display Name:'));
 		tab_group.add(new FlxText(weekNameInputText.x, weekNameInputText.y - 18, 0, 'Week Name (for Reset Score Menu):'));
 		tab_group.add(new FlxText(weekFileInputText.x, weekFileInputText.y - 18, 0, 'Week File:'));
+		tab_group.add(new FlxText(albumInputText.x, albumInputText.y - 18, 0, 'Album:'));
 
 		tab_group.add(songsInputText);
 		tab_group.add(opponentInputText);
@@ -186,6 +189,7 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 		tab_group.add(displayNameInputText);
 		tab_group.add(weekNameInputText);
 		tab_group.add(weekFileInputText);
+		tab_group.add(albumInputText);
 		tab_group.add(hideCheckbox);
 	}
 
@@ -244,6 +248,7 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 		opponentInputText.text = weekFile.weekCharacters[0];
 		boyfriendInputText.text = weekFile.weekCharacters[1];
 		girlfriendInputText.text = weekFile.weekCharacters[2];
+		albumInputText.text = weekFile.album;
 
 		hideCheckbox.checked = weekFile.hideStoryMode;
 
@@ -423,6 +428,11 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 			else if (sender == difficultiesInputText)
 			{
 				weekFile.difficulties = difficultiesInputText.text.trim();
+				unsavedProgress = true;
+			}
+			else if (sender == albumInputText)
+			{
+				weekFile.album = albumInputText.text.trim();
 				unsavedProgress = true;
 			}
 		}
@@ -613,6 +623,7 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 	var bg:FlxSprite;
 	private var grpSongs:FlxTypedGroup<Alphabet>;
 	private var iconArray:Array<HealthIcon> = [];
+	var albumArt:FlxSprite;
 
 	var curSelected = 0;
 
@@ -647,8 +658,16 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 			// songText.screenCenter(X);
 		}
 
+		albumArt = new FlxSprite(FlxG.width - 250, FlxG.height / 2);
+		albumArt.antialiasing = ClientPrefs.data.antialiasing;
+		albumArt.scale.set(1.25, 1.25);
+		albumArt.origin.set(0.5, 0.5);
+		albumArt.angle = 10;
+		add(albumArt);
+
 		addEditorBox();
 		changeSelection();
+		updateAlbumArt();
 		super.create();
 	}
 
@@ -699,8 +718,17 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 
 		if (id == PsychUIInputText.CHANGE_EVENT && (sender is PsychUIInputText))
 		{
-			weekFile.songs[curSelected][1] = iconInputText.text;
-			iconArray[curSelected].changeIcon(iconInputText.text);
+			if (sender == iconInputText)
+			{
+				weekFile.songs[curSelected][1] = iconInputText.text;
+				iconArray[curSelected].changeIcon(iconInputText.text);
+			}
+			else if (sender == albumInputText)
+			{
+				weekFile.album = albumInputText.text;
+				WeekEditorState.unsavedProgress = true;
+				updateAlbumArt();
+			}
 		}
 		else if (id == PsychUINumericStepper.CHANGE_EVENT && (sender is PsychUINumericStepper))
 		{
@@ -713,6 +741,7 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 	var bgColorStepperG:PsychUINumericStepper;
 	var bgColorStepperB:PsychUINumericStepper;
 	var iconInputText:PsychUIInputText;
+	var albumInputText:PsychUIInputText;
 
 	function addFreeplayUI()
 	{
@@ -755,8 +784,9 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 		});
 
 		iconInputText = new PsychUIInputText(10, bgColorStepperR.y + 70, 100, '', 8);
+		albumInputText = new PsychUIInputText(10, iconInputText.y + 30, 150, '', 8);
 
-		var hideFreeplayCheckbox:PsychUICheckBox = new PsychUICheckBox(10, iconInputText.y + 30, "Hide Week from Freeplay?", 100);
+		var hideFreeplayCheckbox:PsychUICheckBox = new PsychUICheckBox(10, albumInputText.y + 30, "Hide Week from Freeplay?", 100);
 		hideFreeplayCheckbox.checked = weekFile.hideFreeplay;
 		hideFreeplayCheckbox.onClick = function()
 		{
@@ -766,12 +796,14 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 
 		tab_group.add(new FlxText(10, bgColorStepperR.y - 18, 0, 'Selected background Color R/G/B:'));
 		tab_group.add(new FlxText(10, iconInputText.y - 18, 0, 'Selected icon:'));
+		tab_group.add(new FlxText(10, albumInputText.y - 18, 0, 'Album:'));
 		tab_group.add(bgColorStepperR);
 		tab_group.add(bgColorStepperG);
 		tab_group.add(bgColorStepperB);
 		tab_group.add(copyColor);
 		tab_group.add(pasteColor);
 		tab_group.add(iconInputText);
+		tab_group.add(albumInputText);
 		tab_group.add(hideFreeplayCheckbox);
 	}
 
@@ -781,6 +813,22 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 		weekFile.songs[curSelected][2][1] = Math.round(bgColorStepperG.value);
 		weekFile.songs[curSelected][2][2] = Math.round(bgColorStepperB.value);
 		bg.color = FlxColor.fromRGB(weekFile.songs[curSelected][2][0], weekFile.songs[curSelected][2][1], weekFile.songs[curSelected][2][2]);
+	}
+
+	function updateAlbumArt()
+	{
+		if (weekFile.album != null && weekFile.album.length > 0)
+		{
+			albumArt.loadGraphic(Paths.image('albums/' + weekFile.album));
+		}
+		else
+		{
+			albumArt.loadGraphic(Paths.image('albums/albumPlaceHolder'));
+		}
+
+		// Center the album art
+		albumArt.x = (FlxG.width - 250) - (albumArt.width / 2);
+		albumArt.y = (FlxG.height / 2) - (albumArt.height / 2);
 	}
 
 	function changeSelection(change:Int = 0)
@@ -802,6 +850,7 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 		}
 		// trace(weekFile.songs[curSelected]);
 		iconInputText.text = weekFile.songs[curSelected][1];
+		albumInputText.text = weekFile.album;
 
 		var colors = weekFile.songs[curSelected][2];
 		bgColorStepperR.value = Math.round(colors[0]);

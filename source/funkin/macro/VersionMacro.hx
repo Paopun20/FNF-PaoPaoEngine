@@ -1,10 +1,12 @@
 package funkin.macro;
+
 #if macro
 import haxe.macro.Context;
 import haxe.macro.Expr;
 import sys.FileSystem;
 import sys.io.File;
 #end
+
 using StringTools;
 
 class VersionMacro
@@ -14,7 +16,7 @@ class VersionMacro
 		var pos = Context.currentPos();
 		var fields = Context.getBuildFields();
 		var versionValue = "unknown";
-		
+
 		try
 		{
 			if (FileSystem.exists(version))
@@ -24,7 +26,9 @@ class VersionMacro
 					versionValue = "unknown";
 			}
 		}
-		catch (e) {}
+		catch (e)
+		{
+		}
 
 		for (field in fields)
 		{
@@ -39,14 +43,14 @@ class VersionMacro
 						break;
 					}
 				}
-				
+
 				if (hasInjectVar)
 				{
 					field.kind = FVar(macro :String, macro $v{versionValue});
 				}
 			}
 		}
-		
+
 		return fields;
 	}
 }

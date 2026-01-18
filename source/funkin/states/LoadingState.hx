@@ -19,9 +19,6 @@ import funkin.objects.Note;
 import funkin.objects.NoteSplash;
 #if HSCRIPT_ALLOWED
 import funkin.psychlua.HScript;
-import crowplexus.iris.Iris;
-import crowplexus.hscript.Expr.Error as IrisError;
-import crowplexus.hscript.Printer;
 #end
 
 #if (cpp || MULTITHREADED_LOADING)
@@ -160,11 +157,9 @@ class LoadingState extends MusicBeatState
 						CoolLog.error('"$scriptPath" contains no \"onCreate" function, stopping script.');
 					}
 				}
-				catch (e:IrisError)
+				catch (e:Dynamic)
 				{
-					var pos:HScriptInfos = cast {fileName: scriptPath, showLine: false};
-					Iris.error(Printer.errorToString(e, false), pos);
-					var hscript:HScript = cast(Iris.instances.get(scriptPath), HScript);
+					CoolLog.error('Error loading HScript from $scriptPath: $e');
 				}
 				if (hscript != null)
 					hscript.destroy();
@@ -1077,7 +1072,7 @@ class LoadingState extends MusicBeatState
 			{
 				CoolLog.error('SOUND NOT FOUND: $key, PATH: $path');
 				FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
-				return FlxAssets.getSound('flixel/sounds/beep');
+				return FlxAssets.getSoundAddExtension('flixel/sounds/beep', true);
 			}
 		}
 		#if (sys || MULTITHREADED_LOADING)

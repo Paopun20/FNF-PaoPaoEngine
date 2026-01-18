@@ -7,7 +7,6 @@ import haxe.Json;
 #if LUA_ALLOWED
 import funkin.psychlua.FunkinLua;
 #end
-
 import funkin.psychlua.ImplementUtils;
 
 typedef Achievement =
@@ -316,7 +315,7 @@ class Achievements
 	#if (LUA_ALLOWED || PYTHON_ALLOWED)
 	public static function addCallbacks(funk)
 	{
-	    var impl = ImplementUtils.make(funk);
+		var impl = ImplementUtils.make(funk);
 		impl("getAchievementScore", function(name:String):Float
 		{
 			if (!achievements.exists(name))

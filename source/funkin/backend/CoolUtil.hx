@@ -8,8 +8,9 @@ import funkin.helper.Version;
 
 class CoolUtil
 {
-    public static var version:String = funkin.states.MainMenuState.psychEngineVersion.trim();
-    public static var isoutdated:Bool = false;
+	public static var version:String = funkin.states.MainMenuState.psychEngineVersion.trim();
+	public static var isoutdated:Bool = false;
+
 	public static function checkForUpdates():String
 	{
 		var url:String = 'https://github.com/Paopun20/FNF-PaoPaoEngine/raw/refs/heads/main/gitVersion.txt';

@@ -48,8 +48,6 @@ class FreeplayState extends MusicBeatState
 	var bottomText:FlxText;
 	var bottomBG:FlxSprite;
 
-	var albumArt:FlxSprite;
-
 	var player:MusicPlayer;
 
 	override function create()
@@ -99,7 +97,7 @@ class FreeplayState extends MusicBeatState
 				{
 					colors = [146, 113, 253];
 				}
-				addSong(song[0], i, song[1], FlxColor.fromRGB(colors[0], colors[1], colors[2]), leWeek.album); // Pass album here
+				addSong(song[0], i, song[1], FlxColor.fromRGB(colors[0], colors[1], colors[2]));
 			}
 		}
 		Mods.loadTopMod();
@@ -141,13 +139,6 @@ class FreeplayState extends MusicBeatState
 
 		scoreText = new FlxText(FlxG.width * 0.7, 5, 0, "", 32);
 		scoreText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
-
-		albumArt = new FlxSprite(FlxG.width - 250, FlxG.height / 2);
-		albumArt.antialiasing = ClientPrefs.data.antialiasing;
-		albumArt.scale.set(1.25, 1.25);
-		albumArt.origin.set(0.5, 0.5);
-		albumArt.angle = 10;
-		add(albumArt);
 
 		scoreBG = new FlxSprite(scoreText.x - 6, 0).makeGraphic(1, 66, 0xFF000000);
 		scoreBG.alpha = 0.6;
@@ -206,9 +197,9 @@ class FreeplayState extends MusicBeatState
 		super.closeSubState();
 	}
 
-	public function addSong(songName:String, weekNum:Int, songCharacter:String, color:Int, album:String = "")
+	public function addSong(songName:String, weekNum:Int, songCharacter:String, color:Int)
 	{
-		songs.push(new SongMetadata(songName, weekNum, songCharacter, color, album));
+		songs.push(new SongMetadata(songName, weekNum, songCharacter, color));
 	}
 
 	function weekIsLocked(name:String):Bool
@@ -534,22 +525,6 @@ class FreeplayState extends MusicBeatState
 		missingTextBG.visible = false;
 	}
 
-	function updateAlbumArt()
-	{
-		if (songs[curSelected].album != null && songs[curSelected].album.length > 0)
-		{
-			albumArt.loadGraphic(Paths.image('albums/' + songs[curSelected].album));
-		}
-		else
-		{
-			albumArt.loadGraphic(Paths.image('albums/albumPlaceHolder'));
-		}
-
-		// Center the album art
-		albumArt.x = (FlxG.width - 250) - (albumArt.width / 2);
-		albumArt.y = (FlxG.height / 2) - (albumArt.height / 2);
-	}
-
 	function changeSelection(change:Int = 0, playSound:Bool = true)
 	{
 		if (player.playingMusic)
@@ -559,9 +534,6 @@ class FreeplayState extends MusicBeatState
 		_updateSongLastDifficulty();
 		if (playSound)
 			FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
-
-		// Update album art
-		updateAlbumArt();
 
 		var newColor:Int = songs[curSelected].color;
 		if (newColor != intendedColor)
@@ -660,16 +632,14 @@ class SongMetadata
 	public var color:Int = -7179779;
 	public var folder:String = "";
 	public var lastDifficulty:String = null;
-	public var album:String = "albumPlaceHolder"; // Add this
 
-	public function new(song:String, week:Int, songCharacter:String, color:Int, album:String = "albumPlaceHolder") // Add album parameter
+	public function new(song:String, week:Int, songCharacter:String, color:Int)
 	{
 		this.songName = song;
 		this.week = week;
 		this.songCharacter = songCharacter;
 		this.color = color;
 		this.folder = Mods.currentModDirectory;
-		this.album = album; // Store album
 		if (this.folder == null)
 			this.folder = '';
 	}

@@ -21,29 +21,22 @@ class StateCapture
 	{
 		if (state == null)
 			state = FlxG.state;
-		
+
 		var camera = FlxG.camera;
-		
+
 		// Create bitmap to hold the capture
-		var bitmapData:BitmapData = new BitmapData(
-			FlxG.width,
-			FlxG.height,
-			true,
-			0x00000000
-		);
-		
+		var bitmapData:BitmapData = new BitmapData(FlxG.width, FlxG.height, true, 0x00000000);
+
 		// Draw the state to the bitmap
 		camera.fill(camera.bgColor.to24Bit(), camera.useBgAlphaBlending, camera.bgColor.alphaFloat);
 		state.draw();
 		bitmapData.draw(camera.canvas);
-		
+
 		// Create sprite from bitmap
 		var sprite:FlxSprite = new FlxSprite();
 		sprite.loadGraphic(FlxGraphic.fromBitmapData(bitmapData));
 		sprite.scrollFactor.set();
-		
+
 		return sprite;
 	}
-	
-	
 }

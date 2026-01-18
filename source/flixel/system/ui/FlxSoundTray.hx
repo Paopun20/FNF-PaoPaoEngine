@@ -154,7 +154,7 @@ class FlxSoundTray extends Sprite
 	{
 		if (!silent)
 		{
-			var sound = FlxAssets.getSound(up ? volumeUpSound : volumeDownSound);
+			var sound = FlxAssets.getSoundAddExtension(up ? volumeUpSound : volumeDownSound, true);
 			// if (sound != null) FlxG.sound.load(sound).play();
 			if (sound != null)
 				FlxG.sound.play(sound);
