@@ -19,7 +19,7 @@ This engine, I focus at 4th wall breaking features and some cool stuff.
   > It took forever to rewrite this.
 - Ndll Support (HScript/Python only)
   > It codename feature.
-  > > IDK, what i say.
+  > > IDK, what to say.
 - Fixed Loading Screen race condition and made it thread-safe
   > A race condition occurs when two or more threads access a shared resource simultaneously, leading to unpredictable behavior, data corruption, or a stuck loading screen.
   > > More details? [here](https://www.youtube.com/watch?v=bhpzTWtee2A)
