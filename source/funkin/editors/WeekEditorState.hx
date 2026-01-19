@@ -142,7 +142,6 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 	var opponentInputText:PsychUIInputText;
 	var boyfriendInputText:PsychUIInputText;
 	var girlfriendInputText:PsychUIInputText;
-	var albumInputText:PsychUIInputText;
 
 	var hideCheckbox:PsychUICheckBox;
 
@@ -162,7 +161,6 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 		displayNameInputText = new PsychUIInputText(10, backgroundInputText.y + 60, 200, '', 8);
 		weekNameInputText = new PsychUIInputText(10, displayNameInputText.y + 60, 150, '', 8);
 		weekFileInputText = new PsychUIInputText(10, weekNameInputText.y + 40, 100, '', 8);
-		albumInputText = new PsychUIInputText(10, weekFileInputText.y + 40, 150, '', 8);
 		reloadWeekThing();
 
 		hideCheckbox = new PsychUICheckBox(10, weekFileInputText.y + 40, "Hide Week from Story Mode?", 100);
@@ -178,7 +176,6 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 		tab_group.add(new FlxText(displayNameInputText.x, displayNameInputText.y - 18, 0, 'Display Name:'));
 		tab_group.add(new FlxText(weekNameInputText.x, weekNameInputText.y - 18, 0, 'Week Name (for Reset Score Menu):'));
 		tab_group.add(new FlxText(weekFileInputText.x, weekFileInputText.y - 18, 0, 'Week File:'));
-		tab_group.add(new FlxText(albumInputText.x, albumInputText.y - 18, 0, 'Album:'));
 
 		tab_group.add(songsInputText);
 		tab_group.add(opponentInputText);
@@ -189,7 +186,6 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 		tab_group.add(displayNameInputText);
 		tab_group.add(weekNameInputText);
 		tab_group.add(weekFileInputText);
-		tab_group.add(albumInputText);
 		tab_group.add(hideCheckbox);
 	}
 
@@ -248,7 +244,6 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 		opponentInputText.text = weekFile.weekCharacters[0];
 		boyfriendInputText.text = weekFile.weekCharacters[1];
 		girlfriendInputText.text = weekFile.weekCharacters[2];
-		albumInputText.text = weekFile.album;
 
 		hideCheckbox.checked = weekFile.hideStoryMode;
 
@@ -428,11 +423,6 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 			else if (sender == difficultiesInputText)
 			{
 				weekFile.difficulties = difficultiesInputText.text.trim();
-				unsavedProgress = true;
-			}
-			else if (sender == albumInputText)
-			{
-				weekFile.album = albumInputText.text.trim();
 				unsavedProgress = true;
 			}
 		}
@@ -676,7 +666,7 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 	function addEditorBox()
 	{
 		var tabs = [{name: 'Freeplay', label: 'Freeplay'},];
-		UI_box = new PsychUIBox(FlxG.width, FlxG.height, 250, 200, ['Freeplay']);
+		UI_box = new PsychUIBox(FlxG.width, FlxG.height, 250, 230, ['Freeplay']);
 		UI_box.x -= UI_box.width + 100;
 		UI_box.y -= UI_box.height + 60;
 		UI_box.scrollFactor.set();
@@ -784,7 +774,7 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 		});
 
 		iconInputText = new PsychUIInputText(10, bgColorStepperR.y + 70, 100, '', 8);
-		albumInputText = new PsychUIInputText(10, iconInputText.y + 30, 150, '', 8);
+		albumInputText = new PsychUIInputText(10, iconInputText.y + 45, 150, '', 8);
 
 		var hideFreeplayCheckbox:PsychUICheckBox = new PsychUICheckBox(10, albumInputText.y + 30, "Hide Week from Freeplay?", 100);
 		hideFreeplayCheckbox.checked = weekFile.hideFreeplay;
