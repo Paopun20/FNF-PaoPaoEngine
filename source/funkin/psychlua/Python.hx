@@ -131,7 +131,7 @@ class Python
 		}
 		catch (e:PyExpr)
 		{
-			pythonTrace('Execute Error: ' + printer.exprToString(e), false, false, FlxColor.RED);
+			pythonTrace('Execute Error: ' + printer.exprToString(e), FlxColor.RED);
 			return null;
 		}
 	}
@@ -157,7 +157,7 @@ class Python
 		}
 		catch (e:Dynamic)
 		{
-			pythonTrace('Call Error ($func): ' + e, false, false, FlxColor.RED);
+			pythonTrace('Call Error ($func): ' + e, FlxColor.RED);
 		}
 		return LuaUtils.Function_Continue;
 	}
@@ -1084,7 +1084,7 @@ class Python
 			var myClass:Dynamic = Type.resolveClass(className);
 			if (myClass == null)
 			{
-				pythonTrace('getPropertyFromClass: Class $className not found', false, false, FlxColor.RED);
+				pythonTrace('getPropertyFromClass: Class $className not found', FlxColor.RED);
 				return null;
 			}
 			return Reflect.getProperty(myClass, variable);
@@ -1094,7 +1094,7 @@ class Python
 			var myClass:Dynamic = Type.resolveClass(className);
 			if (myClass == null)
 			{
-				pythonTrace('setPropertyFromClass: Class $className not found', false, false, FlxColor.RED);
+				pythonTrace('setPropertyFromClass: Class $className not found', FlxColor.RED);
 				return false;
 			}
 			Reflect.setProperty(myClass, variable, value);
@@ -1177,7 +1177,7 @@ class Python
 					poop.updateHitbox();
 				return;
 			}
-			pythonTrace('setGraphicSize: Couldnt find object: ' + obj, false, false, FlxColor.RED);
+			pythonTrace('setGraphicSize: Couldnt find object: ' + obj, FlxColor.RED);
 		});
 		set('scaleObject', function(obj:String, x:Float, y:Float, updateHitbox:Bool = true)
 		{
@@ -1192,7 +1192,7 @@ class Python
 					poop.updateHitbox();
 				return;
 			}
-			pythonTrace('scaleObject: Couldnt find object: ' + obj, false, false, FlxColor.RED);
+			pythonTrace('scaleObject: Couldnt find object: ' + obj, FlxColor.RED);
 		});
 		set('updateHitbox', function(obj:String)
 		{
@@ -1205,7 +1205,7 @@ class Python
 				poop.updateHitbox();
 				return;
 			}
-			pythonTrace('updateHitbox: Couldnt find object: ' + obj, false, false, FlxColor.RED);
+			pythonTrace('updateHitbox: Couldnt find object: ' + obj, FlxColor.RED);
 		});
 		set('screenCenter', function(obj:String, pos:String = 'xy')
 		{
@@ -1232,7 +1232,7 @@ class Python
 						return;
 				}
 			}
-			pythonTrace("screenCenter: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
+			pythonTrace("screenCenter: Object " + obj + " doesn't exist!", FlxColor.RED);
 		});
 		set('setObjectCamera', function(obj:String, camera:String = 'game')
 		{
@@ -1251,7 +1251,7 @@ class Python
 				object.cameras = [LuaUtils.cameraFromString(camera)];
 				return true;
 			}
-			pythonTrace("setObjectCamera: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
+			pythonTrace("setObjectCamera: Object " + obj + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
 		set('setScrollFactor', function(obj:String, scrollX:Float, scrollY:Float)
@@ -1310,15 +1310,15 @@ class Python
 				if (shit.dialogue.length > 0)
 				{
 					game.startDialogue(shit, music);
-					pythonTrace('startDialogue: Successfully loaded dialogue', false, false, FlxColor.GREEN);
+					pythonTrace('startDialogue: Successfully loaded dialogue', FlxColor.GREEN);
 					return true;
 				}
 				else
-					pythonTrace('startDialogue: Your dialogue file is badly formatted!', false, false, FlxColor.RED);
+					pythonTrace('startDialogue: Your dialogue file is badly formatted!', FlxColor.RED);
 			}
 		else
 		{
-			pythonTrace('startDialogue: Dialogue file not found', false, false, FlxColor.RED);
+			pythonTrace('startDialogue: Dialogue file not found', FlxColor.RED);
 			if (game.endingSong)
 				game.endSong();
 			else
@@ -1342,7 +1342,7 @@ class Python
 			}
 			else
 			{
-				pythonTrace('startVideo: Video file not found: ' + videoFile, false, false, FlxColor.RED);
+				pythonTrace('startVideo: Video file not found: ' + videoFile, FlxColor.RED);
 			}
 			return false;
 			#else
@@ -1375,14 +1375,14 @@ class Python
 			{
 				if (this.modFolder == null)
 				{
-					pythonTrace('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!', false, false, FlxColor.RED);
+					pythonTrace('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!', FlxColor.RED);
 					return null;
 				}
 				modName = this.modFolder;
 			}
 			return LuaUtils.getModSetting(saveTag, modName);
 			#else
-			pythonTrace("getModSetting: Mods are disabled in this build!", false, false, FlxColor.RED);
+			pythonTrace("getModSetting: Mods are disabled in this build!", FlxColor.RED);
 			return null;
 			#end
 		});

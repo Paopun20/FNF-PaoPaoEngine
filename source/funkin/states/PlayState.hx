@@ -39,8 +39,6 @@ import funkin.psychlua.*;
 import funkin.psychlua.HScript;
 import funkin.psychlua.LuaUtils;
 #end
-#if HSCRIPT_ALLOWED
-#end
 #if PYTHON_ALLOWED
 import funkin.psychlua.Python;
 #end
@@ -284,6 +282,7 @@ class PlayState extends MusicBeatState
 		Paths.clearStoredMemory();
 		if (nextReloadAll)
 		{
+		    HScript.astCache.clear();
 			Paths.clearUnusedMemory();
 			Language.reloadPhrases();
 		}
@@ -888,8 +887,9 @@ class PlayState extends MusicBeatState
 		char.y += char.positionArray[1];
 	}
 
+	#if VIDEOS_ALLOWED
 	public var videoCutscene:VideoSprite = null;
-
+	
 	public function startVideo(name:String, forMidSong:Bool = false, canSkip:Bool = true, loop:Bool = false, playOnLoad:Bool = true)
 	{
 		#if VIDEOS_ALLOWED
@@ -956,6 +956,7 @@ class PlayState extends MusicBeatState
 		#end
 		return null;
 	}
+	#end
 
 	function startAndEnd()
 	{

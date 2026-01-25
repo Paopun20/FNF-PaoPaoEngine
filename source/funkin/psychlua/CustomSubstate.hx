@@ -8,7 +8,7 @@ class CustomSubstate extends MusicBeatSubstate
 	public static var name:String = 'unnamed';
 	public static var instance:CustomSubstate;
 
-	#if LUA_ALLOWED
+	#if (LUA_ALLOWED || PYTHON_ALLOWED)
 	public static function implement(funk)
 	{
 		var impl = ImplementUtils.make(funk);

@@ -15,13 +15,13 @@ class DeprecatedFunctions
 		// DEPRECATED, DONT MESS WITH THESE SHITS, ITS JUST THERE FOR BACKWARD COMPATIBILITY
 		impl("addAnimationByIndicesLoop", function(obj:String, name:String, prefix:String, indices:String, framerate:Int = 24)
 		{
-			FunkinLua.luaTrace("addAnimationByIndicesLoop is deprecated! Use addAnimationByIndices instead", false, true);
+			ImplementUtils.addTextToDebug("addAnimationByIndicesLoop is deprecated! Use addAnimationByIndices instead", FlxColor.RED);
 			return LuaUtils.addAnimByIndices(obj, name, prefix, indices, framerate, true);
 		});
 
 		impl("objectPlayAnimation", function(obj:String, name:String, forced:Bool = false, ?startFrame:Int = 0)
 		{
-			FunkinLua.luaTrace("objectPlayAnimation is deprecated! Use playAnim instead", false, true);
+			ImplementUtils.addTextToDebug("objectPlayAnimation is deprecated! Use playAnim instead", FlxColor.RED);
 			if (PlayState.instance.getLuaObject(obj) != null)
 			{
 				PlayState.instance.getLuaObject(obj).animation.play(name, forced, false, startFrame);
@@ -38,7 +38,7 @@ class DeprecatedFunctions
 		});
 		impl("characterPlayAnim", function(character:String, anim:String, ?forced:Bool = false)
 		{
-			FunkinLua.luaTrace("characterPlayAnim is deprecated! Use playAnim instead", false, true);
+			ImplementUtils.addTextToDebug("characterPlayAnim is deprecated! Use playAnim instead", FlxColor.RED);
 			switch (character.toLowerCase())
 			{
 				case 'dad':
@@ -54,13 +54,13 @@ class DeprecatedFunctions
 		});
 		impl("luaSpriteMakeGraphic", function(tag:String, width:Int, height:Int, color:String)
 		{
-			FunkinLua.luaTrace("luaSpriteMakeGraphic is deprecated! Use makeGraphic instead", false, true);
+			ImplementUtils.addTextToDebug("luaSpriteMakeGraphic is deprecated! Use makeGraphic instead", FlxColor.RED);
 			if (MusicBeatState.getVariables().exists(tag))
 				MusicBeatState.getVariables().get(tag).makeGraphic(width, height, CoolUtil.colorFromString(color));
 		});
 		impl("luaSpriteAddAnimationByPrefix", function(tag:String, name:String, prefix:String, framerate:Int = 24, loop:Bool = true)
 		{
-			FunkinLua.luaTrace("luaSpriteAddAnimationByPrefix is deprecated! Use addAnimationByPrefix instead", false, true);
+			ImplementUtils.addTextToDebug("luaSpriteAddAnimationByPrefix is deprecated! Use addAnimationByPrefix instead", FlxColor.RED);
 			if (MusicBeatState.getVariables().exists(tag))
 			{
 				var cock:ModchartSprite = MusicBeatState.getVariables().get(tag);
@@ -73,7 +73,7 @@ class DeprecatedFunctions
 		});
 		impl("luaSpriteAddAnimationByIndices", function(tag:String, name:String, prefix:String, indices:String, framerate:Int = 24)
 		{
-			FunkinLua.luaTrace("luaSpriteAddAnimationByIndices is deprecated! Use addAnimationByIndices instead", false, true);
+			ImplementUtils.addTextToDebug("luaSpriteAddAnimationByIndices is deprecated! Use addAnimationByIndices instead", FlxColor.RED);
 			if (MusicBeatState.getVariables().exists(tag))
 			{
 				var strIndices:Array<String> = indices.trim().split(',');
@@ -92,7 +92,7 @@ class DeprecatedFunctions
 		});
 		impl("luaSpritePlayAnimation", function(tag:String, name:String, forced:Bool = false)
 		{
-			FunkinLua.luaTrace("luaSpritePlayAnimation is deprecated! Use playAnim instead", false, true);
+			ImplementUtils.addTextToDebug("luaSpritePlayAnimation is deprecated! Use playAnim instead", FlxColor.RED);
 			if (MusicBeatState.getVariables().exists(tag))
 			{
 				MusicBeatState.getVariables().get(tag).animation.play(name, forced);
@@ -100,18 +100,18 @@ class DeprecatedFunctions
 		});
 		impl("setLuaSpriteCamera", function(tag:String, camera:String = '')
 		{
-			FunkinLua.luaTrace("setLuaSpriteCamera is deprecated! Use setObjectCamera instead", false, true);
+			ImplementUtils.addTextToDebug("setLuaSpriteCamera is deprecated! Use setObjectCamera instead", FlxColor.RED);
 			if (MusicBeatState.getVariables().exists(tag))
 			{
 				MusicBeatState.getVariables().get(tag).cameras = [LuaUtils.cameraFromString(camera)];
 				return true;
 			}
-			FunkinLua.luaTrace("Lua sprite with tag: " + tag + " doesn't exist!");
+			ImplementUtils.addTextToDebug("Lua sprite with tag: " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
 		impl("setLuaSpriteScrollFactor", function(tag:String, scrollX:Float, scrollY:Float)
 		{
-			FunkinLua.luaTrace("setLuaSpriteScrollFactor is deprecated! Use setScrollFactor instead", false, true);
+			ImplementUtils.addTextToDebug("setLuaSpriteScrollFactor is deprecated! Use setScrollFactor instead", FlxColor.RED);
 			if (MusicBeatState.getVariables().exists(tag))
 			{
 				MusicBeatState.getVariables().get(tag).scrollFactor.set(scrollX, scrollY);
@@ -121,7 +121,7 @@ class DeprecatedFunctions
 		});
 		impl("scaleLuaSprite", function(tag:String, x:Float, y:Float)
 		{
-			FunkinLua.luaTrace("scaleLuaSprite is deprecated! Use scaleObject instead", false, true);
+			ImplementUtils.addTextToDebug("scaleLuaSprite is deprecated! Use scaleObject instead", FlxColor.RED);
 			if (MusicBeatState.getVariables().exists(tag))
 			{
 				var shit:ModchartSprite = MusicBeatState.getVariables().get(tag);
@@ -133,7 +133,7 @@ class DeprecatedFunctions
 		});
 		impl("getPropertyLuaSprite", function(tag:String, variable:String)
 		{
-			FunkinLua.luaTrace("getPropertyLuaSprite is deprecated! Use getProperty instead", false, true);
+			ImplementUtils.addTextToDebug("getPropertyLuaSprite is deprecated! Use getProperty instead", FlxColor.RED);
 			if (MusicBeatState.getVariables().exists(tag))
 			{
 				var killMe:Array<String> = variable.split('.');
@@ -152,7 +152,7 @@ class DeprecatedFunctions
 		});
 		impl("setPropertyLuaSprite", function(tag:String, variable:String, value:Dynamic)
 		{
-			FunkinLua.luaTrace("setPropertyLuaSprite is deprecated! Use setProperty instead", false, true);
+			ImplementUtils.addTextToDebug("setPropertyLuaSprite is deprecated! Use setProperty instead", FlxColor.RED);
 			if (MusicBeatState.getVariables().exists(tag))
 			{
 				var killMe:Array<String> = variable.split('.');
@@ -169,18 +169,18 @@ class DeprecatedFunctions
 				Reflect.setProperty(MusicBeatState.getVariables().get(tag), variable, value);
 				return true;
 			}
-			FunkinLua.luaTrace("setPropertyLuaSprite: Lua sprite with tag: " + tag + " doesn't exist!");
+			ImplementUtils.addTextToDebug("setPropertyLuaSprite: Lua sprite with tag: " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
 		impl("musicFadeIn", function(duration:Float, fromValue:Float = 0, toValue:Float = 1)
 		{
 			FlxG.sound.music.fadeIn(duration, fromValue, toValue);
-			FunkinLua.luaTrace('musicFadeIn is deprecated! Use soundFadeIn instead.', false, true);
+			ImplementUtils.addTextToDebug('musicFadeIn is deprecated! Use soundFadeIn instead.', FlxColor.RED);
 		});
 		impl("musicFadeOut", function(duration:Float, toValue:Float = 0)
 		{
 			FlxG.sound.music.fadeOut(duration, toValue);
-			FunkinLua.luaTrace('musicFadeOut is deprecated! Use soundFadeOut instead.', false, true);
+			ImplementUtils.addTextToDebug('musicFadeOut is deprecated! Use soundFadeOut instead.', FlxColor.RED);
 		});
 		impl("updateHitboxFromGroup", function(group:String, index:Int)
 		{
@@ -190,7 +190,7 @@ class DeprecatedFunctions
 				return;
 			}
 			Reflect.getProperty(LuaUtils.getTargetInstance(), group)[index].updateHitbox();
-			FunkinLua.luaTrace('updateHitboxFromGroup is deprecated! Use updateHitbox instead.', false, true);
+			ImplementUtils.addTextToDebug('updateHitboxFromGroup is deprecated! Use updateHitbox instead.', FlxColor.RED);
 		});
 	}
 }

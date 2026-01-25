@@ -8,22 +8,17 @@ import funkin.util.PlatformDex;
 import funkin.psychlua.FunkinLua;
 #end
 #if HSCRIPT_ALLOWED
-import hscript.Parser as HxParser;
-import hscript.Interp as HxInterp;
-import hscript.Printer as HxPrinter;
+import hscript.Parser;
+import hscript.Interp;
+import hscript.Printer;
+import hscript.Expr.Error;
+import hscript.Expr;
+import haxe.ds.StringMap;
 import funkin.util.NdllUtil;
+import haxe.crypto.Sha256;
+import haxe.io.Bytes;
 
 using StringTools;
-
-typedef HScriptInfos =
-{
-	> haxe.PosInfos,
-	var ?funcName:String;
-	var ?showLine:Null<Bool>;
-	#if LUA_ALLOWED
-	var ?isLua:Null<Bool>;
-	#end
-}
 
 interface HscriptInterface
 {
@@ -35,9 +30,27 @@ interface HscriptInterface
 
 class HScript implements HscriptInterface
 {
-	public var parser:HxParser;
-	public var interp:HxInterp;
-	public var printer:HxPrinter;
+	private static function createParser():Parser
+	{
+		var p = new Parser();
+		p.allowJSON = true;
+		p.allowMetadata = true;
+		p.allowTypes = true;
+		return p;
+	}
+
+	private static function createPrinter():Printer
+	{
+		var p = new Printer();
+		return p;
+	}
+
+	public static var astCache:StringMap<Expr> = new StringMap();
+	public static var staticVariables:StringMap<Dynamic> = new StringMap();
+	public static var parser:Parser = createParser();
+	public static var printer:Printer = createPrinter();
+
+	public var interp:Interp;
 	public var origin:Null<String>;
 	public var scriptName:String;
 	public var returnValue:Dynamic;
@@ -48,14 +61,13 @@ class HScript implements HscriptInterface
 	public var modName:String = null;
 	#end
 
-	#if LUA_ALLOWED
-	public var parentLua:FunkinLua;
+	public var parentInterpreted:Dynamic;
 
-	public static function initHaxeModule(parent:FunkinLua)
+	public static function initHaxeModule(parent:Dynamic)
 	{
 		if (parent.hscript == null)
 		{
-			CoolLog.info('initializing haxe interp for: ${parent.scriptName}');
+			CoolLog.info('initializing haxe interp for: "${parent.scriptName}"');
 			parent.hscript = new HScript(parent);
 		}
 	}
@@ -65,7 +77,7 @@ class HScript implements HscriptInterface
 		var hs:HScript = try parent.hscript catch (e) null;
 		if (hs == null)
 		{
-			CoolLog.info('initializing haxe interp for: ${parent.scriptName}');
+			CoolLog.info('initializing haxe interp for: "${parent.scriptName}"');
 			try
 			{
 				parent.hscript = new HScript(parent, code, varsToBring, true);
@@ -73,7 +85,7 @@ class HScript implements HscriptInterface
 			}
 			catch (e:Dynamic)
 			{
-				trace('HScript Error: $e');
+				CoolLog.error('HScript Error in ${parent.scriptName}: $e');
 				parent.hscript = null;
 			}
 		}
@@ -85,25 +97,31 @@ class HScript implements HscriptInterface
 			}
 			catch (e:Dynamic)
 			{
-				trace('HScript Error: $(e');
+				CoolLog.error('HScript Error: $(e');
 				hs.returnValue = null;
 			}
 		}
 	}
-	#end
+
+	function onError(e:Error)
+	{
+		PlayState.instance.addTextToDebug(printer.exprToString(cast e), FlxColor.RED);
+	}
+
+	function onWarning(e:Error)
+	{
+		PlayState.instance.addTextToDebug(printer.exprToString(cast e), FlxColor.YELLOW);
+	}
 
 	public function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?manualRun:Bool = false)
 	{
-		parser = new HxParser();
-		parser.allowJSON = true;
-		parser.allowMetadata = true;
-		parser.allowTypes = true;
+		interp = new Interp();
+		interp.allowStaticVariables = interp.allowPublicVariables = true;
+		interp.errorHandler = onError;
+		interp.staticVariables = HScript.staticVariables;
 
-		interp = new HxInterp();
 		origin = file;
 		scriptName = file;
-
-		printer = new HxPrinter();
 
 		#if MODS_ALLOWED
 		if (file != null && file.length > 0)
@@ -116,7 +134,7 @@ class HScript implements HscriptInterface
 		#end
 
 		#if LUA_ALLOWED
-		parentLua = parent;
+		parentInterpreted = parent;
 		if (parent != null)
 			scriptName = parent.scriptName;
 		#end
@@ -135,7 +153,7 @@ class HScript implements HscriptInterface
 				}
 				catch (e:Dynamic)
 				{
-					trace('Failed to load script IO file: $file');
+					CoolLog.error('Failed to load script IO file: "${file}"');
 					return;
 				}
 			}
@@ -149,15 +167,29 @@ class HScript implements HscriptInterface
 		if (closed)
 			return null;
 
+		var cachedExpr:Dynamic;
+		var cacheKey:String = Sha256.make(Bytes.ofString(modFolder + scriptName + code)).toHex();
+		if (!HScript.astCache.exists(cacheKey))
+		{
+			cachedExpr = HScript.parser.parseString(code);
+			HScript.astCache.set(cacheKey, cachedExpr);
+			CoolLog.info('HScript parsed AST for "${scriptName}"');
+		}
+		else
+		{
+			cachedExpr = HScript.astCache.get(cacheKey);
+			CoolLog.info('HScript reused AST for "${scriptName}"');
+		}
+
 		try
 		{
-			var expr = parser.parseString(code);
+			var expr = cachedExpr;
 			returnValue = interp.execute(expr);
 			return returnValue;
 		}
 		catch (e:Dynamic)
 		{
-			trace('HScript execution error in $scriptName: $e');
+			CoolLog.error('HScript execution error in "' + scriptName + '": ' + e);
 			return null;
 		}
 	}
@@ -187,6 +219,7 @@ class HScript implements HscriptInterface
 		set('FlxTween', flixel.tweens.FlxTween);
 		set('FlxEase', flixel.tweens.FlxEase);
 		set('FlxColor', CustomFlxColor);
+		set('FlxSound', #if (flixel >= "5.3.0") flixel.sound.FlxSound #else flixel.system.FlxSound #end);
 		set('Countdown', funkin.backend.BaseStage.Countdown);
 		set('PlayState', PlayState);
 		set('Paths', Paths);
@@ -245,7 +278,7 @@ class HScript implements HscriptInterface
 			{
 				if (this.modFolder == null)
 				{
-					trace('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!');
+					CoolLog.error('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!');
 					return null;
 				}
 				modName = this.modFolder;
@@ -372,12 +405,12 @@ class HScript implements HscriptInterface
 		set('createCallback', function(name:String, func:Dynamic, ?funk:FunkinLua = null)
 		{
 			if (funk == null)
-				funk = parentLua;
+				funk = parentInterpreted;
 
 			if (funk != null)
 				funk.addLocalCallback(name, func);
 			else
-				trace('createCallback ($name): 3rd argument is null');
+				CoolLog.error('createCallback ($name): 3rd argument is null');
 		});
 		#end
 
@@ -398,14 +431,14 @@ class HScript implements HscriptInterface
 			}
 			catch (e:Dynamic)
 			{
-				trace('addHaxeLibrary error: $e');
+				CoolLog.error('addHaxeLibrary error: $e');
 			}
 		});
 
 		#if LUA_ALLOWED
-		set('parentLua', parentLua);
+		set('parentInterpreted', parentInterpreted);
 		#else
-		set('parentLua', null);
+		set('parentInterpreted', null);
 		#end
 		set('this', this);
 		set('game', FlxG.state);
@@ -450,7 +483,7 @@ class HScript implements HscriptInterface
 			}
 			else
 			{
-				trace('runHaxeFunction: HScript has not been initialized yet! Use "runHaxeCode" to initialize it');
+				CoolLog.error('runHaxeFunction: HScript has not been initialized yet! Use "runHaxeCode" to initialize it');
 			}
 			return null;
 		});
@@ -477,7 +510,7 @@ class HScript implements HscriptInterface
 			}
 			catch (e:Dynamic)
 			{
-				trace('addHaxeLibrary error: $e');
+				CoolLog.error('addHaxeLibrary error: $e');
 			}
 		});
 	}
@@ -509,7 +542,7 @@ class HScript implements HscriptInterface
 			}
 			else
 			{
-				trace('runHaxeFunction: HScript has not been initialized yet! Use "runHaxeCode" to initialize it');
+				CoolLog.error('runHaxeFunction: HScript has not been initialized yet! Use "runHaxeCode" to initialize it');
 			}
 			return null;
 		});
@@ -536,7 +569,7 @@ class HScript implements HscriptInterface
 			}
 			catch (e:Dynamic)
 			{
-				trace('addHaxeLibrary error: $e');
+				CoolLog.error('addHaxeLibrary error: $e');
 			}
 		});
 	}
@@ -590,7 +623,7 @@ class HScript implements HscriptInterface
 		}
 		catch (e:Dynamic)
 		{
-			trace('HScript call error in $scriptName, function $func: $e');
+			CoolLog.error('HScript call error in $scriptName, function $func: $e');
 		}
 		return LuaUtils.Function_Continue;
 	}
@@ -599,25 +632,17 @@ class HScript implements HscriptInterface
 	{
 		if (closed)
 			return;
-
 		closed = true;
-
-		if (interp != null && interp.variables != null)
-		{
-			interp.variables.clear();
-		}
-
+		interp = null;
 		origin = null;
 		#if LUA_ALLOWED
-		parentLua = null;
+		parentInterpreted = null;
 		#end
 	}
 
-	public function destroy():Void
+	public function destroy():Void // for use old api
 	{
 		stop();
-		parser = null;
-		interp = null;
 	}
 }
 

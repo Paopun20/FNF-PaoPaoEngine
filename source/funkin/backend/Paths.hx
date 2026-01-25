@@ -32,22 +32,26 @@ class Paths
 
 	public static var dumpExclusions:Array<String> = ['assets/shared/music/freakyMenu.$SOUND_EXT'];
 
+	public static function clearMemoryByName(name:String)
+	{
+		if (!localTrackedAssets.contains(name) && !dumpExclusions.contains(name))
+		{
+			destroyGraphic(currentTrackedAssets.get(name)); // get rid of the graphic
+			currentTrackedAssets.remove(name); // and remove the key from local cache map
+		}
+
+		// run the garbage collector for good measure lmfao
+		System.gc();
+	}
+
 	// haya I love you for the base cache dump I took to the max
 	public static function clearUnusedMemory()
 	{
 		// clear non local assets in the tracked assets list
 		for (key in currentTrackedAssets.keys())
 		{
-			// if it is not currently contained within the used local assets
-			if (!localTrackedAssets.contains(key) && !dumpExclusions.contains(key))
-			{
-				destroyGraphic(currentTrackedAssets.get(key)); // get rid of the graphic
-				currentTrackedAssets.remove(key); // and remove the key from local cache map
-			}
+		    Paths.clearMemoryByName(key);
 		}
-
-		// run the garbage collector for good measure lmfao
-		System.gc();
 	}
 
 	// define the locally tracked assets
@@ -199,6 +203,12 @@ class Paths
 	inline static public function lua(key:String, ?folder:String)
 		return getPath('$key.lua', TEXT, folder, true);
 
+	inline static public function hscript(key:String, ?folder:String)
+		return getPath('$key.hx', TEXT, folder, true);
+
+	inline static public function python(key:String, ?folder:String)
+		return getPath('$key.py', TEXT, folder, true);
+
 	static public function video(key:String)
 	{
 		#if MODS_ALLOWED
@@ -252,6 +262,11 @@ class Paths
 
 	public static function cacheBitmap(key:String, ?parentFolder:String = null, ?bitmap:BitmapData, ?allowGPU:Bool = true):FlxGraphic
 	{
+		if (key == null || key == '' || key.length == 0)
+		{
+			CoolLog.error('Invalid key "$key"');
+			return null;
+		}
 		if (bitmap == null)
 		{
 			var file:String = getPath(key, IMAGE, parentFolder, true);
@@ -461,8 +476,6 @@ class Paths
 		else if (beepOnNull)
 		{
 			CoolLog.error('SOUND NOT FOUND: $key, PATH: $path');
-			// trace('SOUND NOT FOUND: $key, PATH: $path');
-			// FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
 			return FlxAssets.getSoundAddExtension('flixel/sounds/beep', true);
 		}
 		}

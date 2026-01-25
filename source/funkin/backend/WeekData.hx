@@ -4,10 +4,12 @@ import lime.utils.Assets;
 import openfl.utils.Assets as OpenFlAssets;
 import haxe.Json;
 
+typedef RawSong = Array<Dynamic>;
+
 typedef WeekFile =
 {
 	// JSON variables
-	var songs:Array<Dynamic>;
+	var songs:Array<RawSong>;
 	var weekCharacters:Array<String>;
 	var weekBackground:String;
 	var weekBefore:String;
@@ -18,7 +20,6 @@ typedef WeekFile =
 	var hideStoryMode:Bool;
 	var hideFreeplay:Bool;
 	var difficulties:String;
-	var album:String;
 }
 
 class WeekData
@@ -29,7 +30,7 @@ class WeekData
 	public var folder:String = '';
 
 	// JSON variables
-	public var songs:Array<Dynamic>;
+	public var songs:Array<RawSong>;
 	public var weekCharacters:Array<String>;
 	public var weekBackground:String;
 	public var weekBefore:String;
@@ -40,7 +41,6 @@ class WeekData
 	public var hideStoryMode:Bool;
 	public var hideFreeplay:Bool;
 	public var difficulties:String;
-	public var album:String;
 
 	public var fileName:String;
 
@@ -48,9 +48,9 @@ class WeekData
 	{
 		var weekFile:WeekFile = {
 			songs: [
-				["Bopeebo", "face", [146, 113, 253]],
-				["Fresh", "face", [146, 113, 253]],
-				["Dad Battle", "face", [146, 113, 253]]
+				["Bopeebo", "face", [146, 113, 253], "albumPlaceHolder"],
+				["Fresh", "face", [146, 113, 253], "albumPlaceHolder"],
+				["Dad Battle", "face", [146, 113, 253], "albumPlaceHolder"]
 			],
 			#if BASE_GAME_FILES
 			weekCharacters: ['dad', 'bf', 'gf'],
@@ -61,7 +61,6 @@ class WeekData
 			weekBefore: 'tutorial',
 			storyName: 'Your New Week',
 			weekName: 'Custom Week',
-			album: 'albumPlaceHolder',
 			startUnlocked: true,
 			hiddenUntilUnlocked: false,
 			hideStoryMode: false,
@@ -74,10 +73,14 @@ class WeekData
 	// HELP: Is there any way to convert a WeekFile to WeekData without having to put all variables there manually? I'm kind of a noob in haxe lmao
 	public function new(weekFile:WeekFile, fileName:String)
 	{
-		// here ya go - MiguelItsOut
+		var selfFields = Reflect.fields(this);
 		for (field in Reflect.fields(weekFile))
-			if (Reflect.fields(this).contains(field)) // Reflect.hasField() won't fucking work :/
-				Reflect.setProperty(this, field, Reflect.getProperty(weekFile, field));
+		{
+			if (selfFields.indexOf(field) != -1)
+			{
+				Reflect.setProperty(this, field, Reflect.field(weekFile, field));
+			}
+		}
 
 		this.fileName = fileName;
 	}

@@ -715,7 +715,7 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 			}
 			else if (sender == albumInputText)
 			{
-				weekFile.album = albumInputText.text;
+				weekFile.songs[curSelected][3] = albumInputText.text;
 				WeekEditorState.unsavedProgress = true;
 				updateAlbumArt();
 			}
@@ -807,9 +807,9 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 
 	function updateAlbumArt()
 	{
-		if (weekFile.album != null && weekFile.album.length > 0)
+		if (weekFile.songs[curSelected][3] != null && weekFile.songs[curSelected][3].length > 0)
 		{
-			albumArt.loadGraphic(Paths.image('albums/' + weekFile.album));
+			albumArt.loadGraphic(Paths.image('albums/' + weekFile.songs[curSelected][3]));
 		}
 		else
 		{
@@ -840,7 +840,7 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 		}
 		// trace(weekFile.songs[curSelected]);
 		iconInputText.text = weekFile.songs[curSelected][1];
-		albumInputText.text = weekFile.album;
+		albumInputText.text = weekFile.songs[curSelected][3];
 
 		var colors = weekFile.songs[curSelected][2];
 		bgColorStepperR.value = Math.round(colors[0]);

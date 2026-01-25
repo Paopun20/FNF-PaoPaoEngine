@@ -4,9 +4,9 @@ import flixel.util.FlxDestroyUtil;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flxanimate.frames.FlxAnimateFrames;
 import flxanimate.data.AnimationData;
-import flxanimate.FlxAnimate as OriginalFlxAnimate;
+import flxanimate.FlxAnimate;
 
-class PsychFlxAnimate extends OriginalFlxAnimate
+class PsychFlxAnimate extends FlxAnimate
 {
 	public function loadAtlasEx(img:FlxGraphicAsset, pathOrStr:String = null, myJson:Dynamic = null)
 	{

@@ -8,6 +8,9 @@ import funkin.psychlua.FunkinLua;
 import funkin.psychlua.Python;
 #end
 #end
+
+import funkin.states.PlayState;
+
 class ImplementUtils
 {
 	public static function make(interpreter:Dynamic):(String, Dynamic) -> Null<Dynamic>
@@ -48,5 +51,9 @@ class ImplementUtils
 		{
 			return null;
 		};
+	}
+	public static function addTextToDebug(text:String, color:Int):Void
+	{
+		PlayState.instance.addTextToDebug(text, color);
 	}
 }

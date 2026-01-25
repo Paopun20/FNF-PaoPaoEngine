@@ -320,7 +320,7 @@ class Achievements
 		{
 			if (!achievements.exists(name))
 			{
-				FunkinLua.luaTrace('getAchievementScore: Couldnt find achievement: $name', false, false, FlxColor.RED);
+				ImplementUtils.addTextToDebug('getAchievementScore: Couldnt find achievement: $name', FlxColor.RED);
 				return -1;
 			}
 			return getScore(name);
@@ -329,7 +329,7 @@ class Achievements
 		{
 			if (!achievements.exists(name))
 			{
-				FunkinLua.luaTrace('setAchievementScore: Couldnt find achievement: $name', false, false, FlxColor.RED);
+				ImplementUtils.addTextToDebug('setAchievementScore: Couldnt find achievement: $name', FlxColor.RED);
 				return -1;
 			}
 			return setScore(name, value, saveIfNotUnlocked);
@@ -338,7 +338,7 @@ class Achievements
 		{
 			if (!achievements.exists(name))
 			{
-				FunkinLua.luaTrace('addAchievementScore: Couldnt find achievement: $name', false, false, FlxColor.RED);
+				ImplementUtils.addTextToDebug('addAchievementScore: Couldnt find achievement: $name', FlxColor.RED);
 				return -1;
 			}
 			return addScore(name, value, saveIfNotUnlocked);
@@ -347,7 +347,7 @@ class Achievements
 		{
 			if (!achievements.exists(name))
 			{
-				FunkinLua.luaTrace('unlockAchievement: Couldnt find achievement: $name', false, false, FlxColor.RED);
+				ImplementUtils.addTextToDebug('unlockAchievement: Couldnt find achievement: $name', FlxColor.RED);
 				return null;
 			}
 			return unlock(name);
@@ -356,7 +356,7 @@ class Achievements
 		{
 			if (!achievements.exists(name))
 			{
-				FunkinLua.luaTrace('isAchievementUnlocked: Couldnt find achievement: $name', false, false, FlxColor.RED);
+				ImplementUtils.addTextToDebug('isAchievementUnlocked: Couldnt find achievement: $name', FlxColor.RED);
 				return null;
 			}
 			return isUnlocked(name);

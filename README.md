@@ -2,8 +2,6 @@
 
 Crossover between **Codename Engine**, **FNF V-Slice**, and **Psych Engine**
 
-This engine, I focus at 4th wall breaking features and some cool stuff.
-
 > [!WARNING]
 > This engine is still in heavy development, so some features may not work as expected like Python.
 
@@ -16,7 +14,9 @@ This engine, I focus at 4th wall breaking features and some cool stuff.
   > For assistance, please submit a pull request [here](https://github.com/Paopun20/Hython).\
   > Note: this Hython is a Python interpreter written entirely in **Haxe** and you can use it for your own projects too, it is also open source.
 - Hscript (Improved)
-  > It took forever to rewrite this.
+  > Optimize.
+  > Cache AST.
+  > Use Codename's HScript fork library.
 - Ndll Support (HScript/Python only)
   > It codename feature.
   > > IDK, what to say.

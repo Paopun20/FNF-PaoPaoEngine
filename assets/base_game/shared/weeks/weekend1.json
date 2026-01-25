@@ -1,9 +1,9 @@
 {
 	"songs": [
-		["Darnell", "darnell", [65, 60, 174]],
-		["Lit Up", "darnell", [65, 60, 174]],
-		["2Hot", "darnell", [65, 60, 174]],
-		["Blazin", "darnell", [65, 60, 174]]
+		["Darnell", "darnell", [65, 60, 174], "volume3"],
+		["Lit Up", "darnell", [65, 60, 174], "volume3"],
+		["2Hot", "darnell", [65, 60, 174], "volume3"],
+		["Blazin", "darnell", [65, 60, 174], "volume3"]
 	],
 
 	"weekCharacters": [
@@ -20,7 +20,5 @@
 
 	"hideStoryMode": false,
 	"hideFreeplay": false,
-	"difficulties": "Easy, Normal, Hard",
-	
-	"album": "volume3"
+	"difficulties": "Easy, Normal, Hard"
 }

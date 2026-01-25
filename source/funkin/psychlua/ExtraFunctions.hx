@@ -130,7 +130,7 @@ class ExtraFunctions
 				variables.set('save_$name', save);
 				return;
 			}
-			FunkinLua.luaTrace('initSaveData: Save file already initialized: ' + name);
+			ImplementUtils.addTextToDebug('initSaveData: Save file already initialized: ' + name, FlxColor.RED);
 		});
 		impl("flushSaveData", function(name:String)
 		{
@@ -140,7 +140,7 @@ class ExtraFunctions
 				variables.get('save_$name').flush();
 				return;
 			}
-			FunkinLua.luaTrace('flushSaveData: Save file not initialized: ' + name, false, false, FlxColor.RED);
+			ImplementUtils.addTextToDebug('flushSaveData: Save file not initialized: ' + name, FlxColor.RED);
 		});
 		impl("getDataFromSave", function(name:String, field:String, ?defaultValue:Dynamic = null)
 		{
@@ -153,7 +153,7 @@ class ExtraFunctions
 				else
 					return defaultValue;
 			}
-			FunkinLua.luaTrace('getDataFromSave: Save file not initialized: ' + name, false, false, FlxColor.RED);
+			ImplementUtils.addTextToDebug('getDataFromSave: Save file not initialized: ' + name, FlxColor.RED);
 			return defaultValue;
 		});
 		impl("setDataFromSave", function(name:String, field:String, value:Dynamic)
@@ -164,7 +164,7 @@ class ExtraFunctions
 				Reflect.setField(variables.get('save_$name').data, field, value);
 				return;
 			}
-			FunkinLua.luaTrace('setDataFromSave: Save file not initialized: ' + name, false, false, FlxColor.RED);
+			ImplementUtils.addTextToDebug('setDataFromSave: Save file not initialized: ' + name, FlxColor.RED);
 		});
 		impl("eraseSaveData", function(name:String)
 		{
@@ -174,7 +174,7 @@ class ExtraFunctions
 				variables.get('save_$name').erase();
 				return;
 			}
-			FunkinLua.luaTrace('eraseSaveData: Save file not initialized: ' + name, false, false, FlxColor.RED);
+			ImplementUtils.addTextToDebug('eraseSaveData: Save file not initialized: ' + name, FlxColor.RED);
 		});
 
 		// File management
@@ -207,7 +207,7 @@ class ExtraFunctions
 			}
 			catch (e:Dynamic)
 			{
-				FunkinLua.luaTrace("saveFile: Error trying to save " + path + ": " + e, false, false, FlxColor.RED);
+				ImplementUtils.addTextToDebug("saveFile: Error trying to save " + path + ": " + e, FlxColor.RED);
 			}
 			return false;
 		});
@@ -226,7 +226,7 @@ class ExtraFunctions
 			}
 			catch (e:Dynamic)
 			{
-				FunkinLua.luaTrace("deleteFile: Error trying to delete " + path + ": " + e, false, false, FlxColor.RED);
+				ImplementUtils.addTextToDebug("deleteFile: Error trying to delete " + path + ": " + e, FlxColor.RED);
 			}
 			return false;
 		});

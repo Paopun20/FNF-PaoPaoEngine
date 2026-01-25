@@ -7,6 +7,9 @@ import flixel.util.FlxStringUtil;
 import funkin.states.StoryMenuState;
 import funkin.states.FreeplayState;
 import funkin.options.OptionsState;
+#if HSCRIPT_ALLOWED
+import funkin.psychlua.HScript;
+#end
 
 class PauseSubState extends MusicBeatSubstate
 {
@@ -283,6 +286,9 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.changedDifficulty = true;
 					practiceText.visible = PlayState.instance.practiceMode;
 				case "Restart Song":
+					#if HSCRIPT_ALLOWED
+					HScript.staticVariables.clear();
+					#end
 					restartSong();
 				case "Leave Charting Mode":
 					restartSong();
@@ -341,6 +347,10 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.changedDifficulty = false;
 					PlayState.chartingMode = false;
 					FlxG.camera.followLerp = 0;
+					#if HSCRIPT_ALLOWED
+					HScript.astCache.clear();
+					HScript.staticVariables.clear();
+					#end
 			}
 		}
 	}

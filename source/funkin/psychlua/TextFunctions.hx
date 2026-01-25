@@ -32,7 +32,7 @@ class TextFunctions
 				obj.text = text;
 				return true;
 			}
-			FunkinLua.luaTrace("setTextString: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			ImplementUtils.addTextToDebug("setTextString: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
 		impl("setTextSize", function(tag:String, size:Int)
@@ -45,7 +45,7 @@ class TextFunctions
 				obj.size = size;
 				return true;
 			}
-			FunkinLua.luaTrace("setTextSize: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			ImplementUtils.addTextToDebug("setTextSize: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
 		impl("setTextWidth", function(tag:String, width:Float)
@@ -58,7 +58,7 @@ class TextFunctions
 				obj.fieldWidth = width;
 				return true;
 			}
-			FunkinLua.luaTrace("setTextWidth: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			ImplementUtils.addTextToDebug("setTextWidth: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
 		impl("setTextHeight", function(tag:String, height:Float)
@@ -71,7 +71,7 @@ class TextFunctions
 				obj.fieldHeight = height;
 				return true;
 			}
-			FunkinLua.luaTrace("setTextHeight: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			ImplementUtils.addTextToDebug("setTextHeight: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
 		impl("setTextAutoSize", function(tag:String, value:Bool)
@@ -84,7 +84,7 @@ class TextFunctions
 				obj.autoSize = value;
 				return true;
 			}
-			FunkinLua.luaTrace("setTextAutoSize: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			ImplementUtils.addTextToDebug("setTextAutoSize: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
 		impl("setTextBorder", function(tag:String, size:Float, color:String, ?style:String = 'outline')
@@ -101,7 +101,7 @@ class TextFunctions
 				obj.borderColor = CoolUtil.colorFromString(color);
 				return true;
 			}
-			FunkinLua.luaTrace("setTextBorder: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			ImplementUtils.addTextToDebug("setTextBorder: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
 		impl("setTextColor", function(tag:String, color:String)
@@ -114,7 +114,7 @@ class TextFunctions
 				obj.color = CoolUtil.colorFromString(color);
 				return true;
 			}
-			FunkinLua.luaTrace("setTextColor: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			ImplementUtils.addTextToDebug("setTextColor: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
 		impl("setTextFont", function(tag:String, newFont:String)
@@ -127,7 +127,7 @@ class TextFunctions
 				obj.font = Paths.font(newFont);
 				return true;
 			}
-			FunkinLua.luaTrace("setTextFont: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			ImplementUtils.addTextToDebug("setTextFont: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
 		impl("setTextItalic", function(tag:String, italic:Bool)
@@ -140,7 +140,7 @@ class TextFunctions
 				obj.italic = italic;
 				return true;
 			}
-			FunkinLua.luaTrace("setTextItalic: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			ImplementUtils.addTextToDebug("setTextItalic: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
 		impl("setTextAlignment", function(tag:String, alignment:String = 'left')
@@ -162,7 +162,7 @@ class TextFunctions
 				}
 				return true;
 			}
-			FunkinLua.luaTrace("setTextAlignment: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			ImplementUtils.addTextToDebug("setTextAlignment: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
 
@@ -175,7 +175,7 @@ class TextFunctions
 			{
 				return obj.text;
 			}
-			FunkinLua.luaTrace("getTextString: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			ImplementUtils.addTextToDebug("getTextString: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return null;
 		});
 		impl("getTextSize", function(tag:String)
@@ -187,7 +187,7 @@ class TextFunctions
 			{
 				return obj.size;
 			}
-			FunkinLua.luaTrace("getTextSize: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			ImplementUtils.addTextToDebug("getTextSize: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return -1;
 		});
 		impl("getTextFont", function(tag:String)
@@ -199,7 +199,7 @@ class TextFunctions
 			{
 				return obj.font;
 			}
-			FunkinLua.luaTrace("getTextFont: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			ImplementUtils.addTextToDebug("getTextFont: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return null;
 		});
 		impl("getTextWidth", function(tag:String)
@@ -211,7 +211,7 @@ class TextFunctions
 			{
 				return obj.fieldWidth;
 			}
-			FunkinLua.luaTrace("getTextWidth: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			ImplementUtils.addTextToDebug("getTextWidth: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return 0;
 		});
 
