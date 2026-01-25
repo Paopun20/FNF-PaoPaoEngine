@@ -11,7 +11,7 @@ import funkin.psychlua.FunkinLua;
 import hscript.Parser;
 import hscript.Interp;
 import hscript.Printer;
-import hscript.Expr.Error;
+import hscript.Expr.Error as HscriptError;
 import hscript.Expr;
 import haxe.ds.StringMap;
 import funkin.util.NdllUtil;
@@ -63,6 +63,13 @@ class HScript implements HscriptInterface
 
 	public var parentInterpreted:Dynamic;
 
+	public static function reset()
+	{
+		CoolLog.info('Resetting HScript static/cache');
+		HScript.astCache.clear();
+		HScript.staticVariables.clear();
+	}
+
 	public static function initHaxeModule(parent:Dynamic)
 	{
 		if (parent.hscript == null)
@@ -103,12 +110,12 @@ class HScript implements HscriptInterface
 		}
 	}
 
-	function onError(e:Error)
+	function onError(e:HscriptError)
 	{
 		PlayState.instance.addTextToDebug(printer.exprToString(cast e), FlxColor.RED);
 	}
 
-	function onWarning(e:Error)
+	function onWarning(e:HscriptError)
 	{
 		PlayState.instance.addTextToDebug(printer.exprToString(cast e), FlxColor.YELLOW);
 	}

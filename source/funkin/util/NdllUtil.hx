@@ -3,18 +3,20 @@ package funkin.util;
 #if sys
 import sys.FileSystem;
 #end
-import lime.app.Application;
 import funkin.psychlua.LuaUtils;
+#if NDLL_ALLOWED
+import lime.system.CFFI;
+import funkin.macros.MacroUtil;
+#end
 
 @:keep
+@:access(lime.system.CFFI)
 class NdllUtil
 {
 	public static var os(get, never):String;
 
 	inline public static function get_os():String
-	{
 		return LuaUtils.getBuildTarget();
-	}
 
 	public static function getFunction(ndllPath:String, name:String, args:Int):Dynamic
 	{
@@ -24,7 +26,7 @@ class NdllUtil
 
 		return Reflect.makeVarArgs(function(a:Array<Dynamic>)
 		{
-			return backend.macros.MacroUtil.generateReflectionLike(25, "func", "a");
+			return MacroUtil.generateReflectionLike(25, "func", "a");
 		});
 		#else
 		CoolLog.warning("Ndlls are not supported on this platform!");
@@ -33,14 +35,14 @@ class NdllUtil
 	}
 
 	#if NDLL_ALLOWED
-	public static function _getNdllFunc(ndll:String, name:String, args:Int):Dynamic
+	private static function _getNdllFunc(ndll:String, name:String, args:Int):Dynamic
 	{
 		if (!FileSystem.exists(ndll))
 		{
 			CoolLog.warning('getFunction: ndll "${ndll}" doesn\'t exist!');
 			return noop;
 		}
-		var func = lime.system.CFFI.load('./${ndll}', name, args);
+		var func = CFFI.load('./${ndll}', name, args);
 		if (func != null)
 			return func;
 
@@ -49,7 +51,5 @@ class NdllUtil
 	}
 	#end
 
-	@:dox(hide) @:noCompletion static function noop()
-	{
-	}
+	@:dox(hide) @:noCompletion static function noop() {}
 }

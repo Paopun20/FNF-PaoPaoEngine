@@ -348,8 +348,7 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.chartingMode = false;
 					FlxG.camera.followLerp = 0;
 					#if HSCRIPT_ALLOWED
-					HScript.astCache.clear();
-					HScript.staticVariables.clear();
+					HScript.reset();
 					#end
 			}
 		}

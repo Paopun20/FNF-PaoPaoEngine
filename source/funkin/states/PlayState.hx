@@ -282,7 +282,7 @@ class PlayState extends MusicBeatState
 		Paths.clearStoredMemory();
 		if (nextReloadAll)
 		{
-		    HScript.astCache.clear();
+		    HScript.reset();
 			Paths.clearUnusedMemory();
 			Language.reloadPhrases();
 		}
@@ -889,7 +889,7 @@ class PlayState extends MusicBeatState
 
 	#if VIDEOS_ALLOWED
 	public var videoCutscene:VideoSprite = null;
-	
+
 	public function startVideo(name:String, forMidSong:Bool = false, canSkip:Bool = true, loop:Bool = false, playOnLoad:Bool = true)
 	{
 		#if VIDEOS_ALLOWED
@@ -2163,6 +2163,7 @@ class PlayState extends MusicBeatState
 		DiscordClient.resetClientID();
 		#end
 
+		HScript.reset();
 		MusicBeatState.switchState(new ChartingState());
 	}
 
@@ -2181,6 +2182,8 @@ class PlayState extends MusicBeatState
 			opponentVocals.pause();
 
 		#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
+
+		HScript.reset();
 		MusicBeatState.switchState(new CharacterEditorState(SONG.player2));
 	}
 

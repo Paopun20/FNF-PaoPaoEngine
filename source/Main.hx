@@ -3,11 +3,12 @@ package;
 #if android
 import android.content.Context;
 #end
-import funkin.backend.Highscore;
-import funkin.debug.FPSCounter;
 import flixel.FlxGame;
 import flixel.FlxState;
 import flixel.graphics.FlxGraphic;
+import funkin.backend.Highscore;
+import funkin.debug.FPSCounter;
+import funkin.states.TitleState;
 import haxe.io.Path;
 import lime.app.Application;
 import openfl.Assets;
@@ -15,14 +16,13 @@ import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
 import openfl.events.Event;
-import funkin.states.TitleState;
+
 #if (linux || mac)
 import lime.graphics.Image;
 #end
 #if desktop
 import funkin.backend.ALSoftConfig; // Just to make sure DCE doesn't remove this, since it's not directly referenced anywhere else.
 #end
-// crash handler stuff
 #if CRASH_HANDLER
 import haxe.CallStack;
 import haxe.io.Path;
@@ -32,12 +32,10 @@ import openfl.events.UncaughtErrorEvent;
 import hxwindowmode.WindowColorMode;
 #end
 
-// NATIVE API STUFF, YOU CAN IGNORE THIS AND SCROLL //
 #if (linux && !debug)
 @:cppInclude('./external/gamemode_client.h')
 @:cppFileCode('#define GAMEMODE_AUTO')
 #end
-// // // // // // // // //
 class Main extends Sprite
 {
 	public static final game = {
@@ -61,9 +59,7 @@ class Main extends Sprite
 		#if WindowColorMode
 		WindowColorMode.setDarkMode();
 		if (WindowColorMode.isWindows10)
-		{
 			WindowColorMode.redrawWindowHeader();
-		}
 		#end
 		Lib.current.addChild(new Main());
 	}
@@ -161,8 +157,6 @@ class Main extends Sprite
 		}
 	}
 
-	// Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!
-	// very cool person for real they don't get enough credit for their work
 	#if CRASH_HANDLER
 	function onCrash(e:UncaughtErrorEvent):Void
 	{
@@ -174,26 +168,30 @@ class Main extends Sprite
 
 		dateNow = dateNow.replace(" ", "_").replace(":", "-");
 
-		path = "./crash/" + "PsychEngine_" + dateNow + ".txt";
+		path = "./crash/" + "PaoPaoEngine_" + dateNow + ".log";
 
+		var stackIndex:Int = 0;
 		for (stackItem in callStack)
 		{
 			switch (stackItem)
 			{
 				case FilePos(s, file, line, column):
-					errMsg += file + " (line " + line + ", column " + column + ")\n";
+					errMsg += "#" + stackIndex + " " + file + " (line " + line;
+					if (column != null)
+						errMsg += ", column " + column;
+					errMsg += ")\n";
+					stackIndex++;
 				default:
-					Sys.println(stackItem);
+					errMsg += "#" + stackIndex + " " + Std.string(stackItem) + "\n";
+					stackIndex++;
 			}
 		}
 
 		errMsg += "\nUncaught Error: " + e.error;
-		// remove if you're modding and want the crash log message to contain the link
-		// please remember to actually modify the link for the github page to report the issues to.
 		#if officialBuild
 		errMsg += "\nPlease report this error to the GitHub page: https://github.com/Paopun20/FNF-PaoPaoEngine";
 		#end
-		errMsg += "\n\n> Crash Handler written by: sqirra-rng";
+		errMsg += "\n\n> New Crash Handler written by: Paopun20";
 
 		if (!FileSystem.exists("./crash/"))
 			FileSystem.createDirectory("./crash/");
