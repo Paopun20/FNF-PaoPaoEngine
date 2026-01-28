@@ -28,9 +28,6 @@ import haxe.CallStack;
 import haxe.io.Path;
 import openfl.events.UncaughtErrorEvent;
 #end
-#if WindowColorMode
-import hxwindowmode.WindowColorMode;
-#end
 
 #if (linux && !debug)
 @:cppInclude('./external/gamemode_client.h')
@@ -56,11 +53,6 @@ class Main extends Sprite
 	public static function main():Void
 	{
 		CoolLog.init(); // Initialize the logging system
-		#if WindowColorMode
-		WindowColorMode.setDarkMode();
-		if (WindowColorMode.isWindows10)
-			WindowColorMode.redrawWindowHeader();
-		#end
 		Lib.current.addChild(new Main());
 	}
 

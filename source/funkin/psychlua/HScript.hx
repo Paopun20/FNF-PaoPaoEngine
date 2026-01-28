@@ -13,6 +13,7 @@ import hscript.Interp;
 import hscript.Printer;
 import hscript.Expr.Error as HscriptError;
 import hscript.Expr;
+import hscript.Expr;
 import haxe.ds.StringMap;
 import funkin.util.NdllUtil;
 import haxe.crypto.Sha256;
@@ -112,12 +113,42 @@ class HScript implements HscriptInterface
 
 	function onError(e:HscriptError)
 	{
-		PlayState.instance.addTextToDebug(printer.exprToString(cast e), FlxColor.RED);
+		if (Std.isOfType(e, HscriptError))
+		{
+			PlayState.instance.addTextToDebug(printer.exprToString(cast(e, Expr)), FlxColor.RED);
+		}
 	}
 
 	function onWarning(e:HscriptError)
 	{
-		PlayState.instance.addTextToDebug(printer.exprToString(cast e), FlxColor.YELLOW);
+		if (Std.isOfType(e, HscriptError))
+		{
+			PlayState.instance.addTextToDebug("[WARNING] " + printer.exprToString(cast(e, Expr)), FlxColor.YELLOW);
+		}
+	}
+
+	function onImportFailed(classPath:Array<String>, classAlias:Null<String>):Bool
+	{
+		if (classPath[0] != "funkin")
+		{
+			var className = "funkin." + classPath.join(".");
+			var varName = (classAlias != null) ? classAlias : classPath[classPath.length - 1];
+			var cls = Type.resolveClass(className);
+			if (cls != null)
+			{
+				set(varName, cls);
+				return true;
+			}
+		}
+		else if (classPath.contains("Discord"))
+		{
+			#if DISCORD_ALLOWED
+			var varName = (classAlias != null) ? classAlias : "Discord";
+			set(varName, Type.resolveClass("funkin.api.Discord"));
+			return true;
+			#end
+		}
+		return false;
 	}
 
 	public function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?manualRun:Bool = false)
@@ -126,6 +157,7 @@ class HScript implements HscriptInterface
 		interp.allowStaticVariables = interp.allowPublicVariables = true;
 		interp.errorHandler = onError;
 		interp.staticVariables = HScript.staticVariables;
+		interp.importFailedCallback = onImportFailed;
 
 		origin = file;
 		scriptName = file;

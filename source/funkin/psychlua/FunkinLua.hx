@@ -1,23 +1,19 @@
 #if LUA_ALLOWED
 package funkin.psychlua;
 
-import funkin.backend.Highscore;
-import funkin.backend.Song;
-import funkin.backend.WeekData;
-import funkin.cutscenes.DialogueBoxPsych;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.FlxState;
 import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.input.keyboard.FlxKey;
-import haxe.Json;
+import funkin.backend.Highscore;
+import funkin.backend.Song;
+import funkin.backend.WeekData;
+import funkin.cutscenes.DialogueBoxPsych;
 import funkin.objects.Character;
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;
 import funkin.objects.StrumNote;
-import openfl.Lib;
-import openfl.display.BitmapData;
-import openfl.utils.Assets;
 import funkin.psychlua.DebugLuaText;
 import funkin.psychlua.LuaUtils.LuaTweenOptions;
 import funkin.psychlua.LuaUtils;
@@ -27,6 +23,10 @@ import funkin.states.MainMenuState;
 import funkin.states.StoryMenuState;
 import funkin.substates.GameOverSubstate;
 import funkin.substates.PauseSubState;
+import haxe.Json;
+import openfl.Lib;
+import openfl.display.BitmapData;
+import openfl.utils.Assets;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 #end
@@ -54,6 +54,7 @@ class FunkinLua
 	{
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
+		Lua.init_callbacks(lua);
 
 		// trace('Lua version: ' + Lua.version());
 		// trace("LuaJIT version: " + Lua.versionJIT());
