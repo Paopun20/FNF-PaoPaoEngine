@@ -9,7 +9,7 @@ import flixel.input.keyboard.FlxKey;
 import funkin.backend.Highscore;
 import funkin.backend.Song;
 import funkin.backend.WeekData;
-import funkin.cutscenes.DialogueBoxPsych;
+import funkin.frontend.cutscenes.DialogueBoxPsych;
 import funkin.objects.Character;
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;

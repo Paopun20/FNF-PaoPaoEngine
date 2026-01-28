@@ -1,4 +1,4 @@
-package funkin.cutscenes;
+package funkin.frontend.cutscenes;
 
 import flixel.FlxBasic;
 import flixel.util.FlxSort;

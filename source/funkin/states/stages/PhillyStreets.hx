@@ -7,7 +7,7 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import funkin.substates.GameOverSubstate;
 import funkin.states.stages.objects.*;
 import funkin.objects.Note;
-import funkin.cutscenes.CutsceneHandler;
+import funkin.frontend.cutscenes.CutsceneHandler;
 
 enum NeneState
 {

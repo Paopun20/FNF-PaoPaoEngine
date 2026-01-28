@@ -5,7 +5,7 @@ import funkin.backend.Rating;
 import funkin.backend.Song;
 import funkin.backend.StageData;
 import funkin.backend.WeekData;
-import funkin.cutscenes.DialogueBoxPsych;
+import funkin.frontend.cutscenes.DialogueBoxPsych;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.FlxSubState;

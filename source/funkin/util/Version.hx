@@ -1,4 +1,4 @@
-package funkin.helper;
+package funkin.util;
 
 class Version
 {

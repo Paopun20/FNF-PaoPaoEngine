@@ -4,7 +4,7 @@ package funkin.psychlua;
 import funkin.backend.Highscore;
 import funkin.backend.Song;
 import funkin.backend.WeekData;
-import funkin.cutscenes.DialogueBoxPsych;
+import funkin.frontend.cutscenes.DialogueBoxPsych;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.FlxState;

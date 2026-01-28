@@ -1,9 +1,9 @@
-package funkin.cutscenes;
+package funkin.frontend.cutscenes;
 
 import haxe.Json;
 import openfl.utils.Assets;
 import funkin.objects.TypedAlphabet;
-import funkin.cutscenes.DialogueCharacter;
+import funkin.frontend.cutscenes.DialogueCharacter;
 
 typedef DialogueFile =
 {

@@ -1,4 +1,4 @@
-package funkin.cutscenes;
+package funkin.frontend.cutscenes;
 
 import haxe.Json;
 import lime.utils.Assets;

@@ -4,7 +4,7 @@ import lime.system.System;
 import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
 import funkin.net.HttpClient as Client;
-import funkin.helper.Version;
+import funkin.util.Version;
 
 class CoolUtil
 {

@@ -7,8 +7,8 @@ import flash.net.FileFilter;
 import haxe.Json;
 import lime.system.Clipboard;
 import funkin.objects.TypedAlphabet;
-import funkin.cutscenes.DialogueBoxPsych;
-import funkin.cutscenes.DialogueCharacter;
+import funkin.frontend.cutscenes.DialogueBoxPsych;
+import funkin.frontend.cutscenes.DialogueCharacter;
 import funkin.editors.content.Prompt;
 
 class DialogueCharacterEditorState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
