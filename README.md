@@ -19,9 +19,11 @@ Crossover between **Codename Engine**, **FNF V-Slice**, and **Psych Engine**
   > Use Codename's HScript fork library.
 - Ndll Support (HScript/Python only)
   > It codename feature.
+  >
   > > IDK, what to say.
 - Fixed Loading Screen race condition and made it thread-safe
   > A race condition occurs when two or more threads access a shared resource simultaneously, leading to unpredictable behavior, data corruption, or a stuck loading screen.
+  >
   > > More details? [here](https://www.youtube.com/watch?v=bhpzTWtee2A)
 - Open mod folder by clicking the "Open Mod Folder" button in the mod menu.
 - Format all files to make them more readable and easier to understand
@@ -32,5 +34,18 @@ Crossover between **Codename Engine**, **FNF V-Slice**, and **Psych Engine**
 
 > [!NOTE]
 > It's broken some psych mods, wait I add backwards compatibility any time soon
+
+# Support target build
+
+| Platform | Stability  | Lua Support | Hscript Support | Python Support |
+| -------- | ---------- | ----------- | --------------- | -------------- |
+| C++      | yes        | yes         | yes             | yes            |
+| HashLink | not stable | no          | yes             | yes            |
+| other    | unknown    | unknown     | unknown         | unknown        |
+
+> Why can't Lua be used with HL and other targets?
+>
+> Lua relies on native C/C++ bindings, while HL is based on Haxe bindings.
+> Because of this mismatch, Lua cannot be used with HL.
 
 > (I haven't finished writing the README yet.)
