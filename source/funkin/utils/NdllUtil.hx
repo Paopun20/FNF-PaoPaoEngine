@@ -1,4 +1,4 @@
-package funkin.util;
+package funkin.utils;
 
 #if sys
 import sys.FileSystem;
@@ -6,7 +6,7 @@ import sys.FileSystem;
 import funkin.psychlua.LuaUtils;
 #if NDLL_ALLOWED
 import lime.system.CFFI;
-import funkin.macros.MacroUtil;
+import funkin.utils.macro.MacroUtil;
 #end
 
 @:keep

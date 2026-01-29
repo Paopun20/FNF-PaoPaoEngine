@@ -1,10 +1,10 @@
-package funkin.helper;
+package funkin.utils;
 
 import haxe.Log;
 import haxe.PosInfos;
 import haxe.format.JsonPrinter;
-import funkin.util.AnsiUtil;
-import funkin.util.AnsiUtil.AnsiCode;
+import funkin.utils.AnsiUtil;
+import funkin.utils.AnsiUtil.AnsiCode;
 
 using StringTools;
 

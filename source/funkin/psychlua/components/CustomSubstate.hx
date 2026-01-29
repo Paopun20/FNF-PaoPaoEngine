@@ -1,4 +1,4 @@
-package funkin.psychlua;
+package funkin.psychlua.components;
 
 import flixel.FlxObject;
 import funkin.psychlua.ImplementUtils;

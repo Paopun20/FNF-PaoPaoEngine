@@ -97,7 +97,7 @@ class PlayState extends MusicBeatState
 	#end
 
 	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-	private var luaDebugGroup:FlxTypedGroup<funkin.psychlua.DebugLuaText>;
+	private var luaDebugGroup:FlxTypedGroup<funkin.psychlua.objects.DebugLuaText>;
 	#end
 
 	public var BF_X:Float = 770;
@@ -410,7 +410,7 @@ class PlayState extends MusicBeatState
 			introSoundsSuffix = '-pixel';
 
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		luaDebugGroup = new FlxTypedGroup<funkin.psychlua.DebugLuaText>();
+		luaDebugGroup = new FlxTypedGroup<funkin.psychlua.objects.DebugLuaText>();
 		luaDebugGroup.cameras = [camOther];
 		add(luaDebugGroup);
 		#end
@@ -743,14 +743,14 @@ class PlayState extends MusicBeatState
 	#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
 	public function addTextToDebug(text:String, color:FlxColor)
 	{
-		var newText:funkin.psychlua.DebugLuaText = luaDebugGroup.recycle(funkin.psychlua.DebugLuaText);
+		var newText:funkin.psychlua.objects.DebugLuaText = luaDebugGroup.recycle(funkin.psychlua.objects.DebugLuaText);
 		newText.text = text;
 		newText.color = color;
 		newText.disableTime = 6;
 		newText.alpha = 1;
 		newText.setPosition(10, 8 - newText.height);
 
-		luaDebugGroup.forEachAlive(function(spr:funkin.psychlua.DebugLuaText)
+		luaDebugGroup.forEachAlive(function(spr:funkin.psychlua.objects.DebugLuaText)
 		{
 			spr.y += newText.height + 2;
 		});
@@ -3526,7 +3526,7 @@ class PlayState extends MusicBeatState
 
 	override function destroy()
 	{
-		if (funkin.psychlua.CustomSubstate.instance != null)
+		if (funkin.psychlua.components.CustomSubstate.instance != null)
 		{
 			closeSubState();
 			resetSubState();

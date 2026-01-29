@@ -1,4 +1,4 @@
-package funkin.util;
+package funkin.utils;
 
 enum abstract AnsiCode(String) from String to String
 {

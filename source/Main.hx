@@ -7,7 +7,7 @@ import flixel.FlxGame;
 import flixel.FlxState;
 import flixel.graphics.FlxGraphic;
 import funkin.backend.Highscore;
-import funkin.debug.FPSCounter;
+import funkin.frontend.huds.FPSCounter;
 import funkin.states.TitleState;
 import haxe.io.Path;
 import lime.app.Application;
@@ -16,7 +16,6 @@ import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
 import openfl.events.Event;
-
 #if (linux || mac)
 import lime.graphics.Image;
 #end
@@ -52,7 +51,6 @@ class Main extends Sprite
 
 	public static function main():Void
 	{
-		CoolLog.init(); // Initialize the logging system
 		Lib.current.addChild(new Main());
 	}
 
@@ -82,7 +80,7 @@ class Main extends Sprite
 		FlxG.save.bind('funkin', CoolUtil.getSavePath());
 		Highscore.load();
 
-		#if LUA_ALLOWED Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(funkin.psychlua.CallbackHandler.call)); #end
+		#if LUA_ALLOWED Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(funkin.psychlua.components.CallbackHandler.call)); #end
 		Controls.instance = new Controls();
 		ClientPrefs.loadDefaultKeys();
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
@@ -118,6 +116,10 @@ class Main extends Sprite
 
 		#if CRASH_HANDLER
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
+
+		#if cpp
+		untyped __global__.__hxcpp_set_critical_error_handler(onCritical);
+		#end
 		#end
 
 		#if DISCORD_ALLOWED
@@ -150,6 +152,16 @@ class Main extends Sprite
 	}
 
 	#if CRASH_HANDLER
+	function showDialogWindow(message:String, title:String):Void
+	{
+		Application.current.window.alert(message, title);
+	}
+
+	function saveLogs(filename:String, content:String):Void
+	{
+		File.saveContent(filename, content);
+	}
+
 	function onCrash(e:UncaughtErrorEvent):Void
 	{
 		var errMsg:String = "";
@@ -190,11 +202,37 @@ class Main extends Sprite
 
 		File.saveContent(path, errMsg + "\n");
 		CoolLog.critical("Crash dump saved in " + Path.normalize(path));
-		Application.current.window.alert(errMsg, "Critical Error!");
+		showDialogWindow(errMsg, "Game Crash!");
+		shutdown();
+	}
+	
+	#if cpp
+	function onCritical(message:String):Void
+	{
+		try
+		{
+			saveLogs("./crash/" + "PaoPaoEngine_" + Date.now().toString().replace(" ", "_").replace(":", "-") + ".log", message);
+			showDialogWindow(message, "Critical Error!");
+			shutdown();
+		}
+		catch (e:Dynamic)
+		{
+			trace('Error while handling crash: $e');
+
+			trace('Message: $message');
+		}
+		shutdown();
+	}
+	#end
+
+	static function shutdown():Void
+	{
 		#if DISCORD_ALLOWED
 		DiscordClient.shutdown();
 		#end
+		#if sys
 		Sys.exit(1);
+		#end
 	}
 	#end
 }

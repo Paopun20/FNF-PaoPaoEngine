@@ -57,5 +57,5 @@ import flixel.addons.transition.FlxTransitionableState;
 
 using StringTools;
 
-import funkin.helper.CoolLog;
+import funkin.utils.CoolLog;
 #end

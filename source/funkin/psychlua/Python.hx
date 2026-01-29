@@ -1,38 +1,39 @@
 package funkin.psychlua;
 
 #if PYTHON_ALLOWED
-import funkin.backend.Highscore;
-import funkin.backend.Song;
-import funkin.backend.WeekData;
-import funkin.frontend.cutscenes.DialogueBoxPsych;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.FlxState;
 import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.input.keyboard.FlxKey;
-import haxe.Json;
+import funkin.backend.Highscore;
+import funkin.backend.Song;
+import funkin.backend.WeekData;
+import funkin.frontend.cutscenes.DialogueBoxPsych;
 import funkin.objects.Character;
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;
 import funkin.objects.StrumNote;
-import openfl.Lib;
-import openfl.display.BitmapData;
-import openfl.utils.Assets;
-import paopao.hython.Interp as PyInterp;
-import paopao.hython.Parser as PyParser;
-import paopao.hython.Printer as PyPrinter;
-import paopao.hython.Expr.Error as PyError;
-import paopao.hython.Expr as PyExpr;
-import funkin.psychlua.DebugLuaText;
+import funkin.psychlua.objects.DebugLuaText;
 import funkin.psychlua.LuaUtils.LuaTweenOptions;
 import funkin.psychlua.LuaUtils;
 import funkin.psychlua.ModchartSprite;
+import funkin.psychlua.components.*;
 import funkin.states.FreeplayState;
 import funkin.states.MainMenuState;
 import funkin.states.StoryMenuState;
 import funkin.substates.GameOverSubstate;
 import funkin.substates.PauseSubState;
-import funkin.util.NdllUtil;
+import funkin.utils.NdllUtil;
+import haxe.Json;
+import openfl.Lib;
+import openfl.display.BitmapData;
+import openfl.utils.Assets;
+import paopao.hython.Expr as PyExpr;
+import paopao.hython.Expr.Error as PyError;
+import paopao.hython.Interp as PyInterp;
+import paopao.hython.Parser as PyParser;
+import paopao.hython.Printer as PyPrinter;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 #end

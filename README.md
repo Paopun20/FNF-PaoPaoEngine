@@ -1,9 +1,9 @@
 # FNF - PaoPao Engine (PaoPao's Psych Engine fork)
 
-Crossover between **Codename Engine**, **FNF V-Slice**, and **Psych Engine**
+<!--Crossover between **Codename Engine**, **FNF V-Slice**, and **Psych Engine**-->
 
 > [!WARNING]
-> This engine is still in heavy development, so some features may not work as expected like Python.
+> This engine is still in heavy development, so some features may not work as expected like [Python](https://github.com/Paopun20/Hython) with some [limitations](http://github.com/Paopun20/Hython?tab=readme-ov-file#limitations).
 
 ## Features/Changes
 
@@ -30,10 +30,13 @@ Crossover between **Codename Engine**, **FNF V-Slice**, and **Psych Engine**
 - Fixed Psych Engine Bugs
 - Updated dependencies to the most compatible versions
 - Removed obsolete features from the Psych Engine, such as the Easter Egg.
-- Organize files and folders for better readability and maintainability
+- Organize files and folders for improved readability and maintenance. Ensure compatibility with older layouts when importing to new systems (mostly mods, import backend, or import Discord; others may not be compatible).
 
 > [!NOTE]
 > It's broken some psych mods, wait I add backwards compatibility any time soon
+>
+> > [!WARNING]
+> > Don't try Psych Engine under 1.0.0 version, it will don't like you see.
 
 # Support target build
 
@@ -43,9 +46,9 @@ Crossover between **Codename Engine**, **FNF V-Slice**, and **Psych Engine**
 | HashLink | not stable | no          | yes             | yes            |
 | other    | unknown    | unknown     | unknown         | unknown        |
 
-> Why can't Lua be used with HL and other targets?
+> ### Why can't Lua be used with HL and other targets?
 >
-> Lua relies on native C/C++ bindings, while HL is based on Haxe bindings.
-> Because of this mismatch, Lua cannot be used with HL.
+> Lua relies on native C/C++ bindings, while HL or other targets are based on Haxe bindings.
+> Because of this mismatch, Lua cannot be used with HL or other targets.
 
 > (I haven't finished writing the README yet.)

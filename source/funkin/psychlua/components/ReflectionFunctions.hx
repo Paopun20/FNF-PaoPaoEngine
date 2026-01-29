@@ -1,4 +1,4 @@
-package funkin.psychlua;
+package funkin.psychlua.components;
 
 import Type.ValueType;
 import haxe.Constraints;

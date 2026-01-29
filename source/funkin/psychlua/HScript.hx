@@ -2,8 +2,8 @@ package funkin.psychlua;
 
 import funkin.objects.Character;
 import funkin.psychlua.LuaUtils;
-import funkin.psychlua.CustomSubstate;
-import funkin.util.PlatformDex;
+import funkin.psychlua.components.*;
+import funkin.utils.PlatformDex;
 #if LUA_ALLOWED
 import funkin.psychlua.FunkinLua;
 #end
@@ -15,7 +15,7 @@ import hscript.Expr.Error as HscriptError;
 import hscript.Expr;
 import hscript.Expr;
 import haxe.ds.StringMap;
-import funkin.util.NdllUtil;
+import funkin.utils.NdllUtil;
 import haxe.crypto.Sha256;
 import haxe.io.Bytes;
 

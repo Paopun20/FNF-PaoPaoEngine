@@ -1,4 +1,4 @@
-package funkin.psychlua;
+package funkin.psychlua.components;
 
 //
 // This is simply where i store deprecated functions for it to be more organized.

@@ -1,6 +1,7 @@
 package;
 import CompileTime;
 import flixel.system.FlxBasePreloader;
+import funkin.utils.CoolLog;
 import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.media.Sound;
@@ -43,6 +44,7 @@ class Preloader extends FlxBasePreloader
 		if (WindowColorMode.isWindows10)
 			WindowColorMode.redrawWindowHeader();
 		#end
+		CoolLog.init(); // Initialize the logging system
 	}
 	
 	override function create():Void

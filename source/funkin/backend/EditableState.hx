@@ -15,6 +15,7 @@ class EditableState extends MusicBeatState
 {
 	private var stateName:String;
 	private var statePath:String;
+	private var script:Array<Dynamic>;
 
 	override public function create():Void
 	{

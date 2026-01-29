@@ -15,7 +15,7 @@ enum MainMenuColumn
 	RIGHT;
 }
 
-@:build(funkin.macro.VersionMacro.build())
+@:build(funkin.utils.macro.VersionMacro.build())
 class MainMenuState extends MusicBeatState
 {
 	public static var psychEngineVersion:String = '1.0.4'; // This is also used legacy mods from Psych Engine

@@ -1,4 +1,4 @@
-package funkin.macro;
+package funkin.utils.macro;
 
 #if macro
 import haxe.macro.Context;

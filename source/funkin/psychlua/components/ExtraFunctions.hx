@@ -1,4 +1,4 @@
-package funkin.psychlua;
+package funkin.psychlua.components;
 
 import flixel.util.FlxSave;
 import openfl.utils.Assets;
