@@ -76,9 +76,15 @@ class FPSCounter extends TextField
 	}
 
 	inline function get_memoryMegas():Float
-	#if cpp
+	{
+		#if cpp
 		return cpp.vm.Gc.memInfo64(cpp.vm.Gc.MEM_INFO_USAGE);
-	#else
-		return 0.0;
-	#end
+		#elseif hl
+		return hl.Gc.stats().currentMemory;
+		#elseif sys
+		return cast(openfl.system.System.totalMemory, Float);
+		#else
+		return cast(openfl.system.System.totalMemory, Float);
+		#end
+	}
 }
