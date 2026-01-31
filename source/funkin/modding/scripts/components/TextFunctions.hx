@@ -1,6 +1,6 @@
-package funkin.psychlua.components;
+package funkin.modding.scripts.components;
 
-import funkin.psychlua.ImplementUtils;
+import funkin.modding.scripts.ImplementUtils;
 
 class TextFunctions
 {

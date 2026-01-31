@@ -8,7 +8,7 @@ import funkin.states.StoryMenuState;
 import funkin.states.FreeplayState;
 import funkin.options.OptionsState;
 #if HSCRIPT_ALLOWED
-import funkin.psychlua.HScript;
+import funkin.modding.scripts.HScript;
 #end
 
 class PauseSubState extends MusicBeatSubstate

@@ -1,4 +1,4 @@
-package funkin.psychlua.components;
+package funkin.modding.scripts.components;
 
 import openfl.utils.Assets;
 

@@ -1,11 +1,11 @@
-package funkin.psychlua;
+package funkin.modding.scripts;
 
 #if (LUA_ALLOWED || PYTHON_ALLOWED)
 #if LUA_ALLOWED
-import funkin.psychlua.FunkinLua;
+import funkin.modding.scripts.FunkinLua;
 #end
 #if PYTHON_ALLOWED
-import funkin.psychlua.Python;
+import funkin.modding.scripts.Python;
 #end
 #end
 

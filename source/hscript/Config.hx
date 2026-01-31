@@ -6,7 +6,7 @@ class Config
 		"flixel",
 		"funkin.backend",
 		"funkin.shaders",
-		"funkin.psychlua",
+		"funkin.modding.scripts",
 		"funkin.options",
 		"funkin.objects",
 		"haxe.ds",

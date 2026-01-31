@@ -1,5 +1,5 @@
 #if LUA_ALLOWED
-package funkin.psychlua;
+package funkin.modding.scripts;
 
 import flixel.FlxBasic;
 import flixel.FlxObject;
@@ -14,11 +14,11 @@ import funkin.objects.Character;
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;
 import funkin.objects.StrumNote;
-import funkin.psychlua.objects.DebugLuaText;
-import funkin.psychlua.LuaUtils.LuaTweenOptions;
-import funkin.psychlua.LuaUtils;
-import funkin.psychlua.ModchartSprite;
-import funkin.psychlua.components.*;
+import funkin.modding.scripts.objects.DebugLuaText;
+import funkin.modding.scripts.LuaUtils.LuaTweenOptions;
+import funkin.modding.scripts.LuaUtils;
+import funkin.modding.scripts.ModchartSprite;
+import funkin.modding.scripts.components.*;
 import funkin.states.FreeplayState;
 import funkin.states.MainMenuState;
 import funkin.states.StoryMenuState;
@@ -32,7 +32,7 @@ import openfl.utils.Assets;
 import flixel.addons.display.FlxRuntimeShader;
 #end
 #if HSCRIPT_ALLOWED
-import funkin.psychlua.HScript;
+import funkin.modding.scripts.HScript;
 #end
 
 class FunkinLua

@@ -1,7 +1,7 @@
-package funkin.psychlua.components;
+package funkin.modding.scripts.components;
 
 import flixel.FlxObject;
-import funkin.psychlua.ImplementUtils;
+import funkin.modding.scripts.ImplementUtils;
 
 class CustomSubstate extends MusicBeatSubstate
 {

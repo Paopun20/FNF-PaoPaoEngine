@@ -1,9 +1,9 @@
-package funkin.psychlua.components;
+package funkin.modding.scripts.components;
 
 import Type.ValueType;
 import haxe.Constraints;
 import funkin.substates.GameOverSubstate;
-import funkin.psychlua.ImplementUtils;
+import funkin.modding.scripts.ImplementUtils;
 
 //
 // Functions that use a high amount of Reflections, which are somewhat CPU intensive

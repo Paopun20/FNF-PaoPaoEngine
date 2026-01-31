@@ -1,4 +1,4 @@
-package funkin.psychlua;
+package funkin.modding.scripts;
 
 class ModchartSprite extends FlxSprite
 {

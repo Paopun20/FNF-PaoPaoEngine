@@ -1,8 +1,8 @@
-package funkin.psychlua.components;
+package funkin.modding.scripts.components;
 
 import flixel.util.FlxSave;
 import openfl.utils.Assets;
-import funkin.psychlua.ImplementUtils;
+import funkin.modding.scripts.ImplementUtils;
 
 //
 // Things to trivialize some dumb stuff like splitting strings on older Lua

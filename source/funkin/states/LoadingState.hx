@@ -18,7 +18,7 @@ import funkin.backend.StageData;
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;
 #if HSCRIPT_ALLOWED
-import funkin.psychlua.HScript;
+import funkin.modding.scripts.HScript;
 #end
 
 #if (cpp || MULTITHREADED_LOADING)

@@ -17,4 +17,4 @@ haxelib git flxanimate https://github.com/Dot-Stuff/flxanimate 0188d47c982913eb1
 haxelib git funkin.vis https://github.com/FunkinCrew/funkVis 43fa611141cb254751943274fd987e8c7d35af8a
 haxelib git grig.audio https://gitlab.com/haxe-grig/grig.audio.git 57f5d47f2533fd0c3dcd025a86cb86c0dfa0b6d2
 
-haxelib git hscript-improved https://github.com/CodenameCrew/hscript-improved codename-dev
+haxelib git hscript-improved https://github.com/Paopun20/PPE-hscript-improved codename-dev

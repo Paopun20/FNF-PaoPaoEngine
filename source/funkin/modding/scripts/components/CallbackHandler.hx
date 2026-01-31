@@ -1,5 +1,5 @@
 #if LUA_ALLOWED
-package funkin.psychlua.components;
+package funkin.modding.scripts.components;
 
 class CallbackHandler
 {

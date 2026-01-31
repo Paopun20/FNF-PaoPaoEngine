@@ -41,6 +41,7 @@ import flxanimate.PsychFlxAnimate as FlxAnimate;
 #end
 // Flixel
 import flixel.sound.FlxSound;
+import flixel.sound.FlxStreamSound;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxCamera;

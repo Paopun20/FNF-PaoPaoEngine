@@ -6,7 +6,7 @@ import lime.app.Application;
 import hxdiscord_rpc.Discord;
 import hxdiscord_rpc.Types;
 #if PYTHON_ALLOWED
-import funkin.psychlua.Python;
+import funkin.modding.scripts.Python;
 #end
 
 @:build(funkin.utils.macro.DotEnvMacro.build())

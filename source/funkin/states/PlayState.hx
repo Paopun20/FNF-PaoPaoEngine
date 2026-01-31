@@ -34,13 +34,13 @@ import funkin.substates.PauseSubState;
 import openfl.filters.ShaderFilter;
 #end
 #if LUA_ALLOWED
-import funkin.psychlua.*;
+import funkin.modding.scripts.*;
 #else
-import funkin.psychlua.HScript;
-import funkin.psychlua.LuaUtils;
+import funkin.modding.scripts.HScript;
+import funkin.modding.scripts.LuaUtils;
 #end
 #if PYTHON_ALLOWED
-import funkin.psychlua.Python;
+import funkin.modding.scripts.Python;
 #end
 
 /**
@@ -97,7 +97,7 @@ class PlayState extends MusicBeatState
 	#end
 
 	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-	private var luaDebugGroup:FlxTypedGroup<funkin.psychlua.objects.DebugLuaText>;
+	private var luaDebugGroup:FlxTypedGroup<funkin.modding.scripts.objects.DebugLuaText>;
 	#end
 
 	public var BF_X:Float = 770;
@@ -410,7 +410,7 @@ class PlayState extends MusicBeatState
 			introSoundsSuffix = '-pixel';
 
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		luaDebugGroup = new FlxTypedGroup<funkin.psychlua.objects.DebugLuaText>();
+		luaDebugGroup = new FlxTypedGroup<funkin.modding.scripts.objects.DebugLuaText>();
 		luaDebugGroup.cameras = [camOther];
 		add(luaDebugGroup);
 		#end
@@ -743,14 +743,14 @@ class PlayState extends MusicBeatState
 	#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
 	public function addTextToDebug(text:String, color:FlxColor)
 	{
-		var newText:funkin.psychlua.objects.DebugLuaText = luaDebugGroup.recycle(funkin.psychlua.objects.DebugLuaText);
+		var newText:funkin.modding.scripts.objects.DebugLuaText = luaDebugGroup.recycle(funkin.modding.scripts.objects.DebugLuaText);
 		newText.text = text;
 		newText.color = color;
 		newText.disableTime = 6;
 		newText.alpha = 1;
 		newText.setPosition(10, 8 - newText.height);
 
-		luaDebugGroup.forEachAlive(function(spr:funkin.psychlua.objects.DebugLuaText)
+		luaDebugGroup.forEachAlive(function(spr:funkin.modding.scripts.objects.DebugLuaText)
 		{
 			spr.y += newText.height + 2;
 		});
@@ -3526,7 +3526,7 @@ class PlayState extends MusicBeatState
 
 	override function destroy()
 	{
-		if (funkin.psychlua.components.CustomSubstate.instance != null)
+		if (funkin.modding.scripts.components.CustomSubstate.instance != null)
 		{
 			closeSubState();
 			resetSubState();

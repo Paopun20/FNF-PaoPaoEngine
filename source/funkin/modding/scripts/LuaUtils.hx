@@ -1,4 +1,4 @@
-package funkin.psychlua;
+package funkin.modding.scripts;
 
 import funkin.backend.WeekData;
 import funkin.objects.Character;

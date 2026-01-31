@@ -5,9 +5,9 @@ import funkin.objects.AchievementPopup;
 import haxe.Exception;
 import haxe.Json;
 #if LUA_ALLOWED
-import funkin.psychlua.FunkinLua;
+import funkin.modding.scripts.FunkinLua;
 #end
-import funkin.psychlua.ImplementUtils;
+import funkin.modding.scripts.ImplementUtils;
 
 typedef Achievement =
 {

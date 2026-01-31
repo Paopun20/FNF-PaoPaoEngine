@@ -1,4 +1,5 @@
 package;
+
 import CompileTime;
 import flixel.system.FlxBasePreloader;
 import funkin.utils.CoolLog;
@@ -9,7 +10,7 @@ import openfl.media.SoundChannel;
 import openfl.media.SoundTransform;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
-
+import openfl.events.Event;
 #if LUA_ALLOWED
 import llua.Lua;
 #end
@@ -17,176 +18,274 @@ import llua.Lua;
 import hxwindowmode.WindowColorMode;
 #end
 
-@:sound("art/perload/sounds/beep.wav")
-class PerloadSoundFX extends Sound {}
+@:sound("art/preload/sounds/beep.wav")
+class PreloadSoundFX extends Sound
+{
+}
+
+typedef Task =
+{
+	message:String,
+	action:Void->Void,
+	?delay:Float
+}
 
 class Preloader extends FlxBasePreloader
 {
-	var terminal:TextField;
-	var lines:Array<String>;
-	var lastStep:Int = -1;
-	var sound:PerloadSoundFX;
+	var terminal:Array<TextField>;
+	var tasks:Array<Task>;
+	var sound:PreloadSoundFX;
 	var soundChannel:SoundChannel;
 	var cursorVisible:Bool = true;
 	var cursorChar:String = "_";
 	var cursorTimer:Float = 0;
 	var cursorInterval:Float = 0.5;
-	
-	var endWaitTimer:Float = 0;
-	var endWaitDuration:Float = 1;
-	var allLinesShown:Bool = false;
-	
+
+	var currentTaskIndex:Int = 0;
+	var taskTimer:Float = 0;
+	var waitingForTask:Bool = false;
+	var hasPlayedSound:Bool = false;
+	var currentLineIndex:Int = 0;
+	var lineHeight:Float = 16;
+
 	public function new(MinDisplayTime:Float = 5, ?AllowedURLs:Array<String>)
 	{
 		super(MinDisplayTime, AllowedURLs);
+
 		#if WindowColorMode
 		WindowColorMode.setDarkMode();
 		if (WindowColorMode.isWindows10)
 			WindowColorMode.redrawWindowHeader();
 		#end
-		CoolLog.init(); // Initialize the logging system
+
+		CoolLog.init();
 	}
-	
+
 	override function create():Void
 	{
 		super.create();
-		
+
 		// Background
 		var bg = new Sprite();
 		bg.graphics.beginFill(0x000000);
 		bg.graphics.drawRect(0, 0, stage.stageWidth, stage.stageHeight);
 		bg.graphics.endFill();
 		addChild(bg);
-		
-		// Terminal
-		terminal = new TextField();
-		terminal.defaultTextFormat = new TextFormat("_typewriter", 14, 0x00FF00);
-		terminal.width = stage.stageWidth - 20;
-		terminal.height = stage.stageHeight - 20;
-		terminal.x = 10;
-		terminal.y = 10;
-		terminal.multiline = true;
-		terminal.wordWrap = true;
-		terminal.selectable = false;
-		addChild(terminal);
-		
-		// Initialize lines
-		lines = [
-			'Starting Haxe Kernel ${CompileTime.getHaxeVersion()}...',
-			'Building Target ${CompileTime.getTarget()}...',
-			'Initializing Funkin...',
-			'Initializing PaoPao Engine...',
-			'Initializing Script Interpreter...',
+
+		// Initialize terminal array
+		terminal = [];
+
+		// Initialize tasks
+		tasks = [
+			{
+				message: 'Starting Haxe Kernel ${CompileTime.getHaxeVersion()}...',
+				action: function()
+				{
+				},
+				delay: 0.2
+			},
+			{
+				message: 'Building Target ${CompileTime.getTarget()}...',
+				action: function()
+				{/* Target build */},
+				delay: 0.3
+			},
+			{
+				message: 'Initializing Funkin...',
+				action: function()
+				{/* Funkin init */},
+				delay: 0.2
+			},
+			{
+				message: 'Initializing PaoPao Engine...',
+				action: function()
+				{/* Engine init */},
+				delay: 0.25
+			},
+			{
+				message: 'Initializing Script Interpreter...',
+				action: function()
+				{/* Script init */},
+				delay: 0.2
+			},
 			#if HSCRIPT_ALLOWED
-			"Initializing HScript Interpreter...",
+			{
+				message: "Initializing HScript Interpreter...",
+				action: function()
+				{/* HScript init */},
+				delay: 0.2
+			},
 			#end
 			#if LUA_ALLOWED
-			'Initializing Lua ${StringTools.replace(Lua.version(), "Lua ", "")} LuaJIT ${StringTools.replace(Lua.versionJIT(), "LuaJIT ", "")}...',
+			{
+				message: 'Initializing Lua ${StringTools.replace(Lua.version(), "Lua ", "")} LuaJIT ${StringTools.replace(Lua.versionJIT(), "LuaJIT ", "")}...',
+				action: function()
+				{/* Lua init */},
+				delay: 0.3
+			},
 			#end
-			"Initializing Game...",
-			"Starting Game...",
+			{
+				message: "Initializing Game...",
+				action: function()
+				{/* Game init */},
+				delay: 0.2
+			},
+			{
+				message: "Starting Game...",
+				action: function()
+				{/* Start game */},
+				delay: 0.2
+			},
 		];
-		
+
 		// Initialize sound
-		sound = new PerloadSoundFX();
+		sound = new PreloadSoundFX();
+
+		addEventListener(Event.ENTER_FRAME, onFirstFrame);
 	}
-	
+
+	function onFirstFrame(e:Event):Void
+	{
+		if (!hasPlayedSound && sound != null)
+		{
+			soundChannel = sound.play(0, 0, new SoundTransform(0.5));
+			hasPlayedSound = true;
+		}
+		removeEventListener(Event.ENTER_FRAME, onFirstFrame);
+	}
+
+	function createLine(text:String):TextField
+	{
+		var line = new TextField();
+		line.defaultTextFormat = new TextFormat("_typewriter", 14, 0x00FF00);
+		line.width = stage.stageWidth - 20;
+		line.height = lineHeight;
+		line.x = 10;
+		line.y = 10 + (currentLineIndex * lineHeight);
+		line.multiline = false;
+		line.wordWrap = false;
+		line.selectable = false;
+		line.text = text;
+		addChild(line);
+		return line;
+	}
+
+	function print(text:String):Void
+	{
+		var line = createLine(text);
+		terminal.push(line);
+		currentLineIndex++;
+	}
+
+	function ok():Void
+	{
+		if (terminal.length > 0)
+		{
+			var lastLine = terminal[terminal.length - 1];
+			lastLine.text = " [  OK  ]  " + lastLine.text;
+		}
+	}
+
+	function doTask(task:Task, done:Void->Void):Void
+	{
+		print(task.message);
+
+		// Execute the task action
+		if (task.action != null)
+			task.action();
+
+		// Mark as done
+		ok();
+
+		// Call completion callback
+		if (done != null)
+			done();
+	}
+
 	function refreshCursor():Void
 	{
-		var text = terminal.text;
-		
+		if (terminal.length == 0)
+			return;
+
+		var lastLine = terminal[terminal.length - 1];
+		var text = lastLine.text;
+
 		// Remove existing cursor
 		if (StringTools.endsWith(text, cursorChar))
 			text = text.substr(0, text.length - 1);
-		
+
 		// Add cursor if visible
 		if (cursorVisible)
 			text += cursorChar;
-		
-		terminal.text = text;
-		terminal.scrollV = terminal.maxScrollV;
+
+		lastLine.text = text;
 	}
-	
-	function setCursorVisibility(visible:Bool):Void
+
+	override function update(_:Float):Void
 	{
-		cursorVisible = visible;
-		refreshCursor();
-	}
-	
-	override function update(Percent:Float):Void
-	{
-		// Get delta time
-		var dt = 1 / Lib.current.stage.frameRate;
-		
+		super.update(0);
+
+		var elapsed:Float = 1 / 60;
+
 		// Update cursor blink
-		cursorTimer += dt;
+		cursorTimer += elapsed;
 		if (cursorTimer >= cursorInterval)
 		{
 			cursorTimer = 0;
-			setCursorVisibility(!cursorVisible);
+			cursorVisible = !cursorVisible;
+			refreshCursor();
 		}
-		
-		// Update loading progress
-		var step = Std.int(Percent * lines.length);
-		
-		if (step != lastStep && step < lines.length)
+
+		// Process tasks
+		if (currentTaskIndex < tasks.length && !waitingForTask)
 		{
-			setCursorVisibility(false);
-			
-			// Play sound effect
-			if (sound != null)
-				soundChannel = sound.play(0, 0, new SoundTransform(0.3));
-			
-			// Add new line
-			terminal.appendText("> " + lines[step] + "\n");
-			lastStep = step;
-			
-			setCursorVisibility(true);
-			
-			// Check if all lines are shown
-			if (step >= lines.length - 1)
+			taskTimer += elapsed;
+			var currentTask = tasks[currentTaskIndex];
+			var delay = currentTask.delay != null ? currentTask.delay : 0.3;
+
+			if (taskTimer >= delay)
 			{
-				allLinesShown = true;
+				waitingForTask = true;
+
+				doTask(currentTask, function()
+				{
+					currentTaskIndex++;
+					taskTimer = 0;
+					waitingForTask = false;
+					sound.play(0, 0, new SoundTransform(0.31415926535897932384626433));
+				});
 			}
 		}
 		
-		// Wait at the end before finishing
-		if (allLinesShown && Percent >= 1.0)
+		if (currentTaskIndex >= tasks.length)
 		{
-			endWaitTimer += dt;
-			
-			// Only call super.update after wait period
-			if (endWaitTimer >= endWaitDuration)
-			{
-				super.update(Percent);
-			}
-		}
-		else
-		{
-			super.update(Percent);
+		    super.update(1); // end loop
 		}
 	}
-	
+
 	override function destroy():Void
 	{
-		// Stop sound
 		if (soundChannel != null)
 		{
 			soundChannel.stop();
 			soundChannel = null;
 		}
-		
-		// Clean up terminal
+
 		if (terminal != null)
 		{
-			removeChild(terminal);
+			for (line in terminal)
+			{
+				if (line != null)
+				{
+					removeChild(line);
+				}
+			}
 			terminal = null;
 		}
-		
-		// Clean up references
+
 		sound = null;
-		lines = null;
-		
+		tasks = null;
+
 		super.destroy();
 	}
 }

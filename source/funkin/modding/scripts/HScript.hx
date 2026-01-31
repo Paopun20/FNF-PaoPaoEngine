@@ -1,11 +1,11 @@
-package funkin.psychlua;
+package funkin.modding.scripts;
 
 import funkin.objects.Character;
-import funkin.psychlua.LuaUtils;
-import funkin.psychlua.components.*;
+import funkin.modding.scripts.LuaUtils;
+import funkin.modding.scripts.components.*;
 import funkin.utils.PlatformDex;
 #if LUA_ALLOWED
-import funkin.psychlua.FunkinLua;
+import funkin.modding.scripts.FunkinLua;
 #end
 #if HSCRIPT_ALLOWED
 import hscript.Parser;

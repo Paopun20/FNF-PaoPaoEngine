@@ -1,4 +1,4 @@
-package funkin.psychlua;
+package funkin.modding.scripts;
 
 #if flxanimate
 class ModchartAnimateSprite extends FlxAnimate

@@ -2,13 +2,13 @@ package funkin.backend;
 
 import haxe.ds.StringMap;
 #if HSCRIPT_ALLOWED
-import funkin.psychlua.HScript;
+import funkin.modding.scripts.HScript;
 #end
 #if PYTHON_ALLOWED
-import funkin.psychlua.Python;
+import funkin.modding.scripts.Python;
 #end
 #if LUA_ALLOWED
-import funkin.psychlua.FunkinLua as Lua;
+import funkin.modding.scripts.FunkinLua as Lua;
 #end
 
 class EditableState extends MusicBeatState

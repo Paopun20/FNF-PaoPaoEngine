@@ -56,7 +56,7 @@
 
 	<define
         name="VIDEOS_ALLOWED"
-        if="windows || linux || android || mac"
+        if="windows || linux || mac"
         unless="32bits || hl || html5"
     />
 
@@ -202,7 +202,7 @@
 	<!-- Libraries needed-->
 	<haxelib name="linc_luajit" if="desktop cpp LUA_ALLOWED" unless="hl || html5" />
 	<haxelib name="hython" if="PYTHON_ALLOWED" />
-	<haxelib name="hscript-improved" version="git" if="HSCRIPT_ALLOWED" />
+	<haxelib name="hscript-improved" if="HSCRIPT_ALLOWED" />
 
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED" version="2.2.5" />
 	<haxelib name="hxdiscord_rpc" version="git" if="DISCORD_ALLOWED" />

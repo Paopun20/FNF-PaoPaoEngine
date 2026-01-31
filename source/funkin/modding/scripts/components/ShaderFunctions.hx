@@ -1,10 +1,10 @@
-package funkin.psychlua.components;
+package funkin.modding.scripts.components;
 
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 #end
 
-import funkin.psychlua.ImplementUtils;
+import funkin.modding.scripts.ImplementUtils;
 
 class ShaderFunctions
 {

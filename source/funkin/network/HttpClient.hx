@@ -1,4 +1,4 @@
-package funkin.net;
+package funkin.network;
 
 import haxe.Http;
 import haxe.Json;
