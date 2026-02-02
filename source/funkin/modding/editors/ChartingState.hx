@@ -1,4 +1,4 @@
-package funkin.editors;
+package funkin.modding.editors;
 
 import flixel.FlxSubState;
 import flixel.util.FlxSave;
@@ -14,10 +14,10 @@ import flash.geom.Rectangle;
 import haxe.Json;
 import haxe.Exception;
 import haxe.io.Bytes;
-import funkin.editors.content.MetaNote;
-import funkin.editors.content.VSlice;
-import funkin.editors.content.Prompt;
-import funkin.editors.content.*;
+import funkin.modding.editors.content.MetaNote;
+import funkin.modding.editors.content.VSlice;
+import funkin.modding.editors.content.Prompt;
+import funkin.modding.editors.content.*;
 import funkin.backend.Song;
 import funkin.backend.StageData;
 import funkin.backend.Highscore;
@@ -4296,7 +4296,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		var btn:PsychUIButton = new PsychUIButton(btnX, btnY, '  Exit', function()
 		{
 			PlayState.chartingMode = false;
-			MusicBeatState.switchState(new funkin.editors.MasterEditorMenu());
+			MusicBeatState.switchState(new funkin.modding.editors.MasterEditorMenu());
 			FlxG.sound.playMusic(Paths.music('freakyMenu'));
 			FlxG.mouse.visible = false;
 		}, btnWid);

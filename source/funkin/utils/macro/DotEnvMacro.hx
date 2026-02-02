@@ -5,14 +5,24 @@ import haxe.macro.*;
 import haxe.macro.Expr;
 import sys.FileSystem;
 import sys.io.File;
+import haxe.ds.StringMap;
 #end
 
 using StringTools;
 using Lambda;
 
+private typedef EnvConfig =
+{
+	final key:String;
+	final required:Bool;
+	final defaultValue:Null<String>;
+}
+
+private typedef FieldArray = Array<Field>;
+
 class DotEnvMacro
 {
-	public static macro function build(dotfile:String = '.env'):Array<Field>
+	public static macro function build(dotfile:String = '.env'):FieldArray
 	{
 		final env = parseEnv(dotfile);
 		final fields = Context.getBuildFields();
@@ -129,9 +139,9 @@ class DotEnvMacro
 	}
 
 	// Env file parsing
-	private static function parseEnv(path:String):Map<String, String>
+	private static function parseEnv(path:String):StringMap<String>
 	{
-		final map:Map<String, String> = [];
+		final map:StringMap<String> = new StringMap<String>();
 		if (!FileSystem.exists(path))
 			return map;
 		var content = File.getContent(path);
@@ -207,13 +217,4 @@ class DotEnvMacro
 				key;
 		}
 	}
-}
-
-// Types
-
-private typedef EnvConfig =
-{
-	final key:String;
-	final required:Bool;
-	final defaultValue:Null<String>;
 }

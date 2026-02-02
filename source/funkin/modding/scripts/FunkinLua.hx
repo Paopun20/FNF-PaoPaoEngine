@@ -14,7 +14,7 @@ import funkin.objects.Character;
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;
 import funkin.objects.StrumNote;
-import funkin.modding.scripts.objects.DebugLuaText;
+import funkin.modding.objects.DebugLuaText;
 import funkin.modding.scripts.LuaUtils.LuaTweenOptions;
 import funkin.modding.scripts.LuaUtils;
 import funkin.modding.scripts.ModchartSprite;
@@ -35,7 +35,17 @@ import flixel.addons.display.FlxRuntimeShader;
 import funkin.modding.scripts.HScript;
 #end
 
-class FunkinLua
+
+interface IFunkinLuaInterface
+{
+	public var scriptName:String;
+	public function set(variable:String, data:Dynamic):Void;
+	public function get(variable:String):Dynamic;
+	public function call(functionName:String, args:Array<Dynamic>):Dynamic;
+	public function stop():Void;
+}
+
+class FunkinLua implements IFunkinLuaInterface
 {
 	public var lua:State = null;
 	public var camTarget:FlxCamera;
@@ -1998,6 +2008,19 @@ class FunkinLua
 
 		Convert.toLua(lua, data);
 		Lua.setglobal(lua, variable);
+	}
+
+	public function get(variable:String):Dynamic
+	{
+		if (lua == null)
+		{
+			return null;
+		}
+
+		Lua.getglobal(lua, variable);
+		var result:Dynamic = cast Convert.fromLua(lua, -1);
+		Lua.pop(lua, 1);
+		return result;
 	}
 
 	public function stop()

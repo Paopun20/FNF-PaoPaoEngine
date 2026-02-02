@@ -1,4 +1,4 @@
-package funkin.editors;
+package funkin.modding.editors;
 
 import openfl.net.FileReference;
 import openfl.events.Event;
@@ -9,7 +9,7 @@ import lime.system.Clipboard;
 import funkin.objects.TypedAlphabet;
 import funkin.frontend.cutscenes.DialogueBoxPsych;
 import funkin.frontend.cutscenes.DialogueCharacter;
-import funkin.editors.content.Prompt;
+import funkin.modding.editors.content.Prompt;
 
 class DialogueCharacterEditorState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
 {
@@ -719,7 +719,7 @@ class DialogueCharacterEditorState extends MusicBeatState implements PsychUIEven
 			{
 				if (!unsavedProgress)
 				{
-					MusicBeatState.switchState(new funkin.editors.MasterEditorMenu());
+					MusicBeatState.switchState(new funkin.modding.editors.MasterEditorMenu());
 					FlxG.sound.playMusic(Paths.music('freakyMenu'));
 					transitioning = true;
 				}

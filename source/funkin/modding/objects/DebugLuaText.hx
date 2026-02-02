@@ -1,4 +1,4 @@
-package funkin.modding.scripts.objects;
+package funkin.modding.objects;
 
 class DebugLuaText extends FlxText
 {

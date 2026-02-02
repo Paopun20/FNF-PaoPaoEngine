@@ -1,4 +1,4 @@
-package funkin.editors.content;
+package funkin.modding.editors.content;
 
 import flixel.addons.display.FlxGridOverlay;
 

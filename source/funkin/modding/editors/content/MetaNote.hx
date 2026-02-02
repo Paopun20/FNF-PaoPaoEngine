@@ -1,4 +1,4 @@
-package funkin.editors.content;
+package funkin.modding.editors.content;
 
 import funkin.objects.Note;
 import funkin.shaders.RGBPalette;

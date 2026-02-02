@@ -71,7 +71,7 @@ class FreeplayState extends MusicBeatState
 			FlxTransitionableState.skipNextTransIn = true;
 			persistentUpdate = false;
 			MusicBeatState.switchState(new funkin.states.ErrorState("NO WEEKS ADDED FOR FREEPLAY\n\nPress ACCEPT to go to the Week Editor Menu.\nPress BACK to return to Main Menu.",
-				function() MusicBeatState.switchState(new funkin.editors.WeekEditorState()),
+				function() MusicBeatState.switchState(new funkin.modding.editors.WeekEditorState()),
 				function() MusicBeatState.switchState(new funkin.states.MainMenuState())));
 			return;
 		}
@@ -221,8 +221,8 @@ class FreeplayState extends MusicBeatState
 
 	var instPlaying:Int = -1;
 
-	public static var vocals:FlxSound = null;
-	public static var opponentVocals:FlxSound = null;
+	public static var playerVocals:FlxStreamSound = null;
+	public static var opponentVocals:FlxStreamSound = null;
 
 	public var holdTime:Float = 0;
 
@@ -354,37 +354,36 @@ class FreeplayState extends MusicBeatState
 				Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
 				if (PlayState.SONG.needsVoices)
 				{
-					vocals = new FlxSound();
+					playerVocals = new FlxStreamSound();
 					try
 					{
-						var playerVocals:String = getVocalFromCharacter(PlayState.SONG.player1);
-						var loadedVocals = Paths.voices(PlayState.SONG.song, (playerVocals != null && playerVocals.length > 0) ? playerVocals : 'Player');
+					    var playerVocalFile:String = getVocalFromCharacter(PlayState.SONG.player1);
+					    var loadedVocals = Paths.voices(PlayState.SONG.song, (playerVocalFile != null && playerVocalFile.length > 0) ? playerVocalFile : 'Player');
 						if (loadedVocals == null)
 							loadedVocals = Paths.voices(PlayState.SONG.song);
 
 						if (loadedVocals != null && loadedVocals.length > 0)
 						{
-							vocals.loadEmbedded(loadedVocals);
-							FlxG.sound.list.add(vocals);
-							vocals.persist = vocals.looped = true;
-							vocals.volume = 0.8;
-							vocals.play();
-							vocals.pause();
+							playerVocals.loadEmbedded(loadedVocals);
+							FlxG.sound.list.add(playerVocals);
+							playerVocals.persist = playerVocals.looped = true;
+							playerVocals.volume = 0.8;
+							playerVocals.play();
+							playerVocals.pause();
 						}
 						else
-							vocals = FlxDestroyUtil.destroy(vocals);
+							playerVocals = FlxDestroyUtil.destroy(playerVocals);
 					}
 					catch (e:Dynamic)
 					{
-						vocals = FlxDestroyUtil.destroy(vocals);
+						playerVocals = FlxDestroyUtil.destroy(playerVocals);
 					}
 
-					opponentVocals = new FlxSound();
+					opponentVocals = new FlxStreamSound();
 					try
 					{
-						// trace('please work...');
-						var oppVocals:String = getVocalFromCharacter(PlayState.SONG.player2);
-						var loadedVocals = Paths.voices(PlayState.SONG.song, (oppVocals != null && oppVocals.length > 0) ? oppVocals : 'Opponent');
+						var opponentVocalsFile:String = getVocalFromCharacter(PlayState.SONG.player2);
+						var loadedVocals = Paths.voices(PlayState.SONG.song, (opponentVocalsFile != null && opponentVocalsFile.length > 0) ? opponentVocalsFile : 'Opponent');
 
 						if (loadedVocals != null && loadedVocals.length > 0)
 						{
@@ -394,14 +393,12 @@ class FreeplayState extends MusicBeatState
 							opponentVocals.volume = 0.8;
 							opponentVocals.play();
 							opponentVocals.pause();
-							// trace('yaaay!!');
 						}
 						else
 							opponentVocals = FlxDestroyUtil.destroy(opponentVocals);
 					}
 					catch (e:Dynamic)
 					{
-						// trace('FUUUCK');
 						opponentVocals = FlxDestroyUtil.destroy(opponentVocals);
 					}
 				}
@@ -502,9 +499,9 @@ class FreeplayState extends MusicBeatState
 
 	public static function destroyFreeplayVocals()
 	{
-		if (vocals != null)
-			vocals.stop();
-		vocals = FlxDestroyUtil.destroy(vocals);
+		if (playerVocals != null)
+			playerVocals.stop();
+		playerVocals = FlxDestroyUtil.destroy(playerVocals);
 
 		if (opponentVocals != null)
 			opponentVocals.stop();

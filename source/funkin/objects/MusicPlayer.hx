@@ -1,5 +1,7 @@
 package funkin.objects;
 
+import Math;
+import Std;
 import flixel.group.FlxGroup;
 import flixel.ui.FlxBar;
 import flixel.util.FlxStringUtil;
@@ -95,7 +97,7 @@ class MusicPlayer extends FlxGroup
 		else
 			songTxt.text = Language.getPhrase('musicplayer_paused', 'PLAYING: {1} (PAUSED)', [songName]);
 
-		// if(FlxG.keys.justPressed.K) trace('Time: ${FreeplayState.vocals.time}, Playing: ${FreeplayState.vocals.playing}');
+		// if(FlxG.keys.justPressed.K) trace('Time: ${FreeplayState.playerVocals.time}, Playing: ${FreeplayState.playerVocals.playing}');
 
 		if (controls.UI_LEFT_P)
 		{
@@ -176,7 +178,7 @@ class MusicPlayer extends FlxGroup
 			holdPitchTime += elapsed;
 			if (holdPitchTime > 0.6)
 			{
-				playbackRate += 0.05 * (controls.UI_UP ? 1 : -1);
+			    playbackRate += (0.05 * (controls.UI_UP ? 1 : -1)) * Math.max(holdPitchTime, 1);
 				setPlaybackRate();
 			}
 		}
@@ -192,14 +194,14 @@ class MusicPlayer extends FlxGroup
 
 		if (playing)
 		{
-			if (FreeplayState.vocals != null)
-				FreeplayState.vocals.volume = (FreeplayState.vocals.length > FlxG.sound.music.time) ? 0.8 : 0;
+			if (FreeplayState.playerVocals != null)
+				FreeplayState.playerVocals.volume = (FreeplayState.playerVocals.length > FlxG.sound.music.time) ? 0.8 : 0;
 			if (FreeplayState.opponentVocals != null)
 				FreeplayState.opponentVocals.volume = (FreeplayState.opponentVocals.length > FlxG.sound.music.time) ? 0.8 : 0;
 
-			if ((FreeplayState.vocals != null
-				&& FreeplayState.vocals.length > FlxG.sound.music.time
-				&& Math.abs(FlxG.sound.music.time - FreeplayState.vocals.time) >= 25)
+			if ((FreeplayState.playerVocals != null
+				&& FreeplayState.playerVocals.length > FlxG.sound.music.time
+				&& Math.abs(FlxG.sound.music.time - FreeplayState.playerVocals.time) >= 25)
 				|| (FreeplayState.opponentVocals != null
 					&& FreeplayState.opponentVocals.length > FlxG.sound.music.time
 					&& Math.abs(FlxG.sound.music.time - FreeplayState.opponentVocals.time) >= 25))
@@ -217,8 +219,8 @@ class MusicPlayer extends FlxGroup
 
 	function setVocalsTime(time:Float)
 	{
-		if (FreeplayState.vocals != null && FreeplayState.vocals.length > time)
-			FreeplayState.vocals.time = time;
+		if (FreeplayState.playerVocals != null && FreeplayState.playerVocals.length > time)
+			FreeplayState.playerVocals.time = time;
 		if (FreeplayState.opponentVocals != null && FreeplayState.opponentVocals.length > time)
 			FreeplayState.opponentVocals.time = time;
 	}
@@ -230,8 +232,8 @@ class MusicPlayer extends FlxGroup
 			if (!FlxG.sound.music.playing)
 				FlxG.sound.music.resume();
 
-			if (FreeplayState.vocals != null && FreeplayState.vocals.length > FlxG.sound.music.time && !FreeplayState.vocals.playing)
-				FreeplayState.vocals.resume();
+			if (FreeplayState.playerVocals != null && FreeplayState.playerVocals.length > FlxG.sound.music.time && !FreeplayState.playerVocals.playing)
+				FreeplayState.playerVocals.resume();
 			if (FreeplayState.opponentVocals != null
 				&& FreeplayState.opponentVocals.length > FlxG.sound.music.time
 				&& !FreeplayState.opponentVocals.playing)
@@ -241,8 +243,8 @@ class MusicPlayer extends FlxGroup
 		{
 			FlxG.sound.music.pause();
 
-			if (FreeplayState.vocals != null)
-				FreeplayState.vocals.pause();
+			if (FreeplayState.playerVocals != null)
+				FreeplayState.playerVocals.pause();
 			if (FreeplayState.opponentVocals != null)
 				FreeplayState.opponentVocals.pause();
 		}
@@ -357,8 +359,8 @@ class MusicPlayer extends FlxGroup
 	function setPlaybackRate()
 	{
 		FlxG.sound.music.pitch = playbackRate;
-		if (FreeplayState.vocals != null)
-			FreeplayState.vocals.pitch = playbackRate;
+		if (FreeplayState.playerVocals != null)
+			FreeplayState.playerVocals.pitch = playbackRate;
 		if (FreeplayState.opponentVocals != null)
 			FreeplayState.opponentVocals.pitch = playbackRate;
 	}
@@ -371,10 +373,10 @@ class MusicPlayer extends FlxGroup
 	function set_playbackRate(value:Float):Float
 	{
 		var value = FlxMath.roundDecimal(value, 2);
-		if (value > 3)
-			value = 3;
-		else if (value <= 0.25)
-			value = 0.25;
+		if (value > Std.int(Math.pow(2, 31)) - 1)
+			value = Std.int(Math.pow(2, 31)) - 1;
+		else if (value <= 0)
+			value = 0;
 		return playbackRate = value;
 	}
 }

@@ -3,7 +3,7 @@ package funkin.states;
 import flixel.FlxObject;
 import flixel.effects.FlxFlicker;
 import lime.app.Application;
-import funkin.editors.MasterEditorMenu;
+import funkin.modding.editors.MasterEditorMenu;
 import funkin.options.OptionsState;
 import CompileTime;
 import DateTools;

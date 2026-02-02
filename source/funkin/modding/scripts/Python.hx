@@ -14,7 +14,7 @@ import funkin.objects.Character;
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;
 import funkin.objects.StrumNote;
-import funkin.modding.scripts.objects.DebugLuaText;
+import funkin.modding.objects.DebugLuaText;
 import funkin.modding.scripts.LuaUtils.LuaTweenOptions;
 import funkin.modding.scripts.LuaUtils;
 import funkin.modding.scripts.ModchartSprite;
@@ -44,7 +44,16 @@ import funkin.modding.scripts.HScript;
 import funkin.modding.scripts.FunkinLua;
 #end
 
-class Python
+interface IPythonInterface
+{
+	public var scriptName:String;
+	public function set(variable:String, data:Dynamic):Void;
+	public function get(variable:String):Dynamic;
+	public function call(functionName:String, ?args:Array<Dynamic>):Dynamic;
+	public function stop():Void;
+}
+
+class Python implements IPythonInterface
 {
 	public var parser:PyParser;
 	public var printer:PyPrinter;
@@ -52,6 +61,7 @@ class Python
 	public var origin:Null<String>;
 	public var returnValue:Dynamic;
 	public var closed:Bool = false;
+	public var scriptName: String;
 
 	#if MODS_ALLOWED
 	public var modFolder:String = null;
@@ -74,7 +84,7 @@ class Python
 		parser = new PyParser();
 		interp = new PyInterp();
 		printer = new PyPrinter();
-		origin = file;
+		scriptName = origin = file;
 
 		var game:PlayState = PlayState.instance;
 		if (game != null)
@@ -257,6 +267,7 @@ class Python
 		set('FlxTween', flixel.tweens.FlxTween);
 		set('FlxEase', flixel.tweens.FlxEase);
 		set('FlxSound', flixel.system.FlxSound);
+		set('FlxStreamSound', FlxStreamSound);
 
 		// Game Classes
 		set('Countdown', funkin.backend.BaseStage.Countdown);

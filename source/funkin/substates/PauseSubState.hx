@@ -20,7 +20,7 @@ class PauseSubState extends MusicBeatSubstate
 	var difficultyChoices = [];
 	var curSelected:Int = 0;
 
-	var pauseMusic:FlxSound;
+	var pauseMusic:FlxStreamSound;
 	var practiceText:FlxText;
 	var skipTimeText:FlxText;
 	var skipTimeTracker:Alphabet;
@@ -59,7 +59,7 @@ class PauseSubState extends MusicBeatSubstate
 		}
 		difficultyChoices.push('BACK');
 
-		pauseMusic = new FlxSound();
+		pauseMusic = new FlxStreamSound();
 		try
 		{
 			var pauseSong:String = getPauseSong();
@@ -287,7 +287,7 @@ class PauseSubState extends MusicBeatSubstate
 					practiceText.visible = PlayState.instance.practiceMode;
 				case "Restart Song":
 					#if HSCRIPT_ALLOWED
-					HScript.staticVariables.clear();
+					HScript.reset();
 					#end
 					restartSong();
 				case "Leave Charting Mode":
@@ -313,6 +313,9 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.instance.notes.clear();
 					PlayState.instance.unspawnNotes = [];
 					PlayState.instance.finishSong(true);
+					#if HSCRIPT_ALLOWED
+					HScript.reset();
+					#end
 				case 'Toggle Botplay':
 					PlayState.instance.cpuControlled = !PlayState.instance.cpuControlled;
 					PlayState.changedDifficulty = true;

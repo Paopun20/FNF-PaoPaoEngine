@@ -1,4 +1,4 @@
-package funkin.editors;
+package funkin.modding.editors;
 
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;

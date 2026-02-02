@@ -1,4 +1,4 @@
-package funkin.editors.content;
+package funkin.modding.editors.content;
 
 import openfl.net.FileReference;
 import openfl.events.Event;

@@ -24,8 +24,8 @@ import openfl.utils.Assets as OpenFlAssets;
 import funkin.shaders.ErrorHandledShader;
 import funkin.states.FreeplayState;
 import funkin.states.StoryMenuState;
-import funkin.editors.CharacterEditorState;
-import funkin.editors.ChartingState;
+import funkin.modding.editors.CharacterEditorState;
+import funkin.modding.editors.ChartingState;
 import funkin.states.stages.*;
 import funkin.states.stages.objects.*;
 import funkin.substates.GameOverSubstate;
@@ -96,8 +96,8 @@ class PlayState extends MusicBeatState
 	public var luaArray:Array<FunkinLua> = [];
 	#end
 
-	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-	private var luaDebugGroup:FlxTypedGroup<funkin.modding.scripts.objects.DebugLuaText>;
+	#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
+	private var luaDebugGroup:FlxTypedGroup<funkin.modding.objects.DebugLuaText>;
 	#end
 
 	public var BF_X:Float = 770;
@@ -149,9 +149,9 @@ class PlayState extends MusicBeatState
 
 	public var spawnTime:Float = 2000;
 
-	public var inst:FlxSound;
-	public var vocals:FlxSound;
-	public var opponentVocals:FlxSound;
+	public var inst:FlxStreamSound;
+	public var vocals:FlxStreamSound;
+	public var opponentVocals:FlxStreamSound;
 
 	public var dad:Character = null;
 	public var gf:Character = null;
@@ -409,8 +409,8 @@ class PlayState extends MusicBeatState
 		if (isPixelStage)
 			introSoundsSuffix = '-pixel';
 
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-		luaDebugGroup = new FlxTypedGroup<funkin.modding.scripts.objects.DebugLuaText>();
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
+		luaDebugGroup = new FlxTypedGroup<funkin.modding.objects.DebugLuaText>();
 		luaDebugGroup.cameras = [camOther];
 		add(luaDebugGroup);
 		#end
@@ -484,7 +484,7 @@ class PlayState extends MusicBeatState
 				gf.visible = false;
 		}
 
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
 		// STAGE SCRIPTS
 		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua'); #end
 		#if HSCRIPT_ALLOWED startHScriptsNamed('stages/' + curStage + '.hx'); #end
@@ -743,14 +743,14 @@ class PlayState extends MusicBeatState
 	#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
 	public function addTextToDebug(text:String, color:FlxColor)
 	{
-		var newText:funkin.modding.scripts.objects.DebugLuaText = luaDebugGroup.recycle(funkin.modding.scripts.objects.DebugLuaText);
+		var newText:funkin.modding.objects.DebugLuaText = luaDebugGroup.recycle(funkin.modding.objects.DebugLuaText);
 		newText.text = text;
 		newText.color = color;
 		newText.disableTime = 6;
 		newText.alpha = 1;
 		newText.setPosition(10, 8 - newText.height);
 
-		luaDebugGroup.forEachAlive(function(spr:funkin.modding.scripts.objects.DebugLuaText)
+		luaDebugGroup.forEachAlive(function(spr:funkin.modding.objects.DebugLuaText)
 		{
 			spr.y += newText.height + 2;
 		});
@@ -943,7 +943,7 @@ class PlayState extends MusicBeatState
 				videoCutscene.play();
 			return videoCutscene;
 		}
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
 		else
 			addTextToDebug("Video not found: " + fileName, FlxColor.RED);
 		#else
@@ -1412,8 +1412,8 @@ class PlayState extends MusicBeatState
 
 		curSong = songData.song;
 
-		vocals = new FlxSound();
-		opponentVocals = new FlxSound();
+		vocals = new FlxStreamSound();
+		opponentVocals = new FlxStreamSound();
 		try
 		{
 			if (songData.needsVoices)
@@ -1438,7 +1438,7 @@ class PlayState extends MusicBeatState
 		FlxG.sound.list.add(vocals);
 		FlxG.sound.list.add(opponentVocals);
 
-		inst = new FlxSound();
+		inst = new FlxStreamSound();
 		try
 		{
 			inst.loadEmbedded(Paths.inst(songData.song));
@@ -2553,7 +2553,7 @@ class PlayState extends MusicBeatState
 					var len:Int = e.message.indexOf('\n') + 1;
 					if (len <= 0)
 						len = e.message.length;
-					#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+					#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
 					addTextToDebug('ERROR ("Set Property" Event) - ' + e.message.substr(0, len), FlxColor.RED);
 					#else
 					FlxG.log.warn('ERROR ("Set Property" Event) - ' + e.message.substr(0, len));
@@ -4191,7 +4191,7 @@ class PlayState extends MusicBeatState
 				return true;
 			}
 		}
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
 		addTextToDebug('Missing shader $name .frag AND .vert files!', FlxColor.RED);
 		#else
 		FlxG.log.warn('Missing shader $name .frag AND .vert files!');

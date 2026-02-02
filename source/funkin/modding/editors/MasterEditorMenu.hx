@@ -1,4 +1,4 @@
-package funkin.editors;
+package funkin.modding.editors;
 
 import funkin.backend.WeekData;
 import funkin.objects.Character;

@@ -21,7 +21,7 @@ import haxe.io.Bytes;
 
 using StringTools;
 
-interface HscriptInterface
+interface IHscriptInterface
 {
 	public var scriptName:String;
 	public function set(variable:String, data:Dynamic):Void;
@@ -29,7 +29,7 @@ interface HscriptInterface
 	public function stop():Void;
 }
 
-class HScript implements HscriptInterface
+class HScript implements IHscriptInterface
 {
 	private static function createParser():Parser
 	{
@@ -47,7 +47,6 @@ class HScript implements HscriptInterface
 	}
 
 	public static var astCache:StringMap<Expr> = new StringMap();
-	public static var staticVariables:StringMap<Dynamic> = new StringMap();
 	public static var parser:Parser = createParser();
 	public static var printer:Printer = createPrinter();
 
@@ -66,9 +65,8 @@ class HScript implements HscriptInterface
 
 	public static function reset()
 	{
-		CoolLog.info('Resetting HScript static/cache');
+		CoolLog.info('Resetting HScript cache');
 		HScript.astCache.clear();
-		HScript.staticVariables.clear();
 	}
 
 	public static function initHaxeModule(parent:Dynamic)
@@ -111,7 +109,7 @@ class HScript implements HscriptInterface
 		}
 	}
 
-	function onError(e:HscriptError)
+	private final function onError(e:HscriptError)
 	{
 		if (Std.isOfType(e, HscriptError))
 		{
@@ -119,7 +117,7 @@ class HScript implements HscriptInterface
 		}
 	}
 
-	function onWarning(e:HscriptError)
+	private final function onWarning(e:HscriptError)
 	{
 		if (Std.isOfType(e, HscriptError))
 		{
@@ -127,7 +125,7 @@ class HScript implements HscriptInterface
 		}
 	}
 
-	function onImportFailed(classPath:Array<String>, classAlias:Null<String>):Bool
+	private final function onImportFailed(classPath:Array<String>, classAlias:Null<String>):Bool
 	{
 		if (classPath[0] != "funkin")
 		{
@@ -156,11 +154,9 @@ class HScript implements HscriptInterface
 		interp = new Interp();
 		interp.allowStaticVariables = interp.allowPublicVariables = true;
 		interp.errorHandler = onError;
-		interp.staticVariables = HScript.staticVariables;
 		interp.importFailedCallback = onImportFailed;
 
-		origin = file;
-		scriptName = file;
+		scriptName = origin = file;
 
 		#if MODS_ALLOWED
 		if (file != null && file.length > 0)
@@ -259,6 +255,7 @@ class HScript implements HscriptInterface
 		set('FlxEase', flixel.tweens.FlxEase);
 		set('FlxColor', CustomFlxColor);
 		set('FlxSound', #if (flixel >= "5.3.0") flixel.sound.FlxSound #else flixel.system.FlxSound #end);
+		set('FlxStreamSound', FlxStreamSound);
 		set('Countdown', funkin.backend.BaseStage.Countdown);
 		set('PlayState', PlayState);
 		set('Paths', Paths);

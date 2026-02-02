@@ -1,3 +1,4 @@
+/* this is old file */
 package funkin.states;
 
 import funkin.backend.WeekData;
@@ -69,7 +70,7 @@ class FreeplayState extends MusicBeatState
 			FlxTransitionableState.skipNextTransIn = true;
 			persistentUpdate = false;
 			MusicBeatState.switchState(new funkin.states.ErrorState("NO WEEKS ADDED FOR FREEPLAY\n\nPress ACCEPT to go to the Week Editor Menu.\nPress BACK to return to Main Menu.",
-				function() MusicBeatState.switchState(new funkin.editors.WeekEditorState()),
+				function() MusicBeatState.switchState(new funkin.modding.editors.WeekEditorState()),
 				function() MusicBeatState.switchState(new funkin.states.MainMenuState())));
 			return;
 		}

@@ -1,4 +1,4 @@
-package funkin.editors.content;
+package funkin.modding.editors.content;
 
 import funkin.backend.Song;
 import funkin.backend.Difficulty;
