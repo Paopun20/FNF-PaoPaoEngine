@@ -2,9 +2,8 @@ package funkin.backend;
 
 import flixel.FlxState;
 import funkin.backend.PsychCamera;
-import flixel.util.FlxDestroyUtil;
 
-class MusicBeatState extends FlxState implements FlxDestroyUtil
+class MusicBeatState extends FlxState
 {
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
