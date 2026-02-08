@@ -18,6 +18,8 @@ import haxe.ds.StringMap;
 import funkin.utils.NdllUtil;
 import haxe.crypto.Sha256;
 import haxe.io.Bytes;
+import flixel.util.FlxDestroyUtil.IFlxDestroyable;
+import funkin.modding.scripts.BuildInLib;
 
 using StringTools;
 
@@ -29,7 +31,7 @@ interface IHscriptInterface
 	public function stop():Void;
 }
 
-class HScript implements IHscriptInterface
+class HScript implements IHscriptInterface implements IFlxDestroyable
 {
 	private static function createParser():Parser
 	{
@@ -237,90 +239,13 @@ class HScript implements IHscriptInterface
 			for (k in Reflect.fields(varsToBring))
 				set(k, Reflect.field(varsToBring, k));
 		}
+		
+		var lib = new BuildInLib(set);
+		lib.addLib();
+		lib.addVar();
 
-		// Common classes
-		set('Type', Type);
-		#if sys
-		set('File', File);
-		set('FileSystem', FileSystem);
-		#end
-		set('FlxG', flixel.FlxG);
-		set('FlxMath', flixel.math.FlxMath);
-		set('FlxSprite', flixel.FlxSprite);
-		set('FlxText', flixel.text.FlxText);
-		set('FlxCamera', flixel.FlxCamera);
-		set('PsychCamera', funkin.backend.PsychCamera);
-		set('FlxTimer', flixel.util.FlxTimer);
-		set('FlxTween', flixel.tweens.FlxTween);
-		set('FlxEase', flixel.tweens.FlxEase);
-		set('FlxColor', CustomFlxColor);
-		set('FlxSound', #if (flixel >= "5.3.0") flixel.sound.FlxSound #else flixel.system.FlxSound #end);
-		set('FlxStreamSound', FlxStreamSound);
-		set('Countdown', funkin.backend.BaseStage.Countdown);
-		set('PlayState', PlayState);
-		set('Paths', Paths);
-		set('Conductor', Conductor);
-		set('ClientPrefs', ClientPrefs);
-		#if ACHIEVEMENTS_ALLOWED
-		set('Achievements', Achievements);
-		#end
-		set('Character', Character);
-		set('Alphabet', Alphabet);
-		set('Note', funkin.objects.Note);
-		set('CustomSubstate', CustomSubstate);
-		#if (!flash && sys)
-		set('FlxRuntimeShader', flixel.addons.display.FlxRuntimeShader);
-		set('ErrorHandledRuntimeShader', funkin.shaders.ErrorHandledShader.ErrorHandledRuntimeShader);
-		#end
-		set('ShaderFilter', openfl.filters.ShaderFilter);
-		set('StringTools', StringTools);
-		#if flxanimate
-		set('FlxAnimate', FlxAnimate);
-		#end
 		set("PlatformDex", PlatformDex);
 		set("NdllUtil", NdllUtil);
-
-		// Functions & Variables
-		set('setVar', function(name:String, value:Dynamic)
-		{
-			MusicBeatState.getVariables().set(name, value);
-			return value;
-		});
-		set('getVar', function(name:String)
-		{
-			var result:Dynamic = null;
-			if (MusicBeatState.getVariables().exists(name))
-				result = MusicBeatState.getVariables().get(name);
-			return result;
-		});
-		set('removeVar', function(name:String)
-		{
-			if (MusicBeatState.getVariables().exists(name))
-			{
-				MusicBeatState.getVariables().remove(name);
-				return true;
-			}
-			return false;
-		});
-		set('debugPrint', function(text:String, ?color:FlxColor = null)
-		{
-			if (color == null)
-				color = FlxColor.WHITE;
-			PlayState.instance.addTextToDebug(text, color);
-		});
-		set('getModSetting', function(saveTag:String, ?modName:String = null)
-		{
-			if (modName == null)
-			{
-				if (this.modFolder == null)
-				{
-					CoolLog.error('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!');
-					return null;
-				}
-				modName = this.modFolder;
-			}
-			return LuaUtils.getModSetting(saveTag, modName);
-		});
 
 		// Keyboard & Gamepads
 		set('keyboardJustPressed', function(name:String) return Reflect.getProperty(FlxG.keys.justPressed, name));
@@ -483,13 +408,6 @@ class HScript implements IHscriptInterface
 		set('buildTarget', LuaUtils.getBuildTarget());
 		set('customSubstate', CustomSubstate.instance);
 		set('customSubstateName', CustomSubstate.name);
-
-		set('Function_Stop', LuaUtils.Function_Stop);
-		set('Function_Continue', LuaUtils.Function_Continue);
-		set('Function_StopLua', LuaUtils.Function_StopLua);
-		set('Function_StopHScript', LuaUtils.Function_StopHScript);
-		set('Function_StopPython', LuaUtils.Function_StopPython);
-		set('Function_StopAll', LuaUtils.Function_StopAll);
 	}
 
 	#if LUA_ALLOWED

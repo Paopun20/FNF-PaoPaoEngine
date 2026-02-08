@@ -1,16 +1,18 @@
 package funkin.states;
 
-import funkin.backend.WeekData;
+import flixel.addons.display.FlxBackdrop;
+import flixel.addons.display.FlxGridOverlay;
+import flixel.math.FlxMath;
+import flixel.util.FlxDestroyUtil;
 import funkin.backend.Highscore;
 import funkin.backend.Song;
+import funkin.backend.WeekData;
 import funkin.objects.HealthIcon;
 import funkin.objects.MusicPlayer;
 import funkin.options.GameplayChangersSubstate;
 import funkin.substates.ResetScoreSubState;
-import flixel.math.FlxMath;
-import flixel.util.FlxDestroyUtil;
-import openfl.utils.Assets;
 import haxe.Json;
+import openfl.utils.Assets;
 
 class FreeplayState extends MusicBeatState
 {
@@ -24,6 +26,8 @@ class FreeplayState extends MusicBeatState
 	var curDifficulty:Int = -1;
 
 	private static var lastDifficultyName:String = Difficulty.getDefault();
+
+	var backdrop:FlxBackdrop;
 
 	var scoreBG:FlxSprite;
 	var scoreText:FlxText;
@@ -102,12 +106,24 @@ class FreeplayState extends MusicBeatState
 				addSong(song[0], i, song[1], FlxColor.fromRGB(colors[0], colors[1], colors[2]), song[3]); // Pass album here
 			}
 		}
+
 		Mods.loadTopMod();
 
 		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		add(bg);
 		bg.screenCenter();
+
+		backdrop = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0x33FFFFFF, 0x0));
+		backdrop.velocity.set(40, 40);
+		add(backdrop);
+
+		albumArt = new FlxSprite(FlxG.width - 250, FlxG.height / 2);
+		albumArt.antialiasing = ClientPrefs.data.antialiasing;
+		albumArt.scale.set(1.25, 1.25);
+		albumArt.origin.set(0.5, 0.5);
+		albumArt.angle = 10;
+		add(albumArt);
 
 		grpSongs = new FlxTypedGroup<Alphabet>();
 		add(grpSongs);
@@ -137,17 +153,11 @@ class FreeplayState extends MusicBeatState
 			// DONT PUT X IN THE FIRST PARAMETER OF new ALPHABET() !!
 			// songText.screenCenter(X);
 		}
+
 		WeekData.setDirectoryFromWeek();
 
 		scoreText = new FlxText(FlxG.width * 0.7, 5, 0, "", 32);
 		scoreText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
-
-		albumArt = new FlxSprite(FlxG.width - 250, FlxG.height / 2);
-		albumArt.antialiasing = ClientPrefs.data.antialiasing;
-		albumArt.scale.set(1.25, 1.25);
-		albumArt.origin.set(0.5, 0.5);
-		albumArt.angle = 10;
-		add(albumArt);
 
 		scoreBG = new FlxSprite(scoreText.x - 6, 0).makeGraphic(1, 66, 0xFF000000);
 		scoreBG.alpha = 0.6;
@@ -357,8 +367,9 @@ class FreeplayState extends MusicBeatState
 					playerVocals = new FlxStreamSound();
 					try
 					{
-					    var playerVocalFile:String = getVocalFromCharacter(PlayState.SONG.player1);
-					    var loadedVocals = Paths.voices(PlayState.SONG.song, (playerVocalFile != null && playerVocalFile.length > 0) ? playerVocalFile : 'Player');
+						var playerVocalFile:String = getVocalFromCharacter(PlayState.SONG.player1);
+						var loadedVocals = Paths.voices(PlayState.SONG.song,
+							(playerVocalFile != null && playerVocalFile.length > 0) ? playerVocalFile : 'Player');
 						if (loadedVocals == null)
 							loadedVocals = Paths.voices(PlayState.SONG.song);
 
@@ -383,7 +394,8 @@ class FreeplayState extends MusicBeatState
 					try
 					{
 						var opponentVocalsFile:String = getVocalFromCharacter(PlayState.SONG.player2);
-						var loadedVocals = Paths.voices(PlayState.SONG.song, (opponentVocalsFile != null && opponentVocalsFile.length > 0) ? opponentVocalsFile : 'Opponent');
+						var loadedVocals = Paths.voices(PlayState.SONG.song,
+							(opponentVocalsFile != null && opponentVocalsFile.length > 0) ? opponentVocalsFile : 'Opponent');
 
 						if (loadedVocals != null && loadedVocals.length > 0)
 						{
@@ -626,12 +638,21 @@ class FreeplayState extends MusicBeatState
 
 		var min:Int = Math.round(Math.max(0, Math.min(songs.length, lerpSelected - _drawDistance)));
 		var max:Int = Math.round(Math.max(0, Math.min(songs.length, lerpSelected + _drawDistance)));
+
 		for (i in min...max)
 		{
 			var item:Alphabet = grpSongs.members[i];
 			item.visible = item.active = true;
-			item.x = ((item.targetY - lerpSelected) * item.distancePerItem.x) + item.startPosition.x;
-			item.y = ((item.targetY - lerpSelected) * 1.3 * item.distancePerItem.y) + item.startPosition.y;
+
+			// Distance from the selected item
+			var offsetY:Float = item.targetY - lerpSelected;
+
+			// Curve amount based on distance from center
+			var curveAmount:Float = Math.abs(offsetY) * -60; // Increase -60 for more curve
+
+			// Position with curve (add curveAmount to push items right, subtract to push left)
+			item.x = ((offsetY * item.distancePerItem.x) + item.startPosition.x) + curveAmount;
+			item.y = ((offsetY * 1.3 * item.distancePerItem.y) + item.startPosition.y);
 
 			var icon:HealthIcon = iconArray[i];
 			icon.visible = icon.active = true;

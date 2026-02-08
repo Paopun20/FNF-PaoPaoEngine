@@ -85,12 +85,6 @@ class Preloader extends FlxBasePreloader
 				delay: 0.2
 			},
 			{
-				message: 'Building Target ${CompileTime.getTarget()}...',
-				action: function()
-				{/* Target build */},
-				delay: 0.3
-			},
-			{
 				message: 'Initializing Funkin...',
 				action: function()
 				{/* Funkin init */},
@@ -101,12 +95,6 @@ class Preloader extends FlxBasePreloader
 				action: function()
 				{/* Engine init */},
 				delay: 0.25
-			},
-			{
-				message: 'Initializing Script Interpreter...',
-				action: function()
-				{/* Script init */},
-				delay: 0.2
 			},
 			#if HSCRIPT_ALLOWED
 			{
@@ -124,12 +112,6 @@ class Preloader extends FlxBasePreloader
 				delay: 0.3
 			},
 			#end
-			{
-				message: "Initializing Game...",
-				action: function()
-				{/* Game init */},
-				delay: 0.2
-			},
 			{
 				message: "Starting Game...",
 				action: function()

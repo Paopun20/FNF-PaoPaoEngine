@@ -34,7 +34,7 @@ import flixel.addons.display.FlxRuntimeShader;
 #if HSCRIPT_ALLOWED
 import funkin.modding.scripts.HScript;
 #end
-
+import funkin.modding.scripts.BuildInLib;
 
 interface IFunkinLuaInterface
 {
@@ -83,17 +83,11 @@ class FunkinLua implements IFunkinLuaInterface
 			&& (Mods.currentModDirectory == myFolder[1] || Mods.getGlobalMods().contains(myFolder[1]))) // is inside mods folder
 			this.modFolder = myFolder[1];
 		#end
+		
+		var lib = new BuildInLib(set, scriptName);
+		lib.addVar();
+		lib.addGameVar();
 
-		// Lua shit
-		set('Function_StopLua', LuaUtils.Function_StopLua);
-		set('Function_StopHScript', LuaUtils.Function_StopHScript);
-		set('Function_StopPython', LuaUtils.Function_StopPython);
-		set('Function_StopAll', LuaUtils.Function_StopAll);
-		set('Function_Stop', LuaUtils.Function_Stop);
-		set('Function_Continue', LuaUtils.Function_Continue);
-		set('luaDebugMode', false);
-		set('luaDeprecatedWarnings', true);
-		set('version', MainMenuState.psychEngineVersion.trim());
 		set('modFolder', this.modFolder);
 
 		// Song/Week shit
@@ -125,69 +119,6 @@ class FunkinLua implements IFunkinLuaInterface
 		// Screen stuff
 		set('screenWidth', FlxG.width);
 		set('screenHeight', FlxG.height);
-
-		// PlayState-only variables
-		if (game != null)
-			@:privateAccess
-		{
-			var curSection:SwagSection = PlayState.SONG.notes[game.curSection];
-			set('curSection', game.curSection);
-			set('curBeat', game.curBeat);
-			set('curStep', game.curStep);
-			set('curDecBeat', game.curDecBeat);
-			set('curDecStep', game.curDecStep);
-
-			set('score', game.songScore);
-			set('misses', game.songMisses);
-			set('hits', game.songHits);
-			set('combo', game.combo);
-			set('deaths', PlayState.deathCounter);
-
-			set('rating', game.ratingPercent);
-			set('ratingName', game.ratingName);
-			set('ratingFC', game.ratingFC);
-			set('totalPlayed', game.totalPlayed);
-			set('totalNotesHit', game.totalNotesHit);
-
-			set('inGameOver', GameOverSubstate.instance != null);
-			set('mustHitSection', curSection != null ? (curSection.mustHitSection == true) : false);
-			set('altAnim', curSection != null ? (curSection.altAnim == true) : false);
-			set('gfSection', curSection != null ? (curSection.gfSection == true) : false);
-
-			set('healthGainMult', game.healthGain);
-			set('healthLossMult', game.healthLoss);
-
-			#if FLX_PITCH
-			set('playbackRate', game.playbackRate);
-			#else
-			set('playbackRate', 1);
-			#end
-
-			set('guitarHeroSustains', game.guitarHeroSustains);
-			set('instakillOnMiss', game.instakillOnMiss);
-			set('botPlay', game.cpuControlled);
-			set('practice', game.practiceMode);
-
-			for (i in 0...4)
-			{
-				set('defaultPlayerStrumX' + i, 0);
-				set('defaultPlayerStrumY' + i, 0);
-				set('defaultOpponentStrumX' + i, 0);
-				set('defaultOpponentStrumY' + i, 0);
-			}
-
-			// Default character data
-			set('defaultBoyfriendX', game.BF_X);
-			set('defaultBoyfriendY', game.BF_Y);
-			set('defaultOpponentX', game.DAD_X);
-			set('defaultOpponentY', game.DAD_Y);
-			set('defaultGirlfriendX', game.GF_X);
-			set('defaultGirlfriendY', game.GF_Y);
-
-			set('boyfriendName', game.boyfriend != null ? game.boyfriend.curCharacter : PlayState.SONG.player1);
-			set('dadName', game.dad != null ? game.dad.curCharacter : PlayState.SONG.player2);
-			set('gfName', game.gf != null ? game.gf.curCharacter : PlayState.SONG.gfVersion);
-		}
 
 		// Other settings
 		set('downscroll', ClientPrefs.data.downScroll);
