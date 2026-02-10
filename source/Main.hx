@@ -23,9 +23,7 @@ import lime.graphics.Image;
 import funkin.backend.ALSoftConfig; // Just to make sure DCE doesn't remove this, since it's not directly referenced anywhere else.
 #end
 #if CRASH_HANDLER
-import haxe.CallStack;
-import haxe.io.Path;
-import openfl.events.UncaughtErrorEvent;
+import funkin.backend.ErrorHandle;
 #end
 
 #if (linux && !debug)
@@ -115,11 +113,7 @@ class Main extends Sprite
 		FlxG.mouse.useSystemCursor = true;
 
 		#if CRASH_HANDLER
-		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
-
-		#if cpp
-		untyped __global__.__hxcpp_set_critical_error_handler(onCritical);
-		#end
+		ErrorHandle.init();
 		#end
 
 		#if DISCORD_ALLOWED
@@ -150,89 +144,4 @@ class Main extends Sprite
 			sprite.__cacheBitmapData = null;
 		}
 	}
-
-	#if CRASH_HANDLER
-	function showDialogWindow(message:String, title:String):Void
-	{
-		Application.current.window.alert(message, title);
-	}
-
-	function saveLogs(filename:String, content:String):Void
-	{
-		File.saveContent(filename, content);
-	}
-
-	function onCrash(e:UncaughtErrorEvent):Void
-	{
-		var errMsg:String = "";
-		var path:String;
-		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
-		var dateNow:String = Date.now().toString();
-		CoolLog.critical("Crash detected!");
-
-		dateNow = dateNow.replace(" ", "_").replace(":", "-");
-
-		path = "./crash/" + "PaoPaoEngine_" + dateNow + ".log";
-
-		var stackIndex:Int = 0;
-		for (stackItem in callStack)
-		{
-			switch (stackItem)
-			{
-				case FilePos(s, file, line, column):
-					errMsg += "#" + stackIndex + " " + file + " (line " + line;
-					if (column != null)
-						errMsg += ", column " + column;
-					errMsg += ")\n";
-					stackIndex++;
-				default:
-					errMsg += "#" + stackIndex + " " + Std.string(stackItem) + "\n";
-					stackIndex++;
-			}
-		}
-
-		errMsg += "\nUncaught Error: " + e.error;
-		#if officialBuild
-		errMsg += "\nPlease report this error to the GitHub page: https://github.com/Paopun20/FNF-PaoPaoEngine";
-		#end
-		errMsg += "\n\n> New Crash Handler written by: Paopun20";
-
-		if (!FileSystem.exists("./crash/"))
-			FileSystem.createDirectory("./crash/");
-
-		File.saveContent(path, errMsg + "\n");
-		CoolLog.critical("Crash dump saved in " + Path.normalize(path));
-		showDialogWindow(errMsg, "Game Crash!");
-		shutdown();
-	}
-	
-	#if cpp
-	function onCritical(message:String):Void
-	{
-		try
-		{
-			saveLogs("./crash/" + "PaoPaoEngine_" + Date.now().toString().replace(" ", "_").replace(":", "-") + ".log", message);
-			showDialogWindow(message, "Critical Error!");
-			shutdown();
-		}
-		catch (e:Dynamic)
-		{
-			trace('Error while handling crash: $e');
-
-			trace('Message: $message');
-		}
-		shutdown();
-	}
-	#end
-
-	static function shutdown():Void
-	{
-		#if DISCORD_ALLOWED
-		DiscordClient.shutdown();
-		#end
-		#if sys
-		Sys.exit(1);
-		#end
-	}
-	#end
 }

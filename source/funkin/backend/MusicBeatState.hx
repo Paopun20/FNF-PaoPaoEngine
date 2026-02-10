@@ -1,7 +1,7 @@
 package funkin.backend;
 
 import flixel.FlxState;
-import funkin.backend.PsychCamera;
+import funkin.objects.PsychCamera;
 
 class MusicBeatState extends FlxState
 {

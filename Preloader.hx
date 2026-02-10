@@ -3,6 +3,7 @@ package;
 import CompileTime;
 import flixel.system.FlxBasePreloader;
 import funkin.utils.CoolLog;
+import funkin.backend.ErrorHandler;
 import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.media.Sound;
@@ -48,10 +49,8 @@ class Preloader extends FlxBasePreloader
 	var currentLineIndex:Int = 0;
 	var lineHeight:Float = 16;
 
-	public function new(MinDisplayTime:Float = 5, ?AllowedURLs:Array<String>)
+	public function new(MinDisplayTime:Float = 0, ?AllowedURLs:Array<String>)
 	{
-		super(MinDisplayTime, AllowedURLs);
-
 		#if WindowColorMode
 		WindowColorMode.setDarkMode();
 		if (WindowColorMode.isWindows10)
@@ -59,18 +58,7 @@ class Preloader extends FlxBasePreloader
 		#end
 
 		CoolLog.init();
-	}
-
-	override function create():Void
-	{
-		super.create();
-
-		// Background
-		var bg = new Sprite();
-		bg.graphics.beginFill(0x000000);
-		bg.graphics.drawRect(0, 0, stage.stageWidth, stage.stageHeight);
-		bg.graphics.endFill();
-		addChild(bg);
+		ErrorHandler.init();
 
 		// Initialize terminal array
 		terminal = [];
@@ -120,8 +108,28 @@ class Preloader extends FlxBasePreloader
 			},
 		];
 
+		var ttime:Float = 0;
+		for (i in 0...tasks.length)
+		{
+			ttime += tasks[i].delay != null ? tasks[i].delay : 0.3;
+		}
+
+		super(ttime, AllowedURLs);
+
 		// Initialize sound
 		sound = new PreloadSoundFX();
+	}
+
+	override function create():Void
+	{
+		super.create();
+
+		// Background
+		var bg = new Sprite();
+		bg.graphics.beginFill(0x000000);
+		bg.graphics.drawRect(0, 0, stage.stageWidth, stage.stageHeight);
+		bg.graphics.endFill();
+		addChild(bg);
 
 		addEventListener(Event.ENTER_FRAME, onFirstFrame);
 	}
@@ -238,10 +246,10 @@ class Preloader extends FlxBasePreloader
 				});
 			}
 		}
-		
+
 		if (currentTaskIndex >= tasks.length)
 		{
-		    super.update(1); // end loop
+			super.update(1); // end loop
 		}
 	}
 

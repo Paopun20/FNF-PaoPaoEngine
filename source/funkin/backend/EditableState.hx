@@ -23,7 +23,7 @@ class EditableState extends MusicBeatState
 		#if MODS_ALLOWED
 		statePath = Paths.modFolders(stateName);
 		#else
-		statePath = Paths.getSharedPath("state/" + stateName);
+		statePath = Paths.getSharedPath("states/" + stateName);
 		#end
 
 		super.create();

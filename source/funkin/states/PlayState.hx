@@ -58,7 +58,7 @@ import funkin.modding.scripts.Python;
  * "function eventPushedUnique" - Called one time per event, use it for precaching events that uses different assets based on its values
  * "function eventEarlyTrigger" - Used for making your event start a few MILLISECONDS earlier
  * "function triggerEvent" - Called when the song hits your event's timestamp, this is probably what you were looking for
-**/
+ **/
 class PlayState extends MusicBeatState
 {
 	public static var STRUM_X = 42;
@@ -275,6 +275,28 @@ class PlayState extends MusicBeatState
 	private static var _lastLoadedModDirectory:String = '';
 	public static var nextReloadAll:Bool = false;
 
+	private function initScriptFromDirectory(directory:String)
+	{
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
+		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), directory))
+			for (file in FileSystem.readDirectory(folder))
+			{
+				#if LUA_ALLOWED
+				if (file.toLowerCase().endsWith('.lua'))
+					new FunkinLua(folder + file);
+				#end
+				#if HSCRIPT_ALLOWED
+				if (file.toLowerCase().endsWith('.hx'))
+					initHScript(folder + file);
+				#end
+				#if PYTHON_ALLOWED
+				if (file.toLowerCase().endsWith('.py'))
+					initPython(folder + file);
+				#end
+			}
+		#end
+	}
+
 	override public function create()
 	{
 		// trace('Playback Rate: ' + playbackRate);
@@ -448,27 +470,7 @@ class PlayState extends MusicBeatState
 			add(boyfriendGroup);
 		}
 
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
-		// "SCRIPTS FOLDER" SCRIPTS
-		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'scripts/'))
-			for (file in FileSystem.readDirectory(folder))
-			{
-				#if LUA_ALLOWED
-				if (file.toLowerCase().endsWith('.lua'))
-					new FunkinLua(folder + file);
-				#end
-
-				#if HSCRIPT_ALLOWED
-				if (file.toLowerCase().endsWith('.hx'))
-					initHScript(folder + file);
-				#end
-
-				#if PYTHON_ALLOWED
-				if (file.toLowerCase().endsWith('.py'))
-					initPython(folder + file);
-				#end
-			}
-		#end
+		initScriptFromDirectory('scripts/') // "SCRIPTS FOLDER" SCRIPTS
 
 		var camPos:FlxPoint = FlxPoint.get(girlfriendCameraOffset[0], girlfriendCameraOffset[1]);
 		if (gf != null)
@@ -622,27 +624,7 @@ class PlayState extends MusicBeatState
 		noteTypes = null;
 		eventsPushed = null;
 
-		// SONG SPECIFIC SCRIPTS
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
-		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'data/$songName/'))
-			for (file in FileSystem.readDirectory(folder))
-			{
-				#if LUA_ALLOWED
-				if (file.toLowerCase().endsWith('.lua'))
-					new FunkinLua(folder + file);
-				#end
-
-				#if HSCRIPT_ALLOWED
-				if (file.toLowerCase().endsWith('.hx'))
-					initHScript(folder + file);
-				#end
-
-				#if PYTHON_ALLOWED
-				if (file.toLowerCase().endsWith('.py'))
-					initPython(folder + file);
-				#end
-			}
-		#end
+		initScriptFromDirectory('data/$songName/') // SONG SPECIFIC SCRIPTS
 
 		if (eventNotes.length > 0)
 		{
@@ -1429,6 +1411,7 @@ class PlayState extends MusicBeatState
 		}
 		catch (e:Dynamic)
 		{
+			CoolLog.error("Error loading vocals: " + e);
 		}
 
 		#if FLX_PITCH
@@ -1445,6 +1428,7 @@ class PlayState extends MusicBeatState
 		}
 		catch (e:Dynamic)
 		{
+			CoolLog.error("Error loading instrument: " + e);
 		}
 		FlxG.sound.list.add(inst);
 
@@ -1461,6 +1445,7 @@ class PlayState extends MusicBeatState
 		}
 		catch (e:Dynamic)
 		{
+			CoolLog.error("Error loading events: " + e);
 		}
 
 		var oldNote:Note = null;
