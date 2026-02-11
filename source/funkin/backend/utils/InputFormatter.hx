@@ -1,4 +1,4 @@
-package funkin.backend;
+package funkin.backend.utils;
 
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepad;
@@ -91,6 +91,30 @@ class InputFormatter
 				return "'";
 			case PRINTSCREEN:
 				return "PrtScrn";
+			case F1:
+				return "F1";
+			case F2:
+				return "F2";
+			case F3:
+				return "F3";
+			case F4:
+				return "F4";
+			case F5:
+				return "F5";
+			case F6:
+				return "F6";
+			case F7:
+				return "F7";
+			case F8:
+				return "F8";
+			case F9:
+				return "F9";
+			case F10:
+				return "F10";
+			case F11:
+				return "F11";
+			case F12:
+				return "F12";
 			case NONE:
 				return '---';
 			default:

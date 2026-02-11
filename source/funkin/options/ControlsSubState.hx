@@ -1,6 +1,6 @@
 package funkin.options;
 
-import funkin.backend.InputFormatter;
+import funkin.backend.utils.InputFormatter;
 import flixel.addons.display.FlxBackdrop;
 import flixel.addons.display.FlxGridOverlay;
 import funkin.objects.AttachedSprite;

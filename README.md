@@ -31,6 +31,8 @@
 - Removed obsolete features from the Psych Engine, such as the Easter Egg.
 - Organize files and folders for improved readability and maintenance. Ensure compatibility with older layouts when importing to new systems (mostly mods, import backend, or import Discord; others may not be compatible).
 - Optimize Engine performance and memory usage.
+- New Free-play UI (WIP)
+- New Loading Screen UI (WIP)
 - Improve modding experience and compatibility.
 
 > (I haven't finished writing the README yet.)

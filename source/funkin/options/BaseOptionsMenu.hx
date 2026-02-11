@@ -7,7 +7,7 @@ import flixel.input.gamepad.FlxGamepadManager;
 import funkin.objects.CheckboxThingie;
 import funkin.objects.AttachedText;
 import funkin.options.Option;
-import funkin.backend.InputFormatter;
+import funkin.backend.utils.InputFormatter;
 
 class BaseOptionsMenu extends MusicBeatSubstate
 {
