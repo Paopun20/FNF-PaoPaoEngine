@@ -140,10 +140,16 @@ class FreeplayState extends EditableState
 			Mods.currentModDirectory = songs[i].folder;
 			var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);
 			icon.sprTracker = songText;
+			
+			var card: FlxSprite = new FlxSprite(songText.x + songText.width + 10, songText.y - 10);
+			card.makeGraphic(100, 100, FlxColor.fromRGB(0, 0, 0));
+			card.scale.set(0.5, 0.5);
+			card.origin.set(0.5, 0.5);
+			card.angle = 10;
+			card.alpha = 0.8;
 
 			// too laggy with a lot of songs, so i had to recode the logic for it
-			songText.visible = songText.active = songText.isMenuItem = false;
-			icon.visible = icon.active = false;
+			card.visible = card.active = songText.visible = songText.active = songText.isMenuItem = icon.visible = icon.active = false;
 
 			// using a FlxGroup is too much fuss!
 			iconArray.push(icon);
@@ -688,6 +694,7 @@ class SongMetadata
 		this.color = color;
 		this.folder = Mods.currentModDirectory;
 		this.album = album; // Store album
+		
 		if (this.folder == null)
 			this.folder = '';
 	}

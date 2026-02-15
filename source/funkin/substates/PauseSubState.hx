@@ -11,7 +11,7 @@ import funkin.options.OptionsState;
 import funkin.modding.scripts.HScript;
 #end
 
-class PauseSubState extends MusicBeatSubstate
+class PauseSubState extends EditableSubstate
 {
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 

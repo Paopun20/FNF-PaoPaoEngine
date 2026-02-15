@@ -5,7 +5,7 @@ import funkin.backend.Highscore;
 import flixel.FlxSubState;
 import funkin.objects.HealthIcon;
 
-class ResetScoreSubState extends MusicBeatSubstate
+class ResetScoreSubState extends EditableSubstate
 {
 	var bg:FlxSprite;
 	var alphabetArray:Array<Alphabet> = [];

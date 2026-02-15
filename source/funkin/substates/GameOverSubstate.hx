@@ -8,7 +8,7 @@ import flixel.math.FlxPoint;
 import funkin.states.StoryMenuState;
 import funkin.states.FreeplayState;
 
-class GameOverSubstate extends MusicBeatSubstate
+class GameOverSubstate extends EditableSubstate
 {
 	public var boyfriend:Character;
 

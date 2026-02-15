@@ -5,7 +5,7 @@ import flixel.tweens.FlxEase;
 import funkin.states.MainMenuState;
 import funkin.states.TitleState;
 
-class OutdatedSubState extends MusicBeatSubstate
+class OutdatedSubState extends EditableSubstate
 {
 	public static var updateVersion:String = CoolUtil.checkForUpdates();
 

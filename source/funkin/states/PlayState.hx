@@ -59,7 +59,7 @@ import funkin.modding.scripts.Python;
  * "function eventEarlyTrigger" - Used for making your event start a few MILLISECONDS earlier
  * "function triggerEvent" - Called when the song hits your event's timestamp, this is probably what you were looking for
 **/
-class PlayState extends MusicBeatState
+class PlayState extends EditableState
 {
 	public static var STRUM_X = 42;
 	public static var STRUM_X_MIDDLESCROLL = -278;
@@ -3673,31 +3673,6 @@ class PlayState extends MusicBeatState
 		callOnScripts('onSectionHit');
 	}
 
-	#if LUA_ALLOWED
-	public function startLuasNamed(luaFile:String)
-	{
-		#if MODS_ALLOWED
-		var luaToLoad:String = Paths.modFolders(luaFile);
-		if (!FileSystem.exists(luaToLoad))
-			luaToLoad = Paths.getSharedPath(luaFile);
-
-		if (FileSystem.exists(luaToLoad))
-		#elseif sys
-		var luaToLoad:String = Paths.getSharedPath(luaFile);
-		if (OpenFlAssets.exists(luaToLoad))
-		#end
-		{
-			for (script in luaArray)
-				if (script.scriptName == luaToLoad)
-					return false;
-
-			new FunkinLua(luaToLoad);
-			return true;
-		}
-		return false;
-	}
-	#end
-
 	#if HSCRIPT_ALLOWED
 	public function startHScriptsNamed(scriptFile:String)
 	{
@@ -3764,6 +3739,7 @@ class PlayState extends MusicBeatState
 			var newScript:Python = new Python(null, file);
 			CoolLog.info('initialized python interp successfully: $file');
 			// trace('initialized python interp successfully: $file');
+			newScript.call('onCreate', []);
 			pythonArray.push(newScript);
 		}
 		catch (e:Dynamic)
@@ -3785,12 +3761,35 @@ class PlayState extends MusicBeatState
 	#end
 
 	#if LUA_ALLOWED
+	public function startLuasNamed(luaFile:String)
+	{
+		#if MODS_ALLOWED
+		var luaToLoad:String = Paths.modFolders(luaFile);
+		if (!FileSystem.exists(luaToLoad))
+			luaToLoad = Paths.getSharedPath(luaFile);
+
+		if (FileSystem.exists(luaToLoad))
+		#elseif sys
+		var luaToLoad:String = Paths.getSharedPath(luaFile);
+		if (OpenFlAssets.exists(luaToLoad))
+		#end
+		{
+			for (script in luaArray)
+				if (script.scriptName == luaToLoad)
+					return false;
+
+			initLua(luaToLoad);
+		}
+		return false;
+	}
+
 	public function initLua(file:String)
 	{
 		try
 		{
 		    var newScript:FunkinLua = new FunkinLua(file);
 			CoolLog.info('initialized lua interp successfully: $file');
+			newScript.call('onCreate', []);
 			luaArray.push(newScript);
 		}
 		catch (e:Dynamic)

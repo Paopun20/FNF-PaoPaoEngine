@@ -21,8 +21,9 @@ import funkin.backend.Paths;
 import funkin.backend.Controls;
 import funkin.backend.CoolUtil;
 import funkin.backend.MusicBeatState;
-import funkin.backend.EditableState;
 import funkin.backend.MusicBeatSubstate;
+import funkin.modding.editable.EditableState;
+import funkin.modding.editable.EditableSubstate;
 import funkin.frontend.transition.CustomFadeTransition as CustomFadeTransition; // I remove name it for one go
 import funkin.frontend.transition.BaseTransition;
 import funkin.backend.ClientPrefs;

@@ -116,7 +116,6 @@ class Python implements IPythonInterface implements IFlxDestroyable
 				try
 				{
 					execute(code);
-					call('onCreate', []);
 				}
 				catch (e)
 				{

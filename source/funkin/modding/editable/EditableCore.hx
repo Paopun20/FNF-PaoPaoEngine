@@ -1,6 +1,5 @@
-package funkin.backend;
+package funkin.modding.editable;
 
-import haxe.ds.StringMap;
 #if HSCRIPT_ALLOWED
 import funkin.modding.scripts.HScript;
 #end
@@ -8,15 +7,22 @@ import funkin.modding.scripts.HScript;
 import funkin.modding.scripts.Python;
 #end
 #if LUA_ALLOWED
-import funkin.modding.scripts.FunkinLua as Lua;
+import funkin.modding.scripts.FunkinLua;
 #end
 
-class EditableState extends MusicBeatState
+enum EditableType
 {
-	private var stateName:String;
+	State;
+	Substate;
+}
+
+class EditableCore
+{
+	public var stateName:String;
+	public var stateType:EditableType;
 
 	#if LUA_ALLOWED
-	private var luaArray:Array<Lua> = [];
+	private var luaArray:Array<FunkinLua> = [];
 	#end
 	#if HSCRIPT_ALLOWED
 	private var hscriptArray:Array<HScript> = [];
@@ -25,16 +31,34 @@ class EditableState extends MusicBeatState
 	private var pythonArray:Array<Python> = [];
 	#end
 
-	function preset(script:Dynamic)
+	public function new(stateName:String, stateType:EditableType):Void
+	{
+		this.stateName = stateName;
+		this.stateType = stateType;
+	}
+
+	public function preset(script:Dynamic):Void
 	{
 		if (script != null && Reflect.hasField(script, 'set'))
 		{
 			script.set("stateName", stateName);
+			switch (stateType)
+			{
+				case EditableType.State:
+					script.set("stateType", "State");
+					return;
+				case EditableType.Substate:
+					script.set("stateType", "Substate");
+					return;
+				default:
+					script.set("stateType", "Unknown");
+					return;
+			}
 		}
 	}
 
 	#if HSCRIPT_ALLOWED
-	private inline function initHScript(file:String)
+	public function initHScript(file:String):Void
 	{
 		var newScript:HScript = null;
 		try
@@ -42,7 +66,7 @@ class EditableState extends MusicBeatState
 			newScript = new HScript(null, file);
 			preset(newScript);
 			if (newScript.exists('onCreate'))
-				newScript.call('onCreate');
+				newScript.call('onCreate', []);
 			CoolLog.info('initialized hscript interp successfully: $file');
 			hscriptArray.push(newScript);
 		}
@@ -56,15 +80,15 @@ class EditableState extends MusicBeatState
 	#end
 
 	#if LUA_ALLOWED
-	private inline function initLua(file:String)
+	public function initLua(file:String):Void
 	{
-		var newScript:Lua = null;
+		var newScript:FunkinLua = null;
 		try
 		{
-			newScript = new Lua(file);
+			newScript = new FunkinLua(file);
 			preset(newScript);
 			if (newScript.existsFunc('onCreate'))
-				newScript.call('onCreate');
+				newScript.call('onCreate', []);
 			CoolLog.info('initialized lua interp successfully: $file');
 			luaArray.push(newScript);
 		}
@@ -78,15 +102,15 @@ class EditableState extends MusicBeatState
 	#end
 
 	#if PYTHON_ALLOWED
-	private inline function initPython(file:String)
+	public function initPython(file:String):Void
 	{
 		var newScript:Python = null;
 		try
 		{
 			newScript = new Python(null, file);
 			preset(newScript);
-			if (newScript.existsFunc('onCreate'))
-				newScript.call('onCreate');
+			if (newScript.exists('onCreate'))
+				newScript.call('onCreate', []);
 			CoolLog.info('initialized python interp successfully: $file');
 			pythonArray.push(newScript);
 		}
@@ -99,17 +123,28 @@ class EditableState extends MusicBeatState
 	}
 	#end
 
-	private function initScriptFromDirectory(directory:String, name:String)
+	private function getScriptCount():Int
 	{
-		CoolLog.info('EditableState: Scanning for scripts in: $directory');
+		var count = 0;
+		#if LUA_ALLOWED count += luaArray.length; #end
+		#if HSCRIPT_ALLOWED count += hscriptArray.length; #end
+		#if PYTHON_ALLOWED count += pythonArray.length; #end
+		return count;
+	}
+
+	public function initScriptFromDirectory(directory:String, name:String):Void
+	{
+		CoolLog.info('Loading scripts for state "$stateName" from scripts/states/');
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
 		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), directory))
 			for (file in FileSystem.readDirectory(folder))
 			{
-				if (file.toLowerCase() == name.toLowerCase())
+				if (file.toLowerCase().split('.')[0] == name.toLowerCase())
 				{
+					#if LUA_ALLOWED
 					if (file.toLowerCase().endsWith('.lua'))
 						initLua(folder + file);
+					#end
 					#if HSCRIPT_ALLOWED
 					if (file.toLowerCase().endsWith('.hx'))
 						initHScript(folder + file);
@@ -121,82 +156,60 @@ class EditableState extends MusicBeatState
 				}
 			}
 		#end
+		CoolLog.info('Done - ${getScriptCount()} script(s) loaded for "$stateName"');
 	}
 
-	private function callScripts(funcname:String, args:Array<Dynamic>)
+	public function callScripts(funcname:String, args:Array<Dynamic>):Void
 	{
 		#if LUA_ALLOWED
 		for (i in 0...luaArray.length)
-		{
 			if (luaArray[i].existsFunc(funcname))
 				luaArray[i].call(funcname, args);
-		}
 		#end
 		#if HSCRIPT_ALLOWED
 		for (i in 0...hscriptArray.length)
-		{
 			if (hscriptArray[i].exists(funcname))
 				hscriptArray[i].call(funcname, args);
-		}
 		#end
 		#if PYTHON_ALLOWED
 		for (i in 0...pythonArray.length)
-		{
 			if (pythonArray[i].exists(funcname))
 				pythonArray[i].call(funcname, args);
-		}
 		#end
 	}
 
-	override public function create():Void
+	public function setScript(id:String, v:Dynamic):Void
 	{
-		stateName = Type.getClassName(Type.getClass(this)).split('.').pop();
-		initScriptFromDirectory("scripts/states/", stateName); // load from scripts/states/[state_name].[lua, hx, py]
-		callScripts("onCreatePost", []);
-		super.create();
-		callScripts("onCreate", []);
+		#if LUA_ALLOWED
+		for (luaScript in luaArray)
+			luaScript.set(id, v);
+		#end
+		#if HSCRIPT_ALLOWED
+		for (hscript in hscriptArray)
+			hscript.set(id, v);
+		#end
+		#if PYTHON_ALLOWED
+		for (pythonScript in pythonArray)
+			pythonScript.set(id, v);
+		#end
 	}
 
-	override public function update(elapsed:Float):Void
+	public function destroy():Void
 	{
-		callScripts("onUpdatePost", [elapsed]);
-		super.update(elapsed);
-		callScripts("onUpdate", [elapsed]);
-	}
-
-	override public function beatHit():Void
-	{
-		super.beatHit();
-		callScripts("onBeatHit", []);
-	}
-
-	override public function stepHit():Void
-	{
-		super.stepHit();
-		callScripts("onStepHit", []);
-	}
-
-	override public function sectionHit():Void
-	{
-		super.sectionHit();
-		callScripts("onSectionHit", []);
-	}
-
-	override public function onFocus():Void
-	{
-		super.onFocus();
-		callScripts("onFocus", []);
-	}
-
-	override public function onFocusLost():Void
-	{
-		super.onFocusLost();
-		callScripts("onFocusLost", []);
-	}
-
-	override public function destroy():Void
-	{
-		super.destroy();
-		callScripts("onDestroy", []);
+		#if LUA_ALLOWED
+		for (lua in luaArray)
+			lua.destroy();
+		luaArray = [];
+		#end
+		#if HSCRIPT_ALLOWED
+		for (hscript in hscriptArray)
+			hscript.destroy();
+		hscriptArray = [];
+		#end
+		#if PYTHON_ALLOWED
+		for (python in pythonArray)
+			python.destroy();
+		pythonArray = [];
+		#end
 	}
 }
