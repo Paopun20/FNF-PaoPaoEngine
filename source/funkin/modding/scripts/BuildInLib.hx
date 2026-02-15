@@ -105,7 +105,7 @@ class BuildInLib
 		set('FlxSprite', flixel.FlxSprite);
 		set('FlxText', flixel.text.FlxText);
 		set('FlxCamera', flixel.FlxCamera);
-		set('PsychCamera', funkin.backend.PsychCamera);
+		set('PsychCamera', funkin.objects.PsychCamera);
 		set('FlxTimer', flixel.util.FlxTimer);
 		set('FlxTween', flixel.tweens.FlxTween);
 		set('FlxEase', flixel.tweens.FlxEase);
@@ -966,7 +966,7 @@ class BuildInLib
 		// ================================================================
 		// PROPERTY UTILITIES
 		// ================================================================
-		
+
 		// Only add these if not from Lua (Lua has its own implementations)
 		if (!isLua)
 		{
@@ -1257,14 +1257,14 @@ class BuildInLib
 					else
 						pythonTrace('startDialogue: Your dialogue file is badly formatted!', FlxColor.RED);
 				}
+			else
+			{
+				pythonTrace('startDialogue: Dialogue file not found', FlxColor.RED);
+				if (game.endingSong)
+					game.endSong();
 				else
-				{
-					pythonTrace('startDialogue: Dialogue file not found', FlxColor.RED);
-					if (game.endingSong)
-						game.endSong();
-					else
-						game.startCountdown();
-				}
+					game.startCountdown();
+			}
 				return false;
 			});
 

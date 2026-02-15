@@ -11,7 +11,7 @@ import funkin.options.GameplayChangersSubstate;
 import funkin.substates.ResetScoreSubState;
 import funkin.backend.StageData;
 
-class StoryMenuState extends MusicBeatState
+class StoryMenuState extends EditableState
 {
 	public static var weekCompleted:Map<String, Bool> = new Map<String, Bool>();
 

@@ -1,5 +1,4 @@
 // https://github.com/HaxeFlixel/flixel/blob/master/flixel/util/FlxDestroyUtil.hx
-
 package flixel.util;
 
 import openfl.display.BitmapData;

@@ -1,6 +1,6 @@
 package funkin.states;
 
-class ErrorState extends MusicBeatState
+class ErrorState extends EditableState
 {
 	public var acceptCallback:Void->Void;
 	public var backCallback:Void->Void;

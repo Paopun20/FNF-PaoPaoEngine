@@ -1,7 +1,7 @@
 package funkin.modding.editors;
 
 import funkin.backend.StageData;
-import funkin.backend.PsychCamera;
+import funkin.objects.PsychCamera;
 import funkin.objects.Character;
 import funkin.modding.scripts.LuaUtils;
 import flixel.FlxObject;

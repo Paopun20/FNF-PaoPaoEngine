@@ -2,7 +2,7 @@ package funkin.states;
 
 import funkin.objects.AttachedSprite;
 
-class CreditsState extends MusicBeatState
+class CreditsState extends EditableState
 {
 	var curSelected:Int = -1;
 

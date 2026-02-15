@@ -3,12 +3,11 @@ package funkin.modding.scripts.components;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 #end
-
 import funkin.modding.scripts.ImplementUtils;
 
 class ShaderFunctions
 {
-    #if LUA_ALLOWED
+	#if LUA_ALLOWED
 	public static function implement(funk:FunkinLua)
 	{
 		var lua = funk.lua;
@@ -426,13 +425,13 @@ class ShaderFunctions
 
 		if (target == null)
 		{
-		    #if LUA_ALLOWED
+			#if LUA_ALLOWED
 			ImplementUtils.addTextToDebug('Error on getting shader: Object $obj not found', FlxColor.RED);
 			return null;
-		    #else
+			#else
 			CoolLog.error("Error on getting shader: Object $obj not found");
 			return null;
-		    #end
+			#end
 		}
 		return cast(target.shader, FlxRuntimeShader);
 	}

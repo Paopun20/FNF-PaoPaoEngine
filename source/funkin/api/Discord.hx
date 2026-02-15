@@ -102,13 +102,13 @@ class DiscordClient
 
 	private static function onDisconnected(errorCode:Int, message:cpp.ConstCharStar):Void
 	{
-		CoolLog.info("Discord: Disconnected ($errorCode:$message)");
+		CoolLog.info('Discord: Disconnected ($errorCode:$message)');
 		whoIsConnectedTo = null;
 	}
 
 	private static function onError(errorCode:Int, message:cpp.ConstCharStar):Void
 	{
-		CoolLog.error("Discord: Error ($errorCode:$message)");
+		CoolLog.error('Discord: Error ($errorCode:$message)');
 	}
 
 	inline public static function resetClientID()
@@ -180,7 +180,6 @@ class DiscordClient
 		if (pack != null && pack.discordRPC != null && pack.discordRPC != clientID)
 		{
 			clientID = pack.discordRPC;
-			// trace('Changing clientID! $clientID, $_defaultID');
 		}
 	}
 	#end

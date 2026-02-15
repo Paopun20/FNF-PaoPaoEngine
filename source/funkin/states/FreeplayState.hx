@@ -14,7 +14,7 @@ import funkin.substates.ResetScoreSubState;
 import haxe.Json;
 import openfl.utils.Assets;
 
-class FreeplayState extends MusicBeatState
+class FreeplayState extends EditableState
 {
 	var songs:Array<SongMetadata> = [];
 

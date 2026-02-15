@@ -61,7 +61,7 @@ class ErrorHandle
 		var path:String;
 		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
 		var dateNow:String = Date.now().toString();
-		
+
 		CoolLog.critical("Crash detected!");
 
 		dateNow = dateNow.replace(" ", "_").replace(":", "-");
@@ -93,7 +93,7 @@ class ErrorHandle
 
 		// Save crash log
 		saveLogs(path, errMsg);
-		
+
 		// Dispatch crash signal
 		if (onCrashSignal != null)
 			onCrashSignal.dispatch(errMsg, path);
@@ -113,13 +113,13 @@ class ErrorHandle
 		{
 			var dateNow:String = Date.now().toString().replace(" ", "_").replace(":", "-");
 			var path:String = "./crash/" + "PaoPaoEngine_" + dateNow + ".log";
-			
+
 			saveLogs(path, message);
-			
+
 			// Dispatch critical error signal
 			if (onCriticalErrorSignal != null)
 				onCriticalErrorSignal.dispatch(message);
-			
+
 			showDialogWindow(message, "Critical Error!");
 		}
 		catch (e:Dynamic)
@@ -127,7 +127,7 @@ class ErrorHandle
 			trace('Error while handling critical error: $e');
 			trace('Original message: $message');
 		}
-		
+
 		shutdown();
 	}
 	#end
@@ -174,7 +174,7 @@ class ErrorHandle
 		#if DISCORD_ALLOWED
 		DiscordClient.shutdown();
 		#end
-		
+
 		#if sys
 		Sys.exit(1);
 		#end

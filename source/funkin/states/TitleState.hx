@@ -31,7 +31,7 @@ typedef TitleData =
 	@:optional var idle:Bool;
 }
 
-class TitleState extends MusicBeatState
+class TitleState extends EditableState
 {
 	public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
 	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
@@ -243,14 +243,11 @@ class TitleState extends MusicBeatState
 				catch (e:haxe.Exception)
 				{
 					CoolLog.info('[WARN] Title JSON might broken, ignoring issue...\n${e.details()}');
-					// trace('[WARN] Title JSON might broken, ignoring issue...\n${e.details()}');
 				}
 			}
 			else
 				CoolLog.info('[WARN] No Title JSON detected, using default values.');
-			// trace('[WARN] No Title JSON detected, using default values.');
 		}
-		// else trace('[WARN] No Title JSON detected, using default values.');
 	}
 
 	function getIntroTextShit():Array<Array<String>>
@@ -442,10 +439,10 @@ class TitleState extends MusicBeatState
 					FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 					FlxG.sound.music.fadeIn(4, 0, 0.7);
 				case 2:
-					createCoolText(['Psych Engine by'], 40);
+					createCoolText(['PaoPao Engine by'], 40);
 				case 4:
-					addMoreText('Shadow Mario', 40);
-					addMoreText('Riveren', 40);
+					addMoreText('PaoPao', 40);
+					addMoreText('(yes, sole creator)', 40);
 				case 5:
 					deleteCoolText();
 				case 6:

@@ -8,7 +8,6 @@ import funkin.modding.scripts.FunkinLua;
 import funkin.modding.scripts.Python;
 #end
 #end
-
 import funkin.states.PlayState;
 
 class ImplementUtils
@@ -52,6 +51,7 @@ class ImplementUtils
 			return null;
 		};
 	}
+
 	public static function addTextToDebug(text:String, color:Int):Void
 	{
 		PlayState.instance.addTextToDebug(text, color);

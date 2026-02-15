@@ -14,16 +14,23 @@ import openfl.geom.Rectangle;
 import lime.utils.Assets;
 import flash.media.Sound;
 import haxe.Json;
-import haxe.ds.StringMap;
 #if MODS_ALLOWED
 import funkin.backend.Mods;
 #end
 
 @:access(openfl.display.BitmapData)
-class Caches
+class Paths
 {
-	public static var localTrackedAssets:Array<String> = [];
-	public static var currentTrackedAssets:StringMap<FlxGraphic> = new StringMap<FlxGraphic>();
+	inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
+	inline public static var VIDEO_EXT = "mp4";
+
+	public static function excludeAsset(key:String)
+	{
+		if (!dumpExclusions.contains(key))
+			dumpExclusions.push(key);
+	}
+
+	public static var dumpExclusions:Array<String> = ['assets/shared/music/freakyMenu.$SOUND_EXT'];
 
 	public static function clearMemoryByName(name:String)
 	{
@@ -36,6 +43,19 @@ class Caches
 		// run the garbage collector for good measure lmfao
 		System.gc();
 	}
+
+	// haya I love you for the base cache dump I took to the max
+	public static function clearUnusedMemory()
+	{
+		// clear non local assets in the tracked assets list
+		for (key in currentTrackedAssets.keys())
+		{
+			Paths.clearMemoryByName(key);
+		}
+	}
+
+	// define the locally tracked assets
+	public static var localTrackedAssets:Array<String> = [];
 
 	@:access(flixel.system.frontEnds.BitmapFrontEnd._cache)
 	public static function clearStoredMemory()
@@ -123,20 +143,6 @@ class Caches
 			graphic.bitmap.__texture.dispose();
 		FlxG.bitmap.remove(graphic);
 	}
-}
-
-class Paths
-{
-	inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
-	inline public static var VIDEO_EXT = "mp4";
-
-	public static function excludeAsset(key:String)
-	{
-		if (!dumpExclusions.contains(key))
-			dumpExclusions.push(key);
-	}
-
-	public static var dumpExclusions:Array<String> = ['assets/shared/music/freakyMenu.$SOUND_EXT'];
 
 	static public var currentLevel:String;
 
@@ -234,14 +240,16 @@ class Paths
 	inline static public function soundRandom(key:String, min:Int, max:Int, ?modsAllowed:Bool = true)
 		return sound(key + FlxG.random.int(min, max), modsAllowed);
 
+	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
+
 	static public function image(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true):FlxGraphic
 	{
 		key = Language.getFileTranslation('images/$key') + '.png';
 		var bitmap:BitmapData = null;
-		if (Caches.currentTrackedAssets.exists(key))
+		if (currentTrackedAssets.exists(key))
 		{
-			Caches.localTrackedAssets.push(key);
-			return Caches.currentTrackedAssets.get(key);
+			localTrackedAssets.push(key);
+			return currentTrackedAssets.get(key);
 		}
 		return cacheBitmap(key, parentFolder, bitmap, allowGPU);
 	}
@@ -294,8 +302,8 @@ class Paths
 		graph.persist = true;
 		graph.destroyOnNoUse = false;
 
-		Caches.currentTrackedAssets.set(key, graph);
-		Caches.localTrackedAssets.push(key);
+		currentTrackedAssets.set(key, graph);
+		localTrackedAssets.push(key);
 		return graph;
 	}
 
@@ -449,28 +457,30 @@ class Paths
 		return hideChars.replace(invalidChars.replace(path, '-'), '').trim().toLowerCase();
 	}
 
+	public static var currentTrackedSounds:Map<String, Sound> = [];
+
 	public static function returnSound(key:String, ?path:String, ?modsAllowed:Bool = true, ?beepOnNull:Bool = true)
 	{
 		var file:String = getPath(Language.getFileTranslation(key) + '.$SOUND_EXT', SOUND, path, modsAllowed);
 
 		// trace('precaching sound: $file');
-		if (!Caches.currentTrackedSounds.exists(file))
+		if (!currentTrackedSounds.exists(file))
 		{
 			#if sys
 			if (FileSystem.exists(file))
-				Caches.currentTrackedSounds.set(file, Sound.fromFile(file));
+				currentTrackedSounds.set(file, Sound.fromFile(file));
 			#else
 			if (OpenFlAssets.exists(file, SOUND))
-				Caches.currentTrackedSounds.set(file, OpenFlAssets.getSound(file));
+				currentTrackedSounds.set(file, OpenFlAssets.getSound(file));
 			#end
-		}
 		else if (beepOnNull)
 		{
 			CoolLog.error('SOUND NOT FOUND: $key, PATH: $path');
 			return FlxAssets.getSoundAddExtension('flixel/sounds/beep', true);
 		}
-		Caches.localTrackedAssets.push(file);
-		return Caches.currentTrackedSounds.get(file);
+		}
+		localTrackedAssets.push(file);
+		return currentTrackedSounds.get(file);
 	}
 
 	#if MODS_ALLOWED

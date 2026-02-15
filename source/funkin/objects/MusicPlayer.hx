@@ -178,7 +178,7 @@ class MusicPlayer extends FlxGroup
 			holdPitchTime += elapsed;
 			if (holdPitchTime > 0.6)
 			{
-			    playbackRate += (0.05 * (controls.UI_UP ? 1 : -1)) * Math.max(holdPitchTime, 1);
+				playbackRate += (0.05 * (controls.UI_UP ? 1 : -1)) * Math.max(holdPitchTime, 1);
 				setPlaybackRate();
 			}
 		}
@@ -232,7 +232,9 @@ class MusicPlayer extends FlxGroup
 			if (!FlxG.sound.music.playing)
 				FlxG.sound.music.resume();
 
-			if (FreeplayState.playerVocals != null && FreeplayState.playerVocals.length > FlxG.sound.music.time && !FreeplayState.playerVocals.playing)
+			if (FreeplayState.playerVocals != null
+				&& FreeplayState.playerVocals.length > FlxG.sound.music.time
+				&& !FreeplayState.playerVocals.playing)
 				FreeplayState.playerVocals.resume();
 			if (FreeplayState.opponentVocals != null
 				&& FreeplayState.opponentVocals.length > FlxG.sound.music.time

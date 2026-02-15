@@ -4,7 +4,7 @@ import flixel.FlxSubState;
 import flixel.effects.FlxFlicker;
 import lime.app.Application;
 
-class FlashingState extends MusicBeatState
+class FlashingState extends EditableState
 {
 	public static var leftState:Bool = false;
 

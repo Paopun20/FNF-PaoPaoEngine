@@ -74,8 +74,6 @@ class FunkinLua implements IFunkinLuaInterface
 
 		this.scriptName = scriptName.trim();
 		var game:PlayState = PlayState.instance;
-		if (game != null)
-			game.luaArray.push(this);
 
 		var myFolder:Array<String> = this.scriptName.split('/');
 		#if MODS_ALLOWED
@@ -83,7 +81,7 @@ class FunkinLua implements IFunkinLuaInterface
 			&& (Mods.currentModDirectory == myFolder[1] || Mods.getGlobalMods().contains(myFolder[1]))) // is inside mods folder
 			this.modFolder = myFolder[1];
 		#end
-		
+
 		var lib = new BuildInLib(set, scriptName);
 		lib.addVar();
 		lib.addGameVar();
@@ -1875,6 +1873,38 @@ class FunkinLua implements IFunkinLuaInterface
 	public var lastCalledFunction:String = '';
 
 	public static var lastCalledScript:FunkinLua = null;
+	
+	public function existsFunc(name:String):Bool
+	{
+		if (closed)
+			return false;
+
+		try
+		{
+			if (lua == null)
+				return false;
+
+			Lua.getglobal(lua, name);
+			var type:Int = Lua.type(lua, -1);
+
+			if (type != Lua.LUA_TFUNCTION)
+			{
+				if (type > Lua.LUA_TNIL)
+					luaTrace("ERROR (" + name + "): attempt to call a " + LuaUtils.typeToString(type) + " value", FlxColor.RED);
+
+				Lua.pop(lua, 1);
+				return false;
+			}
+
+			Lua.pop(lua, 1);
+			return true;
+		}
+		catch (e:Dynamic)
+		{
+			CoolLog.error('Error checking function existence: $name: $e');
+			return false;
+		}
+	}
 
 	public function call(func:String, args:Array<Dynamic>):Dynamic
 	{
@@ -1971,6 +2001,12 @@ class FunkinLua implements IFunkinLuaInterface
 			hscript = null;
 		}
 		#end
+	}
+
+	
+	public function destroy()
+	{
+		stop();
 	}
 
 	function oldTweenFunction(tag:String, vars:String, tweenValue:Any, duration:Float, ease:String, funcName:String)

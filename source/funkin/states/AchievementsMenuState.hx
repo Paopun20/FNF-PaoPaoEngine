@@ -5,7 +5,7 @@ import flixel.util.FlxSort;
 import funkin.objects.Bar;
 
 #if ACHIEVEMENTS_ALLOWED
-class AchievementsMenuState extends MusicBeatState
+class AchievementsMenuState extends EditableState
 {
 	public var curSelected:Int = 0;
 

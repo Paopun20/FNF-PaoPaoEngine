@@ -88,10 +88,6 @@ class Python implements IPythonInterface implements IFlxDestroyable
 		printer = new PyPrinter();
 		scriptName = origin = file;
 
-		var game:PlayState = PlayState.instance;
-		if (game != null)
-			game.pythonArray.push(this);
-
 		#if MODS_ALLOWED
 		var myFolder:Array<String> = file.split('/');
 		if (myFolder[0] + '/' == Paths.mods() && (Mods.currentModDirectory == myFolder[1] || Mods.getGlobalMods().contains(myFolder[1])))

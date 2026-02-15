@@ -58,7 +58,7 @@ import funkin.modding.scripts.Python;
  * "function eventPushedUnique" - Called one time per event, use it for precaching events that uses different assets based on its values
  * "function eventEarlyTrigger" - Used for making your event start a few MILLISECONDS earlier
  * "function triggerEvent" - Called when the song hits your event's timestamp, this is probably what you were looking for
- **/
+**/
 class PlayState extends MusicBeatState
 {
 	public static var STRUM_X = 42;
@@ -283,7 +283,7 @@ class PlayState extends MusicBeatState
 			{
 				#if LUA_ALLOWED
 				if (file.toLowerCase().endsWith('.lua'))
-					new FunkinLua(folder + file);
+					initLua(folder + file);
 				#end
 				#if HSCRIPT_ALLOWED
 				if (file.toLowerCase().endsWith('.hx'))
@@ -304,7 +304,7 @@ class PlayState extends MusicBeatState
 		Paths.clearStoredMemory();
 		if (nextReloadAll)
 		{
-		    HScript.reset();
+			HScript.reset();
 			Paths.clearUnusedMemory();
 			Language.reloadPhrases();
 		}
@@ -470,7 +470,7 @@ class PlayState extends MusicBeatState
 			add(boyfriendGroup);
 		}
 
-		initScriptFromDirectory('scripts/') // "SCRIPTS FOLDER" SCRIPTS
+		initScriptFromDirectory('scripts/'); // "SCRIPTS FOLDER" SCRIPTS
 
 		var camPos:FlxPoint = FlxPoint.get(girlfriendCameraOffset[0], girlfriendCameraOffset[1]);
 		if (gf != null)
@@ -624,7 +624,7 @@ class PlayState extends MusicBeatState
 		noteTypes = null;
 		eventsPushed = null;
 
-		initScriptFromDirectory('data/$songName/') // SONG SPECIFIC SCRIPTS
+		initScriptFromDirectory('data/$songName/'); // SONG SPECIFIC SCRIPTS
 
 		if (eventNotes.length > 0)
 		{
@@ -2714,7 +2714,11 @@ class PlayState extends MusicBeatState
 			var percent:Float = ratingPercent;
 			if (Math.isNaN(percent))
 				percent = 0;
-			Highscore.saveScore(Song.loadedSongName, songScore, storyDifficulty, percent);
+
+			if (!cpuControlled)
+			{ // anti-cheat
+				Highscore.saveScore(Song.loadedSongName, songScore, storyDifficulty, percent);
+			}
 			#end
 			playbackRate = 1;
 
@@ -2862,15 +2866,12 @@ class PlayState extends MusicBeatState
 		if (daRating.noteSplash && !note.noteSplashData.disabled)
 			spawnNoteSplashOnNote(note);
 
-		if (!cpuControlled)
+		songScore += score;
+		if (!note.ratingDisabled)
 		{
-			songScore += score;
-			if (!note.ratingDisabled)
-			{
-				songHits++;
-				totalPlayed++;
-				RecalculateRating(false);
-			}
+			songHits++;
+			totalPlayed++;
+			RecalculateRating(false);
 		}
 
 		var uiFolder:String = "";
@@ -3779,6 +3780,23 @@ class PlayState extends MusicBeatState
 					break;
 				}
 			}
+		}
+	}
+	#end
+
+	#if LUA_ALLOWED
+	public function initLua(file:String)
+	{
+		try
+		{
+		    var newScript:FunkinLua = new FunkinLua(file);
+			CoolLog.info('initialized lua interp successfully: $file');
+			luaArray.push(newScript);
+		}
+		catch (e:Dynamic)
+		{
+			CoolLog.error('[Lua] Runtime error: "' + e + '" at ' + file);
+			PlayState.instance.addTextToDebug('[Lua] Runtime error: "' + e + '" at ' + file, FlxColor.RED);
 		}
 	}
 	#end

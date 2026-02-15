@@ -27,7 +27,7 @@ import funkin.modding.scripts.HScript;
 #include <thread>
 ')
 #end
-class LoadingState extends MusicBeatState
+class LoadingState extends EditableState
 {
 	public static var loaded:Int = 0;
 	public static var loadMax:Int = 0;

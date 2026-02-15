@@ -16,11 +16,10 @@
 - Hscript (Improved and QOL with own fork)
   > Optimize.
   > Cache AST.
-  > Use Codename's HScript fork library.
+  > Can use without `game.`
+  > Use Own's Codename's HScript fork library.
 - Ndll Support (HScript/Python only)
   > It codename feature.
-  >
-  > > IDK, what to say.
 - Fixed Loading Screen race condition and made it thread-safe
   > A race condition occurs when two or more threads access a shared resource simultaneously, leading to unpredictable behavior, data corruption, or a stuck loading screen.
   > > More details? [here](https://www.youtube.com/watch?v=bhpzTWtee2A)

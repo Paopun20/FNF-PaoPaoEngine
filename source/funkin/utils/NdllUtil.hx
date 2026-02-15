@@ -51,5 +51,7 @@ class NdllUtil
 	}
 	#end
 
-	@:dox(hide) @:noCompletion static function noop() {}
+	@:dox(hide) @:noCompletion static function noop()
+	{
+	}
 }

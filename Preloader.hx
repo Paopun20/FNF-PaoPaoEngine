@@ -3,7 +3,7 @@ package;
 import CompileTime;
 import flixel.system.FlxBasePreloader;
 import funkin.utils.CoolLog;
-import funkin.backend.ErrorHandler;
+import funkin.backend.ErrorHandle;
 import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.media.Sound;
@@ -58,7 +58,7 @@ class Preloader extends FlxBasePreloader
 		#end
 
 		CoolLog.init();
-		ErrorHandler.init();
+		ErrorHandle.init();
 
 		// Initialize terminal array
 		terminal = [];

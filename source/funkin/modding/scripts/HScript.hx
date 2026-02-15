@@ -11,6 +11,7 @@ import funkin.modding.scripts.FunkinLua;
 import hscript.Parser;
 import hscript.Interp;
 import hscript.Printer;
+import hscript.Tools;
 import hscript.Expr.Error as HscriptError;
 import hscript.Expr;
 import hscript.Expr;
@@ -29,6 +30,139 @@ interface IHscriptInterface
 	public function set(variable:String, data:Dynamic):Void;
 	public function call(func:String, ?args:Array<Dynamic>):Dynamic;
 	public function stop():Void;
+}
+
+class PaoPaoInterp extends Interp
+{
+	public var parentInstance(default, set):Dynamic = [];
+
+	var _instanceFields:Array<String>;
+
+	function set_parentInstance(inst:Dynamic):Dynamic
+	{
+		_instanceFields = inst == null ? [] : Type.getInstanceFields(Type.getClass(inst));
+		return parentInstance = inst;
+	}
+
+	override function resolve(id:String, doException:Bool = true, allowProperty:Bool = true):Dynamic
+	{
+		if (locals.exists(id))
+			return locals.get(id).r;
+		else if (variables.exists(id))
+			return variables.get(id);
+		else if (customClasses.exists(id))
+			return customClasses.get(id);
+		if (parentInstance != null && _instanceFields.contains(id))
+			return Reflect.getProperty(parentInstance, id);
+		else
+			return super.resolve(id, doException, allowProperty);
+	}
+
+	override function setVar(name:String, v:Dynamic):Void
+	{
+		if (allowStaticVariables && staticVariables.exists(name))
+			staticVariables.set(name, v);
+		else if (allowPublicVariables && publicVariables.exists(name))
+			publicVariables.set(name, v);
+		else if (parentInstance != null && _instanceFields.contains(name))
+			Reflect.setProperty(parentInstance, name, v);
+		else
+			variables.set(name, v);
+	}
+
+	override function assign(e1:Expr, e2:Expr):Dynamic
+	{
+		var value:Dynamic = expr(e2);
+		switch (Tools.expr(e1))
+		{
+			case EIdent(variable):
+				var local:Dynamic = locals.get(variable);
+				if (local != null)
+				{
+					if (!local.const)
+						local.r = value;
+					else
+						warn(ECustom('$variable cannot be reassigned as it is a constant expression.'));
+				}
+				else if (parentInstance != null && _instanceFields.contains(variable))
+					Reflect.setProperty(parentInstance, variable, value);
+				else
+				{
+					if (!variables.exists(variable))
+						error(EUnknownVariable(variable));
+
+					setVar(variable, value);
+				}
+
+			case EField(variable, field, stinky):
+				var variable:Dynamic = expr(variable);
+				if (variable == null)
+				{
+					if (stinky)
+						error(EInvalidAccess(field));
+					else
+						return null;
+				}
+
+				value = set(variable, field, value);
+
+			case EArray(variable, index):
+				expr(variable)[expr(index)] = value;
+
+			default:
+				error(EInvalidOp('='));
+		}
+		return value;
+	}
+
+	override function evalAssignOp(op:String, func:Dynamic->Dynamic->Dynamic, e1:Expr, e2:Expr):Dynamic
+	{
+		var value:Dynamic;
+		var _value:Dynamic = expr(e2);
+		switch (Tools.expr(e1))
+		{
+			case EIdent(variable):
+				value = func(expr(e1), _value);
+				var local:Dynamic = locals.get(variable);
+				if (local != null)
+				{
+					if (!local.const)
+						local.r = value;
+					else
+						warn(ECustom('$variable cannot be reassigned as it is a constant expression.'));
+				}
+				else if (parentInstance != null && _instanceFields.contains(variable))
+					Reflect.setProperty(parentInstance, variable, value);
+				else
+				{
+					if (!variables.exists(variable))
+						error(EUnknownVariable(variable));
+
+					setVar(variable, value);
+				}
+
+			case EField(variable, field, stinky):
+				var variable:Dynamic = expr(variable);
+				if (variable == null)
+				{
+					if (stinky)
+						error(EInvalidAccess(field));
+					else
+						return null;
+				}
+
+				value = set(variable, field, func(get(variable, field), _value));
+
+			case EArray(variable, index):
+				var array:Dynamic = expr(variable);
+				var index:Dynamic = expr(index);
+				value = array[index] = func(array[index], _value);
+
+			default:
+				return error(EInvalidOp(op));
+		}
+		return value;
+	}
 }
 
 class HScript implements IHscriptInterface implements IFlxDestroyable
@@ -52,7 +186,7 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 	public static var parser:Parser = createParser();
 	public static var printer:Printer = createPrinter();
 
-	public var interp:Interp;
+	public var interp:PaoPaoInterp;
 	public var origin:Null<String>;
 	public var scriptName:String;
 	public var returnValue:Dynamic;
@@ -153,7 +287,7 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 
 	public function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?manualRun:Bool = false)
 	{
-		interp = new Interp();
+		interp = new PaoPaoInterp();
 		interp.allowStaticVariables = interp.allowPublicVariables = true;
 		interp.errorHandler = onError;
 		interp.importFailedCallback = onImportFailed;
@@ -239,7 +373,7 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 			for (k in Reflect.fields(varsToBring))
 				set(k, Reflect.field(varsToBring, k));
 		}
-		
+
 		var lib = new BuildInLib(set);
 		lib.addLib();
 		lib.addVar();
