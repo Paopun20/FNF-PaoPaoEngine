@@ -5,13 +5,13 @@ haxelib install flixel-addons 3.3.0
 haxelib install flixel-tools 1.5.1
 haxelib install tjson 1.4.0
 haxelib install hxvlc 2.2.5
+haxelib install hxcpp 4.3.2
 haxelib install tink_core 2.1.1
 
 haxelib git hython https://github.com/Paopun20/hython.git
 haxelib git hxdiscord_rpc https://github.com/Paopun20/hxdiscord_rpc.git
 haxelib git linc_luajit https://github.com/Paopun20/linc_luajit.git
 haxelib git compiletime https://github.com/Paopun20/compiletime.git
-haxelib git hxcpp https://github.com/HaxeFoundation/hxcpp.git
 
 haxelib git flxanimate https://github.com/Dot-Stuff/flxanimate 0188d47c982913eb10fad7bd75f062ddfc680f4b
 haxelib git funkin.vis https://github.com/FunkinCrew/funkVis 43fa611141cb254751943274fd987e8c7d35af8a
