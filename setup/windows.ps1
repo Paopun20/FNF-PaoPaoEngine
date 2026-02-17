@@ -7,3 +7,6 @@ if ([string]::IsNullOrEmpty((Get-Command haxe -ea 0))) {
 }
 
 Invoke-Expression $([System.IO.File]::ReadAllText("setup/commands.txt"))
+
+# for windows only
+haxelib install hxWindowColorMode 0.2.1
