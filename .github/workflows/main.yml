@@ -127,6 +127,8 @@ jobs:
             export-path: export/release/macos/bin
 
     runs-on: ${{ matrix.os }}
+    env:
+      DISCORD_RPC_ID: ${{ secrets.DISCORD_RPC_ID }}
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
