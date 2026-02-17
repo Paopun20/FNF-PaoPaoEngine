@@ -10,9 +10,9 @@ haxelib install tink_core 2.1.1
 
 haxelib git hython https://github.com/Paopun20/hython.git
 haxelib git hxdiscord_rpc https://github.com/Paopun20/hxdiscord_rpc.git
-haxelib git linc_luajit https://github.com/Paopun20/linc_luajit.git
 haxelib git compiletime https://github.com/Paopun20/compiletime.git
 
+haxelib git linc_luajit https://github.com/superpowers04/linc_luajit.git
 haxelib git flxanimate https://github.com/Dot-Stuff/flxanimate 0188d47c982913eb10fad7bd75f062ddfc680f4b
 haxelib git funkin.vis https://github.com/FunkinCrew/funkVis 43fa611141cb254751943274fd987e8c7d35af8a
 haxelib git grig.audio https://gitlab.com/haxe-grig/grig.audio.git 57f5d47f2533fd0c3dcd025a86cb86c0dfa0b6d2
