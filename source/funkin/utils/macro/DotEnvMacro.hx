@@ -38,11 +38,22 @@ class DotEnvMacro
 				Context.fatalError('@:env field "${field.name}" must be of type Null<String>', field.pos);
 			}
 			final cfg = parseEnvMeta(field.name, meta);
-			var value:Null<String> = env.get(cfg.key);
+
+			// Check system environment for CI/GitHub Actions
+			var value:Null<String> = Sys.getEnv(cfg.key);
+
+			// Fall back to .env file
+			if (value == null)
+			{
+				value = env.get(cfg.key);
+			}
+
+			// Fall back to default value
 			if (value == null)
 			{
 				value = cfg.defaultValue;
 			}
+
 			if (value == null && cfg.required)
 			{
 				Context.fatalError('Missing required env value "${cfg.key}"', field.pos);
