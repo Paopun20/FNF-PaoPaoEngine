@@ -144,6 +144,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libvlc-dev libvlccore-dev
+      
+      - name: Cache Dependencies
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/haxelib
+          key: ${{ runner.os }}-haxelib-${{ hashFiles('**/setup/commands.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-haxelib-
 
       # Install Haxelib (Unix-like systems)
       - name: Install Haxelib (Unix)
@@ -228,6 +236,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: nightly
+          repository: ${{ github.repository }}
+          make_latest: true
+          prerelease: true
+          draft: false
+          token: ${{ secrets.GITREUP }}
           name: Nightly Build
           body: |
             **PaoPao Engine** development release for commit `${{ github.sha }}`. Since this is not a regular release, **PaoPao Engine** will not install the resources automatically, so you should use the engine if you want them.
@@ -235,7 +248,3 @@ jobs:
             linuxBuild.zip
             windowsBuild.zip
             macBuild.zip
-          prerelease: true
-          draft: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
