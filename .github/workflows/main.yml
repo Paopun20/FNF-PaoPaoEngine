@@ -158,7 +158,7 @@ jobs:
         run: |
           haxelib setup C:/haxelib
           haxelib install hxcpp > /dev/null --quiet
-          .\setup\windows.bat
+          powershell ./setup/windows.ps1
         shell: cmd
 
       # Skip SScript setup mode (Unix)
