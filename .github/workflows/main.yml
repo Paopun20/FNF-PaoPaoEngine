@@ -11,7 +11,15 @@ on:
     branches: [main]
 
   # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch: {}
+  workflow_dispatch: {
+    inputs: {
+      nightly: {
+        description: 'Nightly build',
+        required: true,
+        default: 'true'
+      }
+    }
+  }
 
 jobs:
   build:
@@ -102,9 +110,10 @@ jobs:
           path: ${{ matrix.export-path }}
 
   create-nightly-release:
+    name: Nightly Release
     needs: build
     runs-on: ubuntu-latest
-    if: always()
+    if: always() && github.event.inputs.nightly == 'true'
 
     steps:
       - name: Download all artifacts
@@ -131,4 +140,6 @@ jobs:
           body: |
             **PaoPao Engine** development release for commit ${{ github.sha }}. Since this is not a regular release, so you should use the engine if you want them.
           files: | # get all zip files
-            ./*.zip
+            windowsBuild.zip
+            linuxBuild.zip
+            macBuild.zip
