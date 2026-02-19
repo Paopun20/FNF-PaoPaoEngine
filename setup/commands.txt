@@ -7,14 +7,11 @@ install tjson 1.4.0
 install hxvlc 2.2.5
 install hxcpp 4.3.2
 install tink_core 2.1.1
-
 git hython https://github.com/Paopun20/hython.git
 git compiletime https://github.com/Paopun20/compiletime.git
-
 git hxdiscord_rpc https://github.com/MAJigsaw77/hxdiscord_rpc.git
 git linc_luajit https://github.com/superpowers04/linc_luajit.git
 git flxanimate https://github.com/Dot-Stuff/flxanimate 0188d47c982913eb10fad7bd75f062ddfc680f4b
 git funkin.vis https://github.com/FunkinCrew/funkVis 43fa611141cb254751943274fd987e8c7d35af8a
 git grig.audio https://github.com/FunkinCrew/grig.audio
-
 git hscript-improved https://github.com/Paopun20/PPE-hscript-improved codename-dev
