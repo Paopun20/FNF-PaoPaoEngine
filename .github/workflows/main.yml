@@ -236,6 +236,7 @@ jobs:
 
       - name: Update Nightly Release
         uses: andelf/nightly-release@main
+        if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
