@@ -6,7 +6,10 @@ if ([string]::IsNullOrEmpty((Get-Command haxe -ea 0))) {
     [System.Environment]::Exit(1)
 }
 
-Invoke-Expression $([System.IO.File]::ReadAllText("setup/commands.txt"))
+# execute commands from data
+foreach ($line in [System.IO.File]::ReadAllText("setup/commands.txt").Split("`n")) {
+    sh -c "haxelib --quiet $line -y"
+}
 
 # for windows only
-haxelib install hxWindowColorMode 0.2.1
+haxelib install --quiet hxWindowColorMode 0.2.1 -y

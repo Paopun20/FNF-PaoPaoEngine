@@ -2,6 +2,7 @@
 # SETUP FOR MAC AND LINUX SYSTEMS!!!
 # REMINDER THAT YOU NEED HAXE INSTALLED PRIOR TO USING THIS
 # https://haxe.org/download
+
 if ! command -v haxe >/dev/null 2>&1; then
   echo "oh, Haxe not found."
 
@@ -16,4 +17,7 @@ if ! command -v haxe >/dev/null 2>&1; then
   exit 1
 fi
 
-sh < ./setup/commands.txt
+# read file from ./setup/commands.txt
+while IFS= read -r line; do
+  sh -c "haxelib --quiet $line -y"
+done < ./setup/commands.txt
