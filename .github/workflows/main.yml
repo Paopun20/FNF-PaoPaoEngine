@@ -11,15 +11,7 @@ on:
     branches: [main]
 
   # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch: {
-    inputs: {
-      nightly: {
-        description: 'Nightly build',
-        required: true,
-        default: 'true'
-      }
-    }
-  }
+  workflow_dispatch: {}
 
 jobs:
   build:
@@ -32,14 +24,18 @@ jobs:
             target: linux
             artifact-name: linuxBuild
             export-path: export/release/linux/bin
+            lib-path: ~/haxelib
           - os: windows-latest
             target: windows
             artifact-name: windowsBuild
             export-path: export/release/windows/bin
+            lib-path: C:/haxelib
+            
           - os: macos-15
             target: mac
             artifact-name: macBuild
             export-path: export/release/macos/bin
+            lib-path: ~/haxelib
 
     runs-on: ${{ matrix.os }}
     env:
@@ -63,7 +59,7 @@ jobs:
       - name: Cache Dependencies
         uses: actions/cache@v5
         with:
-          path: ~/.cache/haxelib
+          path: ${{ matrix.lib-path }}
           key: ${{ runner.os }}-haxelib-${{ hashFiles('**/setup/commands.txt') }}
           restore-keys: |
             ${{ runner.os }}-haxelib-
@@ -72,7 +68,7 @@ jobs:
       - name: Install Haxelib (Unix)
         if: matrix.target != 'windows'
         run: |
-          haxelib setup ~/haxelib
+          haxelib setup ${{ matrix.lib-path }}
           haxelib install hxcpp > /dev/null --quiet
           chmod +x ./setup/unix.sh
           sh ./setup/unix.sh
@@ -81,7 +77,7 @@ jobs:
       - name: Install Haxelib (Windows)
         if: matrix.target == 'windows'
         run: |
-          haxelib setup C:/haxelib
+          haxelib setup ${{ matrix.lib-path }}
           haxelib install hxcpp > /dev/null --quiet
           powershell ./setup/windows.ps1
         shell: cmd
@@ -113,7 +109,7 @@ jobs:
     name: Nightly Release
     needs: build
     runs-on: ubuntu-latest
-    if: always() && github.event.inputs.nightly == 'true'
+    if: always()
 
     steps:
       - name: Download all artifacts
