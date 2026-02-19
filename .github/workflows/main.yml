@@ -130,7 +130,5 @@ jobs:
           name: "Nightly Release"
           body: |
             **PaoPao Engine** development release for commit ${{ github.sha }}. Since this is not a regular release, so you should use the engine if you want them.
-          files: |
-            linuxBuild.zip
-            windowsBuild.zip
-            macBuild.zip
+          files: | # get all zip files
+            ./*.zip
