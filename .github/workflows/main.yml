@@ -129,7 +129,7 @@ jobs:
           tag_name: nightly
           name: "Nightly Release"
           body: |
-            **PaoPao Engine** development release for commit ${{ github.sha }}. Since this is not a regular release, **PaoPao Engine** will not install the resources automatically, so you should use the engine if you want them.
+            **PaoPao Engine** development release for commit ${{ github.sha }}. Since this is not a regular release, so you should use the engine if you want them.
           files: |
             linuxBuild.zip
             windowsBuild.zip
