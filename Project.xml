@@ -23,9 +23,9 @@
 	<!--The flixel preloader is not accurate in Chrome. You can use it regularly if you embed the swf into a html file
 		or you can set the actual size of your file manually at "FlxPreloaderBase-onUpdate-bytesTotal"-->
 	<!-- <app preloader="Preloader" resizable="true" /> -->
-	
-	<app preloader="Preloader"/>
-	
+
+	<app preloader="Preloader" />
+
 
 	<!--Minimum without FLX_NO_GAMEPAD: 11.8, without FLX_NO_NATIVE_CURSOR: 11.2-->
 	<set name="SWF_VERSION" value="11.8" />
@@ -115,11 +115,14 @@
 	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
 
 	<classpath name="source" />
+	<source name="source" />
 
 	<!-- __________________________ Game Assets & Etc. __________________________ -->
 
 	<!-- Turn on Crash Handler -->
 	<define name="CRASH_HANDLER" if="desktop release" />
+	<define name="CRASH_DEBUGGER" if="CRASH_HANDLER desktop cpp" />
+	<haxelib name="linc_imgui" if="CRASH_DEBUGGER" />
 
 	<!-- Assets -->
 	<assets path="assets/fonts" />
@@ -151,9 +154,10 @@
 	<section if="BASE_GAME_FILES">
 		<assets path="assets/base_game" rename="assets" exclude="*.ogg" if="web" />
 		<assets path="assets/base_game" rename="assets" exclude="*.mp3" unless="web" />
-		<haxelib name="grig.audio" if="BASE_GAME_FILES" />
-		<haxelib name="funkin.vis" if="BASE_GAME_FILES" />
 	</section>
+
+	<haxelib name="grig.audio" />
+	<haxelib name="funkin.vis" />
 
 	<define name="CHECK_FOR_UPDATES" if="desktop officialBuild" />
 

@@ -164,6 +164,26 @@ class Controls
 
 		return result || _myGamepadJustReleased(gamepadBinds[key]) == true;
 	}
+	
+	public function allPressed(keys:Array<String>):Bool
+	{
+		for (key in keys)
+		{
+			if (!pressed(key))
+				return false;
+		}
+		return true;
+	}
+
+	public function allReleased(keys:Array<String>):Bool
+	{
+		for (key in keys)
+		{
+			if (!justReleased(key))
+				return false;
+		}
+		return true;
+	}
 
 	public var controllerMode:Bool = false;
 

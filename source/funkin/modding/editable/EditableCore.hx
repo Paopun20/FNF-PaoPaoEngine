@@ -116,7 +116,7 @@ class EditableCore
 		}
 		catch (e:Dynamic)
 		{
-			CoolLog.info('[Python] Runtime error: "' + e + '" at ' + file);
+			CoolLog.error('[Python] Runtime error: "' + e + '" at ' + file);
 			if (newScript != null)
 				newScript.destroy();
 		}
@@ -134,7 +134,7 @@ class EditableCore
 
 	public function initScriptFromDirectory(directory:String, name:String):Void
 	{
-		CoolLog.info('Loading scripts for state "$stateName" from scripts/states/');
+		CoolLog.info('Loading scripts for state "$stateName" from ${directory}');
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
 		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), directory))
 			for (file in FileSystem.readDirectory(folder))

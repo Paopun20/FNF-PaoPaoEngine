@@ -1,17 +1,17 @@
 package;
 
 import CompileTime;
+import Main;
 import flixel.system.FlxBasePreloader;
 import funkin.utils.CoolLog;
-import funkin.backend.ErrorHandle;
 import openfl.Lib;
 import openfl.display.Sprite;
+import openfl.events.Event;
 import openfl.media.Sound;
 import openfl.media.SoundChannel;
 import openfl.media.SoundTransform;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
-import openfl.events.Event;
 #if LUA_ALLOWED
 import llua.Lua;
 #end
@@ -24,15 +24,18 @@ class PreloadSoundFX extends Sound
 {
 }
 
+#if !NO_PRELOADER_ANIMATOR
 typedef Task =
 {
 	message:String,
 	action:Void->Void,
 	?delay:Float
 }
+#end
 
 class Preloader extends FlxBasePreloader
 {
+	#if !NO_PRELOADER_ANIMATOR
 	var terminal:Array<TextField>;
 	var tasks:Array<Task>;
 	var sound:PreloadSoundFX;
@@ -48,6 +51,7 @@ class Preloader extends FlxBasePreloader
 	var hasPlayedSound:Bool = false;
 	var currentLineIndex:Int = 0;
 	var lineHeight:Float = 16;
+	#end
 
 	public function new(MinDisplayTime:Float = 0, ?AllowedURLs:Array<String>)
 	{
@@ -60,6 +64,7 @@ class Preloader extends FlxBasePreloader
 		CoolLog.init();
 		ErrorHandle.init();
 
+		#if !NO_PRELOADER_ANIMATOR
 		// Initialize terminal array
 		terminal = [];
 
@@ -118,6 +123,9 @@ class Preloader extends FlxBasePreloader
 
 		// Initialize sound
 		sound = new PreloadSoundFX();
+		#else
+		super(MinDisplayTime, AllowedURLs);
+		#end
 	}
 
 	override function create():Void
@@ -131,9 +139,12 @@ class Preloader extends FlxBasePreloader
 		bg.graphics.endFill();
 		addChild(bg);
 
+		#if !NO_PRELOADER_ANIMATOR
 		addEventListener(Event.ENTER_FRAME, onFirstFrame);
+		#end
 	}
 
+	#if !NO_PRELOADER_ANIMATOR
 	function onFirstFrame(e:Event):Void
 	{
 		if (!hasPlayedSound && sound != null)
@@ -210,11 +221,13 @@ class Preloader extends FlxBasePreloader
 
 		lastLine.text = text;
 	}
+	#end
 
 	override function update(_:Float):Void
 	{
 		super.update(0);
 
+		#if !NO_PRELOADER_ANIMATOR
 		var elapsed:Float = 1 / 60;
 
 		// Update cursor blink
@@ -251,10 +264,14 @@ class Preloader extends FlxBasePreloader
 		{
 			super.update(1); // end loop
 		}
+		#else
+		super.update(1); // Skip animation, finish immediately
+		#end
 	}
 
 	override function destroy():Void
 	{
+		#if !NO_PRELOADER_ANIMATOR
 		if (soundChannel != null)
 		{
 			soundChannel.stop();
@@ -275,6 +292,7 @@ class Preloader extends FlxBasePreloader
 
 		sound = null;
 		tasks = null;
+		#end
 
 		super.destroy();
 	}
