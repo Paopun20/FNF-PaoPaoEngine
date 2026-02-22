@@ -61,4 +61,5 @@ import flixel.addons.transition.FlxTransitionableState;
 using StringTools;
 
 import funkin.utils.CoolLog;
+import funkin.vis.*;
 #end

@@ -157,7 +157,7 @@
 	</section>
 
 	<haxelib name="grig.audio" />
-	<haxelib name="funkin.vis" />
+	<!-- <haxelib name="funkin.vis" /> -->
 
 	<define name="CHECK_FOR_UPDATES" if="desktop officialBuild" />
 
