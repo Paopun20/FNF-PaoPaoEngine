@@ -1,5 +1,6 @@
 package funkin.modding.editable;
 
+#if MODS_ALLOWED
 #if HSCRIPT_ALLOWED
 import funkin.modding.scripts.HScript;
 #end
@@ -8,6 +9,8 @@ import funkin.modding.scripts.Python;
 #end
 #if LUA_ALLOWED
 import funkin.modding.scripts.FunkinLua;
+#end
+import funkin.modding.scripts.LuaUtils;
 #end
 
 enum EditableType
@@ -39,6 +42,7 @@ class EditableCore
 
 	public function preset(script:Dynamic):Void
 	{
+		#if MODS_ALLOWED
 		if (script != null && Reflect.hasField(script, 'set'))
 		{
 			script.set("stateName", stateName);
@@ -55,8 +59,10 @@ class EditableCore
 					return;
 			}
 		}
+		#end
 	}
 
+	#if MODS_ALLOWED
 	#if HSCRIPT_ALLOWED
 	public function initHScript(file:String):Void
 	{
@@ -122,18 +128,21 @@ class EditableCore
 		}
 	}
 	#end
-
+	#end
 	private function getScriptCount():Int
 	{
 		var count = 0;
+		#if MODS_ALLOWED
 		#if LUA_ALLOWED count += luaArray.length; #end
 		#if HSCRIPT_ALLOWED count += hscriptArray.length; #end
 		#if PYTHON_ALLOWED count += pythonArray.length; #end
+		#end
 		return count;
 	}
 
 	public function initScriptFromDirectory(directory:String, name:String):Void
 	{
+		#if MODS_ALLOWED
 		CoolLog.info('Loading scripts for state "$stateName" from ${directory}');
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
 		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), directory))
@@ -156,26 +165,167 @@ class EditableCore
 				}
 			}
 		#end
+
 		CoolLog.info('Done - ${getScriptCount()} script(s) loaded for "$stateName"');
+		#end
 	}
 
-	public function callScripts(funcname:String, args:Array<Dynamic>):Void
+	#if PYTHON_ALLOWED
+	private function callOnPython(func:String, args:Array<Dynamic>, ignoreStops:Bool, exclusions:Array<String>, excludeValues:Array<Dynamic>):Dynamic
 	{
+		var returnVal:Dynamic = null;
+
+		for (script in pythonArray)
+		{
+			if (script == null || exclusions.contains(script.origin))
+				continue;
+
+			if (!script.exists(func))
+				continue;
+
+			try
+			{
+				var value = script.call(func, args);
+
+				if (value != null && !excludeValues.contains(value))
+					returnVal = value;
+
+				if (!shouldContinue(value, ignoreStops, excludeValues))
+					break;
+			}
+			catch (e:Dynamic)
+			{
+				CoolLog.error('[Python] Runtime error in $func: $e');
+			}
+		}
+
+		return returnVal;
+	}
+	#end
+
+	#if HSCRIPT_ALLOWED
+	private function callOnHScript(func:String, args:Array<Dynamic>, ignoreStops:Bool, exclusions:Array<String>, excludeValues:Array<Dynamic>):Dynamic
+	{
+		var returnVal:Dynamic = null;
+
+		for (script in hscriptArray)
+		{
+			if (script == null || exclusions.contains(script.origin))
+				continue;
+
+			if (!script.exists(func))
+				continue;
+
+			try
+			{
+				var result = script.call(func, args);
+				var value = result != null ? result.returnValue : null;
+
+				if (value != null && !excludeValues.contains(value))
+					returnVal = value;
+
+				if (!shouldContinue(value, ignoreStops, excludeValues))
+					break;
+			}
+			catch (e:Dynamic)
+			{
+				CoolLog.error('[HScript] Runtime error in $func: $e');
+			}
+		}
+
+		return returnVal;
+	}
+	#end
+
+	#if LUA_ALLOWED
+	private function callOnLua(func:String, args:Array<Dynamic>, ignoreStops:Bool, exclusions:Array<String>, excludeValues:Array<Dynamic>):Dynamic
+	{
+		var returnVal:Dynamic = null;
+		var toRemove:Array<FunkinLua> = [];
+
+		for (script in luaArray)
+		{
+			if (script == null || script.closed)
+			{
+				toRemove.push(script);
+				continue;
+			}
+
+			if (exclusions.contains(script.scriptName))
+				continue;
+
+			if (!script.existsFunc(func))
+				continue;
+
+			try
+			{
+				var value = script.call(func, args);
+
+				if (value != null && !excludeValues.contains(value))
+					returnVal = value;
+
+				if (!shouldContinue(value, ignoreStops, excludeValues))
+					break;
+			}
+			catch (e:Dynamic)
+			{
+				CoolLog.error('[Lua] Runtime error in $func: $e');
+				toRemove.push(script);
+			}
+		}
+
+		for (script in toRemove)
+			luaArray.remove(script);
+
+		return returnVal;
+	}
+	#end
+
+	private function shouldContinue(value:Dynamic, ignoreStops:Bool, excludeValues:Array<Dynamic>):Bool
+	{
+		#if !MODS_ALLOWED
+		return true;
+		#else
+		if (value == null || excludeValues.contains(value) || ignoreStops)
+			return true;
+
+		return switch (value)
+		{
+			case LuaUtils.Function_StopLua, LuaUtils.Function_StopHScript, LuaUtils.Function_StopPython, LuaUtils.Function_StopAll: false;
+			default: true;
+		};
+		#end
+	}
+
+	public function callScripts(funcToCall:String, args:Array<Dynamic> = null, ignoreStops:Bool = false, exclusions:Array<String> = null,
+			excludeValues:Array<Dynamic> = null):Dynamic
+	{
+		if (args == null)
+			args = [];
+		if (exclusions == null)
+			exclusions = [];
+		if (excludeValues == null)
+			excludeValues = [];
+
+		var returnVal:Dynamic = null;
+
 		#if LUA_ALLOWED
-		for (i in 0...luaArray.length)
-			if (luaArray[i].existsFunc(funcname))
-				luaArray[i].call(funcname, args);
+		returnVal = callOnLua(funcToCall, args, ignoreStops, exclusions, excludeValues);
+		if (!shouldContinue(returnVal, ignoreStops, excludeValues))
+			return returnVal;
 		#end
+
 		#if HSCRIPT_ALLOWED
-		for (i in 0...hscriptArray.length)
-			if (hscriptArray[i].exists(funcname))
-				hscriptArray[i].call(funcname, args);
+		returnVal = callOnHScript(funcToCall, args, ignoreStops, exclusions, excludeValues);
+		if (!shouldContinue(returnVal, ignoreStops, excludeValues))
+			return returnVal;
 		#end
+
 		#if PYTHON_ALLOWED
-		for (i in 0...pythonArray.length)
-			if (pythonArray[i].exists(funcname))
-				pythonArray[i].call(funcname, args);
+		returnVal = callOnPython(funcToCall, args, ignoreStops, exclusions, excludeValues);
 		#end
+
+		return returnVal;
 	}
 
 	public function setScript(id:String, v:Dynamic):Void

@@ -25,7 +25,7 @@ haxelib install tjson 1.4.0
 haxelib install hxvlc 2.2.5
 haxelib install hxcpp 4.3.2
 haxelib install tink_core 2.1.1
-haxelib git hython https://github.com/Paopun20/hython.git
+haxelib git hython https://github.com/Paopun20/hython.git dev
 haxelib git compiletime https://github.com/Paopun20/compiletime.git
 haxelib git hxdiscord_rpc https://github.com/MAJigsaw77/hxdiscord_rpc.git
 haxelib git linc_luajit https://github.com/superpowers04/linc_luajit.git

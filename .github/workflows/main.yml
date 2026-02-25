@@ -11,7 +11,12 @@ on:
     branches: [main]
 
   # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      nightly:
+        default: true
+        type: boolean
+        description: ""
 
 permissions:
   contents: write
@@ -112,7 +117,7 @@ jobs:
     name: Nightly Release
     needs: build
     runs-on: ubuntu-latest
-    if: always()
+    if: ${{ inputs.nightly }}
 
     steps:
       - name: Download all artifacts

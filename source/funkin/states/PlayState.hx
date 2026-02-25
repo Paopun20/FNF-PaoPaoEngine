@@ -2715,7 +2715,7 @@ class PlayState extends EditableState
 			if (Math.isNaN(percent))
 				percent = 0;
 
-			if (!cpuControlled)
+			if (!cpuControlled && !chartingMode && !practiceMode)
 			{ // anti-cheat
 				Highscore.saveScore(Song.loadedSongName, songScore, storyDifficulty, percent);
 			}
