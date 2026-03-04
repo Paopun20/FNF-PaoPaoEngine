@@ -1,7 +1,9 @@
 # Friday Night Funkin' - PaoPao Engine
 
 > [!WARNING]
-> This engine is still in heavy development, so some features may not work as expected like [Python](https://github.com/Paopun20/Hython) with some [limitations](http://github.com/Paopun20/Hython?tab=readme-ov-file#limitations).
+This engine is currently under heavy development, so some features may not function as expected, such as [Python](https://github.com/Paopun20/Hython), which has certain [limitations](http://github.com/Paopun20/Hython?tab=readme-ov-file#limitations).
+
+PaoPoa Engine is a cross-platform [Friday Night Funkin'](https://github.com/FunkinCrew/Funkin) Engine aimed at freedom of modding without source code, optimization, and lightweight, cross-platform.
 
 ## Features/Changes
 
@@ -10,9 +12,8 @@
   > Work in progress, because some Python feature contracts are yet to be completed.\
   > For assistance, please submit a pull request [here](https://github.com/Paopun20/Hython).\
   > Note: this Hython is a Python interpreter written entirely in **Haxe** and you can use it for your own projects too, it is also open source.
-- Hscript (Improved and QOL with own fork)
-  > Optimize.
-  > Cache AST.
+- Hscript (Improved and QOL)
+  > Optimize by Cache AST.
   > Can use without `game.`
   > Use Own's Codename's HScript fork library.
 - Ndll Support (HScript/Python only)
@@ -26,11 +27,15 @@
 - Fixed Psych Engine Bugs
 - Updated dependencies to the most compatible versions
 - Removed obsolete features from the Psych Engine, such as the Easter Egg.
-- Organize files and folders for improved readability and maintenance. Ensure compatibility with older layouts when importing to new systems (mostly mods, import backend, or import Discord; others may not be compatible).
+- Organize files and folders to improve readability and maintenance. Ensure compatibility with older layouts when importing to new systems, as others may not be compatible; all are indexed by StructureCompatibility.hx.
 - Optimize Engine performance and memory usage without breaking everything/mods.
 - New Free-play UI (WIP)
 - New Loading Screen UI (WIP)
 - All states/substates is editable (ex: scripts/stages/[state name].hx, scripts/substates/[state name].hx)
 - Improve modding experience and compatibility.
+
+## Origin
+
+PaoPao Engine was fork based on [**Psych Engine 1.0.4**](https://github.com/ShadowMario/FNF-PsychEngine)
 
 > (I haven't finished writing the README yet.)

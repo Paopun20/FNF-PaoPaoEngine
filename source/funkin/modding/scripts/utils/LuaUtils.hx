@@ -1,4 +1,4 @@
-package funkin.modding.scripts;
+package funkin.modding.scripts.utils;
 
 import funkin.backend.WeekData;
 import funkin.objects.Character;
@@ -22,9 +22,15 @@ class LuaUtils
 {
 	public static final Function_Stop:String = "##SCRIPTENGINE_FUNCTIONSTOP";
 	public static final Function_Continue:String = "##SCRIPTENGINE_FUNCTIONCONTINUE";
+	#if LUA_ALLOWED
 	public static final Function_StopLua:String = "##SCRIPTENGINE_FUNCTIONSTOPLUA";
+	#end
+	#if HSCRIPT_ALLOWED
 	public static final Function_StopHScript:String = "##SCRIPTENGINE_FUNCTIONSTOPHSCRIPT";
+	#end
+	#if PYTHON_ALLOWED
 	public static final Function_StopPython:String = "##SCRIPTENGINE_FUNCTIONSTOPPYTHON";
+	#end
 	public static final Function_StopAll:String = "##SCRIPTENGINE_FUNCTIONSTOPALL";
 
 	public static function getLuaTween(options:Dynamic)

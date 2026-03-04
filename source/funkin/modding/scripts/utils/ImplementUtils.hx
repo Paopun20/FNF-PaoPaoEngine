@@ -1,4 +1,4 @@
-package funkin.modding.scripts;
+package funkin.modding.scripts.utils;
 
 #if (LUA_ALLOWED || PYTHON_ALLOWED)
 #if LUA_ALLOWED

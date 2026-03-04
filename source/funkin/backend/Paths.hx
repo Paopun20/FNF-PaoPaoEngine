@@ -12,7 +12,7 @@ import openfl.utils.Assets as OpenFlAssets;
 import openfl.system.System;
 import openfl.geom.Rectangle;
 import lime.utils.Assets;
-import flash.media.Sound;
+import openfl.media.Sound;
 import haxe.Json;
 #if MODS_ALLOWED
 import funkin.backend.Mods;

@@ -18,8 +18,6 @@ class SourceMap
 			if (sys.FileSystem.exists(path) && sys.FileSystem.isDirectory(path))
 				collectFiles(path, path, setExprs);
 		}
-		
-		// collectFiles("./source", "./source", setExprs);
 
 		return macro
 		{
@@ -30,7 +28,7 @@ class SourceMap
 	}
 
 	#if macro
-	// MSVC limits string literals to ~16KB, so we chunk large files
+	// MSVC limits string literals to ~16KB, so I chunk large files
 	static final CHUNK_SIZE = 8000;
 
 	static function getSourcePaths():Array<String>

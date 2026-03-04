@@ -3,7 +3,7 @@ package funkin.utils;
 #if sys
 import sys.FileSystem;
 #end
-import funkin.modding.scripts.LuaUtils;
+import funkin.modding.scripts.utils.LuaUtils;
 #if NDLL_ALLOWED
 import lime.system.CFFI;
 import funkin.utils.macro.MacroUtil;

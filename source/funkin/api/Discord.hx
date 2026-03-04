@@ -9,7 +9,7 @@ import hxdiscord_rpc.Types;
 import funkin.modding.scripts.Python;
 #end
 
-@:build(funkin.utils.macro.DotEnvMacro.build())
+@:build(funkin.utils.macro.EnvironmentMacro.build())
 class DiscordClient
 {
 	@:env("DISCORD_RPC_ID", {

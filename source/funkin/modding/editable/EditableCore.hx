@@ -10,7 +10,7 @@ import funkin.modding.scripts.Python;
 #if LUA_ALLOWED
 import funkin.modding.scripts.FunkinLua;
 #end
-import funkin.modding.scripts.LuaUtils;
+import funkin.modding.scripts.utils.LuaUtils;
 #end
 
 enum EditableType
@@ -71,8 +71,6 @@ class EditableCore
 		{
 			newScript = new HScript(null, file);
 			preset(newScript);
-			if (newScript.exists('onCreate'))
-				newScript.call('onCreate', []);
 			CoolLog.info('initialized hscript interp successfully: $file');
 			hscriptArray.push(newScript);
 		}
@@ -93,8 +91,6 @@ class EditableCore
 		{
 			newScript = new FunkinLua(file);
 			preset(newScript);
-			if (newScript.existsFunc('onCreate'))
-				newScript.call('onCreate', []);
 			CoolLog.info('initialized lua interp successfully: $file');
 			luaArray.push(newScript);
 		}
@@ -115,8 +111,6 @@ class EditableCore
 		{
 			newScript = new Python(null, file);
 			preset(newScript);
-			if (newScript.exists('onCreate'))
-				newScript.call('onCreate', []);
 			CoolLog.info('initialized python interp successfully: $file');
 			pythonArray.push(newScript);
 		}

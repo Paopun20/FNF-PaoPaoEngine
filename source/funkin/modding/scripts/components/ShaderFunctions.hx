@@ -3,7 +3,8 @@ package funkin.modding.scripts.components;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 #end
-import funkin.modding.scripts.ImplementUtils;
+import funkin.modding.scripts.utils.ImplementUtils;
+import funkin.modding.scripts.utils.LuaUtils;
 
 class ShaderFunctions
 {

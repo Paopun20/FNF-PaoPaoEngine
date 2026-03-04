@@ -1,7 +1,7 @@
 package funkin.modding.scripts;
 
 import funkin.objects.Character;
-import funkin.modding.scripts.LuaUtils;
+import funkin.modding.scripts.utils.LuaUtils;
 import funkin.modding.scripts.components.*;
 import funkin.utils.PlatformDex;
 #if LUA_ALLOWED
@@ -20,7 +20,9 @@ import funkin.utils.NdllUtil;
 import haxe.crypto.Sha256;
 import haxe.io.Bytes;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
-import funkin.modding.scripts.BuildInLib;
+import funkin.modding.scripts.compatibility.StructureCompatibility;
+import funkin.objects.NoteSplash;
+import funkin.objects.StrumNote;
 
 using StringTools;
 
@@ -261,26 +263,26 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 		}
 	}
 
+	static function resolveClass(className:String):Class<Dynamic>
+	{
+		return StructureCompatibility.resolveClass(className);
+	}
+
 	private final function onImportFailed(classPath:Array<String>, classAlias:Null<String>):Bool
 	{
-		if (classPath[0] != "funkin")
+		var varName = (classAlias != null) ? classAlias : classPath[classPath.length - 1];
+		var fullPath = classPath.join(".");
+		var classObj = resolveClass(fullPath);
+		if (classObj != null)
 		{
-			var className = "funkin." + classPath.join(".");
-			var varName = (classAlias != null) ? classAlias : classPath[classPath.length - 1];
-			var cls = Type.resolveClass(className);
-			if (cls != null)
-			{
-				set(varName, cls);
-				return true;
-			}
-		}
-		else if (classPath.contains("Discord"))
-		{
-			#if DISCORD_ALLOWED
-			var varName = (classAlias != null) ? classAlias : "Discord";
-			set(varName, Type.resolveClass("funkin.api.Discord"));
+			set(varName, classObj);
 			return true;
-			#end
+		}
+		if (get("hscriptDebugMode"))
+		{
+			PlayState.instance.addTextToDebug('[DEBUG] Import failed: $fullPath (alias: ${classAlias != null ? classAlias : "none"})', FlxColor.YELLOW);
+			PlayState.instance.addTextToDebug('[DEBUG] Attempted to resolve as: $varName', FlxColor.YELLOW);
+			return true;
 		}
 		return false;
 	}
@@ -328,6 +330,7 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 					return;
 				}
 			}
+
 			execute(scriptContent);
 			call('onCreate', []);
 		}
@@ -374,9 +377,73 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 				set(k, Reflect.field(varsToBring, k));
 		}
 
-		var lib = new BuildInLib(set);
-		lib.addLib();
-		lib.addVar();
+		// Core Haxe Classes
+		set('Type', Type);
+		set('Math', Math);
+		set('Std', Std);
+		set('StringTools', StringTools);
+		#if sys
+		set('File', File);
+		set('FileSystem', FileSystem);
+		#end
+
+		// Flixel Classes
+		set('FlxG', FlxG);
+		set('FlxMath', flixel.math.FlxMath);
+		set('FlxSprite', flixel.FlxSprite);
+		set('FlxText', flixel.text.FlxText);
+		set('FlxCamera', flixel.FlxCamera);
+		set('PsychCamera', funkin.objects.PsychCamera);
+		set('FlxTimer', flixel.util.FlxTimer);
+		set('FlxTween', flixel.tweens.FlxTween);
+		set('FlxEase', flixel.tweens.FlxEase);
+		set('FlxSound', flixel.system.FlxSound);
+		set('FlxStreamSound', FlxStreamSound);
+
+		// Game Classes
+		set('Countdown', funkin.backend.BaseStage.Countdown);
+		set('PlayState', PlayState);
+		set('Paths', Paths);
+		set('Conductor', Conductor);
+		set('ClientPrefs', ClientPrefs);
+		set('Difficulty', Difficulty);
+		set('CoolUtil', CoolUtil);
+		set('Character', Character);
+		set('Alphabet', Alphabet);
+		set('Note', funkin.objects.Note);
+		set('StrumNote', StrumNote);
+		set('NoteSplash', NoteSplash);
+		set('CustomSubstate', CustomSubstate);
+		set('ModchartSprite', ModchartSprite);
+
+		#if ACHIEVEMENTS_ALLOWED
+		set('Achievements', Achievements);
+		#end
+
+		#if (!flash && sys)
+		set('FlxRuntimeShader', flixel.addons.display.FlxRuntimeShader);
+		set('ErrorHandledRuntimeShader', funkin.shaders.ErrorHandledShader.ErrorHandledRuntimeShader);
+		#end
+
+		set('ShaderFilter', openfl.filters.ShaderFilter);
+
+		#if flxanimate
+		set('FlxAnimate', FlxAnimate);
+		#end
+		// Function control constants
+		set('Function_StopLua', LuaUtils.Function_StopLua);
+		set('Function_StopHScript', LuaUtils.Function_StopHScript);
+		set('Function_StopPython', LuaUtils.Function_StopPython);
+		set('Function_StopAll', LuaUtils.Function_StopAll);
+		set('Function_Stop', LuaUtils.Function_Stop);
+		set('Function_Continue', LuaUtils.Function_Continue);
+
+		// Debug settings
+		set('luaDebugMode', false);
+		set('luaDeprecatedWarnings', true);
+
+		// Version info
+		set('version', funkin.states.MainMenuState.psychEngineVersion.trim());
 
 		set("PlatformDex", PlatformDex);
 		set("NdllUtil", NdllUtil);
@@ -517,7 +584,7 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 				if (libPackage.length > 0)
 					str = libPackage + '.';
 
-				var c:Dynamic = Type.resolveClass(str + libName);
+				var c:Dynamic = resolveClass(str + libName);
 				if (c == null)
 					c = Type.resolveEnum(str + libName);
 
@@ -584,7 +651,7 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 			else if (libName == null)
 				libName = '';
 
-			var c:Dynamic = Type.resolveClass(str + libName);
+			var c:Dynamic = resolveClass(str + libName);
 			if (c == null)
 				c = Type.resolveEnum(str + libName);
 
@@ -643,7 +710,7 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 			else if (libName == null)
 				libName = '';
 
-			var c:Dynamic = Type.resolveClass(str + libName);
+			var c:Dynamic = resolveClass(str + libName);
 			if (c == null)
 				c = Type.resolveEnum(str + libName);
 
@@ -773,6 +840,189 @@ class CustomFlxColor
 
 	public static function fromString(str:String):Int
 		return cast FlxColor.fromString(str);
+}
+
+class CustomFlxAxes
+{
+	public static var X(default, null):flixel.util.FlxAxes = flixel.util.FlxAxes.X;
+	public static var Y(default, null):flixel.util.FlxAxes = flixel.util.FlxAxes.Y;
+	public static var XY(default, null):flixel.util.FlxAxes = flixel.util.FlxAxes.XY;
+}
+
+class CustomFlxTextAlign
+{
+	public static var LEFT(default, null):flixel.text.FlxText.FlxTextAlign = flixel.text.FlxText.FlxTextAlign.LEFT;
+	public static var CENTER(default, null):flixel.text.FlxText.FlxTextAlign = flixel.text.FlxText.FlxTextAlign.CENTER;
+	public static var RIGHT(default, null):flixel.text.FlxText.FlxTextAlign = flixel.text.FlxText.FlxTextAlign.RIGHT;
+	public static var JUSTIFY(default, null):flixel.text.FlxText.FlxTextAlign = flixel.text.FlxText.FlxTextAlign.JUSTIFY;
+}
+
+class CustomFlxTextBorderStyle
+{
+	public static var NONE(default, null):flixel.text.FlxText.FlxTextBorderStyle = flixel.text.FlxText.FlxTextBorderStyle.NONE;
+	public static var SHADOW(default, null):flixel.text.FlxText.FlxTextBorderStyle = flixel.text.FlxText.FlxTextBorderStyle.SHADOW;
+	public static var OUTLINE(default, null):flixel.text.FlxText.FlxTextBorderStyle = flixel.text.FlxText.FlxTextBorderStyle.OUTLINE;
+	public static var OUTLINE_FAST(default, null):flixel.text.FlxText.FlxTextBorderStyle = flixel.text.FlxText.FlxTextBorderStyle.OUTLINE_FAST;
+}
+
+class CustomFlxPoint
+{
+	/**
+	 * Recycle or create new FlxPoint.
+	 * Be sure to put() them back into the pool after you're done with them!
+	 */
+	public static inline function get(x:Float = 0, y:Float = 0):flixel.math.FlxBasePoint
+	{
+		return flixel.math.FlxPoint.get(x, y);
+	}
+
+	/**
+	 * Recycle or create a new FlxPoint which will automatically be released
+	 * to the pool when passed into a flixel function.
+	 */
+	public static inline function weak(x:Float = 0, y:Float = 0):flixel.math.FlxBasePoint
+	{
+		return flixel.math.FlxPoint.weak(x, y);
+	}
+}
+
+@:privateAccess(flixel.system.frontEnds.BitmapFrontEnd)
+class BitmapFrontEndWrapper
+{
+	public static var instance(get, never):BitmapFrontEndWrapper;
+	private static var _instance:BitmapFrontEndWrapper;
+
+	static function get_instance():BitmapFrontEndWrapper
+	{
+		if (_instance == null)
+			_instance = new BitmapFrontEndWrapper();
+		return _instance;
+	}
+
+	/**
+	 * Exposes the private _cache field from FlxG.bitmap
+	 */
+	public var _cache(get, never):CacheWrapper;
+
+	private function new()
+	{
+	}
+
+	function get__cache():CacheWrapper
+	{
+		return new CacheWrapper(@:privateAccess FlxG.bitmap._cache);
+	}
+
+	// Delegate common BitmapFrontEnd methods
+	public function add(graphic:flixel.graphics.FlxGraphic, ?persistent:Bool = false, ?key:String):flixel.graphics.FlxGraphic
+	{
+		return FlxG.bitmap.add(graphic, persistent, key);
+	}
+
+	public function removeByKey(key:String):Void
+	{
+		FlxG.bitmap.removeByKey(key);
+	}
+
+	public function remove(graphic:flixel.graphics.FlxGraphic):Void
+	{
+		FlxG.bitmap.remove(graphic);
+	}
+
+	public function get(key:String):flixel.graphics.FlxGraphic
+	{
+		return FlxG.bitmap.get(key);
+	}
+
+	public function checkCache(key:String):Bool
+	{
+		return FlxG.bitmap.checkCache(key);
+	}
+
+	public function create(width:Int, height:Int, color:Int, ?unique:Bool = false, ?key:String):flixel.graphics.FlxGraphic
+	{
+		return FlxG.bitmap.create(width, height, color, unique, key);
+	}
+
+	public function reset():Void
+	{
+		FlxG.bitmap.reset();
+	}
+
+	public function clearCache():Void
+	{
+		FlxG.bitmap.clearCache();
+	}
+
+	public function clearUnused():Void
+	{
+		FlxG.bitmap.clearUnused();
+	}
+}
+
+/**
+ * Wrapper class that exposes Map methods for bitmap cache access in scripts.
+ * Allows scripts to use FlxG.bitmap._cache.exists() and FlxG.bitmap._cache.get()
+ */
+class CacheWrapper
+{
+	private var cache:Map<String, flixel.graphics.FlxGraphic>;
+
+	public function new(cache:Map<String, flixel.graphics.FlxGraphic>)
+	{
+		this.cache = cache;
+	}
+
+	/**
+	 * Check if a bitmap with the given key exists in the cache
+	 */
+	public function exists(key:String):Bool
+	{
+		return cache.exists(key);
+	}
+
+	/**
+	 * Get a bitmap from the cache by its key
+	 */
+	public function get(key:String):flixel.graphics.FlxGraphic
+	{
+		return cache.get(key);
+	}
+
+	/**
+	 * Remove a bitmap from the cache by its key
+	 */
+	public function remove(key:String):Bool
+	{
+		return cache.remove(key);
+	}
+
+	/**
+	 * Set a bitmap in the cache with the given key
+	 */
+	public function set(key:String, value:flixel.graphics.FlxGraphic):Void
+	{
+		cache.set(key, value);
+	}
+
+	/**
+	 * Get all keys in the cache
+	 */
+	public function keys():Iterator<String>
+	{
+		return cache.keys();
+	}
+
+	/**
+	 * Get the number of items in the cache
+	 */
+	public function count():Int
+	{
+		var count = 0;
+		for (key in cache.keys())
+			count++;
+		return count;
+	}
 }
 #else
 class HScript

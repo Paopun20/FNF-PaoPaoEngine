@@ -35,6 +35,7 @@ jobs:
             artifact-name: linuxBuild
             export-path: export/release/linux/bin
             lib-path: ~/haxelib
+
           - os: windows-latest
             target: windows
             artifact-name: windowsBuild
@@ -131,9 +132,9 @@ jobs:
         continue-on-error: true
         run: |
           cd artifacts
-          zip -r ../linuxBuild.zip linuxBuild/
-          zip -r ../windowsBuild.zip windowsBuild/
-          zip -r ../macBuild.zip macBuild/
+          zip -r ../paopao.nightly.linux.zip linuxBuild/
+          zip -r ../paopao.nightly.windows.zip windowsBuild/
+          zip -r ../paopao.nightly.mac.zip macBuild/
 
       - name: Update Nightly Release
         uses: andelf/nightly-release@main
@@ -142,10 +143,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: nightly
-          name: "Nightly Release"
+          name: "Development Release"
           body: |
-            **PaoPao Engine** development release for commit ${{ github.sha }}. Since this is not a regular release, so you should use the engine if you want them.
-          files: | # get all zip files
-            windowsBuild.zip
-            linuxBuild.zip
-            macBuild.zip
+            This is a nightly build of **PaoPao Engine** for commit ${{ github.sha }}.
+            
+            This is a development release of **PaoPao Engine**. It is not recommended for production use.
+            
+            Please use this version only for testing and development purposes.
+            
+          Files: |
+            paopao.nightly.linux.zip
+            paopao.nightly.windows.zip
+            paopao.nightly.mac.zip

@@ -3,7 +3,7 @@ package funkin.modding.editors;
 import funkin.backend.StageData;
 import funkin.objects.PsychCamera;
 import funkin.objects.Character;
-import funkin.modding.scripts.LuaUtils;
+import funkin.modding.scripts.utils.LuaUtils;
 import flixel.FlxObject;
 import flixel.addons.display.FlxBackdrop;
 import flixel.addons.display.FlxGridOverlay;
@@ -16,6 +16,7 @@ import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import funkin.modding.scripts.ModchartSprite;
 import flash.net.FileFilter;
+import haxe.ds.StringMap;
 import funkin.modding.editors.content.Prompt;
 import funkin.modding.editors.content.PreloadListSubState;
 
@@ -182,7 +183,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 				spr.sprite = FlxDestroyUtil.destroy(spr.sprite);
 
 		stageSprites = [];
-		var list:Map<String, FlxSprite> = [];
+		var list:StringMap<FlxSprite> = new StringMap<FlxSprite>();
 		if (stageJson.objects != null && stageJson.objects.length > 0)
 		{
 			list = StageData.addObjectsToState(stageJson.objects, gf, dad, boyfriend, null, true);

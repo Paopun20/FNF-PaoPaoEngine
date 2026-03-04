@@ -7,7 +7,7 @@ import haxe.Json;
 #if LUA_ALLOWED
 import funkin.modding.scripts.FunkinLua;
 #end
-import funkin.modding.scripts.ImplementUtils;
+import funkin.modding.scripts.utils.ImplementUtils;
 
 typedef Achievement =
 {

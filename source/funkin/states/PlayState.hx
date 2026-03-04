@@ -35,12 +35,15 @@ import openfl.filters.ShaderFilter;
 #end
 #if LUA_ALLOWED
 import funkin.modding.scripts.*;
-#else
+import funkin.modding.scripts.utils.LuaUtils;
+#end
+#if HSCRIPT_ALLOWED
 import funkin.modding.scripts.HScript;
-import funkin.modding.scripts.LuaUtils;
+import funkin.modding.scripts.utils.LuaUtils;
 #end
 #if PYTHON_ALLOWED
 import funkin.modding.scripts.Python;
+import funkin.modding.scripts.utils.LuaUtils;
 #end
 
 /**
@@ -59,7 +62,7 @@ import funkin.modding.scripts.Python;
  * "function eventEarlyTrigger" - Used for making your event start a few MILLISECONDS earlier
  * "function triggerEvent" - Called when the song hits your event's timestamp, this is probably what you were looking for
 **/
-class PlayState extends EditableState
+class PlayState extends MusicBeatState
 {
 	public static var STRUM_X = 42;
 	public static var STRUM_X_MIDDLESCROLL = -278;
@@ -2053,6 +2056,8 @@ class PlayState extends EditableState
 		}
 		#end
 
+		setOnScripts('cameraX', camFollow.x);
+		setOnScripts('cameraY', camFollow.y);
 		setOnScripts('botPlay', cpuControlled);
 		callOnScripts('onUpdatePost', [elapsed]);
 	}
@@ -3698,8 +3703,6 @@ class PlayState extends EditableState
 		try
 		{
 			newScript = new HScript(null, file);
-			if (newScript.exists('onCreate'))
-				newScript.call('onCreate');
 			// trace('initialized hscript interp successfully: $file');
 			CoolLog.info('initialized hscript interp successfully: $file');
 			hscriptArray.push(newScript);
@@ -3739,7 +3742,6 @@ class PlayState extends EditableState
 			var newScript:Python = new Python(null, file);
 			CoolLog.info('initialized python interp successfully: $file');
 			// trace('initialized python interp successfully: $file');
-			newScript.call('onCreate', []);
 			pythonArray.push(newScript);
 		}
 		catch (e:Dynamic)
@@ -3789,7 +3791,6 @@ class PlayState extends EditableState
 		{
 		    var newScript:FunkinLua = new FunkinLua(file);
 			CoolLog.info('initialized lua interp successfully: $file');
-			newScript.call('onCreate', []);
 			luaArray.push(newScript);
 		}
 		catch (e:Dynamic)

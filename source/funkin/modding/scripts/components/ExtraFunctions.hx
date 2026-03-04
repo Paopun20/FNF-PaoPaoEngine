@@ -2,7 +2,7 @@ package funkin.modding.scripts.components;
 
 import flixel.util.FlxSave;
 import openfl.utils.Assets;
-import funkin.modding.scripts.ImplementUtils;
+import funkin.modding.scripts.utils.ImplementUtils;
 
 //
 // Things to trivialize some dumb stuff like splitting strings on older Lua

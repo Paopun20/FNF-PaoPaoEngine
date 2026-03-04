@@ -3,7 +3,8 @@ package funkin.modding.scripts.components;
 import Type.ValueType;
 import haxe.Constraints;
 import funkin.substates.GameOverSubstate;
-import funkin.modding.scripts.ImplementUtils;
+import funkin.modding.scripts.utils.ImplementUtils;
+import funkin.modding.scripts.utils.LuaUtils;
 
 //
 // Functions that use a high amount of Reflections, which are somewhat CPU intensive

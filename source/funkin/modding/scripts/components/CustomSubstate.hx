@@ -1,7 +1,7 @@
 package funkin.modding.scripts.components;
 
 import flixel.FlxObject;
-import funkin.modding.scripts.ImplementUtils;
+import funkin.modding.scripts.utils.ImplementUtils;
 
 class CustomSubstate extends MusicBeatSubstate
 {

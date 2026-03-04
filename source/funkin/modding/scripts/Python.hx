@@ -12,9 +12,8 @@ import funkin.backend.Song;
 import funkin.backend.WeekData;
 import funkin.frontend.cutscenes.DialogueBoxPsych;
 import funkin.modding.objects.DebugLuaText;
-import funkin.modding.scripts.BuildInLib;
-import funkin.modding.scripts.LuaUtils.LuaTweenOptions;
-import funkin.modding.scripts.LuaUtils;
+import funkin.modding.scripts.utils.LuaUtils.LuaTweenOptions;
+import funkin.modding.scripts.utils.LuaUtils;
 import funkin.modding.scripts.ModchartSprite;
 import funkin.modding.scripts.components.*;
 import funkin.objects.Character;
@@ -111,18 +110,8 @@ class Python implements IPythonInterface implements IFlxDestroyable
 				code = Assets.getText(file);
 			#end
 
-			if (code != null && code.length > 0)
-			{
-				try
-				{
-					execute(code);
-				}
-				catch (e)
-				{
-					this.stop();
-					throw e;
-				}
-			}
+			execute(code);
+			call('onCreate', []);
 		}
 	}
 
@@ -230,17 +219,71 @@ class Python implements IPythonInterface implements IFlxDestroyable
 			for (k in Reflect.fields(varsToBring))
 				set(k, Reflect.field(varsToBring, k));
 		}
-		var lib = new BuildInLib(set);
-		lib.addLib();
-		lib.addVar();
-		lib.addGameVar();
-		lib.addFuncs();
 
 		#if LUA_ALLOWED
 		set("parentLua", parentLua);
 		#end
 
+		// Stop functions
+		set('Function_StopLua', LuaUtils.Function_StopLua);
+		set('Function_StopHScript', LuaUtils.Function_StopHScript);
+		set('Function_StopPython', LuaUtils.Function_StopPython);
+		set('Function_StopAll', LuaUtils.Function_StopAll);
+		set('Function_Stop', LuaUtils.Function_Stop);
+		set('Function_Continue', LuaUtils.Function_Continue);
+
+		// Core Classes
+		set('Type', Type);
+		set('Math', Math);
+		set('Std', Std);
+		set('StringTools', StringTools);
+		#if sys
+		set('File', File);
+		set('FileSystem', FileSystem);
+		#end
+
+		// Flixel
+		set('FlxG', FlxG);
+		set('FlxMath', flixel.math.FlxMath);
+		set('FlxSprite', flixel.FlxSprite);
+		set('FlxText', flixel.text.FlxText);
+		set('FlxCamera', flixel.FlxCamera);
+		set('PsychCamera', funkin.objects.PsychCamera);
+		set('FlxTimer', flixel.util.FlxTimer);
+		set('FlxTween', flixel.tweens.FlxTween);
+		set('FlxEase', flixel.tweens.FlxEase);
+		set('FlxSound', flixel.system.FlxSound);
+
+		// Game Classes
+		set('Countdown', funkin.backend.BaseStage.Countdown);
+		set('PlayState', PlayState);
+		set('Paths', Paths);
+		set('Conductor', Conductor);
+		set('ClientPrefs', ClientPrefs);
+		set('Difficulty', Difficulty);
+		set('CoolUtil', CoolUtil);
+		set('Character', Character);
+		set('Alphabet', Alphabet);
+		set('Note', funkin.objects.Note);
+		set('StrumNote', StrumNote);
+		set('NoteSplash', NoteSplash);
+		set('CustomSubstate', CustomSubstate);
+		set('ModchartSprite', ModchartSprite);
+
+		#if ACHIEVEMENTS_ALLOWED
+		set('Achievements', Achievements);
+		#end
+		#if (!flash && sys)
+		set('FlxRuntimeShader', flixel.addons.display.FlxRuntimeShader);
+		set('ErrorHandledRuntimeShader', funkin.shaders.ErrorHandledShader.ErrorHandledRuntimeShader);
+		#end
+		set('ShaderFilter', openfl.filters.ShaderFilter);
+		#if flxanimate
+		set('FlxAnimate', FlxAnimate);
+		#end
+
 		// Version and settings
+		set('version', MainMenuState.psychEngineVersion.trim());
 		set('modFolder', this.modFolder);
 		set('scriptName', origin);
 		set('currentModDirectory', Mods.currentModDirectory);
@@ -270,11 +313,14 @@ class Python implements IPythonInterface implements IFlxDestroyable
 		set('seenCutscene', PlayState.seenCutscene);
 		set('hasVocals', PlayState.SONG.needsVoices);
 
+		set('FlxColor', function(color:String) return FlxColor.fromString(color));
+		set('getColorFromName', function(color:String) return FlxColor.fromString(color));
+		set('getColorFromString', function(color:String) return FlxColor.fromString(color));
+		set('getColorFromHex', function(color:String) return FlxColor.fromString('#$color'));
+
 		// Screen
 		set('screenWidth', FlxG.width);
 		set('screenHeight', FlxG.height);
-
-		set("NdllUtil", NdllUtil);
 
 		// PlayState variables
 		if (game != null)
@@ -359,6 +405,347 @@ class Python implements IPythonInterface implements IFlxDestroyable
 		set('splashSkinPostfix', NoteSplash.getSplashSkinPostfix());
 		set('splashAlpha', ClientPrefs.data.splashAlpha);
 
+		// === FUNCTIONS ===
+
+		// Variable management
+		set('setVar', function(name:String, value:Dynamic)
+		{
+			MusicBeatState.getVariables().set(name, value);
+			return value;
+		});
+		set('getVar', function(name:String)
+		{
+			return MusicBeatState.getVariables().get(name);
+		});
+		set('removeVar', function(name:String)
+		{
+			if (MusicBeatState.getVariables().exists(name))
+			{
+				MusicBeatState.getVariables().remove(name);
+				return true;
+			}
+			return false;
+		});
+
+		set("noteTweenX", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear')
+		{
+			return noteTweenFunction(tag, note, {x: value}, duration, ease);
+		});
+		set("noteTweenY", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear')
+		{
+			return noteTweenFunction(tag, note, {y: value}, duration, ease);
+		});
+		set("noteTweenAngle", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear')
+		{
+			return noteTweenFunction(tag, note, {angle: value}, duration, ease);
+		});
+		set("noteTweenAlpha", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear')
+		{
+			return noteTweenFunction(tag, note, {alpha: value}, duration, ease);
+		});
+		set("noteTweenDirection", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear')
+		{
+			return noteTweenFunction(tag, note, {direction: value}, duration, ease);
+		});
+
+		// Script management
+		set('getRunningScripts', function()
+		{
+			var runningScripts:Array<String> = [];
+			#if PYTHON_ALLOWED
+			for (script in game.pythonArray)
+				runningScripts.push(script.origin);
+			#end
+			return runningScripts;
+		});
+
+		set('setOnScripts', function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null)
+		{
+			if (exclusions == null)
+				exclusions = [];
+			if (ignoreSelf && !exclusions.contains(origin))
+				exclusions.push(origin);
+			game.setOnScripts(varName, arg, exclusions);
+		});
+
+		set('callOnScripts',
+			function(funcName:String, ?args:Array<Dynamic> = null, ?ignoreStops = false, ?ignoreSelf:Bool = true, ?excludeScripts:Array<String> = null,
+					?excludeValues:Array<Dynamic> = null)
+			{
+				if (excludeScripts == null)
+					excludeScripts = [];
+				if (ignoreSelf && !excludeScripts.contains(origin))
+					excludeScripts.push(origin);
+				return game.callOnScripts(funcName, args, ignoreStops, excludeScripts, excludeValues);
+			});
+
+		// Tweens
+		set('startTween', function(tag:String, vars:String, values:Any = null, duration:Float, ?options:Any = null)
+		{
+			var penisExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
+			if (penisExam != null && values != null)
+			{
+				var myOptions:LuaTweenOptions = LuaUtils.getLuaTween(options);
+				if (tag != null)
+				{
+					var variables = MusicBeatState.getVariables();
+					var originalTag:String = 'tween_' + LuaUtils.formatVariable(tag);
+					variables.set(tag, FlxTween.tween(penisExam, values, duration, myOptions != null ? {
+						type: myOptions.type,
+						ease: myOptions.ease,
+						startDelay: myOptions.startDelay,
+						loopDelay: myOptions.loopDelay,
+						onUpdate: function(twn:FlxTween)
+						{
+							if (myOptions.onUpdate != null)
+								game.callOnScripts(myOptions.onUpdate, [originalTag, vars]);
+						},
+						onStart: function(twn:FlxTween)
+						{
+							if (myOptions.onStart != null)
+								game.callOnScripts(myOptions.onStart, [originalTag, vars]);
+						},
+						onComplete: function(twn:FlxTween)
+						{
+							if (twn.type == FlxTweenType.ONESHOT || twn.type == FlxTweenType.BACKWARD)
+								variables.remove(tag);
+							if (myOptions.onComplete != null)
+								game.callOnScripts(myOptions.onComplete, [originalTag, vars]);
+						}
+					} : null));
+					return tag;
+				}
+			}
+			return null;
+		});
+
+		set('cancelTween', function(tag:String)
+		{
+			LuaUtils.cancelTween(tag);
+		});
+
+		// Timers
+		set('runTimer', function(tag:String, time:Float = 1, loops:Int = 1)
+		{
+			LuaUtils.cancelTimer(tag);
+			var variables = MusicBeatState.getVariables();
+			var originalTag:String = tag;
+			tag = LuaUtils.formatVariable('timer_$tag');
+			variables.set(tag, new FlxTimer().start(time, function(tmr:FlxTimer)
+			{
+				if (tmr.finished)
+					variables.remove(tag);
+				game.callOnScripts('onTimerCompleted', [originalTag, tmr.loops, tmr.loopsLeft]);
+			}, loops));
+			return tag;
+		});
+
+		set('cancelTimer', function(tag:String)
+		{
+			LuaUtils.cancelTimer(tag);
+		});
+
+		// Game state
+		set('addScore', function(value:Int = 0)
+		{
+			game.songScore += value;
+			game.RecalculateRating();
+		});
+		set('addMisses', function(value:Int = 0)
+		{
+			game.songMisses += value;
+			game.RecalculateRating();
+		});
+		set('addHits', function(value:Int = 0)
+		{
+			game.songHits += value;
+			game.RecalculateRating();
+		});
+		set('setScore', function(value:Int = 0)
+		{
+			game.songScore = value;
+			game.RecalculateRating();
+		});
+		set('setMisses', function(value:Int = 0)
+		{
+			game.songMisses = value;
+			game.RecalculateRating();
+		});
+		set('setHits', function(value:Int = 0)
+		{
+			game.songHits = value;
+			game.RecalculateRating();
+		});
+		set('setHealth', function(value:Float = 1)
+		{
+			game.health = value;
+		});
+		set('addHealth', function(value:Float = 0)
+		{
+			game.health += value;
+		});
+		set('getHealth', function()
+		{
+			return game.health;
+		});
+
+		// Colors
+		set('FlxColor', function(color:String)
+		{
+			return FlxColor.fromString(color);
+		});
+		set('getColorFromName', function(color:String)
+		{
+			return FlxColor.fromString(color);
+		});
+		set('getColorFromString', function(color:String)
+		{
+			return FlxColor.fromString(color);
+		});
+		set('getColorFromHex', function(color:String)
+		{
+			return FlxColor.fromString('#$color');
+		});
+
+		// Precaching
+		set('addCharacterToList', function(name:String, type:String)
+		{
+			var charType:Int = 0;
+			switch (type.toLowerCase())
+			{
+				case 'dad':
+					charType = 1;
+				case 'gf' | 'girlfriend':
+					charType = 2;
+			}
+			game.addCharacterToList(name, charType);
+		});
+		set('precacheImage', function(name:String, ?allowGPU:Bool = true)
+		{
+			Paths.image(name, allowGPU);
+		});
+		set('precacheSound', function(name:String)
+		{
+			Paths.sound(name);
+		});
+		set('precacheMusic', function(name:String)
+		{
+			Paths.music(name);
+		});
+
+		// Events
+		set('triggerEvent', function(name:String, ?value1:String = '', ?value2:String = '')
+		{
+			game.triggerEvent(name, value1, value2, Conductor.songPosition);
+			return true;
+		});
+
+		// Song control
+		set('startCountdown', function()
+		{
+			game.startCountdown();
+			return true;
+		});
+		set('endSong', function()
+		{
+			game.KillNotes();
+			game.endSong();
+			return true;
+		});
+		set('restartSong', function(?skipTransition:Bool = false)
+		{
+			game.persistentUpdate = false;
+			FlxG.camera.followLerp = 0;
+			PauseSubState.restartSong(skipTransition);
+			return true;
+		});
+		set('exitSong', function(?skipTransition:Bool = false)
+		{
+			if (skipTransition)
+			{
+				FlxTransitionableState.skipNextTransIn = true;
+				FlxTransitionableState.skipNextTransOut = true;
+			}
+			if (PlayState.isStoryMode)
+				MusicBeatState.switchState(new StoryMenuState());
+			else
+				MusicBeatState.switchState(new FreeplayState());
+
+			#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
+			FlxG.sound.playMusic(Paths.music('freakyMenu'));
+			PlayState.changedDifficulty = false;
+			PlayState.chartingMode = false;
+			game.transitioning = true;
+			FlxG.camera.followLerp = 0;
+			Mods.loadTopMod();
+			return true;
+		});
+		set('getSongPosition', function()
+		{
+			return Conductor.songPosition;
+		});
+
+		// Character control
+		set('getCharacterX', function(type:String)
+		{
+			switch (type.toLowerCase())
+			{
+				case 'dad' | 'opponent':
+					return game.dadGroup.x;
+				case 'gf' | 'girlfriend':
+					return game.gfGroup.x;
+				default:
+					return game.boyfriendGroup.x;
+			}
+		});
+		set('setCharacterX', function(type:String, value:Float)
+		{
+			switch (type.toLowerCase())
+			{
+				case 'dad' | 'opponent':
+					game.dadGroup.x = value;
+				case 'gf' | 'girlfriend':
+					game.gfGroup.x = value;
+				default:
+					game.boyfriendGroup.x = value;
+			}
+		});
+		set('getCharacterY', function(type:String)
+		{
+			switch (type.toLowerCase())
+			{
+				case 'dad' | 'opponent':
+					return game.dadGroup.y;
+				case 'gf' | 'girlfriend':
+					return game.gfGroup.y;
+				default:
+					return game.boyfriendGroup.y;
+			}
+		});
+		set('setCharacterY', function(type:String, value:Float)
+		{
+			switch (type.toLowerCase())
+			{
+				case 'dad' | 'opponent':
+					game.dadGroup.y = value;
+				case 'gf' | 'girlfriend':
+					game.gfGroup.y = value;
+				default:
+					game.boyfriendGroup.y = value;
+			}
+		});
+		set('cameraSetTarget', function(target:String)
+		{
+			switch (target.trim().toLowerCase())
+			{
+				case 'gf', 'girlfriend':
+					game.moveCameraToGirlfriend();
+				case 'dad', 'opponent':
+					game.moveCamera(true);
+				default:
+					game.moveCamera(false);
+			}
+		});
 		set('characterDance', function(character:String)
 		{
 			switch (character.toLowerCase())
@@ -692,7 +1079,7 @@ class Python implements IPythonInterface implements IFlxDestroyable
 			var myClass:Dynamic = Type.resolveClass(className);
 			if (myClass == null)
 			{
-				pythonTrace('getPropertyFromClass: Class $className not found', FlxColor.RED);
+				pythonTrace('getPropertyFromClass: Class $className not found', false, false, FlxColor.RED);
 				return null;
 			}
 			return Reflect.getProperty(myClass, variable);
@@ -702,7 +1089,7 @@ class Python implements IPythonInterface implements IFlxDestroyable
 			var myClass:Dynamic = Type.resolveClass(className);
 			if (myClass == null)
 			{
-				pythonTrace('setPropertyFromClass: Class $className not found', FlxColor.RED);
+				pythonTrace('setPropertyFromClass: Class $className not found', false, false, FlxColor.RED);
 				return false;
 			}
 			Reflect.setProperty(myClass, variable, value);
@@ -785,7 +1172,7 @@ class Python implements IPythonInterface implements IFlxDestroyable
 					poop.updateHitbox();
 				return;
 			}
-			pythonTrace('setGraphicSize: Couldnt find object: ' + obj, FlxColor.RED);
+			pythonTrace('setGraphicSize: Couldnt find object: ' + obj, false, false, FlxColor.RED);
 		});
 		set('scaleObject', function(obj:String, x:Float, y:Float, updateHitbox:Bool = true)
 		{
@@ -800,7 +1187,7 @@ class Python implements IPythonInterface implements IFlxDestroyable
 					poop.updateHitbox();
 				return;
 			}
-			pythonTrace('scaleObject: Couldnt find object: ' + obj, FlxColor.RED);
+			pythonTrace('scaleObject: Couldnt find object: ' + obj, false, false, FlxColor.RED);
 		});
 		set('updateHitbox', function(obj:String)
 		{
@@ -813,7 +1200,7 @@ class Python implements IPythonInterface implements IFlxDestroyable
 				poop.updateHitbox();
 				return;
 			}
-			pythonTrace('updateHitbox: Couldnt find object: ' + obj, FlxColor.RED);
+			pythonTrace('updateHitbox: Couldnt find object: ' + obj, false, false, FlxColor.RED);
 		});
 		set('screenCenter', function(obj:String, pos:String = 'xy')
 		{
@@ -840,7 +1227,7 @@ class Python implements IPythonInterface implements IFlxDestroyable
 						return;
 				}
 			}
-			pythonTrace("screenCenter: Object " + obj + " doesn't exist!", FlxColor.RED);
+			pythonTrace("screenCenter: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
 		});
 		set('setObjectCamera', function(obj:String, camera:String = 'game')
 		{
@@ -859,7 +1246,7 @@ class Python implements IPythonInterface implements IFlxDestroyable
 				object.cameras = [LuaUtils.cameraFromString(camera)];
 				return true;
 			}
-			pythonTrace("setObjectCamera: Object " + obj + " doesn't exist!", FlxColor.RED);
+			pythonTrace("setObjectCamera: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
 			return false;
 		});
 		set('setScrollFactor', function(obj:String, scrollX:Float, scrollY:Float)
@@ -918,15 +1305,15 @@ class Python implements IPythonInterface implements IFlxDestroyable
 				if (shit.dialogue.length > 0)
 				{
 					game.startDialogue(shit, music);
-					pythonTrace('startDialogue: Successfully loaded dialogue', FlxColor.GREEN);
+					pythonTrace('startDialogue: Successfully loaded dialogue', false, false, FlxColor.GREEN);
 					return true;
 				}
 				else
-					pythonTrace('startDialogue: Your dialogue file is badly formatted!', FlxColor.RED);
+					pythonTrace('startDialogue: Your dialogue file is badly formatted!', false, false, FlxColor.RED);
 			}
 		else
 		{
-			pythonTrace('startDialogue: Dialogue file not found', FlxColor.RED);
+			pythonTrace('startDialogue: Dialogue file not found', false, false, FlxColor.RED);
 			if (game.endingSong)
 				game.endSong();
 			else
@@ -950,7 +1337,7 @@ class Python implements IPythonInterface implements IFlxDestroyable
 			}
 			else
 			{
-				pythonTrace('startVideo: Video file not found: ' + videoFile, FlxColor.RED);
+				pythonTrace('startVideo: Video file not found: ' + videoFile, false, false, FlxColor.RED);
 			}
 			return false;
 			#else
@@ -983,14 +1370,14 @@ class Python implements IPythonInterface implements IFlxDestroyable
 			{
 				if (this.modFolder == null)
 				{
-					pythonTrace('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!', FlxColor.RED);
+					pythonTrace('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!', false, false, FlxColor.RED);
 					return null;
 				}
 				modName = this.modFolder;
 			}
 			return LuaUtils.getModSetting(saveTag, modName);
 			#else
-			pythonTrace("getModSetting: Mods are disabled in this build!", FlxColor.RED);
+			pythonTrace("getModSetting: Mods are disabled in this build!", false, false, FlxColor.RED);
 			return null;
 			#end
 		});

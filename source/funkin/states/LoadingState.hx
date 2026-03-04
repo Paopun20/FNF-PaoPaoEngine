@@ -2,7 +2,7 @@ package funkin.states;
 
 import lime.app.Future;
 #if (sys || MULTITHREADED_LOADING)
-import sys.thread.FixedThreadPool;
+import sys.thread.ElasticThreadPool;
 import sys.thread.Mutex;
 #end
 import haxe.Json;
@@ -12,7 +12,7 @@ import openfl.utils.AssetType;
 import openfl.utils.Assets as OpenFlAssets;
 import flixel.system.FlxAssets;
 import flixel.FlxState;
-import flash.media.Sound;
+import openfl.media.Sound;
 import funkin.backend.Song;
 import funkin.backend.StageData;
 import funkin.objects.Note;
@@ -21,12 +21,116 @@ import funkin.objects.NoteSplash;
 import funkin.modding.scripts.HScript;
 #end
 
-#if (cpp || MULTITHREADED_LOADING)
+#if (js && nodejs)
+import js.node.Os;
+#end
+
+#if cpp
 @:headerCode('
 #include <iostream>
 #include <thread>
 ')
 #end
+class HelperLSTool
+{
+	#if cpp
+	@:functionCode('
+		unsigned int count = std::thread::hardware_concurrency();
+		return count > 0 ? count : defVar;
+	')
+	@:noCompletion
+	public static function getCPUThreadsCount(defVar: Int):Int
+	{
+		return defVar;
+	}
+	
+	#elseif hl
+	@:hlNative("std", "sys_cpu_count")
+	public static function getCPUThreadsCount(defVar: Int):Int
+	{
+		return defVar;
+	}
+	
+	#elseif (js && nodejs)
+	public static function getCPUThreadsCount(defVar: Int):Int
+	{
+		try
+		{
+			var cpus = Os.cpus();
+			return cpus != null ? cpus.length : defVar;
+		}
+		catch (e:Dynamic)
+		{
+			#if debug
+			trace('Failed to detect CPU count in Node.js: $e');
+			#end
+			return defVar;
+		}
+	}
+	
+	#elseif html5
+	public static function getCPUThreadsCount(defVar: Int):Int
+	{
+		try
+		{
+			var hardwareConcurrency:Null<Int> = untyped __js__("navigator.hardwareConcurrency");
+			
+			if (hardwareConcurrency != null && hardwareConcurrency >= 1)
+			{
+				return hardwareConcurrency;
+			}
+		}
+		catch (e:Dynamic)
+		{
+			#if debug
+			trace('Could not detect CPU cores in browser: $e');
+			#end
+		}
+		
+		return defVar;
+	}
+	
+	#elseif java
+	public static function getCPUThreadsCount(defVar: Int):Int
+	{
+		try
+		{
+			var runtime = java.lang.Runtime.getRuntime();
+			return runtime.availableProcessors();
+		}
+		catch (e:Dynamic)
+		{
+			#if debug
+			trace('Failed to detect CPU count in Java: $e');
+			#end
+			return defVar;
+		}
+	}
+	
+	#elseif cs
+	public static function getCPUThreadsCount(defVar: Int):Int
+	{
+		try
+		{
+			return cs.system.Environment.ProcessorCount;
+		}
+		catch (e:Dynamic)
+		{
+			#if debug
+			trace('Failed to detect CPU count in C#: $e');
+			#end
+			return defVar;
+		}
+	}
+	
+	#else
+	public static function getCPUThreadsCount(defVar: Int):Int
+	{
+		return defVar;
+	}
+	#end
+}
+
 class LoadingState extends EditableState
 {
 	public static var loaded:Int = 0;
@@ -37,8 +141,8 @@ class LoadingState extends EditableState
 	static var requestedBitmaps:Map<String, BitmapData> = [];
 	#if (sys || MULTITHREADED_LOADING)
 	static var mutex:Mutex;
-	static var arrayMutex:Mutex; // Separate mutex for array operations
-	static var threadPool:FixedThreadPool = null;
+	static var arrayMutex:Mutex;
+	static var threadPool:ElasticThreadPool = null;
 	#end
 
 	inline static private function safeIncrementLoaded(?assetName:String):Void
@@ -51,6 +155,8 @@ class LoadingState extends EditableState
 		loaded++;
 		if (assetName != null)
 			currentAssetName = assetName;
+		else
+			currentAssetName = "...";
 		#if (sys || MULTITHREADED_LOADING)
 		mutex.release();
 		#end
@@ -449,11 +555,11 @@ class LoadingState extends EditableState
 		#if (sys || MULTITHREADED_LOADING)
 		#if MULTITHREADED_LOADING
 		// Due to the Main thread and Discord thread, we decrease it by 2.
-		var threadCount:Int = Std.int(Math.max(1, getCPUThreadsCount() - #if DISCORD_ALLOWED 2 #else 1 #end));
+		var threadCount:Int = HelperLSTool.getCPUThreadsCount(8); // 8 - 16 in common use
 		#else
 		var threadCount:Int = 1;
 		#end
-		threadPool = new FixedThreadPool(threadCount);
+		threadPool = new ElasticThreadPool(threadCount, 60);
 		#end
 	}
 
@@ -1136,15 +1242,4 @@ class LoadingState extends EditableState
 
 		return null;
 	}
-
-	#if (cpp || MULTITHREADED_LOADING)
-	@:functionCode('
-		return std::thread::hardware_concurrency();
-    	')
-	@:noCompletion
-	public static function getCPUThreadsCount():Int
-	{
-		return -1;
-	}
-	#end
 }

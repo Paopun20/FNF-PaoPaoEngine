@@ -39,6 +39,7 @@
 	<define name="ACHIEVEMENTS_ALLOWED" />
 	<define name="DISCORD_ALLOWED" unless="hl" />
 	<define name="TRANSLATIONS_ALLOWED" />
+	<define name="DEXAPI_ALLOWED" if="windows cpp desktop"/>
 	<define
         name="WindowColorMode"
         if="desktop || window"
@@ -268,7 +269,6 @@
 
 	    <haxedef name="annotate-source" />
 	    <haxedef name="analyzer-optimize" />
-
 	</section>
 
 	<!--Disable deprecated warnings-->
@@ -279,7 +279,6 @@
 	<haxedef name="message.reporting" value="pretty" />
 
 	<!--Macro fixes-->
-	<haxeflag name="--macro" value="allowPackage('flash')" />
 	<haxeflag name="--macro" value="include('my.pack')" />
 
 

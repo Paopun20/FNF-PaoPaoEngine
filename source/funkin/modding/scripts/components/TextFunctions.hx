@@ -1,6 +1,7 @@
 package funkin.modding.scripts.components;
 
-import funkin.modding.scripts.ImplementUtils;
+import funkin.modding.scripts.utils.ImplementUtils;
+import funkin.modding.scripts.utils.LuaUtils;
 
 class TextFunctions
 {

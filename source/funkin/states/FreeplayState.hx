@@ -37,7 +37,7 @@ class FreeplayState extends EditableState
 	var intendedScore:Int = 0;
 	var intendedRating:Float = 0;
 
-	private var grpSongs:FlxTypedGroup<Alphabet>;
+	private var grpSongs:FlxTypedGroup<FlxText>;
 	private var curPlaying:Bool = false;
 
 	private var iconArray:Array<HealthIcon> = [];
@@ -103,7 +103,7 @@ class FreeplayState extends EditableState
 				{
 					colors = [146, 113, 253];
 				}
-				addSong(song[0], i, song[1], FlxColor.fromRGB(colors[0], colors[1], colors[2]), song[3]); // Pass album here
+				addSong(song[0], i, song[1], FlxColor.fromRGB(colors[0], colors[1], colors[2]), song[3]);
 			}
 		}
 
@@ -125,21 +125,19 @@ class FreeplayState extends EditableState
 		albumArt.angle = 10;
 		add(albumArt);
 
-		grpSongs = new FlxTypedGroup<Alphabet>();
+		grpSongs = new FlxTypedGroup<FlxText>();
 		add(grpSongs);
 
 		for (i in 0...songs.length)
 		{
-			var songText:Alphabet = new Alphabet(90, 320, songs[i].songName, true);
-			songText.targetY = i;
+			var songText:FlxText = new FlxText(90, 320, 0, songs[i].songName);
+			songText.setFormat(Paths.font("vcr.ttf"), 48, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			songText.borderSize = 2;
+			songText.ID = i; // Store the index
 			grpSongs.add(songText);
-
-			songText.scaleX = Math.min(1, 980 / songText.width);
-			songText.snapToPosition();
 
 			Mods.currentModDirectory = songs[i].folder;
 			var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);
-			icon.sprTracker = songText;
 			
 			var card: FlxSprite = new FlxSprite(songText.x + songText.width + 10, songText.y - 10);
 			card.makeGraphic(100, 100, FlxColor.fromRGB(0, 0, 0));
@@ -148,16 +146,10 @@ class FreeplayState extends EditableState
 			card.angle = 10;
 			card.alpha = 0.8;
 
-			// too laggy with a lot of songs, so i had to recode the logic for it
-			card.visible = card.active = songText.visible = songText.active = songText.isMenuItem = icon.visible = icon.active = false;
+			songText.visible = songText.active = icon.visible = icon.active = false;
 
-			// using a FlxGroup is too much fuss!
 			iconArray.push(icon);
 			add(icon);
-
-			// songText.x += 40;
-			// DONT PUT X IN THE FIRST PARAMETER OF new ALPHABET() !!
-			// songText.screenCenter(X);
 		}
 
 		WeekData.setDirectoryFromWeek();
@@ -261,10 +253,10 @@ class FreeplayState extends EditableState
 			lerpRating = intendedRating;
 
 		var ratingSplit:Array<String> = Std.string(CoolUtil.floorDecimal(lerpRating * 100, 2)).split('.');
-		if (ratingSplit.length < 2) // No decimals, add an empty space
+		if (ratingSplit.length < 2)
 			ratingSplit.push('');
 
-		while (ratingSplit[1].length < 2) // Less than 2 decimals in it, add decimals then
+		while (ratingSplit[1].length < 2)
 			ratingSplit[1] += '0';
 
 		var shiftMult:Int = 1;
@@ -448,7 +440,6 @@ class FreeplayState extends EditableState
 				PlayState.storyDifficulty = curDifficulty;
 
 				CoolLog.info('CURRENT WEEK: ' + WeekData.getWeekFileName());
-				// trace('CURRENT WEEK: ' + WeekData.getWeekFileName());
 			}
 			catch (e:haxe.Exception)
 			{
@@ -456,7 +447,7 @@ class FreeplayState extends EditableState
 
 				var errorStr:String = e.message;
 				if (errorStr.contains('There is no TEXT asset with an ID of'))
-					errorStr = 'Missing file: ' + errorStr.substring(errorStr.indexOf(songLowercase), errorStr.length - 1); // Missing chart
+					errorStr = 'Missing file: ' + errorStr.substring(errorStr.indexOf(songLowercase), errorStr.length - 1);
 				else
 					errorStr += '\n\n' + e.stack;
 
@@ -560,7 +551,6 @@ class FreeplayState extends EditableState
 			albumArt.loadGraphic(Paths.image('albums/albumPlaceHolder'));
 		}
 
-		// Center the album art
 		albumArt.x = (FlxG.width - 250) - (albumArt.width / 2);
 		albumArt.y = (FlxG.height / 2) - (albumArt.height / 2);
 	}
@@ -575,7 +565,6 @@ class FreeplayState extends EditableState
 		if (playSound)
 			FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
 
-		// Update album art
 		updateAlbumArt();
 
 		var newColor:Int = songs[curSelected].color;
@@ -591,7 +580,7 @@ class FreeplayState extends EditableState
 			var icon:HealthIcon = iconArray[num];
 			item.alpha = 0.6;
 			icon.alpha = 0.6;
-			if (item.targetY == curSelected)
+			if (item.ID == curSelected)
 			{
 				item.alpha = 1;
 				icon.alpha = 1;
@@ -635,6 +624,7 @@ class FreeplayState extends EditableState
 	public function updateTexts(elapsed:Float = 0.0)
 	{
 		lerpSelected = FlxMath.lerp(curSelected, lerpSelected, Math.exp(-elapsed * 9.6));
+		
 		for (i in _lastVisibles)
 		{
 			grpSongs.members[i].visible = grpSongs.members[i].active = false;
@@ -647,21 +637,29 @@ class FreeplayState extends EditableState
 
 		for (i in min...max)
 		{
-			var item:Alphabet = grpSongs.members[i];
+			var item:FlxText = grpSongs.members[i];
 			item.visible = item.active = true;
 
 			// Distance from the selected item
-			var offsetY:Float = item.targetY - lerpSelected;
+			var offsetY:Float = item.ID - lerpSelected;
 
 			// Curve amount based on distance from center
-			var curveAmount:Float = Math.abs(offsetY) * -60; // Increase -60 for more curve
+			var curveAmount:Float = Math.abs(offsetY) * -60;
 
-			// Position with curve (add curveAmount to push items right, subtract to push left)
-			item.x = ((offsetY * item.distancePerItem.x) + item.startPosition.x) + curveAmount;
-			item.y = ((offsetY * 1.3 * item.distancePerItem.y) + item.startPosition.y);
+			// Base position calculations
+			var baseX:Float = 90;
+			var baseY:Float = 320;
+			var spacing:Float = 120; // Vertical spacing between items
+
+			// Position with curve
+			item.x = baseX + curveAmount;
+			item.y = baseY + (offsetY * spacing);
 
 			var icon:HealthIcon = iconArray[i];
 			icon.visible = icon.active = true;
+			icon.x = item.x + item.width + 10;
+			icon.y = item.y - (icon.height / 4);
+			
 			_lastVisibles.push(i);
 		}
 	}
@@ -684,16 +682,16 @@ class SongMetadata
 	public var color:Int = -7179779;
 	public var folder:String = "";
 	public var lastDifficulty:String = null;
-	public var album:String = "albumPlaceHolder"; // Add this
+	public var album:String = "albumPlaceHolder";
 
-	public function new(song:String, week:Int, songCharacter:String, color:Int, album:String = "albumPlaceHolder") // Add album parameter
+	public function new(song:String, week:Int, songCharacter:String, color:Int, album:String = "albumPlaceHolder")
 	{
 		this.songName = song;
 		this.week = week;
 		this.songCharacter = songCharacter;
 		this.color = color;
 		this.folder = Mods.currentModDirectory;
-		this.album = album; // Store album
+		this.album = album;
 		
 		if (this.folder == null)
 			this.folder = '';

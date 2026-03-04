@@ -20,7 +20,7 @@ private typedef EnvConfig =
 
 private typedef FieldArray = Array<Field>;
 
-class DotEnvMacro
+class EnvironmentMacro
 {
 	public static macro function build(dotfile:String = '.env'):FieldArray
 	{
@@ -34,9 +34,7 @@ class DotEnvMacro
 			if (meta == null)
 				continue;
 			if (!isNullString(field.kind))
-			{
-				Context.fatalError('@:env field "${field.name}" must be of type Null<String>', field.pos);
-			}
+			    Context.fatalError('@:env field "${field.name}" must be of type Null<String>', field.pos);
 			final cfg = parseEnvMeta(field.name, meta);
 
 			// Check system environment for CI/GitHub Actions
@@ -44,20 +42,14 @@ class DotEnvMacro
 
 			// Fall back to .env file
 			if (value == null)
-			{
-				value = env.get(cfg.key);
-			}
+			    value = env.get(cfg.key);
 
 			// Fall back to default value
 			if (value == null)
-			{
-				value = cfg.defaultValue;
-			}
+			    value = cfg.defaultValue;
 
 			if (value == null && cfg.required)
-			{
-				Context.fatalError('Missing required env value "${cfg.key}"', field.pos);
-			}
+			    Context.fatalError('Missing required env value "${cfg.key}"', field.pos);
 			field.kind = FVar(getVarType(field.kind), value == null ? macro null : macro $v{value});
 		}
 		return fields;
