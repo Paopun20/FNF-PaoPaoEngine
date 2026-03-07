@@ -35,18 +35,21 @@ jobs:
             artifact-name: linuxBuild
             export-path: export/release/linux/bin
             lib-path: ~/haxelib
+            setup-file: ./setup/unix.sh
 
           - os: windows-latest
             target: windows
             artifact-name: windowsBuild
             export-path: export/release/windows/bin
             lib-path: C:/haxelib
+            setup-file: ./setup/windows.ps1
 
           - os: macos-15
             target: mac
             artifact-name: macBuild
             export-path: export/release/macos/bin
             lib-path: ~/haxelib
+            setup-file: ./setup/unix.sh
 
     runs-on: ${{ matrix.os }}
     env:
@@ -71,7 +74,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ${{ matrix.lib-path }}
-          key: ${{ runner.os }}-haxelib-${{ matrix.lib-path }}
+          key: ${{ runner.os }}-haxelib-${{ hashFiles(matrix.setup-file) }}
           restore-keys: |
             ${{ runner.os }}-haxelib-
 
@@ -81,17 +84,17 @@ jobs:
         run: |
           haxelib setup ${{ matrix.lib-path }}
           haxelib install hxcpp > /dev/null --quiet
-          chmod +x ./setup/unix.sh
-          sh ./setup/unix.sh
+          chmod +x ${{ matrix.setup-file }}
+          sh ${{ matrix.setup-file }}
 
       # Install Haxelib (Windows)
       - name: Install Haxelib (Windows)
         if: matrix.target == 'windows'
+        shell: powershell
         run: |
           haxelib setup ${{ matrix.lib-path }}
           haxelib install hxcpp > /dev/null --quiet
-          powershell ./setup/windows.ps1
-        shell: cmd
+          . ${{ matrix.setup-file }}
 
       # Skip SScript setup mode (Unix)
       - name: Skip SScript setup mode (Unix)
@@ -146,12 +149,11 @@ jobs:
           name: "Development Release"
           body: |
             This is a nightly build of **PaoPao Engine** for commit ${{ github.sha }}.
-            
+
             This is a development release of **PaoPao Engine**. It is not recommended for production use.
-            
+
             Please use this version only for testing and development purposes.
-            
-          Files: |
+          files: |
             paopao.nightly.linux.zip
             paopao.nightly.windows.zip
             paopao.nightly.mac.zip
