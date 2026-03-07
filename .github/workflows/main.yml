@@ -71,7 +71,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ${{ matrix.lib-path }}
-          key: ${{ runner.os }}-haxelib-${{ hashFiles('**/setup/commands.txt') }}
+          key: ${{ runner.os }}-haxelib-${{ matrix.lib-path }}
           restore-keys: |
             ${{ runner.os }}-haxelib-
 
