@@ -15,7 +15,7 @@ PaoPoa Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
 - Hscript (Improved and QOL)
   > Optimize by Cache AST.
   > Can use without `game.`
-  > Use Own's Codename's HScript fork library.
+  > Use Own's Codename's HScript fork library, only add QOL.
 - Ndll Support (HScript/Python only)
   > It codename feature.
 - Fixed Psych Engine Bugs (some critical)

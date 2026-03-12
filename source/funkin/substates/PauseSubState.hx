@@ -10,6 +10,9 @@ import funkin.options.OptionsState;
 #if HSCRIPT_ALLOWED
 import funkin.modding.scripts.HScript;
 #end
+#if PYTHON_ALLOWED
+import funkin.modding.scripts.Python;
+#end
 
 class PauseSubState extends EditableSubstate
 {
@@ -289,6 +292,9 @@ class PauseSubState extends EditableSubstate
 					#if HSCRIPT_ALLOWED
 					HScript.reset();
 					#end
+					#if PYTHON_ALLOWED
+					Python.reset();
+					#end
 					restartSong();
 				case "Leave Charting Mode":
 					restartSong();
@@ -314,7 +320,10 @@ class PauseSubState extends EditableSubstate
 					PlayState.instance.unspawnNotes = [];
 					PlayState.instance.finishSong(true);
 					#if HSCRIPT_ALLOWED
-					HScript.reset();
+					HScript.reset(true);
+					#end
+					#if PYTHON_ALLOWED
+					Python.reset(true);
 					#end
 				case 'Toggle Botplay':
 					PlayState.instance.cpuControlled = !PlayState.instance.cpuControlled;
@@ -351,7 +360,10 @@ class PauseSubState extends EditableSubstate
 					PlayState.chartingMode = false;
 					FlxG.camera.followLerp = 0;
 					#if HSCRIPT_ALLOWED
-					HScript.reset();
+					HScript.reset(true);
+					#end
+					#if PYTHON_ALLOWED
+					Python.reset(true);
 					#end
 			}
 		}

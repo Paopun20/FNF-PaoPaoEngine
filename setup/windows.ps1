@@ -6,10 +6,7 @@ if ([string]::IsNullOrEmpty((Get-Command haxe -ea 0))) {
     [System.Environment]::Exit(1)
 }
 
-Invoke-Expression $([System.IO.File]::ReadAllText("setup/commands.txt"))
-
-# for windows only
-haxelib install hxWindowColorMode 0.2.1if ([string]::IsNullOrEmpty((Get-Command haxe -ea 0)))
+if ([string]::IsNullOrEmpty((Get-Command haxe -ea 0)))
 {
     [void][System.Console]::WriteLine("oh, Haxe not found.")
     [system.Diagnostics.Process]::Start("cmd","/c start https://haxe.org/download/")
@@ -38,16 +35,4 @@ haxelib git funkin.vis https://github.com/FunkinCrew/funkVis 22b1ce089dd924f15cd
 haxelib git grig.audio https://github.com/FunkinCrew/grig.audio 57f5d47f2533fd0c3dcd025a86cb86c0dfa0b6d2
 haxelib git hscript-improved https://github.com/Paopun20/PPE-hscript-improved codename-dev
 
-# for windows only
-Write-Host "Installing hxWindowColorMode 0.2.1"
-$output = haxelib install hxWindowColorMode 0.2.1 -y 2>&1
-
-if ($LASTEXITCODE -ne 0)
-{
-    Write-Error "Failed to install hxWindowColorMode"
-    Write-Error $output
-    [System.Environment]::Exit(1)
-}
-
-Write-Host $output
-Write-Host "Setup completed successfully!"
+haxelib install hxWindowColorMode 0.2.1

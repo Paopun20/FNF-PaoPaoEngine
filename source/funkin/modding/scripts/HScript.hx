@@ -1,28 +1,28 @@
 package funkin.modding.scripts;
 
-import funkin.objects.Character;
-import funkin.modding.scripts.utils.LuaUtils;
 import funkin.modding.scripts.components.*;
+import funkin.modding.scripts.utils.LuaUtils;
+import funkin.objects.Character;
 import funkin.utils.PlatformDex;
 #if LUA_ALLOWED
 import funkin.modding.scripts.FunkinLua;
 #end
 #if HSCRIPT_ALLOWED
-import hscript.Parser;
-import hscript.Interp;
-import hscript.Printer;
-import hscript.Tools;
-import hscript.Expr.Error as HscriptError;
-import hscript.Expr;
-import hscript.Expr;
-import haxe.ds.StringMap;
-import funkin.utils.NdllUtil;
-import haxe.crypto.Sha256;
-import haxe.io.Bytes;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
+import funkin.modding.scripts.CacheScript.CacheParser;
+import funkin.modding.scripts.CacheScript.CacheType;
+import funkin.modding.scripts.CacheScript;
 import funkin.modding.scripts.compatibility.StructureCompatibility;
 import funkin.objects.NoteSplash;
 import funkin.objects.StrumNote;
+import funkin.utils.NdllUtil;
+import haxe.ds.StringMap;
+import hscript.Expr.Error as HscriptError;
+import hscript.Expr;
+import hscript.Interp;
+import hscript.Parser;
+import hscript.Printer;
+import hscript.Tools;
 
 using StringTools;
 
@@ -46,147 +46,34 @@ class PaoPaoInterp extends Interp
 		return parentInstance = inst;
 	}
 
-	override function resolve(id:String, doException:Bool = true, allowProperty:Bool = true):Dynamic
+	override function resetVariables():Void
 	{
-		if (locals.exists(id))
-			return locals.get(id).r;
-		else if (variables.exists(id))
-			return variables.get(id);
-		else if (customClasses.exists(id))
-			return customClasses.get(id);
-		if (parentInstance != null && _instanceFields.contains(id))
-			return Reflect.getProperty(parentInstance, id);
-		else
-			return super.resolve(id, doException, allowProperty);
-	}
+		customClasses = new Map<String, hscript.CustomClassHandler>();
+		variables = new Map<String, Dynamic>();
+		publicVariables = funkin.modding.scripts.HScript.publicVariables;
+		staticVariables = funkin.modding.scripts.HScript.staticVariables;
 
-	override function setVar(name:String, v:Dynamic):Void
-	{
-		if (allowStaticVariables && staticVariables.exists(name))
-			staticVariables.set(name, v);
-		else if (allowPublicVariables && publicVariables.exists(name))
-			publicVariables.set(name, v);
-		else if (parentInstance != null && _instanceFields.contains(name))
-			Reflect.setProperty(parentInstance, name, v);
-		else
-			variables.set(name, v);
-	}
+		usingHandler = new hscript.utils.UsingHandler();
 
-	override function assign(e1:Expr, e2:Expr):Dynamic
-	{
-		var value:Dynamic = expr(e2);
-		switch (Tools.expr(e1))
+		variables.set("null", null);
+		variables.set("true", true);
+		variables.set("false", false);
+		variables.set("trace", Reflect.makeVarArgs(function(el)
 		{
-			case EIdent(variable):
-				var local:Dynamic = locals.get(variable);
-				if (local != null)
-				{
-					if (!local.const)
-						local.r = value;
-					else
-						warn(ECustom('$variable cannot be reassigned as it is a constant expression.'));
-				}
-				else if (parentInstance != null && _instanceFields.contains(variable))
-					Reflect.setProperty(parentInstance, variable, value);
-				else
-				{
-					if (!variables.exists(variable))
-						error(EUnknownVariable(variable));
-
-					setVar(variable, value);
-				}
-
-			case EField(variable, field, stinky):
-				var variable:Dynamic = expr(variable);
-				if (variable == null)
-				{
-					if (stinky)
-						error(EInvalidAccess(field));
-					else
-						return null;
-				}
-
-				value = set(variable, field, value);
-
-			case EArray(variable, index):
-				expr(variable)[expr(index)] = value;
-
-			default:
-				error(EInvalidOp('='));
-		}
-		return value;
-	}
-
-	override function evalAssignOp(op:String, func:Dynamic->Dynamic->Dynamic, e1:Expr, e2:Expr):Dynamic
-	{
-		var value:Dynamic;
-		var _value:Dynamic = expr(e2);
-		switch (Tools.expr(e1))
-		{
-			case EIdent(variable):
-				value = func(expr(e1), _value);
-				var local:Dynamic = locals.get(variable);
-				if (local != null)
-				{
-					if (!local.const)
-						local.r = value;
-					else
-						warn(ECustom('$variable cannot be reassigned as it is a constant expression.'));
-				}
-				else if (parentInstance != null && _instanceFields.contains(variable))
-					Reflect.setProperty(parentInstance, variable, value);
-				else
-				{
-					if (!variables.exists(variable))
-						error(EUnknownVariable(variable));
-
-					setVar(variable, value);
-				}
-
-			case EField(variable, field, stinky):
-				var variable:Dynamic = expr(variable);
-				if (variable == null)
-				{
-					if (stinky)
-						error(EInvalidAccess(field));
-					else
-						return null;
-				}
-
-				value = set(variable, field, func(get(variable, field), _value));
-
-			case EArray(variable, index):
-				var array:Dynamic = expr(variable);
-				var index:Dynamic = expr(index);
-				value = array[index] = func(array[index], _value);
-
-			default:
-				return error(EInvalidOp(op));
-		}
-		return value;
+			var inf = posInfos();
+			var v = el.shift();
+			if (el.length > 0)
+				inf.customParams = el;
+			haxe.Log.trace(Std.string(v), inf);
+		}));
 	}
 }
 
 class HScript implements IHscriptInterface implements IFlxDestroyable
 {
-	private static function createParser():Parser
-	{
-		var p = new Parser();
-		p.allowJSON = true;
-		p.allowMetadata = true;
-		p.allowTypes = true;
-		return p;
-	}
-
-	private static function createPrinter():Printer
-	{
-		var p = new Printer();
-		return p;
-	}
-
-	public static var astCache:StringMap<Expr> = new StringMap();
-	public static var parser:Parser = createParser();
-	public static var printer:Printer = createPrinter();
+	public static var printer:Printer = new Printer();
+	public static var staticVariables:StringMap<Dynamic> = new StringMap<Dynamic>();
+	public static var publicVariables:StringMap<Dynamic> = new StringMap<Dynamic>();
 
 	public var interp:PaoPaoInterp;
 	public var origin:Null<String>;
@@ -201,10 +88,14 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 
 	public var parentInterpreted:Dynamic;
 
-	public static function reset()
+	public static function reset(clearCache:Bool = false)
 	{
-		CoolLog.info('Resetting HScript cache');
-		HScript.astCache.clear();
+		CoolLog.info('Resetting HScript');
+		staticVariables = new StringMap<Dynamic>();
+		publicVariables = new StringMap<Dynamic>();
+
+		if (clearCache)
+			CacheScript.clear(CacheType.HSCRIPT);
 	}
 
 	public static function initHaxeModule(parent:Dynamic)
@@ -342,30 +233,30 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 			return null;
 
 		var cachedExpr:Dynamic;
-		var cacheKey:String = Sha256.make(Bytes.ofString(modFolder + scriptName + code)).toHex();
-		if (!HScript.astCache.exists(cacheKey))
+		var cacheKey:String = CacheScript.hashCode(#if MODS_ALLOWED modFolder + #end scriptName + code);
+		if (!(CacheScript.exists(cacheKey, CacheType.HSCRIPT)))
 		{
-			cachedExpr = HScript.parser.parseString(code);
-			HScript.astCache.set(cacheKey, cachedExpr);
-			CoolLog.info('HScript parsed AST for "${scriptName}"');
+			cachedExpr = CacheParser.parse(code, CacheType.HSCRIPT);
+			CacheScript.set(cacheKey, cachedExpr, CacheType.HSCRIPT);
+			CoolLog.info('HScript parsed AST for "${scriptName}" (${cacheKey})');
 		}
 		else
 		{
-			cachedExpr = HScript.astCache.get(cacheKey);
-			CoolLog.info('HScript reused AST for "${scriptName}"');
+			cachedExpr = CacheScript.get(cacheKey, CacheType.HSCRIPT);
+			CoolLog.info('HScript reused AST for "${scriptName}" (${cacheKey})');
 		}
 
 		try
 		{
-			var expr = cachedExpr;
-			returnValue = interp.execute(expr);
-			return returnValue;
+			returnValue = interp.execute(cachedExpr);
 		}
 		catch (e:Dynamic)
 		{
 			CoolLog.error('HScript execution error in "' + scriptName + '": ' + e);
-			return null;
+			returnValue = null;
 		}
+		cacheKey = cachedExpr = null;
+		return returnValue;
 	}
 
 	public function preset(?varsToBring:Any):Void

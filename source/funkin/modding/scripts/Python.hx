@@ -12,10 +12,13 @@ import funkin.backend.Song;
 import funkin.backend.WeekData;
 import funkin.frontend.cutscenes.DialogueBoxPsych;
 import funkin.modding.objects.DebugLuaText;
-import funkin.modding.scripts.utils.LuaUtils.LuaTweenOptions;
-import funkin.modding.scripts.utils.LuaUtils;
+import funkin.modding.scripts.CacheScript.CacheParser;
+import funkin.modding.scripts.CacheScript.CacheType;
+import funkin.modding.scripts.CacheScript;
 import funkin.modding.scripts.ModchartSprite;
 import funkin.modding.scripts.components.*;
+import funkin.modding.scripts.utils.LuaUtils.LuaTweenOptions;
+import funkin.modding.scripts.utils.LuaUtils;
 import funkin.objects.Character;
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;
@@ -39,7 +42,7 @@ import paopao.hython.Printer as PyPrinter;
 import flixel.addons.display.FlxRuntimeShader;
 #end
 #if HSCRIPT_ALLOWED
-import funkin.modding.scripts.HScript;
+import funkin.modding.scripts.HScript.HScript;
 #end
 #if LUA_ALLOWED
 import funkin.modding.scripts.FunkinLua;
@@ -82,7 +85,6 @@ class Python implements IPythonInterface implements IFlxDestroyable
 
 	public function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?manualRun:Bool = false)
 	{
-		parser = new PyParser();
 		interp = new PyInterp();
 		printer = new PyPrinter();
 		scriptName = origin = file;
@@ -115,15 +117,37 @@ class Python implements IPythonInterface implements IFlxDestroyable
 		}
 	}
 
+	public static function reset(clearCache:Bool = false)
+	{
+		CoolLog.info('Resetting Python');
+
+		if (clearCache)
+			CacheScript.clear(CacheType.PYTHON);
+	}
+
+	
 	public function execute(code:String):Dynamic
 	{
 		if (closed)
 			return null;
 
+		var cachedExpr:Dynamic;
+		var cacheKey:String = CacheScript.hashCode(#if MODS_ALLOWED modFolder + #end scriptName + code);
+		if (!(CacheScript.exists(cacheKey, CacheType.PYTHON)))
+		{
+			cachedExpr = CacheParser.parse(code, CacheType.PYTHON);
+			CacheScript.set(cacheKey, cachedExpr, CacheType.PYTHON);
+			CoolLog.info('Python parsed AST for "${scriptName}"');
+		}
+		else
+		{
+			cachedExpr = CacheScript.get(cacheKey, CacheType.PYTHON);
+			CoolLog.info('Python reused AST for "${scriptName}"');
+		}
+
 		try
 		{
-			var expr = parser.parseString(code);
-			returnValue = interp.execute(expr);
+			returnValue = interp.execute(cachedExpr);
 			return returnValue;
 		}
 		catch (e:PyExpr)

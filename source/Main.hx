@@ -3,6 +3,7 @@ package;
 #if android
 import android.content.Context;
 #end
+import flixel.FlxG;
 import flixel.FlxGame;
 import flixel.FlxState;
 import flixel.graphics.FlxGraphic;
@@ -24,22 +25,25 @@ import funkin.backend.ALSoftConfig; // Just to make sure DCE doesn't remove this
 #end
 #if CRASH_HANDLER
 import flixel.util.FlxSignal.FlxTypedSignal;
-import openfl.events.UncaughtErrorEvent;
-import haxe.CallStack;
-import haxe.io.Path;
-import openfl.events.UncaughtErrorEvent;
-import openfl.Lib;
-import lime.app.Application;
-import sys.FileSystem;
-import sys.io.File;
-import flixel.FlxG;
 import flixel.util.FlxSignal;
 import funkin.utils.macro.SourceMap;
+import haxe.CallStack;
+import haxe.io.Path;
+import lime.app.Application;
+import openfl.Lib;
+import openfl.events.UncaughtErrorEvent;
+import openfl.events.UncaughtErrorEvent;
+import sys.FileSystem;
+import sys.io.File;
 #end
+#if CRASH_DEBUGGER
+// Placeholder for crash debugger UI library
+#end
+import haxe.Exception;
 
 class FunkinGame extends FlxGame
 {
-	public static var onGameCrash(default, null):FlxTypedSignal<(haxe.Exception) -> Void> = new FlxTypedSignal<(haxe.Exception) -> Void>();
+	public static var onGameCrash(default, null):FlxTypedSignal<(Exception) -> Void> = new FlxTypedSignal<(Exception) -> Void>();
 
 	/**
 	 * Used to instantiate the guts of the flixel game object once we have a valid reference to the root.
@@ -48,7 +52,7 @@ class FunkinGame extends FlxGame
 	{
 		try
 			super.create(_)
-		catch (e)
+		catch (e:Exception)
 			onCrash(e);
 	}
 
@@ -56,7 +60,7 @@ class FunkinGame extends FlxGame
 	{
 		try
 			super.onFocus(_)
-		catch (e)
+		catch (e:Exception)
 			onCrash(e);
 	}
 
@@ -64,45 +68,35 @@ class FunkinGame extends FlxGame
 	{
 		try
 			super.onFocusLost(_)
-		catch (e)
+		catch (e:Exception)
 			onCrash(e);
 	}
 
-	/**
-	 * Handles the `onEnterFrame` call and figures out how many updates and draw calls to do.
-	 */
 	override function onEnterFrame(_):Void
 	{
 		try
 			super.onEnterFrame(_)
-		catch (e)
+		catch (e:Exception)
 			onCrash(e);
 	}
 
-	/**
-	 * This function is called by `step()` and updates the actual game state.
-	 * May be called multiple times per "frame" or draw call.
-	 */
 	override function update():Void
 	{
 		try
 			super.update()
-		catch (e)
+		catch (e:Exception)
 			onCrash(e);
 	}
 
-	/**
-	 * Goes through the game state and draws all the game objects and special effects.
-	 */
 	override function draw():Void
 	{
 		try
 			super.draw()
-		catch (e)
+		catch (e:Exception)
 			onCrash(e);
 	}
 
-	private final function onCrash(e:haxe.Exception):Void
+	private final function onCrash(e:Exception):Void
 	{
 		if (onGameCrash != null)
 		{
@@ -131,6 +125,19 @@ class ErrorHandle
 		var path:String;
 		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
 		var dateNow:String = Date.now().toString();
+		var getLine = function(file:String, line:Int):String
+		{
+			var content = getFile(file);
+			if (content != null)
+			{
+				var lines = content.split("\n");
+				if (line > 0 && line <= lines.length)
+				{
+					return lines[line - 1].trim();
+				}
+			}
+			return "Could not retrieve source code line.";
+		};
 
 		CoolLog.critical("Crash detected!");
 
@@ -145,7 +152,7 @@ class ErrorHandle
 			{
 				case FilePos(s, file, line, column):
 					errMsg += file + " (line " + line + ")\n";
-					errMsg += "-> " + getFile(file).split("\n")[line-1] + "\n";
+					errMsg += "-> " + getLine(file, line) + "\n";
 					stackIndex++;
 				default:
 					errMsg += "#" + stackIndex + " " + Std.string(stackItem) + "\n";
@@ -160,9 +167,18 @@ class ErrorHandle
 		errMsg += "\n\n> New Crash Handler written by: Paopun20";
 
 		// Save crash log
+		#if CRASH_DEBUGGER
+		// uhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh, what lib I can use like imgui and easy to use in Haxe?
+
+		// For now, just save the logs and show a simple dialog, but in the future we can make a full crash debugger with stack trace navigation
 		saveLogs(path, errMsg);
 		showDialogWindow(errMsg, "Game Crash!");
 		shutdown();
+		#else
+		saveLogs(path, errMsg);
+		showDialogWindow(errMsg, "Game Crash!");
+		shutdown();
+		#end
 	}
 
 	/**
@@ -235,9 +251,9 @@ class Main extends Sprite
 		startFullscreen: false // if the game should start at fullscreen mode
 	};
 
-	public static var fpsVar:FPSCounter;
-	public static var gameInstance:Main;
-	public static var flxInstance:FunkinGame;
+	public static var fpsVar:FPSCounter; // for showing FPS on screen, if enabled in settings
+	public static var gameInstance:Main; // for mods to access the main class instance, if needed
+	public static var flxInstance:FunkinGame; // just FunkinGame instance, for mods to access it directly if needed
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 

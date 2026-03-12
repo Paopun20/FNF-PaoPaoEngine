@@ -8,8 +8,8 @@ class StructureCompatibility
 	 * Compatibility map for Psych Engine 0.6.3 and 0.7.3 - 1.0.4 -> FNF PaoPao Engine
 	 * This allows old mods to work without modification by redirecting old class paths to new ones
 	 */
-	public static final classAliasMap:Map<String, String> = [
-        // Psych 0.7.3 - 1.0.4 
+	public static final classAliasMap:StringMap<String> = [
+		// Psych 0.7.3 - 1.0.4
 		// backend
 		'backend.Conductor' => 'funkin.backend.Conductor',
 		'backend.ClientPrefs' => 'funkin.backend.ClientPrefs',
@@ -29,7 +29,7 @@ class StructureCompatibility
 		'backend.Controls' => 'funkin.backend.Controls',
 		'backend.Discord' => 'funkin.api.Discord',
 		'backend.DiscordClient' => 'funkin.api.Discord',
-
+		
 		// psychlua
 		'psychlua.LuaUtils' => 'funkin.modding.scripts.utils.LuaUtils',
 		'psychlua.CallbackHandler' => 'funkin.modding.scripts.components.CallbackHandler',
@@ -41,7 +41,6 @@ class StructureCompatibility
 		'psychlua.ShaderFunctions' => 'funkin.modding.scripts.components.ShaderFunctions',
 		'psychlua.TextFunctions' => 'funkin.modding.scripts.components.TextFunctions',
 		'psychlua.ModchartAnimateSprite' => 'funkin.modding.scripts.components.ModchartAnimateSprite',
-		
 		
 		// States
 		'states.PlayState' => 'funkin.states.PlayState',
@@ -78,7 +77,7 @@ class StructureCompatibility
 		'substates.CustomSubstate' => 'funkin.modding.scripts.components.CustomSubstate',
 		'substates.GameplayChangersSubstate' => 'funkin.options.GameplayChangersSubstate',
 		
-		// Options 
+		// Options
 		'options.OptionsState' => 'funkin.options.OptionsState',
 		'options.GameplayChangersSubstate' => 'funkin.options.GameplayChangersSubstate',
 		'options.NotesColorSubState' => 'funkin.options.NotesColorSubState',
@@ -87,7 +86,7 @@ class StructureCompatibility
 		'options.GraphicsSettingsSubState' => 'funkin.options.GraphicsSettingsSubState',
 		'options.GameplaySettingsSubState' => 'funkin.options.GameplaySettingsSubState',
 		
-		// ===== OLD Psych 0.6.3 (no namespace) =====
+		// Psych 0.6.3 (no namespace)
 		'Conductor' => 'funkin.backend.Conductor',
 		'ClientPrefs' => 'funkin.backend.ClientPrefs',
 		'Paths' => 'funkin.backend.Paths',
@@ -142,7 +141,7 @@ class StructureCompatibility
 		'GraphicsSettingsSubState' => 'funkin.options.GraphicsSettingsSubState',
 		'GameplaySettingsSubState' => 'funkin.options.GameplaySettingsSubState',
 	];
-	
+
 	public static function resolveClass(className:String):Class<Dynamic>
 	{
 		var myClass:Dynamic = Type.resolveClass(className);
@@ -150,7 +149,7 @@ class StructureCompatibility
 		{
 			var newClassName = classAliasMap.get(className);
 			myClass = Type.resolveClass(newClassName);
-			
+
 			if (myClass != null)
 			{
 				CoolLog.info('[Compatibility] Redirected "$className" to "$newClassName"');
@@ -162,29 +161,10 @@ class StructureCompatibility
 		}
 		else if (myClass == null)
 		{
-			if (!_warnedClasses.exists(className)) {
-				CoolLog.info('[Compatibility] WARNING: Class "$className" not found and no alias exists. This may break old mods.');
-				CoolLog.info('[Compatibility] If this is a common class, consider adding it to StructureCompatibility.classAliasMap');
-				_warnedClasses.set(className, true);
-			}
+			CoolLog.info('[Compatibility] WARNING: Class "$className" not found and no alias exists. This may break old mods.');
+			CoolLog.info('[Compatibility] If this is a common class, consider adding it to StructureCompatibility.classAliasMap');
 		}
-		
+
 		return myClass;
-	}
-	
-	private static var _warnedClasses:StringMap<Bool> = new StringMap<Bool>();
-	
-	public static function getWarningLog():Array<String>
-	{
-		var log:Array<String> = [];
-		for (className in _warnedClasses.keys()) {
-			log.push(className);
-		}
-		return log;
-	}
-	
-	public static function clearWarningLog():Void
-	{
-		_warnedClasses.clear();
 	}
 }

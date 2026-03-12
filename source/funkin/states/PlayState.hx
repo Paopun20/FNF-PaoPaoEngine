@@ -185,6 +185,7 @@ class PlayState extends MusicBeatState
 
 	public var healthBar:Bar;
 	public var timeBar:Bar;
+	public var timeOffset:Float = 0; // for fake time like fake end
 
 	var songPercent:Float = 0;
 
@@ -1911,18 +1912,21 @@ class PlayState extends MusicBeatState
 		else if (!paused && updateTime)
 		{
 			var curTime:Float = Math.max(0, Conductor.songPosition - ClientPrefs.data.noteOffset);
-			songPercent = (curTime / songLength);
+			var effectiveDisplayTime:Float = curTime + timeOffset;
+			var effectiveDisplayPercent:Float = (effectiveDisplayTime / songLength);
+			songPercent = FlxMath.bound(effectiveDisplayPercent, 0, 1);
+			var effectiveDisplayTime:Float = curTime + timeOffset;
 
-			var songCalc:Float = (songLength - curTime);
+			var songCalc:Float = (songLength - effectiveDisplayTime);
 			if (ClientPrefs.data.timeBarType == 'Time Elapsed')
-				songCalc = curTime;
+    			songCalc = effectiveDisplayTime;
 
-			var secondsTotal:Int = Math.floor(songCalc / 1000);
-			if (secondsTotal < 0)
-				secondsTotal = 0;
-
-			if (ClientPrefs.data.timeBarType != 'Song Name')
-				timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
+			if (ClientPrefs.data.timeBarType != 'Song Name') {
+			    var secondsTotal:Int = Math.floor(songCalc / 1000);
+			    if (secondsTotal < 0)
+					secondsTotal = 0; // Ensure non-negative time display
+			    timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
+			}
 		}
 
 		if (camZooming)
@@ -2549,6 +2553,11 @@ class PlayState extends MusicBeatState
 					FlxG.log.warn('ERROR ("Set Property" Event) - ' + e.message.substr(0, len));
 					#end
 				}
+			
+			case "Offset Timer": // V:1 Offset Amount (in milliseconds) and replace flValue1 -> timeOffset
+				if (flValue1 == null)
+					flValue1 = 0;
+				timeOffset = flValue1;
 
 			case 'Play Sound':
 				if (flValue2 == null)
