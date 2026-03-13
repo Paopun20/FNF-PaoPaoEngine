@@ -2,7 +2,6 @@ package funkin.states;
 
 import lime.app.Future;
 #if (sys || MULTITHREADED_LOADING)
-import sys.thread.ElasticThreadPool;
 import sys.thread.Mutex;
 #end
 import haxe.Json;
@@ -17,6 +16,7 @@ import funkin.backend.Song;
 import funkin.backend.StageData;
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;
+import funkin.utils.ThreadUtil;
 #if HSCRIPT_ALLOWED
 import funkin.modding.scripts.HScript;
 #end
@@ -24,112 +24,6 @@ import funkin.modding.scripts.HScript;
 #if (js && nodejs)
 import js.node.Os;
 #end
-
-#if cpp
-@:headerCode('
-#include <iostream>
-#include <thread>
-')
-#end
-class HelperLSTool
-{
-	#if cpp
-	@:functionCode('
-		unsigned int count = std::thread::hardware_concurrency();
-		return count > 0 ? count : defVar;
-	')
-	@:noCompletion
-	public static function getCPUThreadsCount(defVar: Int):Int
-	{
-		return defVar;
-	}
-	
-	#elseif hl
-	@:hlNative("std", "sys_cpu_count")
-	public static function getCPUThreadsCount(defVar: Int):Int
-	{
-		return defVar;
-	}
-	
-	#elseif (js && nodejs)
-	public static function getCPUThreadsCount(defVar: Int):Int
-	{
-		try
-		{
-			var cpus = Os.cpus();
-			return cpus != null ? cpus.length : defVar;
-		}
-		catch (e:Dynamic)
-		{
-			#if debug
-			trace('Failed to detect CPU count in Node.js: $e');
-			#end
-			return defVar;
-		}
-	}
-	
-	#elseif html5
-	public static function getCPUThreadsCount(defVar: Int):Int
-	{
-		try
-		{
-			var hardwareConcurrency:Null<Int> = untyped __js__("navigator.hardwareConcurrency");
-			
-			if (hardwareConcurrency != null && hardwareConcurrency >= 1)
-			{
-				return hardwareConcurrency;
-			}
-		}
-		catch (e:Dynamic)
-		{
-			#if debug
-			trace('Could not detect CPU cores in browser: $e');
-			#end
-		}
-		
-		return defVar;
-	}
-	
-	#elseif java
-	public static function getCPUThreadsCount(defVar: Int):Int
-	{
-		try
-		{
-			var runtime = java.lang.Runtime.getRuntime();
-			return runtime.availableProcessors();
-		}
-		catch (e:Dynamic)
-		{
-			#if debug
-			trace('Failed to detect CPU count in Java: $e');
-			#end
-			return defVar;
-		}
-	}
-	
-	#elseif cs
-	public static function getCPUThreadsCount(defVar: Int):Int
-	{
-		try
-		{
-			return cs.system.Environment.ProcessorCount;
-		}
-		catch (e:Dynamic)
-		{
-			#if debug
-			trace('Failed to detect CPU count in C#: $e');
-			#end
-			return defVar;
-		}
-	}
-	
-	#else
-	public static function getCPUThreadsCount(defVar: Int):Int
-	{
-		return defVar;
-	}
-	#end
-}
 
 class LoadingState extends EditableState
 {
@@ -142,7 +36,6 @@ class LoadingState extends EditableState
 	#if (sys || MULTITHREADED_LOADING)
 	static var mutex:Mutex;
 	static var arrayMutex:Mutex;
-	static var threadPool:ElasticThreadPool = null;
 	#end
 
 	inline static private function safeIncrementLoaded(?assetName:String):Void
@@ -414,9 +307,6 @@ class LoadingState extends EditableState
 
 		FlxTransitionableState.skipNextTransIn = true;
 		#if (sys || MULTITHREADED_LOADING)
-		if (threadPool != null)
-			threadPool.shutdown();
-		threadPool = null;
 		mutex = null;
 		arrayMutex = null;
 		#end
@@ -491,7 +381,6 @@ class LoadingState extends EditableState
 		#end
 
 		LoadingState.isIntrusive = intrusive;
-		_startPool();
 		loadNextDirectory();
 
 		if (intrusive)
@@ -529,7 +418,6 @@ class LoadingState extends EditableState
 
 	public static function prepare(images:Array<String> = null, sounds:Array<String> = null, music:Array<String> = null)
 	{
-		// Initialize array mutex if needed
 		#if (sys || MULTITHREADED_LOADING)
 		if (arrayMutex == null)
 			arrayMutex = new Mutex();
@@ -549,19 +437,6 @@ class LoadingState extends EditableState
 
 	static var initialThreadCompleted:Bool = true;
 	static var dontPreloadDefaultVoices:Bool = false;
-
-	static function _startPool()
-	{
-		#if (sys || MULTITHREADED_LOADING)
-		#if MULTITHREADED_LOADING
-		// Due to the Main thread and Discord thread, we decrease it by 2.
-		var threadCount:Int = HelperLSTool.getCPUThreadsCount(8); // 8 - 16 in common use
-		#else
-		var threadCount:Int = 1;
-		#end
-		threadPool = new ElasticThreadPool(threadCount, 60);
-		#end
-	}
 
 	public static function prepareToSong()
 	{
@@ -592,8 +467,6 @@ class LoadingState extends EditableState
 			#end
 			return;
 		}
-
-		_startPool();
 
 		// Initialize mutexes before any threading
 		#if (sys || MULTITHREADED_LOADING)
@@ -832,7 +705,7 @@ class LoadingState extends EditableState
 					#if (sys || MULTITHREADED_LOADING)
 					threadMutex.release();
 
-					threadPool.run(() ->
+					ThreadUtil.execAsync(() ->
 					{
 						try
 						{
@@ -865,7 +738,7 @@ class LoadingState extends EditableState
 					#if (sys || MULTITHREADED_LOADING)
 					threadMutex.release();
 
-					threadPool.run(() ->
+					ThreadUtil.execAsync(() ->
 					{
 						try
 						{
@@ -984,7 +857,6 @@ class LoadingState extends EditableState
 	{
 		#if (sys || MULTITHREADED_LOADING)
 		mutex = new Mutex();
-		// Set loadMax in a thread-safe way
 		mutex.acquire();
 		#end
 		loadMax = imagesToPrepare.length + soundsToPrepare.length + musicToPrepare.length + songsToPrepare.length;
@@ -1000,7 +872,6 @@ class LoadingState extends EditableState
 
 	static function _threadFunc()
 	{
-		_startPool();
 		for (sound in soundsToPrepare)
 			initThread(() -> preloadSound('sounds/$sound'), 'sound $sound');
 		for (music in musicToPrepare)
@@ -1020,7 +891,7 @@ class LoadingState extends EditableState
 		#end
 
 		#if (sys || MULTITHREADED_LOADING)
-		threadPool.run(() ->
+		ThreadUtil.execAsync(() ->
 		{
 			#if debug
 			var threadStart = Sys.time();

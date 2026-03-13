@@ -30,20 +30,19 @@ import funkin.states.stages.*;
 import funkin.states.stages.objects.*;
 import funkin.substates.GameOverSubstate;
 import funkin.substates.PauseSubState;
+import flixel.tweens.FlxTween;
 #if !flash
 import openfl.filters.ShaderFilter;
 #end
+import funkin.modding.scripts.utils.LuaUtils;
 #if LUA_ALLOWED
 import funkin.modding.scripts.*;
-import funkin.modding.scripts.utils.LuaUtils;
 #end
 #if HSCRIPT_ALLOWED
 import funkin.modding.scripts.HScript;
-import funkin.modding.scripts.utils.LuaUtils;
 #end
 #if PYTHON_ALLOWED
 import funkin.modding.scripts.Python;
-import funkin.modding.scripts.utils.LuaUtils;
 #end
 
 /**
@@ -111,6 +110,7 @@ class PlayState extends MusicBeatState
 	public var GF_Y:Float = 130;
 
 	public var songSpeedTween:FlxTween;
+	public var timeoffsetTween:FlxTween;
 	public var songSpeed(default, set):Float = 1;
 	public var songSpeedType:String = "multiplicative";
 	public var noteKillOffset:Float = 350;
@@ -1914,18 +1914,19 @@ class PlayState extends MusicBeatState
 			var curTime:Float = Math.max(0, Conductor.songPosition - ClientPrefs.data.noteOffset);
 			var effectiveDisplayTime:Float = curTime + timeOffset;
 			var effectiveDisplayPercent:Float = (effectiveDisplayTime / songLength);
+
 			songPercent = FlxMath.bound(effectiveDisplayPercent, 0, 1);
-			var effectiveDisplayTime:Float = curTime + timeOffset;
 
 			var songCalc:Float = (songLength - effectiveDisplayTime);
 			if (ClientPrefs.data.timeBarType == 'Time Elapsed')
-    			songCalc = effectiveDisplayTime;
+				songCalc = effectiveDisplayTime;
 
-			if (ClientPrefs.data.timeBarType != 'Song Name') {
-			    var secondsTotal:Int = Math.floor(songCalc / 1000);
-			    if (secondsTotal < 0)
+			if (ClientPrefs.data.timeBarType != 'Song Name')
+			{
+				var secondsTotal:Float = songCalc / 1000;
+				if (secondsTotal < 0)
 					secondsTotal = 0; // Ensure non-negative time display
-			    timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
+				timeTxt.text = FlxStringUtil.formatTime(secondsTotal, true);
 			}
 		}
 
@@ -2553,11 +2554,40 @@ class PlayState extends MusicBeatState
 					FlxG.log.warn('ERROR ("Set Property" Event) - ' + e.message.substr(0, len));
 					#end
 				}
-			
-			case "Offset Timer": // V:1 Offset Amount (in milliseconds) and replace flValue1 -> timeOffset
+
+			case "Offset Timer":
 				if (flValue1 == null)
 					flValue1 = 0;
-				timeOffset = flValue1;
+				if (value2 == null)
+					value2 = "0";
+
+				var arg = value2.replace(" ", "").split(',');
+				var v21:Float = (arg[0] != null) ? Std.parseFloat(arg[0]) : -1.0; // -1.0 fallback to NonTween System
+				var v22:String = (arg[1] != null) ? arg[1] : "linear";
+				var tweenEase = LuaUtils.getTweenEaseByString(v22);
+
+				if (timeoffsetTween != null)
+				{
+					timeoffsetTween.cancel();
+					timeoffsetTween = null;
+				}
+				if (v21 <= 0.0)
+				{
+					timeoffsetTween = FlxTween.num(timeOffset, flValue1, (v21 / 1000) / playbackRate, {
+						ease: tweenEase,
+						onComplete: function(self:FlxTween)
+						{
+							timeoffsetTween = null;
+						}
+					}, function(value:Float)
+					{
+						timeOffset = value;
+					});
+				}
+				else
+				{
+					timeOffset = flValue1;
+				}
 
 			case 'Play Sound':
 				if (flValue2 == null)
@@ -2708,6 +2738,12 @@ class PlayState extends MusicBeatState
 		deathCounter = 0;
 		seenCutscene = false;
 
+		if (timeoffsetTween != null)
+		{
+			timeoffsetTween.cancel();
+			timeoffsetTween = null;
+		}
+
 		#if ACHIEVEMENTS_ALLOWED
 		var weekNoMiss:String = WeekData.getWeekFileName() + '_nomiss';
 		checkForAchievement([
@@ -2792,15 +2828,22 @@ class PlayState extends MusicBeatState
 			}
 			else
 			{
-				CoolLog.info('WENT BACK TO FREEPLAY??');
-				// trace('WENT BACK TO FREEPLAY??');
-				Mods.loadTopMod();
-				#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
+				if (chartingMode)
+				{
+					CoolLog.info('WENT BACK TO CHART EDITOR??');
+					openChartEditor();
+				}
+				else
+				{
+					CoolLog.info('WENT BACK TO FREEPLAY??');
+					Mods.loadTopMod();
+					#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 
-				canResync = false;
-				MusicBeatState.switchState(new FreeplayState());
-				FlxG.sound.playMusic(Paths.music('freakyMenu'));
-				changedDifficulty = false;
+					canResync = false;
+					MusicBeatState.switchState(new FreeplayState());
+					FlxG.sound.playMusic(Paths.music('freakyMenu'));
+					changedDifficulty = false;
+				}
 			}
 			transitioning = true;
 		}
@@ -3798,7 +3841,7 @@ class PlayState extends MusicBeatState
 	{
 		try
 		{
-		    var newScript:FunkinLua = new FunkinLua(file);
+			var newScript:FunkinLua = new FunkinLua(file);
 			CoolLog.info('initialized lua interp successfully: $file');
 			luaArray.push(newScript);
 		}

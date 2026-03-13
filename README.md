@@ -5,7 +5,7 @@ This engine is currently under heavy development, so some features may not funct
 
 PaoPoa Engine is a cross-platform [Friday Night Funkin'](https://github.com/FunkinCrew/Funkin) Engine aimed at freedom of modding without source code, optimization, and lightweight, cross-platform.
 
-## Features/Changes
+## Features/Changes from the frok until 0.1.0 initial releases (maybe)
 
 - Python [**Beta**] - Introduction of Python as a mod scripting language
   > interpreted language that offers greater readability and ease of learning compared to Lua. It also provides enhanced power, flexibility, and it lightweight too.\
@@ -13,9 +13,11 @@ PaoPoa Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
   > For assistance, please submit a pull request [here](https://github.com/Paopun20/Hython).\
   > Note: this Hython is a Python interpreter written entirely in **Haxe** and you can use it for your own projects too, it is also open source.
 - Hscript (Improved and QOL)
-  > Optimize by Cache AST.
   > Can use without `game.`
   > Use Own's Codename's HScript fork library, only add QOL.
+- Optimize by Cache AST (HScript/Python only)
+  > Cache AST (Abstract Syntax Tree)
+  > Reuse Cache AST
 - Ndll Support (HScript/Python only)
   > It codename feature.
 - Fixed Psych Engine Bugs (some critical)
@@ -30,9 +32,12 @@ PaoPoa Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
 - Organize files and folders to improve readability and maintenance. Ensure compatibility with older layouts when importing to new systems, as others may not be compatible; all are indexed by StructureCompatibility.hx.
 - Optimize Engine performance and memory usage without breaking everything/mods.
 - New Free-play UI (WIP)
-- New Loading Screen UI (WIP)
+- Improved Loading Screen (WIP)
 - All states/substates is editable (ex: scripts/stages/[state name].hx, scripts/substates/[state name].hx)
 - Improve modding experience and compatibility.
+- New event:
+  - Offset Timer (useful for fake end)
+  > Adjust the time **displayed in the PlayState Time UI only**, without affecting `Conductor.songPosition`.
 
 ## Origin
 

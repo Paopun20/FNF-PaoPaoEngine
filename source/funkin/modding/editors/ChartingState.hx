@@ -115,8 +115,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			'Play Sound',
 			"Value 1: Sound file name\nValue 2: Volume (Default: 1), ranges from 0 to 1"
 		],
-		['Offset Timer',
-		"Value 1: Offset Amount (in milliseconds) [and replace old offset one]"],
+		[
+			'Offset Timer',
+			"Value 1: Offset Amount (in milliseconds)\nValue 2: Time it takes to change fully in seconds [Duration,Tween Ease] (Default: 0,linear)"
+		],
 	];
 
 	public static var keysArray:Array<FlxKey> = [ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT]; // Used for Vortex Editor
@@ -126,7 +128,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	public static var GRID_SIZE = 40;
 
 	final BACKUP_EXT = '.bkp';
-	
+
 	public var quantizations:Array<Int> = [4, 8, 12, 16, 20, 24, 32, 48, 64, 96, 192];
 	public var quantColors:Array<FlxColor> = [
 		0xFFDF0000,

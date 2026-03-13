@@ -10,6 +10,7 @@ import flixel.graphics.FlxGraphic;
 import funkin.backend.Highscore;
 import funkin.frontend.huds.FPSCounter;
 import funkin.states.TitleState;
+import funkin.utils.ThreadUtil;
 import haxe.io.Path;
 import lime.app.Application;
 import openfl.Assets;
@@ -41,7 +42,113 @@ import sys.io.File;
 #end
 import haxe.Exception;
 
-class FunkinGame extends FlxGame
+#if cpp
+@:headerCode('
+#include <iostream>
+#include <thread>
+')
+#end
+private final class HelperLSTool
+{
+	#if cpp
+	@:functionCode('
+		unsigned int count = std::thread::hardware_concurrency();
+		return count > 0 ? count : defVar;
+	')
+	@:noCompletion
+	public static function getCPUThreadsCount(defVar: Int):Int
+	{
+		return defVar;
+	}
+	
+	#elseif hl
+	@:hlNative("std", "sys_cpu_count")
+	public static function getCPUThreadsCount(defVar: Int):Int
+	{
+		return defVar;
+	}
+	
+	#elseif (js && nodejs)
+	public static function getCPUThreadsCount(defVar: Int):Int
+	{
+		try
+		{
+			var cpus = Os.cpus();
+			return cpus != null ? cpus.length : defVar;
+		}
+		catch (e:Dynamic)
+		{
+			#if debug
+			trace('Failed to detect CPU count in Node.js: $e');
+			#end
+			return defVar;
+		}
+	}
+	
+	#elseif html5
+	public static function getCPUThreadsCount(defVar: Int):Int
+	{
+		try
+		{
+			var hardwareConcurrency:Null<Int> = untyped __js__("navigator.hardwareConcurrency");
+			
+			if (hardwareConcurrency != null && hardwareConcurrency >= 1)
+			{
+				return hardwareConcurrency;
+			}
+		}
+		catch (e:Dynamic)
+		{
+			#if debug
+			trace('Could not detect CPU cores in browser: $e');
+			#end
+		}
+		
+		return defVar;
+	}
+	
+	#elseif java
+	public static function getCPUThreadsCount(defVar: Int):Int
+	{
+		try
+		{
+			var runtime = java.lang.Runtime.getRuntime();
+			return runtime.availableProcessors();
+		}
+		catch (e:Dynamic)
+		{
+			#if debug
+			trace('Failed to detect CPU count in Java: $e');
+			#end
+			return defVar;
+		}
+	}
+	
+	#elseif cs
+	public static function getCPUThreadsCount(defVar: Int):Int
+	{
+		try
+		{
+			return cs.system.Environment.ProcessorCount;
+		}
+		catch (e:Dynamic)
+		{
+			#if debug
+			trace('Failed to detect CPU count in C#: $e');
+			#end
+			return defVar;
+		}
+	}
+	
+	#else
+	public static function getCPUThreadsCount(defVar: Int):Int
+	{
+		return defVar;
+	}
+	#end
+}
+
+private final class FunkinGame extends FlxGame
 {
 	public static var onGameCrash(default, null):FlxTypedSignal<(Exception) -> Void> = new FlxTypedSignal<(Exception) -> Void>();
 
@@ -109,14 +216,16 @@ class FunkinGame extends FlxGame
  * Error and crash handling system for PaoPaoEngine
  * Handles uncaught errors, critical errors, and provides logging functionality
  */
-class ErrorHandle
+final class ErrorHandle
 {
 	#if CRASH_HANDLER
 	private static var _sourceMap:Map<String, String> = SourceMap.build();
 
 	public static function init():Void
 	{
-		FunkinGame.onGameCrash.add(onCrash);
+		FunkinGame.onGameCrash.add(onCrash);		
+		var detected:Int = HelperLSTool.getCPUThreadsCount(8);
+		ThreadUtil.maxThreads = Std.int(Math.max(1, detected - 2));
 	}
 
 	private static function onCrash(e:haxe.Exception):Void

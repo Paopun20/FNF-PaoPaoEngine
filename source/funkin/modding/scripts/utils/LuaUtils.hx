@@ -449,17 +449,41 @@ class LuaUtils
 		return 'windows';
 		#end
 		#elseif linux
-		return 'linux';
+		return "linux";
 		#elseif mac
-		return 'mac';
-		#elseif html5
-		return 'browser';
+		return "mac";
 		#elseif android
-		return 'android';
+		return "android";
+		#elseif ios
+		return "ios";
+		#elseif tvos
+		return "tvos";
+		#elseif html5
+		return "browser";
+		#elseif flash
+		return "flash";
+		#elseif nodejs
+		return "nodejs";
+		#elseif hxcpp
+		return "cpp";
+		#elseif cs
+		return "csharp";
+		#elseif java
+		return "java";
+		#elseif python
+		return "python";
+		#elseif lua
+		return "lua";
+		#elseif hl
+		return "hashlink";
+		#elseif neko
+		return "neko";
+		#elseif php
+		return "php";
 		#elseif switch
-		return 'switch';
+		return "switch";
 		#else
-		return 'unknown';
+		return "unknown";
 		#end
 	}
 

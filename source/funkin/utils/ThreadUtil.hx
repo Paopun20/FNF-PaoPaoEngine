@@ -57,7 +57,7 @@ final class ThreadUtil
 		return null;
 	}
 
-	public static var maxThreads:Int = 4;
+	public static var maxThreads:Int = 16;
 
 	static var __threads:Array<Thread> = [];
 	static var __pendingExecs:Deque<Void->Void> = new Deque();
@@ -103,7 +103,7 @@ final class ThreadUtil
 				__threads.push(thread);
 			}
 			catch (e)
-				Logs.warn(e.details());
+				CoolLog.warning(e.details());
 			__threadMutex.release();
 		}
 		#else
