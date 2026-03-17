@@ -1,7 +1,6 @@
 package funkin.modding.editors;
 
 import flixel.graphics.FlxGraphic;
-import flixel.system.debug.interaction.tools.Pointer.GraphicCursorCross;
 import flixel.util.FlxDestroyUtil;
 import openfl.net.FileReference;
 import openfl.events.Event;
@@ -12,6 +11,21 @@ import funkin.objects.HealthIcon;
 import funkin.objects.Bar;
 import funkin.modding.editors.content.Prompt;
 import funkin.modding.editors.content.PsychJsonPrinter;
+import flixel.addons.display.FlxBackdrop;
+import flixel.addons.display.FlxGridOverlay;
+import flixel.addons.display.shapes.FlxShapeGrid;
+import flixel.util.FlxColor;
+import openfl.display.LineScaleMode;
+import flixel.util.FlxSpriteUtil;
+
+#if (FLX_DEBUG || flixel < version("5.7.0"))
+typedef PointerGraphic = flixel.system.debug.interaction.tools.Pointer.GraphicCursorCross;
+#else
+@:bitmap("assets/images/debugger/cursorCross.png")
+class PointerGraphic extends openfl.display.BitmapData
+{
+}
+#end
 
 class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
 {
@@ -25,6 +39,9 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 	var silhouettes:FlxSpriteGroup;
 	var dadPosition = FlxPoint.weak();
 	var bfPosition = FlxPoint.weak();
+	var gridW:Float = 0;
+	var gridH:Float = 0;
+	var grids:Array<FlxShapeGrid> = [];
 
 	var helpBg:FlxSprite;
 	var helpTexts:FlxSpriteGroup;
@@ -60,6 +77,39 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			this._char = Character.DEFAULT_CHARACTER;
 
 		super();
+	}
+
+	final assetFolder = 'week1'; // load from assets/week1/
+
+	inline function loadBG()
+	{
+		var lastLoaded = Paths.currentLevel;
+		Paths.currentLevel = assetFolder;
+
+		camEditor.bgColor = 0xFF666666;
+
+		/*
+			---------
+			| | | | |
+			---------
+			| | | | |
+			---------
+		 */
+
+		for (i in 0...25)
+		{
+			var grid = new FlxShapeGrid(0, 0, 40, 40, 32, 18, {thickness: 2, color: FlxColor.WHITE}, FlxColor.TRANSPARENT);
+			grid.scrollFactor.set(1, 1);
+			add(grid);
+			grids.push(grid);
+		}
+		gridW = 40 * 32;
+		gridH = 40 * 18;
+
+		dadPosition.set(100, 100);
+		bfPosition.set(770, 100);
+
+		Paths.currentLevel = lastLoaded;
 	}
 
 	override function create()
@@ -106,8 +156,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 		addCharacter();
 
-		cameraFollowPointer = new FlxSprite().loadGraphic(FlxGraphic.fromClass(GraphicCursorCross));
-		cameraFollowPointer.setGraphicSize(40, 40);
+		cameraFollowPointer = new FlxSprite(FlxGraphic.fromClass(PointerGraphic));
 		cameraFollowPointer.updateHitbox();
 
 		healthBar = new Bar(30, FlxG.height - 75);
@@ -931,20 +980,33 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		if (FlxG.keys.pressed.I)
 			FlxG.camera.scroll.y -= elapsed * 500 * shiftMult * ctrlMult;
 
+		var baseX = Math.floor(FlxG.camera.scroll.x / gridW) * gridW;
+		var baseY = Math.floor(FlxG.camera.scroll.y / gridH) * gridH;
+
+		var i = 0;
+		for (ix in -2...3)
+		{
+			for (iy in -2...3)
+			{
+				grids[i].setPosition(baseX + ix * gridW, baseY + iy * gridH);
+				i++;
+			}
+		}
+
 		var lastZoom = FlxG.camera.zoom;
 		if (FlxG.keys.justPressed.R && !FlxG.keys.pressed.CONTROL)
 			FlxG.camera.zoom = 1;
-		else if (FlxG.keys.pressed.E && FlxG.camera.zoom < 3)
+		else if (FlxG.keys.pressed.E && FlxG.camera.zoom < 9)
 		{
 			FlxG.camera.zoom += elapsed * FlxG.camera.zoom * shiftMult * ctrlMult;
-			if (FlxG.camera.zoom > 3)
-				FlxG.camera.zoom = 3;
+			if (FlxG.camera.zoom > 9)
+				FlxG.camera.zoom = 9;
 		}
-		else if (FlxG.keys.pressed.Q && FlxG.camera.zoom > 0.1)
+		else if (FlxG.keys.pressed.Q && FlxG.camera.zoom > 0.4)
 		{
 			FlxG.camera.zoom -= elapsed * FlxG.camera.zoom * shiftMult * ctrlMult;
-			if (FlxG.camera.zoom < 0.1)
-				FlxG.camera.zoom = 0.1;
+			if (FlxG.camera.zoom < 0.4)
+				FlxG.camera.zoom = 0.4;
 		}
 
 		if (lastZoom != FlxG.camera.zoom)
@@ -1138,35 +1200,6 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			}
 			return;
 		}
-	}
-
-	final assetFolder = 'week1'; // load from assets/week1/
-
-	inline function loadBG()
-	{
-		var lastLoaded = Paths.currentLevel;
-		Paths.currentLevel = assetFolder;
-
-		/////////////
-		// bg data //
-		/////////////
-		#if !BASE_GAME_FILES
-		camEditor.bgColor = 0xFF666666;
-		#else
-		var bg:BGSprite = new BGSprite('stageback', -600, -200, 0.9, 0.9);
-		add(bg);
-
-		var stageFront:BGSprite = new BGSprite('stagefront', -650, 600, 0.9, 0.9);
-		stageFront.setGraphicSize(Std.int(stageFront.width * 1.1));
-		stageFront.updateHitbox();
-		add(stageFront);
-		#end
-
-		dadPosition.set(100, 100);
-		bfPosition.set(770, 100);
-		/////////////
-
-		Paths.currentLevel = lastLoaded;
 	}
 
 	inline function updatePointerPos(?snap:Bool = true)

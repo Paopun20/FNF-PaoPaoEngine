@@ -41,113 +41,12 @@ import sys.io.File;
 // Placeholder for crash debugger UI library
 #end
 import haxe.Exception;
+import haxe.ds.StringMap;
+import funkin.utils.tools.ThreadTool;
 
-#if cpp
-@:headerCode('
-#include <iostream>
-#include <thread>
-')
-#end
-private final class HelperLSTool
-{
-	#if cpp
-	@:functionCode('
-		unsigned int count = std::thread::hardware_concurrency();
-		return count > 0 ? count : defVar;
-	')
-	@:noCompletion
-	public static function getCPUThreadsCount(defVar: Int):Int
-	{
-		return defVar;
-	}
-	
-	#elseif hl
-	@:hlNative("std", "sys_cpu_count")
-	public static function getCPUThreadsCount(defVar: Int):Int
-	{
-		return defVar;
-	}
-	
-	#elseif (js && nodejs)
-	public static function getCPUThreadsCount(defVar: Int):Int
-	{
-		try
-		{
-			var cpus = Os.cpus();
-			return cpus != null ? cpus.length : defVar;
-		}
-		catch (e:Dynamic)
-		{
-			#if debug
-			trace('Failed to detect CPU count in Node.js: $e');
-			#end
-			return defVar;
-		}
-	}
-	
-	#elseif html5
-	public static function getCPUThreadsCount(defVar: Int):Int
-	{
-		try
-		{
-			var hardwareConcurrency:Null<Int> = untyped __js__("navigator.hardwareConcurrency");
-			
-			if (hardwareConcurrency != null && hardwareConcurrency >= 1)
-			{
-				return hardwareConcurrency;
-			}
-		}
-		catch (e:Dynamic)
-		{
-			#if debug
-			trace('Could not detect CPU cores in browser: $e');
-			#end
-		}
-		
-		return defVar;
-	}
-	
-	#elseif java
-	public static function getCPUThreadsCount(defVar: Int):Int
-	{
-		try
-		{
-			var runtime = java.lang.Runtime.getRuntime();
-			return runtime.availableProcessors();
-		}
-		catch (e:Dynamic)
-		{
-			#if debug
-			trace('Failed to detect CPU count in Java: $e');
-			#end
-			return defVar;
-		}
-	}
-	
-	#elseif cs
-	public static function getCPUThreadsCount(defVar: Int):Int
-	{
-		try
-		{
-			return cs.system.Environment.ProcessorCount;
-		}
-		catch (e:Dynamic)
-		{
-			#if debug
-			trace('Failed to detect CPU count in C#: $e');
-			#end
-			return defVar;
-		}
-	}
-	
-	#else
-	public static function getCPUThreadsCount(defVar: Int):Int
-	{
-		return defVar;
-	}
-	#end
-}
-
+/**
+ * Just a normal one, with error handling and stuff. You can ignore this, your code should go in your states.
+ */
 private final class FunkinGame extends FlxGame
 {
 	public static var onGameCrash(default, null):FlxTypedSignal<(Exception) -> Void> = new FlxTypedSignal<(Exception) -> Void>();
@@ -206,9 +105,7 @@ private final class FunkinGame extends FlxGame
 	private final function onCrash(e:Exception):Void
 	{
 		if (onGameCrash != null)
-		{
 			onGameCrash.dispatch(e);
-		}
 	}
 }
 
@@ -219,16 +116,14 @@ private final class FunkinGame extends FlxGame
 final class ErrorHandle
 {
 	#if CRASH_HANDLER
-	private static var _sourceMap:Map<String, String> = SourceMap.build();
+	private static var _sourceMap:StringMap<String> = SourceMap.build();
 
 	public static function init():Void
 	{
-		FunkinGame.onGameCrash.add(onCrash);		
-		var detected:Int = HelperLSTool.getCPUThreadsCount(8);
-		ThreadUtil.maxThreads = Std.int(Math.max(1, detected - 2));
+		FunkinGame.onGameCrash.add(onCrash);
 	}
 
-	private static function onCrash(e:haxe.Exception):Void
+	private static function onCrash(e:Exception):Void
 	{
 		var errMsg:String = "";
 		var path:String;
@@ -271,9 +166,9 @@ final class ErrorHandle
 
 		errMsg += "\nUncaught Error: " + e.toString();
 		#if officialBuild
-		errMsg += "\nPlease report this error to the GitHub page: https://github.com/Paopun20/FNF-PaoPaoEngine";
+		// errMsg += "\nPlease report this error to the GitHub page: https://github.com/Paopun20/FNF-PaoPaoEngine";
 		#end
-		errMsg += "\n\n> New Crash Handler written by: Paopun20";
+		errMsg += "\n\n> Cool Crash Handler written by: PaoPaoDev";
 
 		// Save crash log
 		#if CRASH_DEBUGGER
@@ -368,6 +263,9 @@ class Main extends Sprite
 
 	public static function main():Void
 	{
+		ThreadTool.defaultThreadCount = 8;
+		ThreadUtil.maxThreads = Std.int(Math.max(1, ThreadTool.getCPUThreadsCount()));
+
 		Lib.current.addChild(new Main());
 		funkin.plugins.ForceCrashPlugin.initialize();
 	}
@@ -418,13 +316,11 @@ class Main extends Sprite
 		#end
 
 		#if (linux || mac) // fix the app icon not showing up on the Linux Panel / Mac Dock
-		var icon = Image.fromFile("icon.png");
-		Lib.current.stage.window.setIcon(icon);
+		Lib.current.stage.window.setIcon(mage.fromFile("icon.png"));
 		#end
 
 		#if html5
-		FlxG.autoPause = false;
-		FlxG.mouse.visible = false;
+		FlxG.mouse.visible = FlxG.autoPause = false;
 		#end
 
 		FlxG.fixedTimestep = false;

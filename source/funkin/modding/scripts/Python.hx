@@ -276,7 +276,7 @@ class Python implements IPythonInterface implements IFlxDestroyable
 		set('FlxTimer', flixel.util.FlxTimer);
 		set('FlxTween', flixel.tweens.FlxTween);
 		set('FlxEase', flixel.tweens.FlxEase);
-		set('FlxSound', flixel.system.FlxSound);
+		set('FlxSound', flixel.sound.FlxSound);
 
 		// Game Classes
 		set('Countdown', funkin.backend.BaseStage.Countdown);

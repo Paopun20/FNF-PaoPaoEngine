@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <module>
 	<components>
+		<class package="haxe" loadAll="true" />
 		<class package="flixel" loadAll="true" />
+		<class package="flixel.addons" loadAll="true" />
 	</components>
 </module>

@@ -115,7 +115,6 @@
 	<set name="BUILD_DIR" value="export/release" unless="debug" />
 	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
 
-	<classpath name="source" />
 	<source name="source" />
 
 	<!-- __________________________ Game Assets & Etc. __________________________ -->
@@ -193,8 +192,11 @@
 
 	<!-- _______________________________ Libraries ______________________________ -->
 
-	<haxelib name="flixel" version="5.9.0" />
-	<haxelib name="flixel-addons" version="3.3.0" />
+	<haxelib name="flixel" version="6.1.2" />
+	<haxelib name="flixel-addons" version="4.0.1" />
+	<haxelib name="flixel-waveform"/>
+	<haxelib name="random"/>
+
 	<haxelib name="tjson" version="1.4.0" />
 	<haxelib name="tink_core" version="2.1.1" />
 	<haxelib name="hxWindowColorMode" if="windows desktop" />
@@ -267,8 +269,6 @@
 	    <haxedef name="HXCPP_GC_GENERATIONAL" />
 	    <haxedef name="HXCPP_CPP_GC_MARK_MOVE" />
 	    <haxedef name="HXCPP_CPP11" />
-
-	    <haxedef name="annotate-source" />
 	    <haxedef name="analyzer-optimize" />
 	</section>
 

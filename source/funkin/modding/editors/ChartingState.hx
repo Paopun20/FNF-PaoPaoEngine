@@ -14,6 +14,7 @@ import flash.geom.Rectangle;
 import haxe.Json;
 import haxe.Exception;
 import haxe.io.Bytes;
+import haxe.ds.Either;
 import funkin.modding.editors.content.MetaNote;
 import funkin.modding.editors.content.VSlice;
 import funkin.modding.editors.content.Prompt;
@@ -5094,6 +5095,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	{
 		persistentUpdate = false;
 		FlxG.mouse.visible = false;
+		PlayState.chartingMode = true;
 		chartEditorSave.flush();
 
 		setSongPlaying(false);
@@ -5444,7 +5446,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		wavData[1][0].resize(0);
 		wavData[1][1].resize(0);
 
-		var sound:FlxSound = switch (waveformTarget)
+		var sound = switch (waveformTarget)
 		{
 			case INST:
 				FlxG.sound.music;

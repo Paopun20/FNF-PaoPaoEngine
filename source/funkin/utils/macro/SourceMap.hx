@@ -1,15 +1,19 @@
 package funkin.utils.macro;
 
-import haxe.macro.Context;
-import haxe.macro.Expr;
+import haxe.ds.StringMap;
 
 #if macro
+import haxe.macro.Context;
+import haxe.macro.Expr;
 using StringTools;
 #end
 
-class SourceMap
+/*
+Simple macro to build a source map of all .hx files in the project at compile time, based on the paths defined in Project.xml. This allows us to include source code in error logs without needing to read files at runtime, which is especially useful for platforms with limited file access or for packaging everything into a single binary.
+ */
+final class SourceMap
 {
-	macro public static function build():ExprOf<Map<String, String>>
+	macro public static function build():ExprOf<StringMap<String>>
 	{
 		var setExprs:Array<Expr> = [];
 
@@ -21,7 +25,7 @@ class SourceMap
 
 		return macro
 		{
-			var __sourceMap = new Map<String, String>();
+			var __sourceMap = new StringMap<String>();
 			$b{setExprs};
 			__sourceMap;
 		};
@@ -30,6 +34,13 @@ class SourceMap
 	#if macro
 	// MSVC limits string literals to ~16KB, so I chunk large files
 	static final CHUNK_SIZE = 8000;
+	
+	static function resolvePathAttr(node:Xml):Null<String>
+	{
+		var path = node.get("path");
+		if (path == null || path == "") path = node.get("name");
+		return (path != null && path != "") ? sys.FileSystem.absolutePath(path) : null;
+	}
 
 	static function getSourcePaths():Array<String>
 	{
@@ -65,15 +76,20 @@ class SourceMap
 						var libPath = resolveHaxelibPath(name, version);
 						if (libPath != null)
 							paths.push(libPath);
+						else
+							Context.warning('SourceMap: Could not resolve haxelib $name:$version', Context.currentPos());
 					}
 				
-				case "source":
+				case "source" | "classpath":
 					// <source path="source"/>
-					var path = node.get("path");
+					var path = resolvePathAttr(node);
 					if (path != null && path != "")
 						paths.push(sys.FileSystem.absolutePath(path));
-				
+					else
+						Context.warning('SourceMap: Invalid <source> path in Project.xml', Context.currentPos());
+
 				default:
+					// Just facking ignore other nodes
 			}
 		}
 
@@ -159,7 +175,7 @@ class SourceMap
 			}
 			else if (file.endsWith(".hx"))
 			{
-				var key = full.substr(base.length + 1);
+				var key = full.substr(base.length + 1).replace("\\", "/");
 				var content = try sys.io.File.getContent(full) catch (e:Dynamic) continue;
 				exprs.push(macro __sourceMap.set($v{key}, ${splitString(content)}));
 			}

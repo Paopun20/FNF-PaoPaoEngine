@@ -21,7 +21,7 @@ PaoPoa Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
 - Ndll Support (HScript/Python only)
   > It codename feature.
 - Fixed Psych Engine Bugs (some critical)
-   - Loading Screen (Critical): Fix Race Condition
+  - Loading Screen (Critical): Fix Race Condition
     > A race condition occurs when two or more threads access a shared resource simultaneously, leading to unpredictable behavior, data corruption, or a stuck loading screen.
     > More details? [here](https://www.youtube.com/watch?v=bhpzTWtee2A)
 - Open mod folder by clicking the "Open Mod Folder" button in the mod menu.
@@ -30,11 +30,12 @@ PaoPoa Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
 - Updated dependencies to the most compatible versions
 - Removed obsolete features from the Psych Engine, such as the Easter Egg.
 - Organize files and folders to improve readability and maintenance. Ensure compatibility with older layouts when importing to new systems, as others may not be compatible; all are indexed by StructureCompatibility.hx.
-- Optimize Engine performance and memory usage without breaking everything/mods.
+- Optimize Engine performance and memory usage without breaking everything/mods like script engine.
 - New Free-play UI (WIP)
 - Improved Loading Screen (WIP)
 - All states/substates is editable (ex: scripts/stages/[state name].hx, scripts/substates/[state name].hx)
 - Improve modding experience and compatibility.
+- Update Lib: flixel, flixel-addons (RIP, old mods)
 - New event:
   - Offset Timer (useful for fake end)
   > Adjust the time **displayed in the PlayState Time UI only**, without affecting `Conductor.songPosition`.

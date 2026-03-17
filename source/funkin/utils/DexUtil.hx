@@ -29,62 +29,54 @@ enum abstract MessageBoxIcon(Int)
  </target>
  ')
 @:cppFileCode('
- #ifndef SCREENSHOT_CPP_INCLUDED
- #define SCREENSHOT_CPP_INCLUDED
+#ifndef SCREENSHOT_CPP_INCLUDED
+#define SCREENSHOT_CPP_INCLUDED
 
- #include <Windows.h>
- #include <windowsx.h>
- #include <cstdio>
- #include <iostream>
- #include <tchar.h>
- #include <wingdi.h>
- #include <winuser.h>
- #include <dwmapi.h>
- #include <winternl.h>
- #include <Shlobj.h>
- #include <commctrl.h>
- #include <string>
+#include <Windows.h>
+#include <windowsx.h>
+#include <cstdio>
+#include <iostream>
+#include <tchar.h>
+#include <wingdi.h>
+#include <winuser.h>
+#include <dwmapi.h>
+#include <winternl.h>
+#include <Shlobj.h>
+#include <commctrl.h>
+#include <string>
+#include <chrono>
+#include <thread>
+#include <sysinfoapi.h>
+#include <psapi.h>
+#define UNICODE
+#pragma comment(lib, "Dwmapi")
+#pragma comment(lib, "ntdll.lib")
+#pragma comment(lib, "user32.lib")
+#pragma comment(lib, "Shell32.lib")
+#pragma comment(lib, "gdi32.lib")
+#pragma comment(lib, "psapi.lib")
 
- #include <chrono>
- #include <thread>
- #include <sysinfoapi.h>
- #include <psapi.h>
+// This is so that all window-related functions ALWAYS apply to the engine window.
+static std::string globalWindowTitle = "Friday Night Funkin\': Plus Engine";
 
- #define UNICODE
+// Get the active window handle
+static HWND GET_WINDOW() {
+    return GetForegroundWindow();
+}
 
- #pragma comment(lib, "Dwmapi")
- #pragma comment(lib, "ntdll.lib")
- #pragma comment(lib, "user32.lib")
- #pragma comment(lib, "Shell32.lib")
- #pragma comment(lib, "gdi32.lib")
- #pragma comment(lib, "psapi.lib")
-
- // This is so that all window-related functions ALWAYS apply to the engine window.
- static std::string globalWindowTitle = "Friday Night Funkin\': Plus Engine";
-
- // Get the active window handle
- static HWND GET_WINDOW() {
-     return GetForegroundWindow();
- }
-
- // Get the engine window by title
- static HWND GET_ENGINE_WINDOW() {
+// Get the engine window by title
+static HWND GET_ENGINE_WINDOW() {
 	HWND hwnd = GetForegroundWindow();
-     char windowTitle[256];
+    char windowTitle[256];
+    GetWindowTextA(hwnd, windowTitle, sizeof(windowTitle));
+    if (globalWindowTitle == windowTitle) {
+        return hwnd;
+    }
+    return FindWindowA(NULL, globalWindowTitle.c_str());
+}
 
-     GetWindowTextA(hwnd, windowTitle, sizeof(windowTitle));
-
-     if (globalWindowTitle == windowTitle) {
-         return hwnd;
-     }
-
-     return FindWindowA(NULL, globalWindowTitle.c_str());
- }
-
- //////////////////////////////////////////////////////////////////////////////////////////////////////
-
- static BOOL SaveToFile(HBITMAP hBitmap3, LPCTSTR lpszFileName)
- {
+static BOOL SaveToFile(HBITMAP hBitmap3, LPCTSTR lpszFileName)
+{
 	HDC hDC;
 	int iBits;
 	WORD wBitCount;
@@ -163,32 +155,27 @@ enum abstract MessageBoxIcon(Int)
 	CloseHandle(fh);
 
 	return TRUE;
- }
+}
 
- static int screenCapture(int x, int y, int w, int h, LPCSTR fname)
- {
-     HDC hdcSource = GetDC(NULL);
-     HDC hdcMemory = CreateCompatibleDC(hdcSource);
-
-     int capX = GetDeviceCaps(hdcSource, HORZRES);
-     int capY = GetDeviceCaps(hdcSource, VERTRES);
-
-     HBITMAP hBitmap = CreateCompatibleBitmap(hdcSource, w, h);
-     HBITMAP hBitmapOld = (HBITMAP)SelectObject(hdcMemory, hBitmap);
-
-     BitBlt(hdcMemory, 0, 0, w, h, hdcSource, x, y, SRCCOPY);
-     hBitmap = (HBITMAP)SelectObject(hdcMemory, hBitmapOld);
-
-     DeleteDC(hdcSource);
-     DeleteDC(hdcMemory);
-
-     HPALETTE hpal = NULL;
-     if(SaveToFile(hBitmap, fname)) return 1;
-     return 0;
- }
+static int screenCapture(int x, int y, int w, int h, LPCSTR fname)
+{
+    HDC hdcSource = GetDC(NULL);
+    HDC hdcMemory = CreateCompatibleDC(hdcSource);
+    int capX = GetDeviceCaps(hdcSource, HORZRES);
+    int capY = GetDeviceCaps(hdcSource, VERTRES);
+    HBITMAP hBitmap = CreateCompatibleBitmap(hdcSource, w, h);
+    HBITMAP hBitmapOld = (HBITMAP)SelectObject(hdcMemory, hBitmap);
+    BitBlt(hdcMemory, 0, 0, w, h, hdcSource, x, y, SRCCOPY);
+    hBitmap = (HBITMAP)SelectObject(hdcMemory, hBitmapOld);
+    DeleteDC(hdcSource);
+    DeleteDC(hdcMemory);
+    HPALETTE hpal = NULL;
+    if(SaveToFile(hBitmap, fname)) return 1;
+    return 0;
+}
 
  #endif // SCREENSHOT_CPP_INCLUDED
- ')
+')
 #end
 class DexUtil
 {

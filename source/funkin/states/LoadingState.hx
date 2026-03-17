@@ -11,31 +11,32 @@ import openfl.utils.AssetType;
 import openfl.utils.Assets as OpenFlAssets;
 import flixel.system.FlxAssets;
 import flixel.FlxState;
+import flixel.addons.display.FlxBackdrop;
+import flixel.addons.display.FlxGridOverlay;
 import openfl.media.Sound;
 import funkin.backend.Song;
 import funkin.backend.StageData;
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;
 import funkin.utils.ThreadUtil;
-#if HSCRIPT_ALLOWED
-import funkin.modding.scripts.HScript;
-#end
-
+import Random;
 #if (js && nodejs)
 import js.node.Os;
 #end
 
 class LoadingState extends EditableState
 {
-	public static var loaded:Int = 0;
-	public static var loadMax:Int = 0;
-	static var currentAssetName:String = "...";
+	private static var loaded:Int = 0;
+	private static var loadMax:Int = 0;
+	private static var currentAssetName:String = "...";
 
-	static var originalBitmapKeys:Map<String, String> = [];
-	static var requestedBitmaps:Map<String, BitmapData> = [];
+	var backdropTimer:Float = 0;
+
+	private static var originalBitmapKeys:Map<String, String> = [];
+	private static var requestedBitmaps:Map<String, BitmapData> = [];
 	#if (sys || MULTITHREADED_LOADING)
-	static var mutex:Mutex;
-	static var arrayMutex:Mutex;
+	private static var mutex:Mutex;
+	private static var arrayMutex:Mutex;
 	#end
 
 	inline static private function safeIncrementLoaded(?assetName:String):Void
@@ -98,6 +99,7 @@ class LoadingState extends EditableState
 	var dontUpdate:Bool = false;
 
 	var barGroup:FlxSpriteGroup;
+	var backdrop:FlxBackdrop;
 	var bar:FlxSprite;
 	var barWidth:Int = 0;
 	var intendedPercent:Float = 0;
@@ -109,13 +111,10 @@ class LoadingState extends EditableState
 
 	var timePassed:Float = 0;
 
-	#if HSCRIPT_ALLOWED
-	var hscript:HScript;
-	#end
-
 	override function create()
 	{
 		persistentUpdate = true;
+
 		barGroup = new FlxSpriteGroup();
 		add(barGroup);
 
@@ -131,48 +130,16 @@ class LoadingState extends EditableState
 		barGroup.add(bar);
 		barWidth = Std.int(barBack.width - 10);
 
-		#if HSCRIPT_ALLOWED
-		if (Mods.currentModDirectory != null && Mods.currentModDirectory.trim().length > 0)
-		{
-			var scriptPath:String = 'mods/${Mods.currentModDirectory}/data/LoadingScreen.hx'; // mods/My-Mod/data/LoadingScreen.hx
-			if (FileSystem.exists(scriptPath))
-			{
-				try
-				{
-					hscript = new HScript(null, scriptPath);
-					hscript.set('getLoaded', function() return loaded);
-					hscript.set('getLoadMax', function() return loadMax);
-					hscript.set('barBack', barBack);
-					hscript.set('bar', bar);
-
-					if (hscript.exists('onCreate'))
-					{
-						hscript.call('onCreate');
-						CoolLog.info('initialized hscript interp successfully: $scriptPath');
-						return super.create();
-					}
-					else
-					{
-						CoolLog.error('"$scriptPath" contains no \"onCreate" function, stopping script.');
-					}
-				}
-				catch (e:Dynamic)
-				{
-					CoolLog.error('Error loading HScript from $scriptPath: $e');
-				}
-				if (hscript != null)
-					hscript.destroy();
-				hscript = null;
-			}
-		}
-		#end
-
 		var bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		bg.setGraphicSize(Std.int(FlxG.width));
 		bg.color = 0xFFD16FFF;
 		bg.updateHitbox();
 		addBehindBar(bg);
+
+		backdrop = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0x33FFFFFF, 0x0));
+		backdrop.velocity.set(40, 40);
+		addBehindBar(backdrop);
 
 		loadingText = new FlxText(0, 550, FlxG.width, Language.getPhrase('now_loading', 'Now Loading', ['...']), 32);
 		loadingText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
@@ -203,6 +170,14 @@ class LoadingState extends EditableState
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+
+		backdropTimer += elapsed;
+		if (backdropTimer >= 3.0) // change direction every 1 seconds
+		{
+			backdropTimer = 0;
+			backdrop.velocity.set(Random.int(20, 40) * Random.int(-1, 1), Random.int(-40, 40));
+		}
+
 		if (dontUpdate)
 			return;
 
@@ -233,15 +208,6 @@ class LoadingState extends EditableState
 			bar.updateHitbox();
 		}
 
-		#if HSCRIPT_ALLOWED
-		if (hscript != null)
-		{
-			if (hscript.exists('onUpdate'))
-				hscript.call('onUpdate', [elapsed]);
-			return;
-		}
-		#end
-
 		timePassed += elapsed;
 		var dots:String = '';
 		switch (Math.floor(timePassed % 1 * 3))
@@ -259,20 +225,6 @@ class LoadingState extends EditableState
 		var progress = safeGetLoadProgress();
 		assetText.text = Language.getPhrase('asset_loading', 'Asset Loading: {1} {2}', [progress.assetName, '(${progress.loaded}/${progress.max})']);
 	}
-
-	#if HSCRIPT_ALLOWED
-	override function destroy()
-	{
-		if (hscript != null)
-		{
-			if (hscript.exists('onDestroy'))
-				hscript.call('onDestroy');
-			hscript.destroy();
-		}
-		hscript = null;
-		super.destroy();
-	}
-	#end
 
 	var finishedLoading:Bool = false;
 
@@ -338,13 +290,9 @@ class LoadingState extends EditableState
 				// CoolLog.info('finished preloading image $key');
 			}
 			else if (bitmap != null)
-			{
 				CoolLog.error('failed to cache image $key');
-			}
 			else
-			{
 				CoolLog.error('failed to load image $key');
-			}
 		}
 
 		// Thread-safe check of completion status
