@@ -2602,7 +2602,7 @@ class PlayState extends MusicBeatState
 						}
 						if (v21 <= 0.0)
 						{
-							endoffsetTween = FlxTween.num(endoffsetTween, flValue1, (v21 / 1000) / playbackRate, {
+							endoffsetTween = FlxTween.num(endOffset, flValue1, (v21 / 1000) / playbackRate, {
 								ease: tweenEase,
 								onComplete: function(self:FlxTween)
 								{
@@ -3784,7 +3784,7 @@ class PlayState extends MusicBeatState
 		var newScript:HScript = null;
 		try
 		{
-			newScript = new HScript(null, file);
+			newScript = new HScript(null, file).setParent(this);
 			// trace('initialized hscript interp successfully: $file');
 			CoolLog.info('initialized hscript interp successfully: $file');
 			hscriptArray.push(newScript);

@@ -69,7 +69,7 @@ class EditableCore
 		var newScript:HScript = null;
 		try
 		{
-			newScript = new HScript(null, file);
+			newScript = new HScript(null, file).setParent(this);
 			preset(newScript);
 			CoolLog.info('initialized hscript interp successfully: $file');
 			hscriptArray.push(newScript);

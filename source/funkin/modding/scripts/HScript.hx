@@ -45,28 +45,6 @@ class PaoPaoInterp extends Interp
 		_instanceFields = inst == null ? [] : Type.getInstanceFields(Type.getClass(inst));
 		return parentInstance = inst;
 	}
-
-	override function resetVariables():Void
-	{
-		customClasses = new Map<String, hscript.CustomClassHandler>();
-		variables = new Map<String, Dynamic>();
-		publicVariables = funkin.modding.scripts.HScript.publicVariables;
-		staticVariables = funkin.modding.scripts.HScript.staticVariables;
-
-		usingHandler = new hscript.utils.UsingHandler();
-
-		variables.set("null", null);
-		variables.set("true", true);
-		variables.set("false", false);
-		variables.set("trace", Reflect.makeVarArgs(function(el)
-		{
-			var inf = posInfos();
-			var v = el.shift();
-			if (el.length > 0)
-				inf.customParams = el;
-			haxe.Log.trace(Std.string(v), inf);
-		}));
-	}
 }
 
 class HScript implements IHscriptInterface implements IFlxDestroyable
@@ -192,13 +170,16 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 		return false;
 	}
 
-	public function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?manualRun:Bool = false)
+	public function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?parentInstance:Dynamic = null)
 	{
 		interp = new PaoPaoInterp();
 		interp.printCallStack = true;
 		interp.allowStaticVariables = interp.allowPublicVariables = true;
 		interp.errorHandler = onError;
 		interp.importFailedCallback = onImportFailed;
+		interp.publicVariables = publicVariables;
+		interp.staticVariables = staticVariables;
+		setParent(parentInstance);
 
 		scriptName = origin = file;
 
@@ -220,7 +201,7 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 
 		preset(varsToBring);
 
-		if (!manualRun && file != null && file.length > 0)
+		if (file != null && file.length > 0)
 		{
 			var scriptContent:String = file;
 			if (!file.contains('\n'))
@@ -274,6 +255,12 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 		return returnValue;
 	}
 
+	public function setParent(parent:Dynamic): HScript
+	{
+		interp.scriptObject = parent;
+		return this;
+	}
+
 	public function preset(?varsToBring:Any):Void
 	{
 		// Bring variables from Lua / Haxe
@@ -282,8 +269,6 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 			for (k in Reflect.fields(varsToBring))
 				set(k, Reflect.field(varsToBring, k));
 		}
-
-		interp.scriptObject = FlxG.state;
 
 		// Core Haxe Classes
 		set('Type', Type);
