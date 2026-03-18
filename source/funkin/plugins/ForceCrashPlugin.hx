@@ -5,7 +5,9 @@ import haxe.Exception;
 import flixel.FlxBasic;
 import flixel.FlxG;
 
-class ForceCrashException extends Exception {}
+class ForceCrashException extends Exception
+{
+}
 
 @:nullSafety
 class ForceCrashPlugin extends FlxBasic

@@ -33,15 +33,21 @@ PaoPoa Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
 - Optimize Engine performance and memory usage without breaking everything/mods like script engine.
 - New Free-play UI (WIP)
 - Improved Loading Screen (WIP)
-- All states/substates is editable (ex: scripts/stages/[state name].hx, scripts/substates/[state name].hx)
+- All states/substates is editable (ex: scripts/stages/[state name].hx, scripts/substates/[state name].hx) (untest)
 - Improve modding experience and compatibility.
 - Update Lib: flixel, flixel-addons (RIP, old mods)
-- New event:
-  - Offset Timer (useful for fake end)
-  > Adjust the time **displayed in the PlayState Time UI only**, without affecting `Conductor.songPosition`.
+- GDI Effects (HScript only):
+  > /J SL WINDOWS API library
+- New events:
+  - Offset Timer
+  > Shifts the **displayed time** forward or backward in the Time UI. Supports tweening.
+  > Does not affect `Conductor.songPosition`.
+  - Offset End
+  > Shortens the **displayed song length** in the Time UI, making the bar fill up earlier.
+  > Useful for fake endings. Does not affect `Conductor.songPosition` or `songLength`.
 
 ## Origin
 
 PaoPao Engine was fork based on [**Psych Engine 1.0.4**](https://github.com/ShadowMario/FNF-PsychEngine)
 
-> (I haven't finished writing the README yet.)
+> (I haven't finished writing the README yet)

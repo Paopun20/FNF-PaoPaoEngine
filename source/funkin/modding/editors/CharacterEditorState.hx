@@ -422,6 +422,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 				animateGhost.alpha = ghostAlpha;
 		}, ghostAlpha, 0, 1);
 		ghostAlphaSlider.label = 'Opacity:';
+		ghostAlphaSlider.snap = 0.05;
 
 		tab_group.add(makeGhostButton);
 		// tab_group.add(hideGhostButton);

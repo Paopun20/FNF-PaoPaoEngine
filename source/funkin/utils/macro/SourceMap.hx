@@ -1,15 +1,15 @@
 package funkin.utils.macro;
 
 import haxe.ds.StringMap;
-
 #if macro
 import haxe.macro.Context;
 import haxe.macro.Expr;
+
 using StringTools;
 #end
 
 /*
-Simple macro to build a source map of all .hx files in the project at compile time, based on the paths defined in Project.xml. This allows us to include source code in error logs without needing to read files at runtime, which is especially useful for platforms with limited file access or for packaging everything into a single binary.
+	Simple macro to build a source map of all .hx files in the project at compile time, based on the paths defined in Project.xml. This allows us to include source code in error logs without needing to read files at runtime, which is especially useful for platforms with limited file access or for packaging everything into a single binary.
  */
 final class SourceMap
 {
@@ -34,11 +34,12 @@ final class SourceMap
 	#if macro
 	// MSVC limits string literals to ~16KB, so I chunk large files
 	static final CHUNK_SIZE = 8000;
-	
+
 	static function resolvePathAttr(node:Xml):Null<String>
 	{
 		var path = node.get("path");
-		if (path == null || path == "") path = node.get("name");
+		if (path == null || path == "")
+			path = node.get("name");
 		return (path != null && path != "") ? sys.FileSystem.absolutePath(path) : null;
 	}
 
@@ -62,10 +63,19 @@ final class SourceMap
 
 		for (node in xml.firstElement())
 		{
-			if (node.nodeType != Xml.Element) continue;
+			if (node.nodeType != Xml.Element)
+				continue;
 
 			switch (node.nodeName)
 			{
+				case "source" | "classpath":
+					// <source path="source"/>
+					var path = resolvePathAttr(node);
+					if (path != null && path != "")
+						paths.push(sys.FileSystem.absolutePath(path));
+					else
+						Context.warning('SourceMap: Invalid <source> path in Project.xml', Context.currentPos());
+
 				case "haxelib":
 					// <haxelib name="flixel"/>
 					// <haxelib name="flixel" version="5.4.0"/>
@@ -79,14 +89,6 @@ final class SourceMap
 						else
 							Context.warning('SourceMap: Could not resolve haxelib $name:$version', Context.currentPos());
 					}
-				
-				case "source" | "classpath":
-					// <source path="source"/>
-					var path = resolvePathAttr(node);
-					if (path != null && path != "")
-						paths.push(sys.FileSystem.absolutePath(path));
-					else
-						Context.warning('SourceMap: Invalid <source> path in Project.xml', Context.currentPos());
 
 				default:
 					// Just facking ignore other nodes
@@ -124,7 +126,8 @@ final class SourceMap
 			for (line in output.split("\n"))
 			{
 				line = line.trim().replace("\\", "/");
-				if (line == "" || line.startsWith("-")) continue;
+				if (line == "" || line.startsWith("-"))
+					continue;
 				if (sys.FileSystem.exists(line) && sys.FileSystem.isDirectory(line))
 				{
 					Context.info('SourceMap: Resolved $libArg -> $line', Context.currentPos());

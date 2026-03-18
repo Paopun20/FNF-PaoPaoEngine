@@ -62,7 +62,7 @@ class CacheScript
 
 	public static function hashCode(string:String):String
 	{
-	    return Sha256.make(Bytes.ofString(string)).toHex();
+		return Sha256.make(Bytes.ofString(string)).toHex();
 	}
 }
 

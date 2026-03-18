@@ -111,6 +111,7 @@ class PlayState extends MusicBeatState
 
 	public var songSpeedTween:FlxTween;
 	public var timeoffsetTween:FlxTween;
+	public var endoffsetTween:FlxTween;
 	public var songSpeed(default, set):Float = 1;
 	public var songSpeedType:String = "multiplicative";
 	public var noteKillOffset:Float = 350;
@@ -186,6 +187,7 @@ class PlayState extends MusicBeatState
 	public var healthBar:Bar;
 	public var timeBar:Bar;
 	public var timeOffset:Float = 0; // for fake time like fake end
+	public var endOffset:Float = 0; // for fake time like fake end
 
 	var songPercent:Float = 0;
 
@@ -1913,11 +1915,12 @@ class PlayState extends MusicBeatState
 		{
 			var curTime:Float = Math.max(0, Conductor.songPosition - ClientPrefs.data.noteOffset);
 			var effectiveDisplayTime:Float = curTime + timeOffset;
-			var effectiveDisplayPercent:Float = (effectiveDisplayTime / songLength);
+			var fakeSongLength:Float = Math.max(1, songLength - endOffset);
+			var effectiveDisplayPercent:Float = (effectiveDisplayTime / fakeSongLength);
 
 			songPercent = FlxMath.bound(effectiveDisplayPercent, 0, 1);
 
-			var songCalc:Float = (songLength - effectiveDisplayTime);
+			var songCalc:Float = (fakeSongLength - effectiveDisplayTime);
 			if (ClientPrefs.data.timeBarType == 'Time Elapsed')
 				songCalc = effectiveDisplayTime;
 
@@ -2555,7 +2558,7 @@ class PlayState extends MusicBeatState
 					#end
 				}
 
-			case "Offset Timer":
+			case "Offset Timer" | "Offset End":
 				if (flValue1 == null)
 					flValue1 = 0;
 				if (value2 == null)
@@ -2566,27 +2569,54 @@ class PlayState extends MusicBeatState
 				var v22:String = (arg[1] != null) ? arg[1] : "linear";
 				var tweenEase = LuaUtils.getTweenEaseByString(v22);
 
-				if (timeoffsetTween != null)
+				switch (eventName)
 				{
-					timeoffsetTween.cancel();
-					timeoffsetTween = null;
-				}
-				if (v21 <= 0.0)
-				{
-					timeoffsetTween = FlxTween.num(timeOffset, flValue1, (v21 / 1000) / playbackRate, {
-						ease: tweenEase,
-						onComplete: function(self:FlxTween)
+					case "Offset Timer":
+						if (timeoffsetTween != null)
 						{
+							timeoffsetTween.cancel();
 							timeoffsetTween = null;
 						}
-					}, function(value:Float)
-					{
-						timeOffset = value;
-					});
-				}
-				else
-				{
-					timeOffset = flValue1;
+						if (v21 <= 0.0)
+						{
+							timeoffsetTween = FlxTween.num(timeOffset, flValue1, (v21 / 1000) / playbackRate, {
+								ease: tweenEase,
+								onComplete: function(self:FlxTween)
+								{
+									timeoffsetTween = null;
+								}
+							}, function(value:Float)
+							{
+								timeOffset = value;
+							});
+						}
+						else
+						{
+							timeOffset = flValue1;
+						}
+					case "Offset End":
+						if (endoffsetTween != null)
+						{
+							endoffsetTween.cancel();
+							endoffsetTween = null;
+						}
+						if (v21 <= 0.0)
+						{
+							endoffsetTween = FlxTween.num(endoffsetTween, flValue1, (v21 / 1000) / playbackRate, {
+								ease: tweenEase,
+								onComplete: function(self:FlxTween)
+								{
+									endoffsetTween = null;
+								}
+							}, function(value:Float)
+							{
+								timeOffset = value;
+							});
+						}
+						else
+						{
+							timeOffset = flValue1;
+						}
 				}
 
 			case 'Play Sound':

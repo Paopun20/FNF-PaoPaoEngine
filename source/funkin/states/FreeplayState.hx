@@ -138,8 +138,8 @@ class FreeplayState extends EditableState
 
 			Mods.currentModDirectory = songs[i].folder;
 			var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);
-			
-			var card: FlxSprite = new FlxSprite(songText.x + songText.width + 10, songText.y - 10);
+
+			var card:FlxSprite = new FlxSprite(songText.x + songText.width + 10, songText.y - 10);
 			card.makeGraphic(100, 100, FlxColor.fromRGB(0, 0, 0));
 			card.scale.set(0.5, 0.5);
 			card.origin.set(0.5, 0.5);
@@ -624,7 +624,7 @@ class FreeplayState extends EditableState
 	public function updateTexts(elapsed:Float = 0.0)
 	{
 		lerpSelected = FlxMath.lerp(curSelected, lerpSelected, Math.exp(-elapsed * 9.6));
-		
+
 		for (i in _lastVisibles)
 		{
 			grpSongs.members[i].visible = grpSongs.members[i].active = false;
@@ -659,7 +659,7 @@ class FreeplayState extends EditableState
 			icon.visible = icon.active = true;
 			icon.x = item.x + item.width + 10;
 			icon.y = item.y - (icon.height / 4);
-			
+
 			_lastVisibles.push(i);
 		}
 	}
@@ -692,7 +692,7 @@ class SongMetadata
 		this.color = color;
 		this.folder = Mods.currentModDirectory;
 		this.album = album;
-		
+
 		if (this.folder == null)
 			this.folder = '';
 	}

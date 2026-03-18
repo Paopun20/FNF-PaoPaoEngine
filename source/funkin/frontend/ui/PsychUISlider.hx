@@ -18,6 +18,11 @@ class PsychUISlider extends FlxSpriteGroup
 	public var max(default, set):Float = 999;
 	public var decimals(default, set):Int = 2;
 
+	/**
+	 * If greater than 0, the slider will snap to increments of this value. For example, if snap is 0.5, the slider will only allow values like 0, 0.5, 1.0, 1.5, etc.
+	 */
+	public var snap:Float = 0;
+
 	public function new(x:Float = 0, y:Float = 0, callback:Float->Void, def:Float = 0, min:Float = -999, max:Float = 999, wid:Float = 200,
 			mainColor:FlxColor = FlxColor.WHITE, handleColor:FlxColor = 0xFFAAAAAA)
 	{
@@ -91,6 +96,13 @@ class PsychUISlider extends FlxSpriteGroup
 			movingHandle = false;
 	}
 
+	function _snapValue(v:Float):Float
+	{
+		if (snap <= 0)
+			return v;
+		return Math.round(v / snap) * snap;
+	}
+
 	function _updatePositions()
 	{
 		minText.x = bar.x - minText.width / 2;
@@ -144,7 +156,7 @@ class PsychUISlider extends FlxSpriteGroup
 
 	function set_value(v:Float)
 	{
-		value = Math.max(min, Math.min(max, v));
+		value = Math.max(min, Math.min(max, _snapValue(v)));
 		valueText.text = Std.string(FlxMath.roundDecimal(value, decimals));
 		_updateHandleX();
 		return value;

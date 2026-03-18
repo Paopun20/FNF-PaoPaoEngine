@@ -164,7 +164,7 @@ class Controls
 
 		return result || _myGamepadJustReleased(gamepadBinds[key]) == true;
 	}
-	
+
 	public function allPressed(keys:Array<String>):Bool
 	{
 		for (key in keys)

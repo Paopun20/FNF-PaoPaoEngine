@@ -142,7 +142,14 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 	{
 		if (Std.isOfType(e, HscriptError))
 		{
-			PlayState.instance.addTextToDebug(printer.exprToString(cast(e, Expr)), FlxColor.RED);
+			if (PlayState.instance != null)
+			{
+				PlayState.instance.addTextToDebug("[ERROR] " + Printer.errorToString(e), FlxColor.RED);
+			}
+			else
+			{
+				CoolLog.error('HScript Error: ' + Printer.errorToString(e));
+			}
 		}
 	}
 
@@ -150,7 +157,14 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 	{
 		if (Std.isOfType(e, HscriptError))
 		{
-			PlayState.instance.addTextToDebug("[WARNING] " + printer.exprToString(cast(e, Expr)), FlxColor.YELLOW);
+			if (PlayState.instance != null)
+			{
+				PlayState.instance.addTextToDebug("[WARNING] " + Printer.errorToString(e), FlxColor.YELLOW);
+			}
+			else
+			{
+				CoolLog.error('HScript Warning: ' + Printer.errorToString(e));
+			}
 		}
 	}
 
@@ -181,6 +195,7 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 	public function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?manualRun:Bool = false)
 	{
 		interp = new PaoPaoInterp();
+		interp.printCallStack = true;
 		interp.allowStaticVariables = interp.allowPublicVariables = true;
 		interp.errorHandler = onError;
 		interp.importFailedCallback = onImportFailed;
@@ -268,6 +283,8 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 				set(k, Reflect.field(varsToBring, k));
 		}
 
+		interp.scriptObject = FlxG.state;
+
 		// Core Haxe Classes
 		set('Type', Type);
 		set('Math', Math);
@@ -286,7 +303,24 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 		set('FlxCamera', flixel.FlxCamera);
 		set('PsychCamera', funkin.objects.PsychCamera);
 		set('FlxTimer', flixel.util.FlxTimer);
-		set('FlxTween', flixel.tweens.FlxTween);
+		set('FlxTween', {
+			tween: function(obj:Dynamic, props:Dynamic, duration:Float, ?options:Dynamic)
+			{
+				if (obj == null)
+					return null;
+				for (field in Reflect.fields(props))
+					if (Reflect.getProperty(obj, field) == null)
+						CoolLog.warning('FlxTween.tween: "$field" not found on $obj');
+				return FlxTween.tween(obj, props, duration, options);
+			},
+			num: FlxTween.num,
+			color: FlxTween.color,
+			angle: FlxTween.angle,
+			shake: FlxTween.shake,
+			cancelTweensOf: FlxTween.cancelTweensOf,
+			completeTweensOf: FlxTween.completeTweensOf,
+			globalManager: FlxTween.globalManager
+		});
 		set('FlxEase', flixel.tweens.FlxEase);
 		set('FlxSound', flixel.system.FlxSound);
 		set('FlxStreamSound', FlxStreamSound);
@@ -669,7 +703,8 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 		}
 		catch (e:Dynamic)
 		{
-			CoolLog.error('HScript call error in $scriptName, function $func: $e');
+			var stack = haxe.CallStack.toString(haxe.CallStack.exceptionStack(true));
+			CoolLog.error('HScript call error in $scriptName, function $func: $e\n$stack');
 		}
 		return LuaUtils.Function_Continue;
 	}

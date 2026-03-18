@@ -4,7 +4,7 @@ import funkin.vis.LogHelper;
 
 class Scaling
 {
-    public static inline function freqScaleMel(freq:Float):Float
+	public static inline function freqScaleMel(freq:Float):Float
 		return LogHelper.log2(1 + freq / 700);
 
 	public static inline function invFreqScaleMel(x:Float):Float

@@ -120,6 +120,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			'Offset Timer',
 			"Value 1: Offset Amount (in milliseconds)\nValue 2: Time it takes to change fully in seconds [Duration,Tween Ease] (Default: 0,linear)"
 		],
+		[
+			"Offset End",
+			"Value 1: Offset Amount (in milliseconds)\nValue 2: Time it takes to change fully in seconds [Duration,Tween Ease] (Default: 0,linear)"
+		]
 	];
 
 	public static var keysArray:Array<FlxKey> = [ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT]; // Used for Vortex Editor
@@ -2537,6 +2541,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		objY += 25;
 		playbackSlider = new PsychUISlider(50, objY, function(v:Float) setPitch(playbackRate = v), 1, 0.1, 5.0, 200);
 		playbackSlider.label = 'Playback Rate';
+		playbackSlider.snap = 0.05;
 
 		objY += 60;
 		mouseSnapCheckBox = new PsychUICheckBox(objX, objY, 'Mouse Scroll Snap', 100,

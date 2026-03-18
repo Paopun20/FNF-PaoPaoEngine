@@ -125,7 +125,6 @@ class Python implements IPythonInterface implements IFlxDestroyable
 			CacheScript.clear(CacheType.PYTHON);
 	}
 
-	
 	public function execute(code:String):Dynamic
 	{
 		if (closed)
@@ -1383,7 +1382,12 @@ class Python implements IPythonInterface implements IFlxDestroyable
 		{
 			if (color == null)
 				color = FlxColor.WHITE;
-			PlayState.instance.addTextToDebug(text, color);
+			if (PlayState.instance != null)
+			{
+				PlayState.instance.addTextToDebug(text, color);
+				return;
+			}
+			CoolLog.debug('[Python] $text');
 		});
 
 		// Mod settings
@@ -1435,7 +1439,11 @@ class Python implements IPythonInterface implements IFlxDestroyable
 	public static function pythonTrace(text:String, ignoreCheck:Bool = false, deprecated:Bool = false, color:FlxColor = FlxColor.WHITE)
 	{
 		if (PlayState.instance != null)
+		{
 			PlayState.instance.addTextToDebug(text, color);
+			return;
+		}
+		CoolLog.debug('[Python] $text');
 	}
 
 	public function stop()

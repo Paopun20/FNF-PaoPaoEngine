@@ -1870,8 +1870,15 @@ class FunkinLua implements IFunkinLuaInterface
 		});
 		//
 
-		Lua_helper.add_callback(lua, "debugPrint",
-			function(text:Dynamic = '', color:String = 'WHITE') PlayState.instance.addTextToDebug(text, CoolUtil.colorFromString(color)));
+		Lua_helper.add_callback(lua, "debugPrint", function(text:Dynamic = '', color:String = 'WHITE')
+		{
+			if (PlayState.instance == null)
+			{
+				CoolLog.info(text);
+				return;
+			}
+			PlayState.instance.addTextToDebug(text, CoolUtil.colorFromString(color));
+		});
 
 		addLocalCallback("close", function()
 		{
@@ -2138,6 +2145,11 @@ class FunkinLua implements IFunkinLuaInterface
 		{
 			if (deprecated && !getBool('luaDeprecatedWarnings'))
 			{
+				return;
+			}
+			if (PlayState.instance == null)
+			{
+				CoolLog.info(text);
 				return;
 			}
 			PlayState.instance.addTextToDebug(text, color);

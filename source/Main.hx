@@ -43,6 +43,14 @@ import sys.io.File;
 import haxe.Exception;
 import haxe.ds.StringMap;
 import funkin.utils.tools.ThreadTool;
+#if hxhardware
+import hxhardware.CPU;
+import hxhardware.GPU;
+import hxhardware.Memory;
+#end
+#if cpp
+import winapi.WindowsAPI;
+#end
 
 /**
  * Just a normal one, with error handling and stuff. You can ignore this, your code should go in your states.
@@ -265,6 +273,9 @@ class Main extends Sprite
 	{
 		ThreadTool.defaultThreadCount = 8;
 		ThreadUtil.maxThreads = Std.int(Math.max(1, ThreadTool.getCPUThreadsCount()));
+		WindowsAPI.reDefineMainWindowTitle(Application.current.window.title);
+
+		CPU.init();
 
 		Lib.current.addChild(new Main());
 		funkin.plugins.ForceCrashPlugin.initialize();

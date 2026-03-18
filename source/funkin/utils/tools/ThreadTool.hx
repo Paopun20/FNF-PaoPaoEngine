@@ -8,7 +8,7 @@ package funkin.utils.tools;
 #end
 final class ThreadTool
 {
-    public static var defaultThreadCount:Int = 8; // Default to 8 threads if detection fails
+	public static var defaultThreadCount:Int = 8; // Default to 8 threads if detection fails
 
 	#if cpp
 	@:functionCode('
@@ -16,20 +16,18 @@ final class ThreadTool
 		return count > 0 ? count : defaultThreadCount;
 	')
 	@:noCompletion
-	public static function getCPUThreadsCount(): Int
+	public static function getCPUThreadsCount():Int
 	{
 		return defaultThreadCount;
 	}
-	
 	#elseif hl
 	@:hlNative("std", "sys_cpu_count")
-	public static function getCPUThreadsCount(): Int
+	public static function getCPUThreadsCount():Int
 	{
 		return defaultThreadCount;
 	}
-	
 	#elseif (js && nodejs)
-	public static function getCPUThreadsCount(): Int
+	public static function getCPUThreadsCount():Int
 	{
 		try
 		{
@@ -44,14 +42,13 @@ final class ThreadTool
 			return defaultThreadCount;
 		}
 	}
-	
 	#elseif html5
-	public static function getCPUThreadsCount(): Int
+	public static function getCPUThreadsCount():Int
 	{
 		try
 		{
 			var hardwareConcurrency:Null<Int> = untyped __js__("navigator.hardwareConcurrency");
-			
+
 			if (hardwareConcurrency != null && hardwareConcurrency >= 1)
 			{
 				return hardwareConcurrency;
@@ -61,12 +58,11 @@ final class ThreadTool
 		{
 			trace('Could not detect CPU cores in browser: $e');
 		}
-		
+
 		return defaultThreadCount;
 	}
-	
 	#elseif java
-	public static function getCPUThreadsCount(): Int
+	public static function getCPUThreadsCount():Int
 	{
 		try
 		{
@@ -79,9 +75,8 @@ final class ThreadTool
 			return defaultThreadCount;
 		}
 	}
-	
 	#elseif cs
-	public static function getCPUThreadsCount(): Int
+	public static function getCPUThreadsCount():Int
 	{
 		try
 		{
@@ -93,9 +88,8 @@ final class ThreadTool
 			return defaultThreadCount;
 		}
 	}
-	
 	#else
-	public static function getCPUThreadsCount(): Int
+	public static function getCPUThreadsCount():Int
 	{
 		return defaultThreadCount;
 	}

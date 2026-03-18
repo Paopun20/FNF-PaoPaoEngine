@@ -32,7 +32,8 @@ class FileDialogHandler extends FlxBasic
 
 		_startUp(onComplete, onCancel, onError);
 
-		_dialog.onSelect.add(function(selectedPath:String) {
+		_dialog.onSelect.add(function(selectedPath:String)
+		{
 			this.path = selectedPath;
 			CoolLog.info('Saved file to: $path');
 			_finish();
@@ -49,7 +50,8 @@ class FileDialogHandler extends FlxBasic
 
 		_startUp(onComplete, onCancel, onError);
 
-		_dialog.onSelect.add(function(selectedPath:String) {
+		_dialog.onSelect.add(function(selectedPath:String)
+		{
 			this.path = selectedPath;
 			this.data = File.getContent(selectedPath);
 			CoolLog.info('Loaded file from: $path');
@@ -68,7 +70,8 @@ class FileDialogHandler extends FlxBasic
 
 		_startUp(onComplete, onCancel, onError);
 
-		_dialog.onSelect.add(function(selectedPath:String) {
+		_dialog.onSelect.add(function(selectedPath:String)
+		{
 			this.path = selectedPath;
 			CoolLog.info('Loaded directory: $path');
 			_finish();
@@ -81,7 +84,8 @@ class FileDialogHandler extends FlxBasic
 	{
 		this.completed = true;
 		_newDialog();
-		if (onComplete != null) onComplete();
+		if (onComplete != null)
+			onComplete();
 	}
 
 	function _startUp(onComplete:Void->Void, onCancel:Void->Void, onError:Void->Void)
@@ -98,16 +102,19 @@ class FileDialogHandler extends FlxBasic
 	function _newDialog()
 	{
 		_dialog = new FileDialog();
-		_dialog.onCancel.add(function() {
+		_dialog.onCancel.add(function()
+		{
 			this.completed = true;
 			_newDialog();
-			if (onCancel != null) onCancel();
+			if (onCancel != null)
+				onCancel();
 		});
 	}
 
 	function _buildFilter(?filter:Array<FileFilter>):String
 	{
-		if (filter == null) filter = [new FileFilter('JSON', 'json')];
+		if (filter == null)
+			filter = [new FileFilter('JSON', 'json')];
 		return filter.map(f -> StringTools.replace(StringTools.replace(f.extension, "*.", ""), ";", ",")).join(";");
 	}
 

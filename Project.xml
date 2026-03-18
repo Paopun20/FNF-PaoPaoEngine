@@ -5,8 +5,8 @@
 	<app
         title="Friday Night Funkin': PaoPao Engine"
         file="PaoPaoEngine"
-        packageName="com.paopa.paopaoengine"
-        package="com.paopa.paopaoengine"
+        packageName="com.paopao.paopaoengine"
+        package="com.paopao.paopaoengine"
         main="Main"
         version="0.2.8"
         company="Paopaodev"
@@ -196,9 +196,10 @@
 	<haxelib name="flixel-addons" version="4.0.1" />
 	<haxelib name="flixel-waveform"/>
 	<haxelib name="random"/>
+	<haxelib name="hxhardware" if="cpp" />
+	<haxelib name="sl-windows-api" if="cpp" />
 
 	<haxelib name="tjson" version="1.4.0" />
-	<haxelib name="tink_core" version="2.1.1" />
 	<haxelib name="hxWindowColorMode" if="windows desktop" />
 	<haxelib name="compiletime" />
 

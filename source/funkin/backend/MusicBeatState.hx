@@ -17,7 +17,7 @@ class MusicBeatState extends FlxState
 
 	public var controls(get, never):Controls;
 
-	private function get_controls(): Controls
+	private function get_controls():Controls
 	{
 		return Controls.instance;
 	}
@@ -26,11 +26,11 @@ class MusicBeatState extends FlxState
 
 	public var variables:StringMap<Dynamic> = new StringMap<Dynamic>();
 
-	public static function getVariables(): StringMap<Dynamic>
+	public static function getVariables():StringMap<Dynamic>
 		return getState().variables;
-	
-	public static function setVariable(key:String, value:Dynamic): Void
-	    getState().variables.set(key, value);
+
+	public static function setVariable(key:String, value:Dynamic):Void
+		getState().variables.set(key, value);
 
 	override function create()
 	{
@@ -50,7 +50,7 @@ class MusicBeatState extends FlxState
 		timePassedOnState = 0;
 	}
 
-	public function initPsychCamera(): PsychCamera
+	public function initPsychCamera():PsychCamera
 	{
 		var camera = new PsychCamera();
 		FlxG.cameras.reset(camera);

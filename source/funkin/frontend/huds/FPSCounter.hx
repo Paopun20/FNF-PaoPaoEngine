@@ -4,6 +4,11 @@ import flixel.FlxG;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
 import flixel.util.FlxStringUtil;
+#if hxhardware
+import hxhardware.CPU;
+import hxhardware.GPU;
+import hxhardware.Memory;
+#end
 
 /**
 	The FPS class provides an easy-to-use monitor to display
@@ -22,6 +27,12 @@ class FPSCounter extends TextField
 	public var memoryMegas(get, never):Float;
 
 	private var _color:Int;
+
+	#if hxhardware
+	private var cpuUsage:Float = 0;
+	private var ramUsage:Float = 0;
+	private var gpuUsage:Float = 0;
+	#end
 
 	@:noCompletion private var times:Array<Float>;
 
@@ -45,6 +56,7 @@ class FPSCounter extends TextField
 	}
 
 	var deltaTimeout:Float = 0.0;
+	var deltaSysTO:Float = 0.0;
 
 	// Event Handlers
 	private override function __enterFrame(deltaTime:Float):Void
@@ -53,21 +65,56 @@ class FPSCounter extends TextField
 		times.push(now);
 		while (times[0] < now - 1000)
 			times.shift();
-		// prevents the overlay from updating every frame, why would you need to anyways @crowplexus
-		if (deltaTimeout < 50)
+
+		deltaTimeout += deltaTime;
+		deltaSysTO += deltaTime;
+
+		if (deltaSysTO >= 500)
 		{
-			deltaTimeout += deltaTime;
-			return;
+			#if hxhardware
+			cpuUsage = CPU.getProcessCPUUsage();
+			ramUsage = Memory.getProcessPhysicalMemoryUsage();
+			gpuUsage = GPU.getSystemTotalGPUUsage();
+			#end
+
+			deltaSysTO = 0;
 		}
 
+		if (deltaTimeout < 50)
+			return;
+
 		currentFPS = times.length < FlxG.updateFramerate ? times.length : FlxG.updateFramerate;
+
 		updateText();
-		deltaTimeout = 0.0;
+		deltaTimeout = 0;
+	}
+
+	private function format2(v:Float):String
+	{
+		var rounded = Math.round(v * 100) / 100;
+		var s = Std.string(rounded);
+
+		if (s.indexOf('.') == -1)
+			return s + ".00";
+
+		var parts = s.split('.');
+		if (parts[1].length == 1)
+			return s + "0";
+
+		return s;
 	}
 
 	public dynamic function updateText():Void
 	{ // so people can override it in hscript
-		text = 'FPS: ${currentFPS}' + '\nMemory: ${FlxStringUtil.formatBytes(memoryMegas)}';
+		text = 'FPS: ${currentFPS}\n';
+
+		#if hxhardware
+		text += '\nCPU: ' + format2(cpuUsage) + '%';
+		text += '\nRAM: ' + format2(ramUsage / (1024 * 1024)) + ' MB';
+		text += '\nGPU: ' + format2(gpuUsage) + '%';
+		#else
+		text += '\nMemory: ${FlxStringUtil.formatBytes(memoryMegas)}';
+		#end
 
 		textColor = this._color;
 
