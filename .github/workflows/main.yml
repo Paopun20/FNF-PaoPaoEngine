@@ -78,6 +78,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libvlc-dev libvlccore-dev
+          sudo apt install libgl1-mesa-dev libglu1-mesa-dev g++ g++-multilib gcc-multilib libasound2-dev libx11-dev libxext-dev libxi-dev libxrandr-dev libxinerama-dev libpulse-dev
 
       - name: Cache Dependencies
         uses: actions/cache@v5
@@ -92,6 +93,7 @@ jobs:
         run: |
           haxelib setup ${{ matrix.lib-path }}
           haxelib --global update haxelib
+          haxelib fixrepo
           chmod +x ${{ matrix.setup-file }}
           sh ${{ matrix.setup-file }}
 
@@ -101,6 +103,7 @@ jobs:
         run: |
           haxelib setup ${{ matrix.lib-path }}
           haxelib --global update haxelib
+          haxelib fixrepo
           . ${{ matrix.setup-file }}
 
       - name: Skip SScript setup mode (Unix)
