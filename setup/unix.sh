@@ -16,7 +16,6 @@ if ! command -v haxe >/dev/null 2>&1; then
   exit 1
 fi
 
-haxelib install lime 8.3.1
 haxelib install openfl 9.5.0
 haxelib install flixel 6.1.2
 haxelib install flixel-addons 4.0.1
@@ -29,6 +28,7 @@ haxelib install tink_core 2.1.1
 haxelib install moonchart 0.5.1
 haxelib install sl-windows-api 1.2.0
 haxelib install random 1.4.1
+haxelib git lime https://github.com/openfl/lime
 haxelib git hython https://github.com/Paopun20/hython.git dev
 haxelib git compiletime https://github.com/Paopun20/compiletime.git
 haxelib git hxdiscord_rpc https://github.com/MAJigsaw77/hxdiscord_rpc.git

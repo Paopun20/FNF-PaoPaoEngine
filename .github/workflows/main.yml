@@ -48,7 +48,6 @@ jobs:
             lib-path: ~/haxelib
             setup-file: ./setup/unix.sh
 
-          # ── Apple mobile/TV targets ──────────────────────────────────────
           - os: macos-15
             target: ios
             artifact-name: iosBuild
@@ -120,11 +119,14 @@ jobs:
 
       - name: Compile (Apple)
         if: matrix.target == 'ios' || matrix.target == 'tvos'
-        run: haxelib run lime build ${{ matrix.target }} --app-version="4.0.0-${{ github.run_id}}" -D officialBuild -nosign
+        run: |
+          haxelib run lime rebuild ${{ matrix.target }}
+          haxelib run lime build ${{ matrix.target }} --app-version="4.0.0-${{ github.run_id}}" -D officialBuild -nosign
 
       - name: Compile
         if: matrix.target != 'ios' && matrix.target != 'tvos'
-        run: haxelib run lime build ${{ matrix.target }} --app-version="4.0.0-${{ github.run_id}}" -D officialBuild
+        run: |
+          haxelib run lime build ${{ matrix.target }} --app-version="4.0.0-${{ github.run_id}}" -D officialBuild
 
       - name: Publish Artifact
         uses: actions/upload-artifact@v4.3.4
