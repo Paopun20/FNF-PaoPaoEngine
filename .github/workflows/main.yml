@@ -132,6 +132,9 @@ jobs:
           haxelib remove lime
           git clone --recursive https://github.com/openfl/lime
           haxelib dev lime lime
+          haxelib remove hxcpp
+          git clone --recursive https://github.com/HaxeFoundation/hxcpp.git
+          haxelib dev hxcpp hxcpp
           haxelib run lime rebuild tvos
           haxelib run lime build ${{ matrix.target }} --app-version="4.0.0-${{ github.run_id}}" -D officialBuild -nosign
 
