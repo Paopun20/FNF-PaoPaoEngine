@@ -30,7 +30,7 @@ haxelib install sl-windows-api 1.2.0
 haxelib install random 1.4.1
 haxelib install format 3.8.0
 haxelib install hxp 1.3.1
-haxelib git lime https://github.com/openfl/lime
+haxelib install lime 8.3.1
 haxelib git hython https://github.com/Paopun20/hython.git dev
 haxelib git compiletime https://github.com/Paopun20/compiletime.git
 haxelib git hxdiscord_rpc https://github.com/MAJigsaw77/hxdiscord_rpc.git
