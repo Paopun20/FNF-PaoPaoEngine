@@ -198,6 +198,7 @@
 	<haxelib name="random"/>
 	<haxelib name="hxhardware" if="cpp" />
 	<haxelib name="sl-windows-api" if="cpp" />
+	<haxelib name="lime" version="8.3.1" />
 
 	<haxelib name="tjson" version="1.4.0" />
 	<haxelib name="hxWindowColorMode" if="windows desktop" />

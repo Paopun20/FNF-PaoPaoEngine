@@ -57,7 +57,9 @@ import winapi.WindowsAPI;
  */
 private final class FunkinGame extends FlxGame
 {
+	#if CRASH_HANDLER
 	public static var onGameCrash(default, null):FlxTypedSignal<(Exception) -> Void> = new FlxTypedSignal<(Exception) -> Void>();
+	#end
 
 	/**
 	 * Used to instantiate the guts of the flixel game object once we have a valid reference to the root.
@@ -112,8 +114,10 @@ private final class FunkinGame extends FlxGame
 
 	private final function onCrash(e:Exception):Void
 	{
+		#if CRASH_HANDLER
 		if (onGameCrash != null)
 			onGameCrash.dispatch(e);
+		#end
 	}
 }
 
@@ -327,7 +331,7 @@ class Main extends Sprite
 		#end
 
 		#if (linux || mac) // fix the app icon not showing up on the Linux Panel / Mac Dock
-		Lib.current.stage.window.setIcon(mage.fromFile("icon.png"));
+		Lib.current.stage.window.setIcon(Image.fromFile("icon.png"));
 		#end
 
 		#if html5

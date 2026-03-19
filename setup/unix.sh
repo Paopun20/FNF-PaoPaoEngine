@@ -16,7 +16,7 @@ if ! command -v haxe >/dev/null 2>&1; then
   exit 1
 fi
 
-haxelib install lime 8.3.0
+haxelib install lime 8.3.1
 haxelib install openfl 9.5.0
 haxelib install flixel 6.1.2
 haxelib install flixel-addons 4.0.1
