@@ -35,18 +35,6 @@ interface IHscriptInterface
 	public function stop():Void;
 }
 
-class PaoPaoInterp extends Interp
-{
-	public var parentInstance(default, set):Dynamic = [];
-
-	var _instanceFields:Array<String>;
-
-	function set_parentInstance(inst:Dynamic):Dynamic
-	{
-		_instanceFields = inst == null ? [] : Type.getInstanceFields(Type.getClass(inst));
-		return parentInstance = inst;
-	}
-}
 
 class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestroyable
 {
@@ -54,7 +42,7 @@ class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestr
 	public static var staticVariables:StringMap<Dynamic> = new StringMap<Dynamic>();
 	public static var publicVariables:StringMap<Dynamic> = new StringMap<Dynamic>();
 
-	public var interp:PaoPaoInterp;
+	public var interp:Interp;
 	public var origin:Null<String>;
 	public var scriptName:String;
 	public var returnValue:Dynamic;
@@ -174,7 +162,7 @@ class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestr
 	public override function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?parentInstance:Dynamic = null)
 	{
 		super();
-		interp = new PaoPaoInterp();
+		interp = new Interp();
 		interp.printCallStack = true;
 		interp.allowStaticVariables = interp.allowPublicVariables = true;
 		interp.errorHandler = onError;

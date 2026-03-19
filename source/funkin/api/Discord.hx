@@ -119,18 +119,22 @@ class DiscordClient
 	public static function changePresence(details:String = 'In the Menus', ?state:String, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float,
 			largeImageKey:String = 'icon')
 	{
+		var now:Float = Date.now().getTime();
+
 		var startTimestamp:Float = 0;
-		if (hasStartTimestamp)
-			startTimestamp = Date.now().getTime();
 		if (endTimestamp > 0)
-			endTimestamp = startTimestamp + endTimestamp;
+			endTimestamp = now + endTimestamp; // countdown: set end, leave start at 0
+		else if (hasStartTimestamp)
+			startTimestamp = now; // count-up: set start only
 
 		discordPresence.state = state;
 		discordPresence.details = details;
 		discordPresence.smallImageKey = smallImageKey;
 		discordPresence.largeImageKey = largeImageKey;
+
 		discordPresence.startTimestamp = Std.int(startTimestamp / 1000);
 		discordPresence.endTimestamp = Std.int(endTimestamp / 1000);
+
 		updatePresence();
 	}
 

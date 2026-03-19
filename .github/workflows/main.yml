@@ -51,6 +51,20 @@ jobs:
             lib-path: ~/haxelib
             setup-file: ./setup/unix.sh
 
+          - os: macos-15
+            target: ios
+            artifact-name: iosBuild
+            export-path: export/release/ios
+            lib-path: ~/haxelib
+            setup-file: ./setup/unix.sh
+
+          - os: macos-15
+            target: tvos
+            artifact-name: tvosBuild
+            export-path: export/release/tvos
+            lib-path: ~/haxelib
+            setup-file: ./setup/unix.sh
+
     runs-on: ${{ matrix.os }}
     env:
       DISCORD_RPC_ID: ${{ secrets.DISCORD_RPC_ID }}
@@ -113,6 +127,16 @@ jobs:
       - name: Compile
         run: haxelib run lime build ${{ matrix.target }} --app-version="4.0.0-${{ github.run_id}}" -D officialBuild
 
+      - name: Select Xcode
+        if: matrix.target == 'ios' || matrix.target == 'tvos'
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
+      - name: Create Version Tag
+        run: echo "${{github.run_id}}" > VERSION
+
+      - name: Compile
+        run: haxelib run lime build ${{ matrix.target }} --app-version="4.0.0-${{ github.run_id}}" -D officialBuild
+
       - name: Publish Artifact
         uses: actions/upload-artifact@v4.3.4
         with:
@@ -138,6 +162,8 @@ jobs:
           zip -r ../paopao.nightly.linux.zip linuxBuild/
           zip -r ../paopao.nightly.windows.zip windowsBuild/
           zip -r ../paopao.nightly.mac.zip macBuild/
+          zip -r ../paopao.nightly.ios.zip iosBuild/
+          zip -r ../paopao.nightly.tvos.zip tvosBuild/
 
       - name: Update Nightly Release
         uses: andelf/nightly-release@main
@@ -157,3 +183,5 @@ jobs:
             paopao.nightly.linux.zip
             paopao.nightly.windows.zip
             paopao.nightly.mac.zip
+            paopao.nightly.ios.zip
+            paopao.nightly.tvos.zip
