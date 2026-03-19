@@ -48,7 +48,7 @@ import hxhardware.CPU;
 import hxhardware.GPU;
 import hxhardware.Memory;
 #end
-#if cpp
+#if sl-windows-api
 import winapi.WindowsAPI;
 #end
 
@@ -277,7 +277,9 @@ class Main extends Sprite
 	{
 		ThreadTool.defaultThreadCount = 8;
 		ThreadUtil.maxThreads = Std.int(Math.max(1, ThreadTool.getCPUThreadsCount()));
+		#if sl-windows-api
 		WindowsAPI.reDefineMainWindowTitle(Application.current.window.title);
+		#end
 
 		CPU.init();
 
