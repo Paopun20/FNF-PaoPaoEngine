@@ -91,6 +91,7 @@ jobs:
         if: matrix.target != 'windows'
         run: |
           haxelib setup ${{ matrix.lib-path }}
+          haxelib --global update haxelib
           chmod +x ${{ matrix.setup-file }}
           sh ${{ matrix.setup-file }}
 
@@ -99,6 +100,7 @@ jobs:
         shell: powershell
         run: |
           haxelib setup ${{ matrix.lib-path }}
+          haxelib --global update haxelib
           . ${{ matrix.setup-file }}
 
       - name: Skip SScript setup mode (Unix)
