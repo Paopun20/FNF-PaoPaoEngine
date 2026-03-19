@@ -55,12 +55,12 @@ jobs:
             lib-path: ~/haxelib
             setup-file: ./setup/unix.sh
 
-          - os: macos-15
-            target: tvos
-            artifact-name: tvosBuild
-            export-path: export/release/tvos
-            lib-path: ~/haxelib
-            setup-file: ./setup/unix.sh
+          #- os: macos-15
+          #  target: tvos
+          #  artifact-name: tvosBuild
+          #  export-path: export/release/tvos
+          #  lib-path: ~/haxelib
+          #  setup-file: ./setup/unix.sh
 
     runs-on: ${{ matrix.os }}
     env:
@@ -190,4 +190,3 @@ jobs:
             paopao.nightly.windows.zip
             paopao.nightly.mac.zip
             paopao.nightly.ios.zip
-            paopao.nightly.tvos.zip
