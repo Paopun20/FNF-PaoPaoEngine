@@ -16,7 +16,7 @@ if ! command -v haxe >/dev/null 2>&1; then
   exit 1
 fi
 
-haxelib install openfl 9.5.0
+haxelib install openfl 9.5.1
 haxelib install flixel 6.1.2
 haxelib install flixel-addons 4.0.1
 haxelib install flixel-tools 1.5.1

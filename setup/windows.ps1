@@ -16,7 +16,7 @@ if ([string]::IsNullOrEmpty((Get-Command haxe -ea 0)))
 }
 
 # execute commands from data
-haxelib install openfl 9.5.0
+haxelib install openfl 9.5.1
 haxelib install flixel 6.1.2
 haxelib install flixel-addons 4.0.1
 haxelib install flixel-tools 1.5.1
