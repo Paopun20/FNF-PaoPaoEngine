@@ -68,29 +68,26 @@ class CacheScript
 
 class CacheParser
 {
-	public static var hscriptParser = (() ->
-	{
-		var p = new Parser();
-		p.allowJSON = true;
-		p.allowMetadata = true;
-		p.allowTypes = true;
-		return p;
-	})();
-	public static var pythonParser = (() ->
-	{
-		var p = new PyParser();
-		return p;
-	})();
-
 	public static function parse(code:String, type:CacheType):Dynamic
 	{
 		return switch (type)
 		{
 			case HSCRIPT:
-				hscriptParser.parseString(code);
+				(() ->
+				{
+					var p = new Parser();
+					p.allowJSON = true;
+					p.allowMetadata = true;
+					p.allowTypes = true;
+					return p;
+				})().parseString(code);
 
 			case PYTHON:
-				pythonParser.parseString(code);
+				(() ->
+				{
+					var p = new PyParser();
+					return p;
+				})().parseString(code);
 		}
 	}
 }

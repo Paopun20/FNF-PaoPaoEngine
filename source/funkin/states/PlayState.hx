@@ -3619,7 +3619,7 @@ class PlayState extends MusicBeatState
 		for (script in hscriptArray)
 			if (script != null)
 			{
-				if (script.exists('onDestroy'))
+				if (script.has('onDestroy'))
 					script.call('onDestroy');
 				script.destroy();
 			}
@@ -3968,7 +3968,7 @@ class PlayState extends MusicBeatState
 		for (script in hscriptArray)
 		{
 			@:privateAccess
-			if (script == null || !script.exists(funcToCall) || exclusions.contains(script.origin))
+			if (script == null || !script.has(funcToCall) || exclusions.contains(script.origin))
 				continue;
 
 			var callValue = script.call(funcToCall, args);

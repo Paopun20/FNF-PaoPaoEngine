@@ -9,7 +9,7 @@ class EditableState extends MusicBeatState
 	override public function create():Void
 	{
 		var stateName = Type.getClassName(Type.getClass(this)).split('.').pop();
-		scripts = new EditableCore(stateName, EditableType.State);
+		scripts = new EditableCore(stateName, EditableType.State, this);
 		scripts.initScriptFromDirectory("scripts/states/", stateName);
 		scripts.setScript("stateName", stateName);
 		super.create();

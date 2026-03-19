@@ -7,11 +7,9 @@ PaoPoa Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
 
 ## Features/Changes from the frok until 0.1.0 initial releases (maybe)
 
-- Python [**Beta**] - Introduction of Python as a mod scripting language
-  > interpreted language that offers greater readability and ease of learning compared to Lua. It also provides enhanced power, flexibility, and it lightweight too.\
+- Python [**Beta**] - A Simple Version of Python for mod scripting
   > Work in progress, because some Python feature contracts are yet to be completed.\
   > For assistance, please submit a pull request [here](https://github.com/Paopun20/Hython).\
-  > Note: this Hython is a Python interpreter written entirely in **Haxe** and you can use it for your own projects too, it is also open source.
 - Hscript (Improved and QOL)
   > Can use without `game.`
   > Use Own's Codename's HScript fork library, only add QOL.

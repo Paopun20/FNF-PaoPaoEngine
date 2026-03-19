@@ -23,6 +23,7 @@ import hscript.Interp;
 import hscript.Parser;
 import hscript.Printer;
 import hscript.Tools;
+import flixel.FlxBasic;
 
 using StringTools;
 
@@ -47,7 +48,7 @@ class PaoPaoInterp extends Interp
 	}
 }
 
-class HScript implements IHscriptInterface implements IFlxDestroyable
+class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestroyable
 {
 	public static var printer:Printer = new Printer();
 	public static var staticVariables:StringMap<Dynamic> = new StringMap<Dynamic>();
@@ -110,7 +111,7 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 			}
 			catch (e:Dynamic)
 			{
-				CoolLog.error('HScript Error: $(e');
+				CoolLog.error('HScript Error: $e');
 				hs.returnValue = null;
 			}
 		}
@@ -122,11 +123,11 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 		{
 			if (PlayState.instance != null)
 			{
-				PlayState.instance.addTextToDebug("[ERROR] " + Printer.errorToString(e), FlxColor.RED);
+				PlayState.instance.addTextToDebug('[ERROR]: ${scriptName} - ' + Printer.errorToString(e), FlxColor.RED);
 			}
 			else
 			{
-				CoolLog.error('HScript Error: ' + Printer.errorToString(e));
+				CoolLog.error('HScript ${scriptName}: ' + Printer.errorToString(e));
 			}
 		}
 	}
@@ -137,11 +138,11 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 		{
 			if (PlayState.instance != null)
 			{
-				PlayState.instance.addTextToDebug("[WARNING] " + Printer.errorToString(e), FlxColor.YELLOW);
+				PlayState.instance.addTextToDebug('[WARNING]: ${scriptName} - ' + Printer.errorToString(e), FlxColor.YELLOW);
 			}
 			else
 			{
-				CoolLog.error('HScript Warning: ' + Printer.errorToString(e));
+				CoolLog.warning('HScript ${scriptName}: ' + Printer.errorToString(e));
 			}
 		}
 	}
@@ -170,8 +171,9 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 		return false;
 	}
 
-	public function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?parentInstance:Dynamic = null)
+	public override function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?parentInstance:Dynamic = null)
 	{
+		super();
 		interp = new PaoPaoInterp();
 		interp.printCallStack = true;
 		interp.allowStaticVariables = interp.allowPublicVariables = true;
@@ -255,7 +257,7 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 		return returnValue;
 	}
 
-	public function setParent(parent:Dynamic): HScript
+	public function setParent(parent:Dynamic):HScript
 	{
 		interp.scriptObject = parent;
 		return this;
@@ -366,6 +368,16 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 		set('anyGamepadJustPressed', function(name:String) return FlxG.gamepads.anyJustPressed(name));
 		set('anyGamepadPressed', function(name:String) return FlxG.gamepads.anyPressed(name));
 		set('anyGamepadReleased', function(name:String) return FlxG.gamepads.anyJustReleased(name));
+
+		set('setVar', function(name:String, value:Dynamic) {
+			MusicBeatState.getVariables().set(name, value);
+			return value;
+		});
+		set('getVar', function(name:String) {
+			var result:Dynamic = null;
+			if(MusicBeatState.getVariables().exists(name)) result = MusicBeatState.getVariables().get(name);
+			return result;
+		});
 
 		set('gamepadAnalogX', function(id:Int, ?leftStick:Bool = true)
 		{
@@ -656,7 +668,7 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 		return interp.variables.get(variable);
 	}
 
-	public function exists(variable:String):Bool
+	public function has(variable:String):Bool
 	{
 		if (interp == null || closed)
 			return false;
@@ -674,7 +686,7 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 
 		try
 		{
-			if (exists(func))
+			if (has(func))
 			{
 				var functionRef = interp.variables.get(func);
 				if (Reflect.isFunction(functionRef))
@@ -706,8 +718,9 @@ class HScript implements IHscriptInterface implements IFlxDestroyable
 		#end
 	}
 
-	public function destroy():Void // for use old api
+	public override function destroy():Void // for use old api
 	{
+		super.destroy();
 		stop();
 	}
 }

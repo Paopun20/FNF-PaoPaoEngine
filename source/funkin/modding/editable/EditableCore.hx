@@ -23,6 +23,7 @@ class EditableCore
 {
 	public var stateName:String;
 	public var stateType:EditableType;
+	public var parent:Dynamic;
 
 	#if LUA_ALLOWED
 	private var luaArray:Array<FunkinLua> = [];
@@ -34,10 +35,11 @@ class EditableCore
 	private var pythonArray:Array<Python> = [];
 	#end
 
-	public function new(stateName:String, stateType:EditableType):Void
+	public function new(stateName:String, stateType:EditableType, parent:Dynamic):Void
 	{
 		this.stateName = stateName;
 		this.stateType = stateType;
+		this.parent = parent;
 	}
 
 	public function preset(script:Dynamic):Void
@@ -69,7 +71,7 @@ class EditableCore
 		var newScript:HScript = null;
 		try
 		{
-			newScript = new HScript(null, file).setParent(this);
+			newScript = new HScript(null, file).setParent(parent);
 			preset(newScript);
 			CoolLog.info('initialized hscript interp successfully: $file');
 			hscriptArray.push(newScript);
@@ -207,7 +209,7 @@ class EditableCore
 			if (script == null || exclusions.contains(script.origin))
 				continue;
 
-			if (!script.exists(func))
+			if (!script.has(func))
 				continue;
 
 			try
