@@ -296,8 +296,8 @@ class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestr
 			completeTweensOf: FlxTween.completeTweensOf,
 			globalManager: FlxTween.globalManager
 		});
-		set('FlxEase', flixel.tweens.FlxEase);
-		set('FlxSound', flixel.system.FlxSound);
+		set('FlxEase', FlxEase);
+		set('FlxSound', FlxSound);
 		set('FlxStreamSound', FlxStreamSound);
 
 		// Game Classes
