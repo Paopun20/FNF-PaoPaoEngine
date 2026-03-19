@@ -28,6 +28,7 @@ haxelib install tink_core 2.1.1
 haxelib install moonchart 0.5.1
 haxelib install sl-windows-api 1.2.0
 haxelib install random 1.4.1
+haxelib install format 3.8.0
 haxelib git lime https://github.com/openfl/lime
 haxelib git hython https://github.com/Paopun20/hython.git dev
 haxelib git compiletime https://github.com/Paopun20/compiletime.git
