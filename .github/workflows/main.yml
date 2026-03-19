@@ -122,10 +122,17 @@ jobs:
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
 
-      - name: Compile (Apple)
-        if: matrix.target == 'ios' || matrix.target == 'tvos'
+      - name: Compile (Apple IOS)
+        if: matrix.target == 'ios'
         run: |
           haxelib run lime rebuild ${{ matrix.target }}
+      - name: Compile (Apple TV)
+        if: matrix.target == 'tvos'
+        run: |
+          haxelib remove lime
+          git clone --recursive https://github.com/openfl/lime
+          haxelib dev lime lime
+          lime rebuild tvos
           haxelib run lime build ${{ matrix.target }} --app-version="4.0.0-${{ github.run_id}}" -D officialBuild -nosign
 
       - name: Compile
