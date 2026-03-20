@@ -1,7 +1,7 @@
 package;
 
-#if android
-import lime.system.JNI;
+#if (android || ios)
+import lime.system.System;
 #end
 import flixel.FlxG;
 import flixel.FlxGame;
@@ -312,9 +312,9 @@ class Main extends Sprite
 
 		// Credits to MAJigsaw77 (he's the og author for this code)
 		#if android
-		Sys.setCwd(Path.addTrailingSlash(JNI.callStaticMethod("android/content/Context", "getExternalFilesDir", "(Ljava/lang/String;)Ljava/io/File;", [null]).toString()));
+		Sys.setCwd(Path.addTrailingSlash(System.applicationStorageDirectory));
 		#elseif ios
-		Sys.setCwd(lime.system.System.applicationStorageDirectory);
+		Sys.setCwd(System.applicationStorageDirectory);
 		#end
 		#if VIDEOS_ALLOWED
 		hxvlc.util.Handle.init(#if (hxvlc >= "1.8.0") ['--no-lua'] #end);
