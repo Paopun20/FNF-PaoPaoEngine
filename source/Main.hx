@@ -291,8 +291,12 @@ class Main extends Sprite
 		#end
 
 		CoolLog.init();
+		#if CRASH_HANDLER
 		ErrorHandle.init();
+		#end
+		#if hxhardware
 		CPU.init();
+		#end
 
 		Lib.current.addChild(new Main());
 		funkin.plugins.ForceCrashPlugin.initialize();
@@ -355,10 +359,6 @@ class Main extends Sprite
 		FlxG.game.focusLostFramerate = 60;
 		FlxG.keys.preventDefaultKeys = [TAB];
 		FlxG.mouse.useSystemCursor = true;
-
-		#if CRASH_HANDLER
-		ErrorHandle.init();
-		#end
 
 		#if DISCORD_ALLOWED
 		DiscordClient.prepare();
