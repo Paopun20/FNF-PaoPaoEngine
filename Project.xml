@@ -291,8 +291,8 @@
 	</section>
 
 	<section if="android">
+		<android target-sdk-version="33" min-sdk-version="21" compile-sdk-version="33" />
 		<dependency name="c++_shared" />
-		<android target-sdk-version="21" min-sdk-version="21" />
 		<haxedef name="HXCPP_CLANG" />
 		<haxedef name="HXCPP_ARM_MODE" value="thumb2" />
 	</section>
