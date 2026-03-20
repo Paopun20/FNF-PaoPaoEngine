@@ -36,11 +36,10 @@
 	<define name="MODS_ALLOWED" />
 	<define name="HSCRIPT_ALLOWED" if="MODS_ALLOWED" />
 	<define name="PYTHON_ALLOWED" if="MODS_ALLOWED" />
-	<define name="LUA_ALLOWED" if="MODS_ALLOWED cpp" unless="hl" />
+	<define name="LUA_ALLOWED" if="MODS_ALLOWED cpp" unless="hl || html5" />
 	<define name="ACHIEVEMENTS_ALLOWED" />
-	<define name="DISCORD_ALLOWED" unless="hl" />
+	<define name="DISCORD_ALLOWED" if="cpp desktop" unless="hl || html5" />
 	<define name="TRANSLATIONS_ALLOWED" />
-	<define name="DEXAPI_ALLOWED" if="windows cpp desktop"/>
 
 	<define name="officialBuild" />
 
@@ -55,7 +54,7 @@
 
 	<define
         name="VIDEOS_ALLOWED"
-        if="windows || linux || mac"
+        if="windows || linux || mac || android || ios"
         unless="32bits || hl || html5"
     />
 
@@ -192,7 +191,7 @@
 	<haxelib name="flixel-addons" version="4.0.1" />
 	<haxelib name="flixel-waveform"/>
 	<haxelib name="random"/>
-	<haxelib name="hxhardware" if="cpp" />
+	<haxelib name="hxhardware" if="desktop cpp" />
 	<define name="SlWindowsAPI" if="windows desktop cpp"/>
 	<haxelib name="sl-windows-api" if="SlWindowsAPI"/>
 	<haxelib name="lime" version="8.3.1" />
@@ -202,7 +201,7 @@
 	<haxelib name="compiletime" />
 
 	<!-- Libraries needed-->
-	<haxelib name="linc_luajit" if="desktop cpp LUA_ALLOWED" unless="hl || html5" />
+	<haxelib name="linc_luajit" if="LUA_ALLOWED" />
 	<haxelib name="hython" if="PYTHON_ALLOWED" />
 	<haxelib name="hscript-improved" if="HSCRIPT_ALLOWED" />
 
