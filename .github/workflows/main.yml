@@ -48,12 +48,12 @@ jobs:
             lib-path: ~/haxelib
             setup-file: ./setup/unix.sh
 
-          - os: macos-latest
-            target: ios
-            artifact-name: iosBuild
-            export-path: export/release/ios/
-            lib-path: ~/haxelib
-            setup-file: ./setup/unix.sh
+          # - os: macos-latest
+          #   target: ios
+          #   artifact-name: iosBuild
+          #   export-path: export/release/ios/
+          #   lib-path: ~/haxelib
+          #   setup-file: ./setup/unix.sh
 
           - os: ubuntu-latest
             target: android
@@ -188,7 +188,7 @@ jobs:
     name: Nightly Release
     needs: build
     runs-on: ubuntu-latest
-    if: ${{ inputs.nightly || github.event_name == 'pull_request' }}
+    if: ${{ (inputs.nightly || github.event_name == 'pull_request') && always() }}
 
     steps:
       - name: Download all artifacts
@@ -203,7 +203,6 @@ jobs:
           zip -r ../paopao.nightly.linux.zip linuxBuild/
           zip -r ../paopao.nightly.windows.zip windowsBuild/
           zip -r ../paopao.nightly.mac.zip macBuild/
-          zip -r ../paopao.nightly.ios.zip iosBuild/
           zip -r ../paopao.nightly.android.zip androidBuild/
 
       - name: Update Nightly Release
@@ -224,5 +223,4 @@ jobs:
             paopao.nightly.linux.zip
             paopao.nightly.windows.zip
             paopao.nightly.mac.zip
-            paopao.nightly.ios.zip
             paopao.nightly.android.zip
