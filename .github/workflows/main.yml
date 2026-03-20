@@ -41,26 +41,33 @@ jobs:
             lib-path: C:/haxelib
             setup-file: ./setup/windows.ps1
 
-          - os: macos-15
+          - os: macos-latest
             target: mac
             artifact-name: macBuild
             export-path: export/release/macos/bin
             lib-path: ~/haxelib
             setup-file: ./setup/unix.sh
 
-          - os: macos-15
+          - os: macos-latest
             target: ios
             artifact-name: iosBuild
-            export-path: export/release/ios
+            export-path: export/release/ios/PaoPaoEngine
             lib-path: ~/haxelib
             setup-file: ./setup/unix.sh
 
-          #- os: macos-15
-          #  target: tvos
-          #  artifact-name: tvosBuild
-          #  export-path: export/release/tvos
-          #  lib-path: ~/haxelib
-          #  setup-file: ./setup/unix.sh
+          - os: ubuntu-latest
+            target: android
+            artifact-name: androidBuild
+            export-path: export/release/android/bin
+            lib-path: ~/haxelib
+            setup-file: ./setup/unix.sh
+
+          # - os: macos-15
+          #   target: tvos
+          #   artifact-name: tvosBuild
+          #   export-path: export/release/tvos
+          #   lib-path: ~/haxelib
+          #   setup-file: ./setup/unix.sh
 
     runs-on: ${{ matrix.os }}
     env:
@@ -126,9 +133,21 @@ jobs:
         if: matrix.target == 'ios'
         run: |
           haxelib run lime rebuild ${{ matrix.target }}
+
+      - name: Set Android NDK
+        if: matrix.target == 'android'
+        run: echo "ANDROID_NDK_HOME=$ANDROID_NDK_LATEST_HOME" >> $GITHUB_ENV
+
+      - name: Compile (Android)
+        if: matrix.target == 'android'
+        run: |
+          haxelib run lime build android --app-version="4.0.0-${{ github.run_id }}" -D officialBuild
+
       - name: Compile (Apple TV)
         if: matrix.target == 'tvos'
         run: |
+          haxelib install format 3.8.0
+          haxelib install hxp 1.3.1
           haxelib remove lime
           git clone --recursive https://github.com/openfl/lime
           haxelib dev lime lime
@@ -138,8 +157,8 @@ jobs:
           haxelib run lime rebuild tvos
           haxelib run lime build ${{ matrix.target }} --app-version="4.0.0-${{ github.run_id}}" -D officialBuild -nosign
 
-      - name: Compile
-        if: matrix.target != 'ios' && matrix.target != 'tvos'
+      - name: Compile (Anyelse)
+        if: matrix.target != 'ios' && matrix.target != 'tvos' && matrix.target != 'android'
         run: |
           haxelib run lime build ${{ matrix.target }} --app-version="4.0.0-${{ github.run_id}}" -D officialBuild
 
@@ -153,7 +172,7 @@ jobs:
     name: Nightly Release
     needs: build
     runs-on: ubuntu-latest
-    if: ${{ inputs.nightly }}
+    if: ${{ inputs.nightly || github.event_name == 'pull_request' }}
 
     steps:
       - name: Download all artifacts
@@ -169,7 +188,7 @@ jobs:
           zip -r ../paopao.nightly.windows.zip windowsBuild/
           zip -r ../paopao.nightly.mac.zip macBuild/
           zip -r ../paopao.nightly.ios.zip iosBuild/
-          zip -r ../paopao.nightly.tvos.zip tvosBuild/
+          zip -r ../paopao.nightly.android.zip androidBuild/
 
       - name: Update Nightly Release
         uses: andelf/nightly-release@main
@@ -190,3 +209,4 @@ jobs:
             paopao.nightly.windows.zip
             paopao.nightly.mac.zip
             paopao.nightly.ios.zip
+            paopao.nightly.android.zip

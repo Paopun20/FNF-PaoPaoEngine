@@ -1,6 +1,8 @@
 package funkin.utils.macro;
 
 import haxe.ds.StringMap;
+import sys.FileSystem;
+
 #if macro
 import haxe.macro.Context;
 import haxe.macro.Expr;
@@ -18,10 +20,8 @@ final class SourceMap
 		var setExprs:Array<Expr> = [];
 
 		for (path in getSourcePaths())
-		{
-			if (sys.FileSystem.exists(path) && sys.FileSystem.isDirectory(path))
+			if (FileSystem.exists(path) && FileSystem.isDirectory(path))
 				collectFiles(path, path, setExprs);
-		}
 
 		return macro
 		{
@@ -33,32 +33,32 @@ final class SourceMap
 
 	#if macro
 	// MSVC limits string literals to ~16KB, so I chunk large files
-	static final CHUNK_SIZE = 8000;
+	private static final CHUNK_SIZE = 8000;
 
-	static function resolvePathAttr(node:Xml):Null<String>
+	private static function resolvePathAttr(node:Xml):Null<String>
 	{
 		var path = node.get("path");
 		if (path == null || path == "")
 			path = node.get("name");
-		return (path != null && path != "") ? sys.FileSystem.absolutePath(path) : null;
+		return (path != null && path != "") ? FileSystem.absolutePath(path) : null;
 	}
 
-	static function getSourcePaths():Array<String>
+	private static function getSourcePaths():Array<String>
 	{
 		var paths:Array<String> = [];
 
 		var xmlPath = "./Project.xml";
-		if (!sys.FileSystem.exists(xmlPath))
+		if (!FileSystem.exists(xmlPath))
 		{
 			Context.warning("SourceMap: Project.xml not found", Context.currentPos());
-			return [sys.FileSystem.absolutePath("./source")];
+			return [FileSystem.absolutePath("./source")];
 		}
 
 		var content = sys.io.File.getContent(xmlPath);
 		var xml = try Xml.parse(content) catch (e:Dynamic)
 		{
 			Context.warning('SourceMap: Failed to parse Project.xml: $e', Context.currentPos());
-			return [sys.FileSystem.absolutePath("./source")];
+			return [FileSystem.absolutePath("./source")];
 		};
 
 		for (node in xml.firstElement())
@@ -72,7 +72,7 @@ final class SourceMap
 					// <source path="source"/>
 					var path = resolvePathAttr(node);
 					if (path != null && path != "")
-						paths.push(sys.FileSystem.absolutePath(path));
+						paths.push(FileSystem.absolutePath(path));
 					else
 						Context.warning('SourceMap: Invalid <source> path in Project.xml', Context.currentPos());
 
@@ -98,13 +98,13 @@ final class SourceMap
 		if (paths.length == 0)
 		{
 			Context.warning("SourceMap: No paths found in Project.xml, falling back to ./source", Context.currentPos());
-			paths.push(sys.FileSystem.absolutePath("./source"));
+			paths.push(FileSystem.absolutePath("./source"));
 		}
 
 		return paths;
 	}
 
-	static function resolveHaxelibPath(name:String, ?version:String):Null<String>
+	private static function resolveHaxelibPath(name:String, ?version:String):Null<String>
 	{
 		// haxelib path accepts "name:version" format
 		var libArg = (version != null && version != "") ? '$name:$version' : name;
@@ -128,7 +128,7 @@ final class SourceMap
 				line = line.trim().replace("\\", "/");
 				if (line == "" || line.startsWith("-"))
 					continue;
-				if (sys.FileSystem.exists(line) && sys.FileSystem.isDirectory(line))
+				if (FileSystem.exists(line) && FileSystem.isDirectory(line))
 				{
 					Context.info('SourceMap: Resolved $libArg -> $line', Context.currentPos());
 					return line;
@@ -145,7 +145,7 @@ final class SourceMap
 		}
 	}
 
-	static function splitString(s:String):Expr
+	private static function splitString(s:String):Expr
 	{
 		if (s.length <= CHUNK_SIZE)
 			return macro $v{s};
@@ -166,13 +166,13 @@ final class SourceMap
 		return result;
 	}
 
-	static function collectFiles(base:String, dir:String, exprs:Array<Expr>):Void
+	private static function collectFiles(base:String, dir:String, exprs:Array<Expr>):Void
 	{
-		var items = try sys.FileSystem.readDirectory(dir) catch (e:Dynamic) return;
+		var items = try FileSystem.readDirectory(dir) catch (e:Dynamic) return;
 		for (file in items)
 		{
 			var full = dir + "/" + file;
-			if (sys.FileSystem.isDirectory(full))
+			if (FileSystem.isDirectory(full))
 			{
 				collectFiles(base, full, exprs);
 			}

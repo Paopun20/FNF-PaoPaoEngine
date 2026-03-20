@@ -48,8 +48,11 @@ import hxhardware.CPU;
 import hxhardware.GPU;
 import hxhardware.Memory;
 #end
-#if sl-windows-api
+#if SlWindowsAPI
 import winapi.WindowsAPI;
+#end
+#if hxWindowColorMode
+import hxwindowmode.WindowColorMode;
 #end
 
 /**
@@ -277,10 +280,18 @@ class Main extends Sprite
 	{
 		ThreadTool.defaultThreadCount = 8;
 		ThreadUtil.maxThreads = Std.int(Math.max(1, ThreadTool.getCPUThreadsCount()));
-		#if sl-windows-api
+		#if SlWindowsAPI
 		WindowsAPI.reDefineMainWindowTitle(Application.current.window.title);
 		#end
 
+		#if hxWindowColorMode
+		WindowColorMode.setDarkMode();
+		if (WindowColorMode.isWindows10)
+			WindowColorMode.redrawWindowHeader();
+		#end
+
+		CoolLog.init();
+		ErrorHandle.init();
 		CPU.init();
 
 		Lib.current.addChild(new Main());

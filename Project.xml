@@ -23,8 +23,9 @@
 	<!--The flixel preloader is not accurate in Chrome. You can use it regularly if you embed the swf into a html file
 		or you can set the actual size of your file manually at "FlxPreloaderBase-onUpdate-bytesTotal"-->
 	<!-- <app preloader="Preloader" resizable="true" /> -->
+	 <app preloader="flixel.system.FlxPreloader" />
 
-	<app preloader="Preloader" />
+	<!-- <app preloader="Preloader" /> -->
 
 
 	<!--Minimum without FLX_NO_GAMEPAD: 11.8, without FLX_NO_NATIVE_CURSOR: 11.2-->
@@ -40,11 +41,6 @@
 	<define name="DISCORD_ALLOWED" unless="hl" />
 	<define name="TRANSLATIONS_ALLOWED" />
 	<define name="DEXAPI_ALLOWED" if="windows cpp desktop"/>
-	<define
-        name="WindowColorMode"
-        if="desktop || window"
-        unless="hl || android || ios || mac || linux || html5"
-    />
 
 	<define name="officialBuild" />
 
@@ -197,11 +193,12 @@
 	<haxelib name="flixel-waveform"/>
 	<haxelib name="random"/>
 	<haxelib name="hxhardware" if="cpp" />
-	<haxelib name="sl-windows-api" if="windows desktop cpp" />
+	<define name="SlWindowsAPI" if="windows desktop cpp"/>
+	<haxelib name="sl-windows-api" if="SlWindowsAPI"/>
 	<haxelib name="lime" version="8.3.1" />
 
 	<haxelib name="tjson" version="1.4.0" />
-	<haxelib name="hxWindowColorMode" if="windows desktop" />
+	<haxelib name="hxWindowColorMode" if="windows desktop cpp" />
 	<haxelib name="compiletime" />
 
 	<!-- Libraries needed-->
