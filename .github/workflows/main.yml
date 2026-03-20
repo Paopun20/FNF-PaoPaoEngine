@@ -58,7 +58,7 @@ jobs:
           - os: ubuntu-latest
             target: android
             artifact-name: androidBuild
-            export-path: export/release/android/bin
+            export-path: export/release/android/bin/app/build/outputs/apk/release
             lib-path: ~/haxelib
             setup-file: ./setup/unix.sh
 
@@ -157,7 +157,7 @@ jobs:
           echo "JAVA_HOME=$JAVA_HOME"
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
           echo -e "$ANDROID_SDK_ROOT\n$ANDROID_NDK_HOME\n$JAVA_HOME\n" | haxelib run lime setup android
-          haxelib run lime build android --app-version="4.0.0-${{ github.run_id }}" -D officialBuild
+          haxelib run lime build android --app-version="4.0.0-${{ github.run_id }}" -D officialBuild -release
 
       - name: Compile (Apple TV)
         if: matrix.target == 'tvos'
@@ -188,7 +188,7 @@ jobs:
     name: Nightly Release
     needs: build
     runs-on: ubuntu-latest
-    if: ${{ (inputs.nightly || github.event_name == 'pull_request') && always() }}
+    if: ${{ (inputs.nightly || github.event_name == 'push') && always() }}
 
     steps:
       - name: Download all artifacts
