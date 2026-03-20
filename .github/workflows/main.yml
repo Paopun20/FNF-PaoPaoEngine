@@ -58,7 +58,7 @@ jobs:
           - os: ubuntu-latest
             target: android
             artifact-name: androidBuild
-            export-path: export/release/android/bin/app/release
+            export-path: export/release/android/bin/app/build/outputs/apk
             lib-path: ~/haxelib
             setup-file: ./setup/unix.sh
 
