@@ -200,7 +200,6 @@
 	<haxelib name="hxhardware" if="desktop cpp" />
 	<define name="SlWindowsAPI" if="windows desktop cpp" />
 	<haxelib name="sl-windows-api" if="SlWindowsAPI" />
-	<haxelib name="lime" version="8.3.1" />
 
 	<haxelib name="tjson" version="1.4.0" />
 	<haxelib name="hxWindowColorMode" if="windows desktop cpp" />
