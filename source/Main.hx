@@ -1,7 +1,7 @@
 package;
 
 #if android
-import android.content.Context;
+import lime.system.JNI;
 #end
 import flixel.FlxG;
 import flixel.FlxGame;
@@ -312,7 +312,7 @@ class Main extends Sprite
 
 		// Credits to MAJigsaw77 (he's the og author for this code)
 		#if android
-		Sys.setCwd(Path.addTrailingSlash(Context.getExternalFilesDir()));
+		Sys.setCwd(Path.addTrailingSlash(JNI.callStaticMethod("android/content/Context", "getExternalFilesDir", "(Ljava/lang/String;)Ljava/io/File;", [null]).toString()));
 		#elseif ios
 		Sys.setCwd(lime.system.System.applicationStorageDirectory);
 		#end
