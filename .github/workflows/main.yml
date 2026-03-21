@@ -58,7 +58,7 @@ jobs:
           - os: ubuntu-latest
             target: android
             artifact-name: androidBuild
-            export-path: export/release/android/bin/app/build/outputs/apk
+            export-path: export/release/android/bin/app/release
             lib-path: ~/haxelib
             setup-file: ./setup/unix.sh
 
@@ -138,21 +138,18 @@ jobs:
           haxelib run lime rebuild ${{ matrix.target }}
           haxelib run lime build ios --app-version="4.0.0-${{ github.run_id }}" -D officialBuild -nosign
 
-      - name: Install Android NDK
+      - name: Install Android NDK r21d
         if: matrix.target == 'android'
         run: |
-          wget -q https://dl.google.com/android/repository/android-ndk-r27d-linux.zip
-          unzip -q android-ndk-r27d-linux.zip -d /opt/
-          mv /opt/android-ndk-r27d /opt/android-ndk
+          wget -q https://dl.google.com/android/repository/android-ndk-r21d-linux-x86_64.zip
+          unzip -q android-ndk-r21d-linux-x86_64.zip -d /opt/
+          mv /opt/android-ndk-r21d /opt/android-ndk
           echo "ANDROID_NDK_HOME=/opt/android-ndk" >> $GITHUB_ENV
 
       - name: Install Android SDK platform
         if: matrix.target == 'android'
         run: |
-          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
-            "platforms;android-33" \
-            "build-tools;33.0.2" \
-            "platform-tools"
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platforms;android-33" "build-tools;33.0.2"
 
       - name: Compile (Android)
         if: matrix.target == 'android'
@@ -206,7 +203,7 @@ jobs:
           zip -r ../paopao.nightly.linux.zip linuxBuild/
           zip -r ../paopao.nightly.windows.zip windowsBuild/
           zip -r ../paopao.nightly.mac.zip macBuild/
-          find androidBuild/ -name "*.apk" -exec zip ../paopao.nightly.android.zip {} \;
+          zip -r ../paopao.nightly.android.zip androidBuild/
 
       - name: Update Nightly Release
         uses: andelf/nightly-release@main

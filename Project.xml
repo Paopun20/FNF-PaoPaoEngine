@@ -294,7 +294,14 @@
 		<dependency name="c++_shared" />
 		<haxedef name="HXCPP_CLANG" />
 		<haxedef name="HXCPP_ARM_MODE" value="thumb2" />
-		<haxelib name="android6permissions" />
+
+		<android xmlns:android="http://schemas.android.com/apk/res/android">
+			<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+			<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+			<uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+			<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+			<uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+		</android>
 	</section>
 
 	<!--Disable

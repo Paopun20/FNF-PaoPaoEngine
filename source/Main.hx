@@ -54,9 +54,6 @@ import winapi.WindowsAPI;
 #if hxWindowColorMode
 import hxwindowmode.WindowColorMode;
 #end
-#if android
-import com.player03.android6.Permissions;
-#end
 
 /**
  * Just a normal one, with error handling and stuff. You can ignore this, your code should go in your states.
@@ -288,45 +285,6 @@ class Main extends Sprite
 		#end
 
 		CoolLog.init();
-
-		#if android
-		var perms = [
-			Permissions.READ_EXTERNAL_STORAGE,
-			Permissions.WRITE_EXTERNAL_STORAGE,
-			Permissions.READ_MEDIA_VIDEO,
-			Permissions.READ_MEDIA_IMAGES,
-			Permissions.READ_MEDIA_AUDIO
-		];
-
-		var listener = null;
-
-		listener = function(granteds:Array<String>)
-		{
-			Permissions.onPermissionsGranted.remove(listener);
-
-			var ok = true;
-			for (p in perms)
-			{
-				if (granteds.indexOf(p) < 0)
-				{
-					ok = false;
-					break;
-				}
-			}
-
-			if (ok)
-			{
-				CoolLog.info("All granted");
-			}
-			else
-			{
-				CoolLog.warning("Some denied");
-			}
-		};
-
-		Permissions.onPermissionsGranted.add(listener);
-		Permissions.requestPermissions(perms);
-		#end
 
 		#if hxWindowColorMode
 		WindowColorMode.setDarkMode();
