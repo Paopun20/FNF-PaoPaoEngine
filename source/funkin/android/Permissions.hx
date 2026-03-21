@@ -4,7 +4,7 @@ package funkin.android;
 import com.player03.android6.Permissions as AndroidPermissions;
 #end
 
-class PermissionType
+abstract class PermissionType
 {
 	public static var ACCEPT_HANDOVER = "android.permission.ACCEPT_HANDOVER";
 	public static var ACCESS_BACKGROUND_LOCATION = "android.permission.ACCESS_BACKGROUND_LOCATION";
