@@ -138,18 +138,21 @@ jobs:
           haxelib run lime rebuild ${{ matrix.target }}
           haxelib run lime build ios --app-version="4.0.0-${{ github.run_id }}" -D officialBuild -nosign
 
-      - name: Install Android NDK r21d
+      - name: Install Android NDK
         if: matrix.target == 'android'
         run: |
-          wget -q https://dl.google.com/android/repository/android-ndk-r21d-linux-x86_64.zip
-          unzip -q android-ndk-r21d-linux-x86_64.zip -d /opt/
-          mv /opt/android-ndk-r21d /opt/android-ndk
+          wget -q https://dl.google.com/android/repository/android-ndk-r27d-linux.zip
+          unzip -q android-ndk-r27d-linux-x86_64.zip -d /opt/
+          mv /opt/android-ndk-r27d /opt/android-ndk
           echo "ANDROID_NDK_HOME=/opt/android-ndk" >> $GITHUB_ENV
 
       - name: Install Android SDK platform
         if: matrix.target == 'android'
         run: |
-          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platforms;android-33" "build-tools;33.0.2"
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
+            "platforms;android-33" \
+            "build-tools;33.0.2" \
+            "platform-tools"
 
       - name: Compile (Android)
         if: matrix.target == 'android'
