@@ -142,7 +142,7 @@ jobs:
         if: matrix.target == 'android'
         run: |
           wget -q https://dl.google.com/android/repository/android-ndk-r27d-linux.zip
-          unzip -q android-ndk-r27d-linux-x86_64.zip -d /opt/
+          unzip -q android-ndk-r27d-linux.zip -d /opt/
           mv /opt/android-ndk-r27d /opt/android-ndk
           echo "ANDROID_NDK_HOME=/opt/android-ndk" >> $GITHUB_ENV
 
