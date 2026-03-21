@@ -305,7 +305,6 @@
 
 		<set name="debug" if="debug" />
 		<haxeflag name="-debug" if="debug" />
-		<haxeflag name="-release" unless="debug" />
 	</section>
 
 	<!--Disable
