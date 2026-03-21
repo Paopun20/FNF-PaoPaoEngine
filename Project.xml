@@ -302,6 +302,10 @@
 			<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 			<uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
 		</android>
+
+		<set name="debug" if="debug" />
+		<haxeflag name="-debug" if="debug" />
+		<haxeflag name="-release" unless="debug" />
 	</section>
 
 	<!--Disable
