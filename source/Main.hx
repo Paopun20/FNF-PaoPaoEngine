@@ -55,7 +55,7 @@ import winapi.WindowsAPI;
 import hxwindowmode.WindowColorMode;
 #end
 #if android
-import funkin.android.Permissions;
+import com.player03.android6.Permissions;
 #end
 
 /**
@@ -290,29 +290,42 @@ class Main extends Sprite
 		CoolLog.init();
 
 		#if android
-		var loop:Bool = true;
-		while (loop)
+		var perms = [
+			Permissions.READ_EXTERNAL_STORAGE,
+			Permissions.WRITE_EXTERNAL_STORAGE,
+			Permissions.READ_MEDIA_VIDEO,
+			Permissions.READ_MEDIA_IMAGES,
+			Permissions.READ_MEDIA_AUDIO
+		];
+
+		var listener = null;
+
+		listener = function(granteds:Array<String>)
 		{
-			Permissions.hasOrRequestMany([
-				PermissionType.READ_EXTERNAL_STORAGE,
-				PermissionType.WRITE_EXTERNAL_STORAGE,
-				PermissionType.READ_MEDIA_VIDEO,
-				PermissionType.READ_MEDIA_IMAGES,
-				PermissionType.READ_MEDIA_AUDIO
-			], (ok:Bool) ->
+			Permissions.onPermissionsGranted.remove(listener);
+
+			var ok = true;
+			for (p in perms)
+			{
+				if (granteds.indexOf(p) < 0)
 				{
-					if (ok)
-					{
-						CoolLog.info("All permissions granted");
-						loop = false;
-					}
-					else
-					{
-						CoolLog.info("Some permissions denied");
-						loop = true;
-					}
-				});
-		}
+					ok = false;
+					break;
+				}
+			}
+
+			if (ok)
+			{
+				CoolLog.info("All granted");
+			}
+			else
+			{
+				CoolLog.warn("Some denied");
+			}
+		};
+
+		Permissions.onPermissionsGranted.add(listener);
+		Permissions.requestPermissions(perms);
 		#end
 
 		#if hxWindowColorMode
