@@ -110,4 +110,20 @@ final class ThreadUtil
 		func();
 		#end
 	}
+
+	private static function runSync(asyncFunc:((Dynamic) -> Void)->Void):Dynamic
+	{
+		var result:Dynamic = null;
+		var completed = false;
+
+		asyncFunc(function(arg:Dynamic)
+		{
+			completed = true;
+			result = arg;
+		});
+
+		while (!completed)
+			Sys.sleep(0.01);
+		return result;
+	}
 }

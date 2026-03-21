@@ -294,6 +294,7 @@
 		<dependency name="c++_shared" />
 		<haxedef name="HXCPP_CLANG" />
 		<haxedef name="HXCPP_ARM_MODE" value="thumb2" />
+		<haxelib name="android6permissions" />
 	</section>
 
 	<!--Disable

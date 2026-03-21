@@ -2,7 +2,6 @@ package funkin.utils.macro;
 
 import haxe.ds.StringMap;
 import sys.FileSystem;
-
 #if macro
 import haxe.macro.Context;
 import haxe.macro.Expr;

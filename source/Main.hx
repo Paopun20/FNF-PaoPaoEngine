@@ -54,6 +54,9 @@ import winapi.WindowsAPI;
 #if hxWindowColorMode
 import hxwindowmode.WindowColorMode;
 #end
+#if android
+import funkin.android.Permissions;
+#end
 
 /**
  * Just a normal one, with error handling and stuff. You can ignore this, your code should go in your states.
@@ -284,13 +287,39 @@ class Main extends Sprite
 		WindowsAPI.reDefineMainWindowTitle(Application.current.window.title);
 		#end
 
+		CoolLog.init();
+
+		#if android
+		var loop:Bool = true;
+		while (loop)
+		{
+			Permissions.hasOrRequestMany([
+				PermissionsType.READ_EXTERNAL_STORAGE,
+				PermissionsType.WRITE_EXTERNAL_STORAGE,
+				PermissionsType.READ_MEDIA_VIDEO,
+				PermissionsType.READ_MEDIA_IMAGES,
+				PermissionsType.READ_MEDIA_AUDIO
+			], (ok:Bool) ->
+				{
+					if (ok)
+					{
+						CoolLog.info("All permissions granted");
+						loop = false;
+					}
+					else
+					{
+						CoolLog.info("Some permissions denied");
+						loop = true;
+					}
+				});
+		}
+		#end
+
 		#if hxWindowColorMode
 		WindowColorMode.setDarkMode();
 		if (WindowColorMode.isWindows10)
 			WindowColorMode.redrawWindowHeader();
 		#end
-
-		CoolLog.init();
 		#if CRASH_HANDLER
 		ErrorHandle.init();
 		#end

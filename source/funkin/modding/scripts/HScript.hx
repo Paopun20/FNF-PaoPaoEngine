@@ -35,7 +35,6 @@ interface IHscriptInterface
 	public function stop():Void;
 }
 
-
 class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestroyable
 {
 	public static var printer:Printer = new Printer();
@@ -357,13 +356,16 @@ class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestr
 		set('anyGamepadPressed', function(name:String) return FlxG.gamepads.anyPressed(name));
 		set('anyGamepadReleased', function(name:String) return FlxG.gamepads.anyJustReleased(name));
 
-		set('setVar', function(name:String, value:Dynamic) {
+		set('setVar', function(name:String, value:Dynamic)
+		{
 			MusicBeatState.getVariables().set(name, value);
 			return value;
 		});
-		set('getVar', function(name:String) {
+		set('getVar', function(name:String)
+		{
 			var result:Dynamic = null;
-			if(MusicBeatState.getVariables().exists(name)) result = MusicBeatState.getVariables().get(name);
+			if (MusicBeatState.getVariables().exists(name))
+				result = MusicBeatState.getVariables().get(name);
 			return result;
 		});
 
