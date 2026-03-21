@@ -58,7 +58,7 @@ jobs:
           - os: ubuntu-latest
             target: android
             artifact-name: androidBuild
-            export-path: export/release/android/bin/app/release
+            export-path: export/release/android/bin/app/build/outputs/apk
             lib-path: ~/haxelib
             setup-file: ./setup/unix.sh
 
@@ -203,7 +203,7 @@ jobs:
           zip -r ../paopao.nightly.linux.zip linuxBuild/
           zip -r ../paopao.nightly.windows.zip windowsBuild/
           zip -r ../paopao.nightly.mac.zip macBuild/
-          zip -r ../paopao.nightly.android.zip androidBuild/
+          find androidBuild/ -name "*.apk" -exec zip ../paopao.nightly.android.zip {} \;
 
       - name: Update Nightly Release
         uses: andelf/nightly-release@main
