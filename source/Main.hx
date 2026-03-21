@@ -294,11 +294,11 @@ class Main extends Sprite
 		while (loop)
 		{
 			Permissions.hasOrRequestMany([
-				PermissionsType.READ_EXTERNAL_STORAGE,
-				PermissionsType.WRITE_EXTERNAL_STORAGE,
-				PermissionsType.READ_MEDIA_VIDEO,
-				PermissionsType.READ_MEDIA_IMAGES,
-				PermissionsType.READ_MEDIA_AUDIO
+				PermissionType.READ_EXTERNAL_STORAGE,
+				PermissionType.WRITE_EXTERNAL_STORAGE,
+				PermissionType.READ_MEDIA_VIDEO,
+				PermissionType.READ_MEDIA_IMAGES,
+				PermissionType.READ_MEDIA_AUDIO
 			], (ok:Bool) ->
 				{
 					if (ok)
