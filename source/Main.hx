@@ -320,7 +320,7 @@ class Main extends Sprite
 			}
 			else
 			{
-				CoolLog.warn("Some denied");
+				CoolLog.warning("Some denied");
 			}
 		};
 
