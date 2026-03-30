@@ -30,8 +30,6 @@ class LoadingState extends EditableState
 	private static var loadMax:Int = 0;
 	private static var currentAssetName:String = "...";
 
-	var backdropTimer:Float = 0;
-
 	private static var originalBitmapKeys:Map<String, String> = [];
 	private static var requestedBitmaps:Map<String, BitmapData> = [];
 	#if (sys || MULTITHREADED_LOADING)
@@ -138,7 +136,7 @@ class LoadingState extends EditableState
 		addBehindBar(bg);
 
 		backdrop = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0x33FFFFFF, 0x0));
-		backdrop.velocity.set(40, 40);
+		backdrop.velocity.set(Random.int(-40, 40), Random.int(-40, 40));
 		addBehindBar(backdrop);
 
 		loadingText = new FlxText(0, 550, FlxG.width, Language.getPhrase('now_loading', 'Now Loading', ['...']), 32);
@@ -170,13 +168,6 @@ class LoadingState extends EditableState
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
-
-		backdropTimer += elapsed;
-		if (backdropTimer >= 3.0) // change direction every 1 seconds
-		{
-			backdropTimer = 0;
-			backdrop.velocity.set(Random.int(20, 40) * Random.int(-1, 1), Random.int(-40, 40));
-		}
 
 		if (dontUpdate)
 			return;

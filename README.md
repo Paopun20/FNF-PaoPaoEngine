@@ -9,19 +9,20 @@ PaoPoa Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
 
 - Python [**Beta**] - A Simple Version of Python for mod scripting
   > Work in progress, because some Python feature contracts are yet to be completed.\
-  > For assistance, please submit a pull request [here](https://github.com/Paopun20/Hython).\
-- Hscript (Improved and QOL)
-  > Can use without `game.`
-  > Use Own's Codename's HScript fork library, only add QOL.
+  > Want to help? Submit a pull request on the [Hython GitHub repository](https://github.com/Paopun20/Hython).
+- Hscript (Improved and QOL) [**WIP**]
+  > Can use without `game.`\
+  > Use Own's Codename's HScript fork library, only add QOL.\
+  > It's too buggy like add/remove it not work...
 - Optimize by Cache AST (HScript/Python only)
-  > Cache AST (Abstract Syntax Tree)
+  > Cache AST (Abstract Syntax Tree)\
   > Reuse Cache AST
 - Ndll Support (HScript/Python only)
   > It codename feature.
 - Fixed Psych Engine Bugs (some critical)
   - Loading Screen (Critical): Fix Race Condition
-    > A race condition occurs when two or more threads access a shared resource simultaneously, leading to unpredictable behavior, data corruption, or a stuck loading screen.
-    > More details? [here](https://www.youtube.com/watch?v=bhpzTWtee2A)
+    > A race condition occurs when two or more threads access a shared resource simultaneously, leading to unpredictable behavior, data corruption, or a stuck loading screen.\
+    > More details? [YouTube video about Race Conditions](https://www.youtube.com/watch?v=bhpzTWtee2A)
 - Open mod folder by clicking the "Open Mod Folder" button in the mod menu.
 - Format all files to make them more readable and easier to understand
 - Fixed Psych Engine Bugs
@@ -38,10 +39,10 @@ PaoPoa Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
   > /J SL WINDOWS API library
 - New events:
   - Offset Timer
-  > Shifts the **displayed time** forward or backward in the Time UI. Supports tweening.
+  > Shifts the **displayed time** forward or backward in the Time UI. Supports tweening.\
   > Does not affect `Conductor.songPosition`.
   - Offset End
-  > Shortens the **displayed song length** in the Time UI, making the bar fill up earlier.
+  > Shortens the **displayed song length** in the Time UI, making the bar fill up earlier.\
   > Useful for fake endings. Does not affect `Conductor.songPosition` or `songLength`.
 
 ## Origin

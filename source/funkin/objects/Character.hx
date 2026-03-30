@@ -8,6 +8,9 @@ import openfl.utils.Assets;
 import haxe.Json;
 import funkin.backend.Song;
 import funkin.states.stages.objects.TankmenBG;
+import haxe.ds.StringMap;
+
+using StringTools;
 
 typedef CharacterFile =
 {
@@ -24,6 +27,7 @@ typedef CharacterFile =
 	var no_antialiasing:Bool;
 	var healthbar_colors:Array<Int>;
 	var vocals_file:String;
+	var isAnimateatlas:Bool;
 	@:optional var _editor_isPlayer:Null<Bool>;
 }
 
@@ -44,9 +48,9 @@ class Character extends FlxSprite
 	**/
 	public static final DEFAULT_CHARACTER:String = 'bf';
 
-	public var animOffsets:Map<String, Array<Dynamic>>;
+	public var animOffsets:StringMap<Array<Dynamic>>;
 	public var debugMode:Bool = false;
-	public var extraData:Map<String, Dynamic> = new Map<String, Dynamic>();
+	public var extraData:StringMap<Dynamic> = new StringMap<Dynamic>();
 
 	public var isPlayer:Bool = false;
 	public var curCharacter:String = DEFAULT_CHARACTER;
@@ -86,7 +90,7 @@ class Character extends FlxSprite
 
 		animation = new PsychAnimationController(this);
 
-		animOffsets = new Map<String, Array<Dynamic>>();
+		animOffsets = new StringMap<Array<Dynamic>>();
 		this.isPlayer = isPlayer;
 		changeCharacter(character);
 
@@ -103,8 +107,8 @@ class Character extends FlxSprite
 
 	public function changeCharacter(character:String)
 	{
-		animationsArray = [];
-		animOffsets = [];
+		animationsArray = new Array<AnimArray>();
+		animOffsets = new StringMap<Array<Dynamic>>();
 		curCharacter = character;
 		var characterPath:String = 'characters/$character.json';
 
@@ -146,8 +150,10 @@ class Character extends FlxSprite
 	{
 		isAnimateAtlas = false;
 
+		var path:String = json.assetPath == null ? json.image : json.assetPath.replace('shared:', '');
+
 		#if flxanimate
-		var animToFind:String = Paths.getPath('images/' + json.image + '/Animation.json', TEXT);
+		var animToFind:String = Paths.getPath('images/' + path + '/Animation.json', TEXT);
 		if (#if MODS_ALLOWED FileSystem.exists(animToFind) || #end Assets.exists(animToFind))
 			isAnimateAtlas = true;
 		#end
@@ -157,7 +163,9 @@ class Character extends FlxSprite
 
 		if (!isAnimateAtlas)
 		{
-			frames = Paths.getMultiAtlas(json.image.split(','));
+			if (json.assetPath != null)
+				path = convertMultiSparrow(json.animations, path);
+			frames = Paths.getMultiAtlas(path.split(','));
 		}
 		#if flxanimate
 		else
@@ -166,44 +174,119 @@ class Character extends FlxSprite
 			atlas.showPivot = false;
 			try
 			{
-				Paths.loadAnimateAtlas(atlas, json.image);
+				Paths.loadAnimateAtlas(atlas, path);
 			}
 			catch (e:haxe.Exception)
 			{
-				FlxG.log.warn('Could not load atlas ${json.image}: $e');
+				FlxG.log.warn('Could not load atlas ${path}: $e');
 				// trace(e.stack);
 				CoolLog.error(e.stack);
 			}
 		}
 		#end
 
-		imageFile = json.image;
-		jsonScale = json.scale;
-		if (json.scale != 1)
+		if (json.assetPath == null)
 		{
-			scale.set(jsonScale, jsonScale);
-			updateHitbox();
+			// Psych Engine format
+			imageFile = json.image;
+			jsonScale = json.scale;
+			if (json.scale != 1)
+			{
+				scale.set(jsonScale, jsonScale);
+				updateHitbox();
+			}
+
+			// positioning
+			positionArray = json.position;
+			cameraPosition = json.camera_position;
+
+			// data
+			healthIcon = json.healthicon;
+			singDuration = json.sing_duration;
+			flipX = (json.flip_x != isPlayer);
+			healthColorArray = (json.healthbar_colors != null && json.healthbar_colors.length > 2) ? json.healthbar_colors : [161, 161, 161];
+			vocalsFile = json.vocals_file != null ? json.vocals_file : '';
+			originalFlipX = (json.flip_x == true);
+			editorIsPlayer = json._editor_isPlayer;
+
+			// antialiasing
+			noAntialiasing = (json.no_antialiasing == true);
+			antialiasing = ClientPrefs.data.antialiasing ? !noAntialiasing : false;
+
+			// animations
+			animationsArray = json.animations;
+		}
+		else
+		{
+			// V-Slice / Base FNF format
+			imageFile = json.assetPath.replace('shared:', '');
+			imageFile = convertMultiSparrow(json.animations, imageFile);
+
+			if (json.scale != null)
+			{
+				jsonScale = json.scale;
+				if (json.scale != 1)
+				{
+					scale.set(jsonScale, jsonScale);
+					updateHitbox();
+				}
+			}
+
+			// positioning
+			if (json.offsets != null)
+				positionArray = json.offsets;
+			if (json.cameraOffsets != null)
+				cameraPosition = json.cameraOffsets;
+
+			// data
+			if (json.healthIcon != null)
+				healthIcon = json.healthIcon.id != null ? json.healthIcon.id : curCharacter;
+			else
+				healthIcon = curCharacter;
+
+			if (json.singTime != null)
+				singDuration = json.singTime;
+			else
+				singDuration = 8.0;
+
+			if (json.flipX != null)
+				flipX = (json.flipX != isPlayer);
+
+			// grab dominant color from health icon
+			var icon:funkin.objects.HealthIcon = new funkin.objects.HealthIcon(healthIcon, false, false);
+			var coolColor:FlxColor = FlxColor.fromInt(CoolUtil.dominantColor(icon));
+			icon.destroy();
+			icon = null;
+			healthColorArray[0] = coolColor.red;
+			healthColorArray[1] = coolColor.green;
+			healthColorArray[2] = coolColor.blue;
+
+			vocalsFile = '';
+			originalFlipX = (json.flipX == true);
+
+			// antialiasing
+			noAntialiasing = json.isPixel != null ? json.isPixel : false;
+			antialiasing = ClientPrefs.data.antialiasing ? !noAntialiasing : false;
+
+			// convert V-Slice animations to Psych AnimArray format
+			var base_animationsArray:Array<Dynamic> = json.animations;
+			if (base_animationsArray != null && base_animationsArray.length > 0)
+			{
+				for (anim in base_animationsArray)
+				{
+					var animFormat:AnimArray = {
+						anim: anim.name,
+						name: anim.prefix,
+						fps: anim.fps != null ? anim.fps : 24,
+						loop: anim.loop != null ? !!anim.loop : false,
+						indices: anim.indices != null ? anim.indices : [],
+						offsets: anim.offsets != null ? anim.offsets : [0, 0]
+					};
+					animationsArray.push(animFormat);
+				}
+			}
 		}
 
-		// positioning
-		positionArray = json.position;
-		cameraPosition = json.camera_position;
-
-		// data
-		healthIcon = json.healthicon;
-		singDuration = json.sing_duration;
-		flipX = (json.flip_x != isPlayer);
-		healthColorArray = (json.healthbar_colors != null && json.healthbar_colors.length > 2) ? json.healthbar_colors : [161, 161, 161];
-		vocalsFile = json.vocals_file != null ? json.vocals_file : '';
-		originalFlipX = (json.flip_x == true);
-		editorIsPlayer = json._editor_isPlayer;
-
-		// antialiasing
-		noAntialiasing = (json.no_antialiasing == true);
-		antialiasing = ClientPrefs.data.antialiasing ? !noAntialiasing : false;
-
-		// animations
-		animationsArray = json.animations;
 		if (animationsArray != null && animationsArray.length > 0)
 		{
 			for (anim in animationsArray)
@@ -242,6 +325,19 @@ class Character extends FlxSprite
 			copyAtlasValues();
 		#end
 		// trace('Loaded file to character ' + curCharacter);
+	}
+
+	function convertMultiSparrow(animations:Null<Array<Dynamic>>, str:String):String
+	{
+		if (animations != null && animations.length > 0)
+		{
+			for (anim in animations)
+			{
+				if (anim.assetPath != null && anim.assetPath != '')
+					str += ',${anim.assetPath.replace('shared:', '')}';
+			}
+		}
+		return str;
 	}
 
 	override function update(elapsed:Float)
@@ -487,7 +583,9 @@ class Character extends FlxSprite
 
 	public function addOffset(name:String, x:Float = 0, y:Float = 0)
 	{
-		animOffsets[name] = [x, y];
+		animOffsets.set(name, [x, y]);
+		if (hasAnimation(name))
+			offset.set(x, y);
 	}
 
 	public function quickAnimAdd(name:String, anim:String)

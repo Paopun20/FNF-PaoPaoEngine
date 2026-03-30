@@ -19,14 +19,18 @@ class CallbackHandler
 				var last:FunkinLua = FunkinLua.lastCalledScript;
 				if (last == null || last.lua != l)
 				{
-					// trace('looping thru scripts');
-					for (script in PlayState.instance.luaArray)
-						if (script != FunkinLua.lastCalledScript && script != null && script.lua == l)
+					for (script in PlayState.instance.scriptPack.scripts)
+					{
+						if (Std.isOfType(script, FunkinLua))
 						{
-							// trace('found script');
-							cbf = script.callbacks.get(fname);
-							break;
+							var luaScript:FunkinLua = cast script;
+							if (luaScript != FunkinLua.lastCalledScript && luaScript != null && luaScript.lua == l)
+							{
+								cbf = luaScript.callbacks.get(fname);
+								break;
+							}
 						}
+					}
 				}
 				else
 					cbf = last.callbacks.get(fname);

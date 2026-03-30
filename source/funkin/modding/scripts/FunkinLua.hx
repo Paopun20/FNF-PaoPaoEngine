@@ -44,13 +44,12 @@ interface IFunkinLuaInterface
 	public function stop():Void;
 }
 
-class FunkinLua implements IFunkinLuaInterface
+class FunkinLua extends Script
 {
 	public var lua:State = null;
 	public var camTarget:FlxCamera;
 	public var scriptName:String = '';
 	public var modFolder:String = null;
-	public var closed:Bool = false;
 
 	#if HSCRIPT_ALLOWED
 	public var hscript:HScript = null;
@@ -62,6 +61,8 @@ class FunkinLua implements IFunkinLuaInterface
 
 	public function new(scriptName:String)
 	{
+		super(scriptName);
+
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
 
@@ -70,16 +71,18 @@ class FunkinLua implements IFunkinLuaInterface
 
 		// LuaL.dostring(lua, CLENSE);
 
-		this.scriptName = scriptName.trim();
+		this.scriptName = this.fileName;
 		var game:PlayState = PlayState.instance;
-		game.luaArray.push(this);
+		game.scriptPack.add(this);
 
-		var myFolder:Array<String> = this.scriptName.split('/');
+		var myFolder:Array<String> = scriptName.split('/');
 		#if MODS_ALLOWED
 		if (myFolder[0] + '/' == Paths.mods()
 			&& (Mods.currentModDirectory == myFolder[1] || Mods.getGlobalMods().contains(myFolder[1]))) // is inside mods folder
 			this.modFolder = myFolder[1];
 		#end
+
+		Script.preset(this);
 
 		// Lua shit
 		set('Function_StopLua', LuaUtils.Function_StopLua);
@@ -217,9 +220,13 @@ class FunkinLua implements IFunkinLuaInterface
 		Lua_helper.add_callback(lua, "getRunningScripts", function()
 		{
 			var runningScripts:Array<String> = [];
-			for (script in game.luaArray)
-				runningScripts.push(script.scriptName);
-
+			for (script in game.scriptPack.scripts)
+			{
+				#if LUA_ALLOWED
+				if (Std.isOfType(script, FunkinLua))
+					runningScripts.push(cast(script, FunkinLua).scriptName);
+				#end
+			}
 			return runningScripts;
 		});
 
@@ -237,7 +244,7 @@ class FunkinLua implements IFunkinLuaInterface
 				exclusions = [];
 			if (ignoreSelf && !exclusions.contains(scriptName))
 				exclusions.push(scriptName);
-			game.setOnHScript(varName, arg, exclusions);
+			game.setOnScripts(varName, arg, exclusions);
 		});
 		addLocalCallback("setOnLuas", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null)
 		{
@@ -245,7 +252,7 @@ class FunkinLua implements IFunkinLuaInterface
 				exclusions = [];
 			if (ignoreSelf && !exclusions.contains(scriptName))
 				exclusions.push(scriptName);
-			game.setOnLuas(varName, arg, exclusions);
+			game.setOnScripts(varName, arg, exclusions);
 		});
 		addLocalCallback("setOnPython", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null)
 		{
@@ -253,7 +260,7 @@ class FunkinLua implements IFunkinLuaInterface
 				exclusions = [];
 			if (ignoreSelf && !exclusions.contains(scriptName))
 				exclusions.push(scriptName);
-			game.setOnPython(varName, arg, exclusions);
+			game.setOnScripts(varName, arg, exclusions);
 		});
 
 		addLocalCallback("callOnScripts",
@@ -306,9 +313,15 @@ class FunkinLua implements IFunkinLuaInterface
 
 			var luaPath:String = findScript(luaFile);
 			if (luaPath != null)
-				for (luaInstance in game.luaArray)
-					if (luaInstance.scriptName == luaPath)
-						return luaInstance.call(funcName, args);
+				for (script in game.scriptPack.scripts)
+				{
+					if (Std.isOfType(script, FunkinLua))
+					{
+						var luaInstance:FunkinLua = cast script;
+						if (luaInstance.scriptName == luaPath)
+							return luaInstance.call(funcName, args);
+					}
+				}
 
 			return null;
 		});
@@ -317,27 +330,45 @@ class FunkinLua implements IFunkinLuaInterface
 			var luaPath:String = findScript(scriptFile);
 			if (luaPath != null)
 			{
-				for (luaInstance in game.luaArray)
-					if (luaInstance.scriptName == luaPath)
-						return true;
+				for (script in game.scriptPack.scripts)
+				{
+					if (Std.isOfType(script, FunkinLua))
+					{
+						var luaInstance:FunkinLua = cast script;
+						if (luaInstance.scriptName == luaPath)
+							return true;
+					}
+				}
 			}
 
 			#if HSCRIPT_ALLOWED
 			var hscriptPath:String = findScript(scriptFile, '.hx');
 			if (hscriptPath != null)
 			{
-				for (hscriptInstance in game.hscriptArray)
-					if (hscriptInstance.origin == hscriptPath)
-						return true;
+				for (script in game.scriptPack.scripts)
+				{
+					if (Std.isOfType(script, HScript))
+					{
+						var hscriptInstance:HScript = cast script;
+						if (hscriptInstance.origin == hscriptPath)
+							return true;
+					}
+				}
 			}
 			#end
 			#if PYTHON_ALLOWED
 			var pythonPath:String = findScript(scriptFile, '.py');
 			if (pythonPath != null)
 			{
-				for (pythonInstance in game.pythonArray)
-					if (pythonInstance.origin == pythonPath)
-						return true;
+				for (script in game.scriptPack.scripts)
+				{
+					if (Std.isOfType(script, Python))
+					{
+						var pythonInstance:Python = cast script;
+						if (pythonInstance.origin == pythonPath)
+							return true;
+					}
+				}
 			}
 			#end
 			return false;
@@ -359,12 +390,18 @@ class FunkinLua implements IFunkinLuaInterface
 			if (luaPath != null)
 			{
 				if (!ignoreAlreadyRunning)
-					for (luaInstance in game.luaArray)
-						if (luaInstance.scriptName == luaPath)
+					for (script in game.scriptPack.scripts)
+					{
+						if (Std.isOfType(script, FunkinLua))
 						{
-							luaTrace('addLuaScript: The script "' + luaPath + '" is already running!');
-							return;
+							var luaInstance:FunkinLua = cast script;
+							if (luaInstance.scriptName == luaPath)
+							{
+								luaTrace('addLuaScript: The script "' + luaPath + '" is already running!');
+								return;
+							}
 						}
+					}
 
 				new FunkinLua(luaPath);
 				return;
@@ -378,12 +415,18 @@ class FunkinLua implements IFunkinLuaInterface
 			if (scriptPath != null)
 			{
 				if (!ignoreAlreadyRunning)
-					for (script in game.hscriptArray)
-						if (script.origin == scriptPath)
+					for (script in game.scriptPack.scripts)
+					{
+						if (Std.isOfType(script, HScript))
 						{
-							luaTrace('addHScript: The script "' + scriptPath + '" is already running!');
-							return;
+							var hscriptInstance:HScript = cast script;
+							if (hscriptInstance.origin == scriptPath)
+							{
+								luaTrace('addHScript: The script "' + scriptPath + '" is already running!');
+								return;
+							}
 						}
+					}
 
 				PlayState.instance.initHScript(scriptPath);
 				return;
@@ -400,12 +443,18 @@ class FunkinLua implements IFunkinLuaInterface
 			if (scriptPath != null)
 			{
 				if (!ignoreAlreadyRunning)
-					for (script in game.pythonArray)
-						if (script.origin == scriptPath)
+					for (script in game.scriptPack.scripts)
+					{
+						if (Std.isOfType(script, Python))
 						{
-							luaTrace('addPython: The script "' + scriptPath + '" is already running!');
-							return;
+							var pythonInstance:Python = cast script;
+							if (pythonInstance.origin == scriptPath)
+							{
+								luaTrace('addPython: The script "' + scriptPath + '" is already running!');
+								return;
+							}
 						}
+					}
 
 				PlayState.instance.initPython(scriptPath);
 				return;
@@ -421,14 +470,17 @@ class FunkinLua implements IFunkinLuaInterface
 			if (luaPath != null)
 			{
 				var foundAny:Bool = false;
-				for (luaInstance in game.luaArray)
+				for (script in game.scriptPack.scripts)
 				{
-					if (luaInstance.scriptName == luaPath)
+					if (Std.isOfType(script, FunkinLua))
 					{
-						// trace('Closing lua script $luaPath');
-						CoolLog.info('Closing lua script $luaPath');
-						luaInstance.stop();
-						foundAny = true;
+						var luaInstance:FunkinLua = cast script;
+						if (luaInstance.scriptName == luaPath)
+						{
+							CoolLog.info('Closing lua script $luaPath');
+							luaInstance.stop();
+							foundAny = true;
+						}
 					}
 				}
 				if (foundAny)
@@ -445,14 +497,17 @@ class FunkinLua implements IFunkinLuaInterface
 			if (scriptPath != null)
 			{
 				var foundAny:Bool = false;
-				for (script in game.hscriptArray)
+				for (script in game.scriptPack.scripts)
 				{
-					if (script.origin == scriptPath)
+					if (Std.isOfType(script, HScript))
 					{
-						// trace('Closing hscript $scriptPath');
-						CoolLog.info('Closing hscript $scriptPath');
-						script.destroy();
-						foundAny = true;
+						var hscriptInstance:HScript = cast script;
+						if (hscriptInstance.origin == scriptPath)
+						{
+							CoolLog.info('Closing hscript $scriptPath');
+							hscriptInstance.destroy();
+							foundAny = true;
+						}
 					}
 				}
 				if (foundAny)
@@ -472,14 +527,17 @@ class FunkinLua implements IFunkinLuaInterface
 			if (scriptPath != null)
 			{
 				var foundAny:Bool = false;
-				for (script in game.pythonArray)
+				for (script in game.scriptPack.scripts)
 				{
-					if (script.origin == scriptPath)
+					if (Std.isOfType(script, Python))
 					{
-						// trace('Closing python script $scriptPath');
-						CoolLog.info('Closing python script $scriptPath');
-						script.destroy();
-						foundAny = true;
+						var pythonInstance:Python = cast script;
+						if (pythonInstance.origin == scriptPath)
+						{
+							CoolLog.info('Closing python script $scriptPath');
+							pythonInstance.destroy();
+							foundAny = true;
+						}
 					}
 				}
 				if (foundAny)
@@ -1940,7 +1998,7 @@ class FunkinLua implements IFunkinLuaInterface
 		call('onCreate', []);
 	}
 
-	public function existsFunc(name:String):Bool
+	public override function hasFunction(funcName:String):Bool
 	{
 		if (closed)
 			return false;
@@ -1950,13 +2008,13 @@ class FunkinLua implements IFunkinLuaInterface
 			if (lua == null)
 				return false;
 
-			Lua.getglobal(lua, name);
+			Lua.getglobal(lua, funcName);
 			var type:Int = Lua.type(lua, -1);
 
 			if (type != Lua.LUA_TFUNCTION)
 			{
 				if (type > Lua.LUA_TNIL)
-					luaTrace("ERROR (" + name + "): attempt to call a " + LuaUtils.typeToString(type) + " value", FlxColor.RED);
+					luaTrace("ERROR (" + funcName + "): attempt to call a " + LuaUtils.typeToString(type) + " value", FlxColor.RED);
 
 				Lua.pop(lua, 1);
 				return false;
@@ -1967,7 +2025,7 @@ class FunkinLua implements IFunkinLuaInterface
 		}
 		catch (e:Dynamic)
 		{
-			CoolLog.error('Error checking function existence: $name: $e');
+			CoolLog.error('Error checking function existence: $funcName: $e');
 			return false;
 		}
 	}
@@ -1977,7 +2035,7 @@ class FunkinLua implements IFunkinLuaInterface
 
 	public static var lastCalledScript:FunkinLua = null;
 
-	public function call(func:String, args:Array<Dynamic>):Dynamic
+	public override function call(func:String, ?args:Array<Dynamic>):Dynamic
 	{
 		if (closed)
 			return LuaUtils.Function_Continue;
@@ -2030,7 +2088,7 @@ class FunkinLua implements IFunkinLuaInterface
 		return LuaUtils.Function_Continue;
 	}
 
-	public function set(variable:String, data:Dynamic)
+	public override function set(variable:String, data:Dynamic)
 	{
 		if (lua == null)
 		{
@@ -2041,7 +2099,7 @@ class FunkinLua implements IFunkinLuaInterface
 		Lua.setglobal(lua, variable);
 	}
 
-	public function get(variable:String):Dynamic
+	public override function get(variable:String):Dynamic
 	{
 		if (lua == null)
 		{
@@ -2054,7 +2112,7 @@ class FunkinLua implements IFunkinLuaInterface
 		return result;
 	}
 
-	public function stop()
+	public override function stop()
 	{
 		closed = true;
 
@@ -2073,9 +2131,10 @@ class FunkinLua implements IFunkinLuaInterface
 		#end
 	}
 
-	public function destroy()
+	public override function destroy()
 	{
 		stop();
+		super.destroy();
 	}
 
 	function oldTweenFunction(tag:String, vars:String, tweenValue:Any, duration:Float, ease:String, funcName:String)

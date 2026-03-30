@@ -16,7 +16,6 @@ import funkin.modding.scripts.compatibility.StructureCompatibility;
 import funkin.objects.NoteSplash;
 import funkin.objects.StrumNote;
 import funkin.utils.NdllUtil;
-import haxe.ds.StringMap;
 import hscript.Expr.Error as HscriptError;
 import hscript.Expr;
 import hscript.Interp;
@@ -27,6 +26,7 @@ import flixel.FlxBasic;
 
 using StringTools;
 
+typedef StringMap<T> = Map<String, T>; // for this file only
 interface IHscriptInterface
 {
 	public var scriptName:String;
@@ -35,7 +35,7 @@ interface IHscriptInterface
 	public function stop():Void;
 }
 
-class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestroyable
+class HScript extends Script
 {
 	public static var printer:Printer = new Printer();
 	public static var staticVariables:StringMap<Dynamic> = new StringMap<Dynamic>();
@@ -45,7 +45,11 @@ class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestr
 	public var origin:Null<String>;
 	public var scriptName:String;
 	public var returnValue:Dynamic;
-	public var closed:Bool = false;
+
+	public var variables(get, never):StringMap<Dynamic>;
+
+	public function get_variables()
+		return interp.variables;
 
 	#if MODS_ALLOWED
 	public var modFolder:String = null;
@@ -158,9 +162,10 @@ class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestr
 		return false;
 	}
 
-	public override function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?parentInstance:Dynamic = null)
+	public function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?parentInstance:Dynamic = null)
 	{
-		super();
+		super(file);
+
 		interp = new Interp();
 		interp.printCallStack = true;
 		interp.allowStaticVariables = interp.allowPublicVariables = true;
@@ -168,9 +173,12 @@ class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestr
 		interp.importFailedCallback = onImportFailed;
 		interp.publicVariables = publicVariables;
 		interp.staticVariables = staticVariables;
-		setParent(parentInstance);
+		interp.variables.set("this", this);
+		this.setParent((parentInstance != null ? parentInstance : LuaUtils.getHScriptScriptObject()));
+		addExHScript(this.interp, LuaUtils.isPlayStateScript(interp.scriptObject));
 
-		scriptName = origin = file;
+		this.scriptName = this.fileName;
+		this.origin = file;
 
 		#if MODS_ALLOWED
 		if (file != null && file.length > 0)
@@ -185,9 +193,10 @@ class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestr
 		#if LUA_ALLOWED
 		parentInterpreted = parent;
 		if (parent != null)
-			scriptName = parent.scriptName;
+			this.scriptName = parent.scriptName;
 		#end
 
+		Script.preset(this);
 		preset(varsToBring);
 
 		if (file != null && file.length > 0)
@@ -212,7 +221,7 @@ class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestr
 		}
 	}
 
-	public function execute(code:String):Dynamic
+	public override function execute(code:String):Dynamic
 	{
 		if (closed)
 			return null;
@@ -244,11 +253,85 @@ class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestr
 		return returnValue;
 	}
 
-	public function setParent(parent:Dynamic):HScript
+	public function setParent(parent:Dynamic)
 	{
-		interp.scriptObject = parent;
+		if (interp != null)
+		{
+			interp.scriptObject = parent;
+			if (parent.variables != null)
+				interp.publicVariables = parent.variables;
+		}
 		return this;
 	}
+
+	public static function addExHScript(obj:Interp, isPlayState:Bool = false) {
+		if(obj == null) return;
+
+		if(isPlayState) {
+			obj.variables.set("game", PlayState.instance); //runHaxeCode moment
+			obj.variables.set("add", function(basic:FlxBasic, ?frontOfChars:Bool = false) {
+				if (frontOfChars) {
+					PlayState.instance.add(basic);
+					return;
+				}
+
+				var position:Int = PlayState.instance.members.indexOf(PlayState.instance.gfGroup);
+				if(PlayState.instance.members.indexOf(PlayState.instance.boyfriendGroup) < position) position = PlayState.instance.members.indexOf(PlayState.instance.boyfriendGroup);
+				else if(PlayState.instance.members.indexOf(PlayState.instance.dadGroup) < position) position = PlayState.instance.members.indexOf(PlayState.instance.dadGroup);
+
+				PlayState.instance.insert(position, basic);
+			});
+
+			obj.variables.set('insert', PlayState.instance.insert);
+			obj.variables.set('remove', PlayState.instance.remove);
+			obj.variables.set('addBehindGF', PlayState.instance.addBehindGF);
+			obj.variables.set('addBehindDad', PlayState.instance.addBehindDad);
+			obj.variables.set('addBehindBF', PlayState.instance.addBehindBF);
+			obj.variables.set('setVar', function(name:String, value:Dynamic) {
+				PlayState.instance.variables.set(name, value);
+				return value;
+			});
+			obj.variables.set('getVar', function(name:String) {
+				var result:Dynamic = null;
+				if(PlayState.instance.variables.exists(name)) result = PlayState.instance.variables.get(name);
+				return result;
+			});
+			obj.variables.set('removeVar', function(name:String) {
+				if(PlayState.instance.variables.exists(name)) {
+					PlayState.instance.variables.remove(name);
+					return true;
+				}
+				return false;
+			});
+
+			obj.variables.set('customSubstate', CustomSubstate.instance);
+			obj.variables.set('customSubstateName', CustomSubstate.name);
+		} else {
+			obj.variables.set("game", obj.scriptObject);
+			obj.variables.set('add', obj.scriptObject.add);
+			obj.variables.set('insert', obj.scriptObject.insert);
+			obj.variables.set('remove', obj.scriptObject.remove);
+
+			if(obj.scriptObject.variables != null) {
+				obj.variables.set('setVar', function(name:String, value:Dynamic) {
+					obj.scriptObject.variables.set(name, value);
+					return value;
+				});
+				obj.variables.set('getVar', function(name:String) {
+					var result:Dynamic = null;
+					if(obj.scriptObject.variables.get(name) != null) result = obj.scriptObject.variables.get(name);
+					return result;
+				});
+				obj.variables.set('removeVar', function(name:String) {
+					if(obj.scriptObject.variables.get(name) != null) {
+						obj.scriptObject.variables.remove(name);
+						return true;
+					}
+					return false;
+				});
+			}
+		}
+		}
 
 	public function preset(?varsToBring:Any):Void
 	{
@@ -258,6 +341,8 @@ class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestr
 			for (k in Reflect.fields(varsToBring))
 				set(k, Reflect.field(varsToBring, k));
 		}
+
+		Script.preset(this);
 
 		// Core Haxe Classes
 		set('Type', Type);
@@ -469,9 +554,15 @@ class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestr
 		#if LUA_ALLOWED
 		set('createGlobalCallback', function(name:String, func:Dynamic)
 		{
-			for (script in PlayState.instance.luaArray)
-				if (script != null && script.lua != null && !script.closed)
-					Lua_helper.add_callback(script.lua, name, func);
+			for (script in PlayState.instance.scriptPack.scripts)
+			{
+				if (Std.isOfType(script, FunkinLua))
+				{
+					var luaScript:FunkinLua = cast script;
+					if (luaScript != null && luaScript.lua != null && !luaScript.closed)
+						Lua_helper.add_callback(luaScript.lua, name, func);
+				}
+			}
 
 			FunkinLua.customFunctions.set(name, func);
 		});
@@ -642,7 +733,7 @@ class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestr
 	}
 	#end
 
-	public function set(variable:String, data:Dynamic):Void
+	public override function set(variable:String, data:Dynamic):Void
 	{
 		if (interp == null || closed)
 			return;
@@ -650,7 +741,7 @@ class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestr
 		interp.variables.set(variable, data);
 	}
 
-	public function get(variable:String):Dynamic
+	public override function get(variable:String):Dynamic
 	{
 		if (interp == null || closed)
 			return null;
@@ -658,15 +749,15 @@ class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestr
 		return interp.variables.get(variable);
 	}
 
-	public function has(variable:String):Bool
+	public override function hasFunction(funcName:String):Bool
 	{
 		if (interp == null || closed)
 			return false;
 
-		return interp.variables.exists(variable);
+		return interp.variables.exists(funcName) && Reflect.isFunction(interp.variables.get(funcName));
 	}
 
-	public function call(func:String, ?args:Array<Dynamic>):Dynamic
+	public override function call(func:String, ?args:Array<Dynamic>):Dynamic
 	{
 		if (closed)
 			return LuaUtils.Function_Continue;
@@ -676,7 +767,7 @@ class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestr
 
 		try
 		{
-			if (has(func))
+			if (hasFunction(func))
 			{
 				var functionRef = interp.variables.get(func);
 				if (Reflect.isFunction(functionRef))
@@ -696,7 +787,7 @@ class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestr
 		return LuaUtils.Function_Continue;
 	}
 
-	public function stop():Void
+	public override function stop():Void
 	{
 		if (closed)
 			return;
@@ -706,12 +797,13 @@ class HScript extends FlxBasic implements IHscriptInterface implements IFlxDestr
 		#if LUA_ALLOWED
 		parentInterpreted = null;
 		#end
+		super.stop();
 	}
 
-	public override function destroy():Void // for use old api
+	public override function destroy():Void
 	{
-		super.destroy();
 		stop();
+		super.destroy();
 	}
 }
 

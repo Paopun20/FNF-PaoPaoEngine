@@ -203,7 +203,7 @@ jobs:
           zip -r ../paopao.nightly.linux.zip linuxBuild/
           zip -r ../paopao.nightly.windows.zip windowsBuild/
           zip -r ../paopao.nightly.mac.zip macBuild/
-          zip -r ../paopao.nightly.android.zip androidBuild/
+          find androidBuild/ -name "*.apk" -exec zip ../paopao.nightly.android.zip {} \;
 
       - name: Update Nightly Release
         uses: andelf/nightly-release@main

@@ -66,7 +66,7 @@ class CustomSubstate extends MusicBeatSubstate
 	override function create()
 	{
 		instance = this;
-		PlayState.instance.setOnHScript('customSubstate', instance);
+		PlayState.instance.setOnScripts('customSubstate', instance);
 
 		PlayState.instance.callOnScripts('onCustomSubstateCreate', [name]);
 		super.create();
@@ -76,7 +76,7 @@ class CustomSubstate extends MusicBeatSubstate
 	public function new(name:String)
 	{
 		CustomSubstate.name = name;
-		PlayState.instance.setOnHScript('customSubstateName', name);
+		PlayState.instance.setOnScripts('customSubstateName', name);
 		super();
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 	}
@@ -94,8 +94,8 @@ class CustomSubstate extends MusicBeatSubstate
 		instance = null;
 		name = 'unnamed';
 
-		PlayState.instance.setOnHScript('customSubstate', null);
-		PlayState.instance.setOnHScript('customSubstateName', name);
+		PlayState.instance.setOnScripts('customSubstate', null);
+		PlayState.instance.setOnScripts('customSubstateName', name);
 		super.destroy();
 	}
 }

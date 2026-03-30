@@ -61,7 +61,7 @@ bool ShowNotification(const std::string& title, const std::string& desc) {
 #end
 class PlatformDex
 {
-	#if windows
+	#if (windows && cpp)
 	@:functionCode('
         return ShowNotification(title.c_str(), desc.c_str());
     ')

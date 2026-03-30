@@ -46,6 +46,14 @@ class LuaUtils
 		} : null;
 	}
 
+	public static function getHScriptScriptObject() {
+		return (FlxG.state.subState == null ? FlxG.state : FlxG.state.subState);
+	}
+
+	public static inline function isPlayStateScript(obj:Dynamic):Bool {
+		return (obj is PlayState && !(obj is flixel.FlxSubState));
+	}
+
 	public static function setVarInArray(instance:Dynamic, variable:String, value:Dynamic, allowMaps:Bool = false):Any
 	{
 		var splitProps:Array<String> = variable.split('[');

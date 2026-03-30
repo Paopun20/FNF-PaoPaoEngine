@@ -57,14 +57,13 @@ interface IPythonInterface
 	public function stop():Void;
 }
 
-class Python implements IPythonInterface implements IFlxDestroyable
+class Python extends Script implements IPythonInterface implements IFlxDestroyable
 {
 	public var parser:PyParser;
 	public var printer:PyPrinter;
 	public var interp:PyInterp;
 	public var origin:Null<String>;
 	public var returnValue:Dynamic;
-	public var closed:Bool = false;
 	public var scriptName:String;
 
 	#if MODS_ALLOWED
@@ -85,6 +84,7 @@ class Python implements IPythonInterface implements IFlxDestroyable
 
 	public function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?manualRun:Bool = false)
 	{
+		super(file);
 		interp = new PyInterp();
 		printer = new PyPrinter();
 		scriptName = origin = file;
@@ -125,7 +125,7 @@ class Python implements IPythonInterface implements IFlxDestroyable
 			CacheScript.clear(CacheType.PYTHON);
 	}
 
-	public function execute(code:String):Dynamic
+	public override function execute(code:String):Dynamic
 	{
 		if (closed)
 			return null;
@@ -149,14 +149,14 @@ class Python implements IPythonInterface implements IFlxDestroyable
 			returnValue = interp.execute(cachedExpr);
 			return returnValue;
 		}
-		catch (e:PyExpr)
+		catch (e:Dynamic)
 		{
 			pythonTrace('Execute Error: ' + printer.exprToString(e), FlxColor.RED);
 			return null;
 		}
 	}
 
-	public function call(func:String, ?args:Array<Dynamic>):Dynamic
+	public override function call(func:String, ?args:Array<Dynamic>):Dynamic
 	{
 		if (closed)
 			return LuaUtils.Function_Continue;
@@ -187,13 +187,13 @@ class Python implements IPythonInterface implements IFlxDestroyable
 		return interp.getdef(func);
 	}
 
-	public function set(variable:String, arg:Dynamic)
+	public override function set(variable:String, value:Dynamic)
 	{
 		if (interp != null)
-			interp.setVar(variable, arg);
+			interp.setVar(variable, value);
 	}
 
-	public function get(variable:String):Dynamic
+	public override function get(variable:String):Dynamic
 	{
 		if (interp != null)
 			return interp.getVar(variable);
@@ -476,8 +476,14 @@ class Python implements IPythonInterface implements IFlxDestroyable
 		{
 			var runningScripts:Array<String> = [];
 			#if PYTHON_ALLOWED
-			for (script in game.pythonArray)
-				runningScripts.push(script.origin);
+			for (script in game.scriptPack.scripts)
+			{
+				if (Std.isOfType(script, Python))
+				{
+					var pythonScript:Python = cast script;
+					runningScripts.push(pythonScript.origin);
+				}
+			}
 			#end
 			return runningScripts;
 		});
@@ -1446,7 +1452,7 @@ class Python implements IPythonInterface implements IFlxDestroyable
 		CoolLog.debug('[Python] $text');
 	}
 
-	public function stop()
+	public override function stop()
 	{
 		closed = true;
 		if (interp != null)
@@ -1456,13 +1462,14 @@ class Python implements IPythonInterface implements IFlxDestroyable
 		}
 	}
 
-	public function destroy()
+	public override function destroy()
 	{
 		stop();
 		parser = null;
 		interp = null;
 		returnValue = null;
 		#if LUA_ALLOWED parentLua = null; #end
+		super.destroy();
 	}
 }
 #else

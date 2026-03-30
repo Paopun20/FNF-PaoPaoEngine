@@ -191,11 +191,7 @@ class DiscordClient
 	#if LUA_ALLOWED
 	public static function addLuaCallbacks(lua:State)
 	{
-		Lua_helper.add_callback(lua, "changeDiscordPresence",
-			function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float)
-			{
-				changePresence(details, state, smallImageKey, hasStartTimestamp, endTimestamp);
-			});
+		Lua_helper.add_callback(lua, "changeDiscordPresence", changePresence);
 
 		Lua_helper.add_callback(lua, "changeDiscordClientID", function(?newID:String = null)
 		{
@@ -209,10 +205,7 @@ class DiscordClient
 	#if PYTHON_ALLOWED
 	public static function addPythonCallbacks(py:Python)
 	{
-		py.set("changeDiscordPresence", function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float)
-		{
-			changePresence(details, state, smallImageKey, hasStartTimestamp, endTimestamp);
-		});
+		py.set("changeDiscordPresence", changePresence);
 
 		py.set("changeDiscordClientID", function(?newID:String = null)
 		{
