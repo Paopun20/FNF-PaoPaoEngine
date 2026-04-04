@@ -9,7 +9,7 @@ class CustomSubstate extends MusicBeatSubstate
 	public static var instance:CustomSubstate;
 
 	#if (LUA_ALLOWED || PYTHON_ALLOWED)
-	public static function implement(funk)
+	public static function implement(funk:Dynamic)
 	{
 		var impl = ImplementUtils.make(funk);
 		impl("openCustomSubstate", openCustomSubstate);

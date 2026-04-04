@@ -9,7 +9,7 @@ import funkin.modding.scripts.utils.LuaUtils;
 
 class DeprecatedFunctions
 {
-	public static function implement(funk)
+	public static function implement(funk:Dynamic)
 	{
 		var impl = ImplementUtils.make(funk);
 

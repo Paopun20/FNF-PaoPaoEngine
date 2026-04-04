@@ -14,7 +14,7 @@ class ReflectionFunctions
 {
 	static final instanceStr:Dynamic = "##PSYCHLUA_STRINGTOOBJ";
 
-	public static function implement(funk)
+	public static function implement(funk:Dynamic)
 	{
 		var impl = ImplementUtils.make(funk);
 		impl("getProperty", function(variable:String, ?allowMaps:Bool = false)

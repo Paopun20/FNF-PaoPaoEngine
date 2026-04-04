@@ -27,7 +27,6 @@ typedef CharacterFile =
 	var no_antialiasing:Bool;
 	var healthbar_colors:Array<Int>;
 	var vocals_file:String;
-	var isAnimateatlas:Bool;
 	@:optional var _editor_isPlayer:Null<Bool>;
 }
 

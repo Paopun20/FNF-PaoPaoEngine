@@ -1,7 +1,7 @@
 # Friday Night Funkin' - PaoPao Engine
 
 > [!WARNING]
-This engine is currently under heavy development, so some features may not function as expected, such as [Python](https://github.com/Paopun20/Hython), which has certain [limitations](http://github.com/Paopun20/Hython?tab=readme-ov-file#limitations).
+This engine is currently under heavy development, Mod API is not the same as **Psych Engine** mods, ya your cook bro
 
 PaoPoa Engine is a cross-platform [Friday Night Funkin'](https://github.com/FunkinCrew/Funkin) Engine aimed at freedom of modding without source code, optimization, and lightweight, cross-platform.
 

@@ -7,11 +7,13 @@ class ScriptPack
 	public var scripts:Array<Script> = [];
 	public var name:String;
 	public var path:String;
+	public var legacyMode:Bool;
 
-	public function new(?name:String = "ScriptPack", ?path:String = "")
+	public function new(?name:String = "ScriptPack", ?path:String = "", ?legacyMode:Bool = false)
 	{
 		this.name = name;
 		this.path = path;
+		this.legacyMode = legacyMode;
 	}
 
 	public function load(onlyName:String = null):Void
@@ -24,8 +26,10 @@ class ScriptPack
 					continue;
 
 				#if LUA_ALLOWED
-				if (file.toLowerCase().endsWith('.lua'))
-					add(new FunkinLua(folder + file));
+				if (file.toLowerCase().endsWith('.lua')) {
+					add(new LuaScript(folder + file));
+					//add(new FunkinLua(folder + file));
+				}
 				#end
 				#if HSCRIPT_ALLOWED
 				if (file.toLowerCase().endsWith('.hx'))

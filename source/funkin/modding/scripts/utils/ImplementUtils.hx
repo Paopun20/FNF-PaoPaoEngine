@@ -2,7 +2,7 @@ package funkin.modding.scripts.utils;
 
 #if (LUA_ALLOWED || PYTHON_ALLOWED)
 #if LUA_ALLOWED
-import funkin.modding.scripts.FunkinLua;
+import funkin.modding.scripts.LuaScript;
 #end
 #if PYTHON_ALLOWED
 import funkin.modding.scripts.Python;
@@ -15,19 +15,12 @@ class ImplementUtils
 	public static function make(interpreter:Dynamic):(String, Dynamic) -> Null<Dynamic>
 	{
 		#if LUA_ALLOWED
-		if (Std.isOfType(interpreter, FunkinLua))
+		if (Std.isOfType(interpreter, LuaScript))
 		{
-			var flua = cast(interpreter, FunkinLua);
+			var ls = cast(interpreter, LuaScript);
 			return function(name:String, value:Dynamic):Null<Dynamic>
 			{
-				if (Reflect.isFunction(value))
-				{
-					Lua_helper.add_callback(flua.lua, name, value);
-				}
-				else
-				{
-					flua.set(name, value);
-				}
+				ls.set(name, value);
 				return null;
 			};
 		}
@@ -46,6 +39,7 @@ class ImplementUtils
 			};
 		}
 		#end
+
 		return function(name:String, value:Dynamic):Null<Dynamic>
 		{
 			return null;

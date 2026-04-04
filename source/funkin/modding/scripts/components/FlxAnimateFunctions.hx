@@ -5,10 +5,9 @@ import openfl.utils.Assets;
 #if (LUA_ALLOWED && flxanimate)
 class FlxAnimateFunctions
 {
-	public static function implement(funk:FunkinLua)
+	public static function implement(lua:LuaScript)
 	{
-		var lua:State = funk.lua;
-		Lua_helper.add_callback(lua, "makeFlxAnimateSprite", function(tag:String, ?x:Float = 0, ?y:Float = 0, ?loadFolder:String = null)
+		lua.set("makeFlxAnimateSprite", function(tag:String, ?x:Float = 0, ?y:Float = 0, ?loadFolder:String = null)
 		{
 			tag = tag.replace('.', '');
 			var lastSprite = MusicBeatState.getVariables().get(tag);
@@ -26,14 +25,14 @@ class FlxAnimateFunctions
 			mySprite.active = true;
 		});
 
-		Lua_helper.add_callback(lua, "loadAnimateAtlas", function(tag:String, folderOrImg:String, ?spriteJson:String = null, ?animationJson:String = null)
+		lua.set("loadAnimateAtlas", function(tag:String, folderOrImg:String, ?spriteJson:String = null, ?animationJson:String = null)
 		{
 			var spr:FlxAnimate = MusicBeatState.getVariables().get(tag);
 			if (spr != null)
 				Paths.loadAnimateAtlas(spr, folderOrImg, spriteJson, animationJson);
 		});
 
-		Lua_helper.add_callback(lua, "addAnimationBySymbol",
+		lua.set("addAnimationBySymbol",
 			function(tag:String, name:String, symbol:String, ?framerate:Float = 24, ?loop:Bool = false, ?matX:Float = 0, ?matY:Float = 0)
 			{
 				var obj:FlxAnimate = cast MusicBeatState.getVariables().get(tag);
@@ -52,7 +51,7 @@ class FlxAnimateFunctions
 				return true;
 			});
 
-		Lua_helper.add_callback(lua, "addAnimationBySymbolIndices",
+		lua.set("addAnimationBySymbolIndices",
 			function(tag:String, name:String, symbol:String, ?indices:Any = null, ?framerate:Float = 24, ?loop:Bool = false, ?matX:Float = 0, ?matY:Float = 0)
 			{
 				var obj:FlxAnimate = cast MusicBeatState.getVariables().get(tag);

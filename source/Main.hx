@@ -134,9 +134,7 @@ final class ErrorHandle
 	private static var _sourceMap:StringMap<String> = SourceMap.build();
 
 	public static function init():Void
-	{
 		FunkinGame.onGameCrash.add(onCrash);
-	}
 
 	private static function onCrash(e:Exception):Void
 	{
@@ -151,9 +149,7 @@ final class ErrorHandle
 			{
 				var lines = content.split("\n");
 				if (line > 0 && line <= lines.length)
-				{
 					return lines[line - 1].trim();
-				}
 			}
 			return "Could not retrieve source code line.";
 		};
@@ -179,11 +175,35 @@ final class ErrorHandle
 			}
 		}
 
-		errMsg += "\nUncaught Error: " + e.toString();
+		// Improved error reporting: always show something useful
+		var errorDetail = "";
+		var errorType = "";
+		if (e != null)
+		{
+			errorType = Type.getClassName(Type.getClass(e));
+			if (e.message != null && e.message != "")
+			{
+				errorDetail = e.message;
+			}
+			else if (e.toString() != null && e.toString() != "")
+			{
+				errorDetail = e.toString();
+			}
+			else
+			{
+				errorDetail = "<no error details available>";
+			}
+		}
+		else
+		{
+			errorType = "<Unknown Exception Type>";
+			errorDetail = "<Exception object is null>";
+		}
+		errMsg += '\n${errorType.split(".").pop()} ' + errorDetail;
 		#if officialBuild
-		// errMsg += "\nPlease report this error to the GitHub page: https://github.com/Paopun20/FNF-PaoPaoEngine";
+		errMsg += "\nPlease report this error to the GitHub page: https://github.com/Paopun20/FNF-PaoPaoEngine";
 		#end
-		errMsg += "\n\n> Cool Crash Handler written by: PaoPaoDev";
+		errMsg += "\n\n> Cool Crash Handler written by: PaoPao";
 
 		// Save crash log
 		#if CRASH_DEBUGGER

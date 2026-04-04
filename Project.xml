@@ -207,8 +207,10 @@
 
 	<!-- Libraries needed-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED" />
+	<haxelib name="lscript" if="LUA_ALLOWED" />
 	<haxelib name="hython" if="PYTHON_ALLOWED" />
 	<haxelib name="hscript-improved" if="HSCRIPT_ALLOWED" />
+	<define name="hscript" if="HSCRIPT_ALLOWED debug" />
 
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED" version="2.2.5" />
 	<haxelib name="hxdiscord_rpc" version="git" if="DISCORD_ALLOWED" />
@@ -286,6 +288,7 @@
 		<haxedef name="HXCPP_GC_DYNAMIC_SIZE" />
 		<haxedef name="HXCPP_GC_GENERATIONAL" />
 		<haxedef name="HXCPP_CPP_GC_MARK_MOVE" />
+		<haxedef name="HXCPP_CHECK_POINTER" />
 		<haxedef name="HXCPP_CPP11" />
 		<haxedef name="analyzer-optimize" />
 	</section>
@@ -295,6 +298,7 @@
 		<dependency name="c++_shared" />
 		<haxedef name="HXCPP_CLANG" />
 		<haxedef name="HXCPP_ARM_MODE" value="thumb2" />
+		<haxedef name="android" />
 
 		<android xmlns:android="http://schemas.android.com/apk/res/android">
 			<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />

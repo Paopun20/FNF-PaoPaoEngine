@@ -4,7 +4,7 @@ package funkin.modding.editable;
 import funkin.modding.scripts.Script;
 import funkin.modding.scripts.ScriptPack;
 #if LUA_ALLOWED
-import funkin.modding.scripts.FunkinLua;
+import funkin.modding.scripts.LuaScript;
 #end
 #if HSCRIPT_ALLOWED
 import funkin.modding.scripts.HScript;
@@ -72,7 +72,7 @@ class EditableCore
 	#if LUA_ALLOWED
 	public function initLua(file:String):Void
 	{
-		var script = new FunkinLua(file);
+		var script = new LuaScript(file);
 		initScript(script);
 	}
 	#end
@@ -80,7 +80,7 @@ class EditableCore
 	#if HSCRIPT_ALLOWED
 	public function initHScript(file:String):Void
 	{
-		var script = new HScript(null, file).setParent(parent);
+		var script = new HScript(file).setParent(parent);
 		initScript(script);
 	}
 	#end

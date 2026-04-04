@@ -1,6 +1,9 @@
 #if LUA_ALLOWED
 package funkin.modding.scripts.components;
 
+import funkin.modding.scripts.FunkinLua;
+import funkin.states.PlayState;
+
 class CallbackHandler
 {
 	public static inline function call(l:State, fname:String):Int

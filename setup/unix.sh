@@ -39,3 +39,4 @@ haxelib git funkin.vis https://github.com/FunkinCrew/funkVis 22b1ce089dd924f15cd
 haxelib git grig.audio https://github.com/FunkinCrew/grig.audio 57f5d47f2533fd0c3dcd025a86cb86c0dfa0b6d2
 haxelib git hscript-improved https://github.com/Paopun20/PPE-hscript-improved codename-dev
 haxelib git hxhardware https://github.com/Vortex2Oblivion/hxhardware.git
+haxelib git lscript https://github.com/SrtHero278/lscript

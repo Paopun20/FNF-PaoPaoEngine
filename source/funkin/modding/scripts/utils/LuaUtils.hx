@@ -643,6 +643,10 @@ class LuaUtils
 				return "table";
 			case Lua.LUA_TFUNCTION:
 				return "function";
+			case Lua.LUA_TTHREAD:
+				return "thread";
+			case Lua.LUA_TUSERDATA:
+				return "userdata";
 		}
 		if (type <= Lua.LUA_TNIL)
 			return "nil";

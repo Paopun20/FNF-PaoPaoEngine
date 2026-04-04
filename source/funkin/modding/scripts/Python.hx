@@ -42,10 +42,10 @@ import paopao.hython.Printer as PyPrinter;
 import flixel.addons.display.FlxRuntimeShader;
 #end
 #if HSCRIPT_ALLOWED
-import funkin.modding.scripts.HScript.HScript;
+import funkin.modding.scripts.HScript;
 #end
 #if LUA_ALLOWED
-import funkin.modding.scripts.FunkinLua;
+import funkin.modding.scripts.LuaScript;
 #end
 
 interface IPythonInterface
@@ -66,23 +66,20 @@ class Python extends Script implements IPythonInterface implements IFlxDestroyab
 	public var returnValue:Dynamic;
 	public var scriptName:String;
 
+	#if LUA_ALLOWED
+	public var parentLua:Dynamic = null;
+	#end
+	#if HSCRIPT_ALLOWED
+	public var hscript:HScript = null;
+	#end
 	#if MODS_ALLOWED
 	public var modFolder:String = null;
 	public var modName:String = null;
 	#end
 
-	#if LUA_ALLOWED
-	public var parentLua:FunkinLua;
-	#end
-
-	#if HSCRIPT_ALLOWED
-	public var hscript:HScript;
-	public var lastCalledFunction:String;
-	#end
-
 	public static var customFunctions:Map<String, Dynamic> = new Map<String, Dynamic>();
 
-	public function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?manualRun:Bool = false)
+	public function new(?_:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?manualRun:Bool = false)
 	{
 		super(file);
 		interp = new PyInterp();
@@ -93,10 +90,6 @@ class Python extends Script implements IPythonInterface implements IFlxDestroyab
 		var myFolder:Array<String> = file.split('/');
 		if (myFolder[0] + '/' == Paths.mods() && (Mods.currentModDirectory == myFolder[1] || Mods.getGlobalMods().contains(myFolder[1])))
 			this.modFolder = myFolder[1];
-		#end
-
-		#if LUA_ALLOWED
-		parentLua = parent;
 		#end
 
 		preset(varsToBring);
@@ -1434,7 +1427,7 @@ class Python extends Script implements IPythonInterface implements IFlxDestroyab
 		#if DISCORD_ALLOWED DiscordClient.addPythonCallbacks(this); #end
 		#if ACHIEVEMENTS_ALLOWED Achievements.addCallbacks(this); #end // wip
 		// #if TRANSLATIONS_ALLOWED Language.addPythonCallbacks(this); #end // wip
-		HScript.pyimplement(this);
+		// HScript.pyimplement(this);
 		ReflectionFunctions.implement(this);
 		TextFunctions.implement(this);
 		ExtraFunctions.implement(this);

@@ -5,7 +5,10 @@ import funkin.modding.scripts.utils.LuaUtils;
 import funkin.objects.Character;
 import funkin.utils.PlatformDex;
 #if LUA_ALLOWED
-import funkin.modding.scripts.FunkinLua;
+import funkin.modding.scripts.LuaScript;
+#end
+#if PYTHON_ALLOWED
+import funkin.modding.scripts.Python;
 #end
 #if HSCRIPT_ALLOWED
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
@@ -27,6 +30,7 @@ import flixel.FlxBasic;
 using StringTools;
 
 typedef StringMap<T> = Map<String, T>; // for this file only
+
 interface IHscriptInterface
 {
 	public var scriptName:String;
@@ -56,8 +60,6 @@ class HScript extends Script
 	public var modName:String = null;
 	#end
 
-	public var parentInterpreted:Dynamic;
-
 	public static function reset(clearCache:Bool = false)
 	{
 		CoolLog.info('Resetting HScript');
@@ -66,46 +68,6 @@ class HScript extends Script
 
 		if (clearCache)
 			CacheScript.clear(CacheType.HSCRIPT);
-	}
-
-	public static function initHaxeModule(parent:Dynamic)
-	{
-		if (parent.hscript == null)
-		{
-			CoolLog.info('initializing haxe interp for: "${parent.scriptName}"');
-			parent.hscript = new HScript(parent);
-		}
-	}
-
-	public static function initHaxeModuleCode(parent:Dynamic, code:String, ?varsToBring:Any = null)
-	{
-		var hs:HScript = try parent.hscript catch (e) null;
-		if (hs == null)
-		{
-			CoolLog.info('initializing haxe interp for: "${parent.scriptName}"');
-			try
-			{
-				parent.hscript = new HScript(parent, code, varsToBring, true);
-				parent.hscript.execute(code);
-			}
-			catch (e:Dynamic)
-			{
-				CoolLog.error('HScript Error in ${parent.scriptName}: $e');
-				parent.hscript = null;
-			}
-		}
-		else
-		{
-			try
-			{
-				hs.returnValue = hs.execute(code);
-			}
-			catch (e:Dynamic)
-			{
-				CoolLog.error('HScript Error: $e');
-				hs.returnValue = null;
-			}
-		}
 	}
 
 	private final function onError(e:HscriptError)
@@ -162,7 +124,7 @@ class HScript extends Script
 		return false;
 	}
 
-	public function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?parentInstance:Dynamic = null)
+	public function new(?_:String = "", ?file:String = '', ?varsToBring:Any = null, ?parentInstance:Dynamic = null)
 	{
 		super(file);
 
@@ -188,12 +150,6 @@ class HScript extends Script
 				&& (Mods.currentModDirectory == myFolder[1] || Mods.getGlobalMods().contains(myFolder[1])))
 				this.modFolder = myFolder[1];
 		}
-		#end
-
-		#if LUA_ALLOWED
-		parentInterpreted = parent;
-		if (parent != null)
-			this.scriptName = parent.scriptName;
 		#end
 
 		Script.preset(this);
@@ -264,20 +220,27 @@ class HScript extends Script
 		return this;
 	}
 
-	public static function addExHScript(obj:Interp, isPlayState:Bool = false) {
-		if(obj == null) return;
+	public static function addExHScript(obj:Interp, isPlayState:Bool = false)
+	{
+		if (obj == null)
+			return;
 
-		if(isPlayState) {
-			obj.variables.set("game", PlayState.instance); //runHaxeCode moment
-			obj.variables.set("add", function(basic:FlxBasic, ?frontOfChars:Bool = false) {
-				if (frontOfChars) {
+		if (isPlayState)
+		{
+			obj.variables.set("game", PlayState.instance);
+			obj.variables.set("add", function(basic:FlxBasic, ?frontOfChars:Bool = false)
+			{
+				if (frontOfChars)
+				{
 					PlayState.instance.add(basic);
 					return;
 				}
 
 				var position:Int = PlayState.instance.members.indexOf(PlayState.instance.gfGroup);
-				if(PlayState.instance.members.indexOf(PlayState.instance.boyfriendGroup) < position) position = PlayState.instance.members.indexOf(PlayState.instance.boyfriendGroup);
-				else if(PlayState.instance.members.indexOf(PlayState.instance.dadGroup) < position) position = PlayState.instance.members.indexOf(PlayState.instance.dadGroup);
+				if (PlayState.instance.members.indexOf(PlayState.instance.boyfriendGroup) < position)
+					position = PlayState.instance.members.indexOf(PlayState.instance.boyfriendGroup);
+				else if (PlayState.instance.members.indexOf(PlayState.instance.dadGroup) < position)
+					position = PlayState.instance.members.indexOf(PlayState.instance.dadGroup);
 
 				PlayState.instance.insert(position, basic);
 			});
@@ -287,17 +250,22 @@ class HScript extends Script
 			obj.variables.set('addBehindGF', PlayState.instance.addBehindGF);
 			obj.variables.set('addBehindDad', PlayState.instance.addBehindDad);
 			obj.variables.set('addBehindBF', PlayState.instance.addBehindBF);
-			obj.variables.set('setVar', function(name:String, value:Dynamic) {
+			obj.variables.set('setVar', function(name:String, value:Dynamic)
+			{
 				PlayState.instance.variables.set(name, value);
 				return value;
 			});
-			obj.variables.set('getVar', function(name:String) {
+			obj.variables.set('getVar', function(name:String)
+			{
 				var result:Dynamic = null;
-				if(PlayState.instance.variables.exists(name)) result = PlayState.instance.variables.get(name);
+				if (PlayState.instance.variables.exists(name))
+					result = PlayState.instance.variables.get(name);
 				return result;
 			});
-			obj.variables.set('removeVar', function(name:String) {
-				if(PlayState.instance.variables.exists(name)) {
+			obj.variables.set('removeVar', function(name:String)
+			{
+				if (PlayState.instance.variables.exists(name))
+				{
 					PlayState.instance.variables.remove(name);
 					return true;
 				}
@@ -306,24 +274,32 @@ class HScript extends Script
 
 			obj.variables.set('customSubstate', CustomSubstate.instance);
 			obj.variables.set('customSubstateName', CustomSubstate.name);
-		} else {
+		}
+		else
+		{
 			obj.variables.set("game", obj.scriptObject);
 			obj.variables.set('add', obj.scriptObject.add);
 			obj.variables.set('insert', obj.scriptObject.insert);
 			obj.variables.set('remove', obj.scriptObject.remove);
 
-			if(obj.scriptObject.variables != null) {
-				obj.variables.set('setVar', function(name:String, value:Dynamic) {
+			if (obj.scriptObject.variables != null)
+			{
+				obj.variables.set('setVar', function(name:String, value:Dynamic)
+				{
 					obj.scriptObject.variables.set(name, value);
 					return value;
 				});
-				obj.variables.set('getVar', function(name:String) {
+				obj.variables.set('getVar', function(name:String)
+				{
 					var result:Dynamic = null;
-					if(obj.scriptObject.variables.get(name) != null) result = obj.scriptObject.variables.get(name);
+					if (obj.scriptObject.variables.get(name) != null)
+						result = obj.scriptObject.variables.get(name);
 					return result;
 				});
-				obj.variables.set('removeVar', function(name:String) {
-					if(obj.scriptObject.variables.get(name) != null) {
+				obj.variables.set('removeVar', function(name:String)
+				{
+					if (obj.scriptObject.variables.get(name) != null)
+					{
 						obj.scriptObject.variables.remove(name);
 						return true;
 					}
@@ -331,7 +307,7 @@ class HScript extends Script
 				});
 			}
 		}
-		}
+	}
 
 	public function preset(?varsToBring:Any):Void
 	{
@@ -414,6 +390,7 @@ class HScript extends Script
 		#if flxanimate
 		set('FlxAnimate', FlxAnimate);
 		#end
+
 		// Function control constants
 		set('Function_StopLua', LuaUtils.Function_StopLua);
 		set('Function_StopHScript', LuaUtils.Function_StopHScript);
@@ -549,189 +526,7 @@ class HScript extends Script
 			}
 			return false;
 		});
-
-		// For adding your own callbacks
-		#if LUA_ALLOWED
-		set('createGlobalCallback', function(name:String, func:Dynamic)
-		{
-			for (script in PlayState.instance.scriptPack.scripts)
-			{
-				if (Std.isOfType(script, FunkinLua))
-				{
-					var luaScript:FunkinLua = cast script;
-					if (luaScript != null && luaScript.lua != null && !luaScript.closed)
-						Lua_helper.add_callback(luaScript.lua, name, func);
-				}
-			}
-
-			FunkinLua.customFunctions.set(name, func);
-		});
-
-		set('createCallback', function(name:String, func:Dynamic, ?funk:FunkinLua = null)
-		{
-			if (funk == null)
-				funk = parentInterpreted;
-
-			if (funk != null)
-				funk.addLocalCallback(name, func);
-			else
-				CoolLog.error('createCallback ($name): 3rd argument is null');
-		});
-		#end
-
-		set('addHaxeLibrary', function(libName:String, ?libPackage:String = '')
-		{
-			try
-			{
-				var str:String = '';
-				if (libPackage.length > 0)
-					str = libPackage + '.';
-
-				var c:Dynamic = resolveClass(str + libName);
-				if (c == null)
-					c = Type.resolveEnum(str + libName);
-
-				if (c != null)
-					set(libName, c);
-			}
-			catch (e:Dynamic)
-			{
-				CoolLog.error('addHaxeLibrary error: $e');
-			}
-		});
-
-		#if LUA_ALLOWED
-		set('parentInterpreted', parentInterpreted);
-		#else
-		set('parentInterpreted', null);
-		#end
-		set('this', this);
-		set('game', FlxG.state);
-		set('controls', Controls.instance);
-
-		set('buildTarget', LuaUtils.getBuildTarget());
-		set('customSubstate', CustomSubstate.instance);
-		set('customSubstateName', CustomSubstate.name);
 	}
-
-	#if LUA_ALLOWED
-	public static function implement(funk:FunkinLua)
-	{
-		funk.addLocalCallback("runHaxeCode",
-			function(codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):Dynamic
-			{
-				initHaxeModuleCode(funk, codeToRun, varsToBring);
-				if (funk.hscript != null)
-				{
-					if (funcToRun != null)
-					{
-						var result = funk.hscript.call(funcToRun, funcArgs);
-						return (result != null && result != LuaUtils.Function_Continue) ? result : funk.hscript.returnValue;
-					}
-					return funk.hscript.returnValue;
-				}
-				return null;
-			});
-
-		funk.addLocalCallback("runHaxeFunction", function(funcToRun:String, ?funcArgs:Array<Dynamic> = null)
-		{
-			if (funk.hscript != null)
-			{
-				return funk.hscript.call(funcToRun, funcArgs);
-			}
-			else
-			{
-				CoolLog.error('runHaxeFunction: HScript has not been initialized yet! Use "runHaxeCode" to initialize it');
-			}
-			return null;
-		});
-
-		funk.addLocalCallback("addHaxeLibrary", function(libName:String, ?libPackage:String = '')
-		{
-			var str:String = '';
-			if (libPackage.length > 0)
-				str = libPackage + '.';
-			else if (libName == null)
-				libName = '';
-
-			var c:Dynamic = resolveClass(str + libName);
-			if (c == null)
-				c = Type.resolveEnum(str + libName);
-
-			if (funk.hscript == null)
-				initHaxeModule(funk);
-
-			try
-			{
-				if (c != null)
-					funk.hscript.set(libName, c);
-			}
-			catch (e:Dynamic)
-			{
-				CoolLog.error('addHaxeLibrary error: $e');
-			}
-		});
-	}
-	#end
-
-	#if PYTHON_ALLOWED
-	public static function pyimplement(python:Python):Void
-	{
-		python.set("runHaxeCode", function(codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):Dynamic
-		{
-			initHaxeModuleCode(python, codeToRun, varsToBring);
-			if (python.hscript != null)
-			{
-				if (funcToRun != null)
-				{
-					var result = python.hscript.call(funcToRun, funcArgs);
-					return (result != null && result != LuaUtils.Function_Continue) ? result : python.hscript.returnValue;
-				}
-				return python.hscript.returnValue;
-			}
-			return null;
-		});
-
-		python.set("runHaxeFunction", function(funcToRun:String, ?funcArgs:Array<Dynamic> = null)
-		{
-			if (python.hscript != null)
-			{
-				return python.hscript.call(funcToRun, funcArgs);
-			}
-			else
-			{
-				CoolLog.error('runHaxeFunction: HScript has not been initialized yet! Use "runHaxeCode" to initialize it');
-			}
-			return null;
-		});
-
-		python.set("addHaxeLibrary", function(libName:String, ?libPackage:String = '')
-		{
-			var str:String = '';
-			if (libPackage.length > 0)
-				str = libPackage + '.';
-			else if (libName == null)
-				libName = '';
-
-			var c:Dynamic = resolveClass(str + libName);
-			if (c == null)
-				c = Type.resolveEnum(str + libName);
-
-			if (python.hscript == null)
-				initHaxeModule(cast python);
-
-			try
-			{
-				if (c != null)
-					python.hscript.set(libName, c);
-			}
-			catch (e:Dynamic)
-			{
-				CoolLog.error('addHaxeLibrary error: $e');
-			}
-		});
-	}
-	#end
 
 	public override function set(variable:String, data:Dynamic):Void
 	{
@@ -794,9 +589,6 @@ class HScript extends Script
 		closed = true;
 		interp = null;
 		origin = null;
-		#if LUA_ALLOWED
-		parentInterpreted = null;
-		#end
 		super.stop();
 	}
 
@@ -806,6 +598,329 @@ class HScript extends Script
 		super.destroy();
 	}
 }
+
+#if LUA_ALLOWED
+class HxLua
+{
+	public var hscript:HScript;
+	public var lua:LuaScript;
+
+	/** The HScript-side reference back to the owning Lua script. */
+	public var parentInterpreted:Dynamic;
+
+	static function resolveClass(className:String):Class<Dynamic>
+	{
+		return StructureCompatibility.resolveClass(className);
+	}
+
+	public function new(lua:LuaScript)
+	{
+		this.lua = lua;
+		this.hscript = new HScript();
+		this.parentInterpreted = lua;
+		implement(lua, this);
+	}
+
+	/**
+	 * Registers all runHaxeCode / runHaxeFunction / addHaxeLibrary callbacks
+	 * on a LuaScript, routing them through the given HxLua bridge.
+	 */
+	public static function implement(funk:LuaScript, ?bridge:HxLua):Void
+	{
+		funk.set("runHaxeCode",
+			function(codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):Dynamic
+			{
+				var hs:HScript = (bridge != null) ? bridge.hscript : try funk.hscript catch (e) null;
+				if (hs == null)
+				{
+					CoolLog.info('initializing haxe interp for: "${funk.scriptName}"');
+					try
+					{
+						hs = new HScript();
+						if (varsToBring != null)
+							for (k in Reflect.fields(varsToBring))
+								hs.set(k, Reflect.field(varsToBring, k));
+						hs.returnValue = hs.execute(codeToRun);
+						if (bridge != null)
+							bridge.hscript = hs;
+						else
+							funk.hscript = hs;
+					}
+					catch (e:Dynamic)
+					{
+						CoolLog.error('HScript Error in ${funk.scriptName}: $e');
+						return null;
+					}
+				}
+				else
+				{
+					try
+					{
+						hs.returnValue = hs.execute(codeToRun);
+					}
+					catch (e:Dynamic)
+					{
+						CoolLog.error('HScript Error: $e');
+						hs.returnValue = null;
+					}
+				}
+
+				if (hs != null)
+				{
+					if (funcToRun != null)
+					{
+						var result = hs.call(funcToRun, funcArgs);
+						return (result != null && result != LuaUtils.Function_Continue) ? result : hs.returnValue;
+					}
+					return hs.returnValue;
+				}
+				return null;
+			});
+
+		funk.set("runHaxeFunction", function(funcToRun:String, ?funcArgs:Array<Dynamic> = null)
+		{
+			var hs:HScript = (bridge != null) ? bridge.hscript : try funk.hscript catch (e) null;
+			if (hs != null)
+			{
+				return hs.call(funcToRun, funcArgs);
+			}
+			else
+			{
+				CoolLog.error('runHaxeFunction: HScript has not been initialized yet! Use "runHaxeCode" to initialize it');
+			}
+			return null;
+		});
+
+		funk.set("addHaxeLibrary", function(libName:String, ?libPackage:String = '')
+		{
+			var str:String = '';
+			if (libPackage.length > 0)
+				str = libPackage + '.';
+			else if (libName == null)
+				libName = '';
+
+			var c:Dynamic = resolveClass(str + libName);
+			if (c == null)
+				c = Type.resolveEnum(str + libName);
+
+			var hs:HScript = (bridge != null) ? bridge.hscript : try funk.hscript catch (e) null;
+			if (hs == null)
+			{
+				hs = new HScript();
+				if (bridge != null)
+					bridge.hscript = hs;
+				else
+					funk.hscript = hs;
+			}
+
+			try
+			{
+				if (c != null)
+					hs.set(libName, c);
+			}
+			catch (e:Dynamic)
+			{
+				CoolLog.error('addHaxeLibrary error: $e');
+			}
+		});
+	}
+
+	public function stop():Void
+	{
+		if (hscript != null)
+		{
+			hscript.stop();
+			hscript = null;
+		}
+		lua = null;
+		parentInterpreted = null;
+	}
+}
+#else
+// Stub when Lua is not available — keeps call-sites compiling.
+class HxLua
+{
+	public var hscript:HScript;
+
+	public function new(?_:Dynamic)
+	{
+	}
+
+	public static function implement(?_:Dynamic, ?__:Dynamic):Void
+	{
+	}
+
+	public function stop():Void
+	{
+		if (hscript != null)
+		{
+			hscript.stop();
+			hscript = null;
+		}
+	}
+}
+#end
+
+#if PYTHON_ALLOWED
+class HxPython
+{
+	public var hscript:HScript;
+	public var python:Python;
+
+	/** The HScript-side reference back to the owning Python script. */
+	public var parentInterpreted:Dynamic;
+
+	static function resolveClass(className:String):Class<Dynamic>
+	{
+		return StructureCompatibility.resolveClass(className);
+	}
+
+	public function new(python:Python)
+	{
+		this.python = python;
+		this.hscript = new HScript();
+		this.parentInterpreted = python;
+		implement(python, this);
+	}
+
+	/**
+	 * Registers all runHaxeCode / runHaxeFunction / addHaxeLibrary variables
+	 * on a Python script, routing them through the given HxPython bridge.
+	 */
+	public static function implement(python:Python, ?bridge:HxPython):Void
+	{
+		python.set("runHaxeCode", function(codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):Dynamic
+		{
+			var hs:HScript = (bridge != null) ? bridge.hscript : try python.hscript catch (e) null;
+			if (hs == null)
+			{
+				CoolLog.info('initializing haxe interp for: "${python.scriptName}"');
+				try
+				{
+					hs = new HScript();
+					if (varsToBring != null)
+						for (k in Reflect.fields(varsToBring))
+							hs.set(k, Reflect.field(varsToBring, k));
+					hs.returnValue = hs.execute(codeToRun);
+					if (bridge != null)
+						bridge.hscript = hs;
+					else
+						python.hscript = hs;
+				}
+				catch (e:Dynamic)
+				{
+					CoolLog.error('HScript Error in ${python.scriptName}: $e');
+					return null;
+				}
+			}
+			else
+			{
+				try
+				{
+					hs.returnValue = hs.execute(codeToRun);
+				}
+				catch (e:Dynamic)
+				{
+					CoolLog.error('HScript Error: $e');
+					hs.returnValue = null;
+				}
+			}
+
+			if (hs != null)
+			{
+				if (funcToRun != null)
+				{
+					var result = hs.call(funcToRun, funcArgs);
+					return (result != null && result != LuaUtils.Function_Continue) ? result : hs.returnValue;
+				}
+				return hs.returnValue;
+			}
+			return null;
+		});
+
+		python.set("runHaxeFunction", function(funcToRun:String, ?funcArgs:Array<Dynamic> = null)
+		{
+			var hs:HScript = (bridge != null) ? bridge.hscript : try python.hscript catch (e) null;
+			if (hs != null)
+			{
+				return hs.call(funcToRun, funcArgs);
+			}
+			else
+			{
+				CoolLog.error('runHaxeFunction: HScript has not been initialized yet! Use "runHaxeCode" to initialize it');
+			}
+			return null;
+		});
+
+		python.set("addHaxeLibrary", function(libName:String, ?libPackage:String = '')
+		{
+			var str:String = '';
+			if (libPackage.length > 0)
+				str = libPackage + '.';
+			else if (libName == null)
+				libName = '';
+
+			var c:Dynamic = resolveClass(str + libName);
+			if (c == null)
+				c = Type.resolveEnum(str + libName);
+
+			var hs:HScript = (bridge != null) ? bridge.hscript : try python.hscript catch (e) null;
+			if (hs == null)
+			{
+				hs = new HScript();
+				if (bridge != null)
+					bridge.hscript = hs;
+				else
+					python.hscript = hs;
+			}
+
+			try
+			{
+				if (c != null)
+					hs.set(libName, c);
+			}
+			catch (e:Dynamic)
+			{
+				CoolLog.error('addHaxeLibrary error: $e');
+			}
+		});
+	}
+
+	public function stop():Void
+	{
+		if (hscript != null)
+		{
+			hscript.stop();
+			hscript = null;
+		}
+		python = null;
+		parentInterpreted = null;
+	}
+}
+#else
+// Stub when Python is not available — keeps call-sites compiling.
+class HxPython
+{
+	public var hscript:HScript;
+
+	public function new(?_:Dynamic)
+	{
+	}
+
+	public static function implement(?_:Dynamic, ?__:Dynamic):Void
+	{
+	}
+
+	public function stop():Void
+	{
+		if (hscript != null)
+		{
+			hscript.stop();
+			hscript = null;
+		}
+	}
+}
+#end
 
 class CustomFlxColor
 {
@@ -873,19 +988,11 @@ class CustomFlxTextBorderStyle
 
 class CustomFlxPoint
 {
-	/**
-	 * Recycle or create new FlxPoint.
-	 * Be sure to put() them back into the pool after you're done with them!
-	 */
 	public static inline function get(x:Float = 0, y:Float = 0):flixel.math.FlxBasePoint
 	{
 		return flixel.math.FlxPoint.get(x, y);
 	}
 
-	/**
-	 * Recycle or create a new FlxPoint which will automatically be released
-	 * to the pool when passed into a flixel function.
-	 */
 	public static inline function weak(x:Float = 0, y:Float = 0):flixel.math.FlxBasePoint
 	{
 		return flixel.math.FlxPoint.weak(x, y);
@@ -905,9 +1012,6 @@ class BitmapFrontEndWrapper
 		return _instance;
 	}
 
-	/**
-	 * Exposes the private _cache field from FlxG.bitmap
-	 */
 	public var _cache(get, never):CacheWrapper;
 
 	private function new()
@@ -919,7 +1023,6 @@ class BitmapFrontEndWrapper
 		return new CacheWrapper(@:privateAccess FlxG.bitmap._cache);
 	}
 
-	// Delegate common BitmapFrontEnd methods
 	public function add(graphic:flixel.graphics.FlxGraphic, ?persistent:Bool = false, ?key:String):flixel.graphics.FlxGraphic
 	{
 		return FlxG.bitmap.add(graphic, persistent, key);
@@ -966,10 +1069,6 @@ class BitmapFrontEndWrapper
 	}
 }
 
-/**
- * Wrapper class that exposes Map methods for bitmap cache access in scripts.
- * Allows scripts to use FlxG.bitmap._cache.exists() and FlxG.bitmap._cache.get()
- */
 class CacheWrapper
 {
 	private var cache:Map<String, flixel.graphics.FlxGraphic>;
@@ -979,49 +1078,31 @@ class CacheWrapper
 		this.cache = cache;
 	}
 
-	/**
-	 * Check if a bitmap with the given key exists in the cache
-	 */
 	public function exists(key:String):Bool
 	{
 		return cache.exists(key);
 	}
 
-	/**
-	 * Get a bitmap from the cache by its key
-	 */
 	public function get(key:String):flixel.graphics.FlxGraphic
 	{
 		return cache.get(key);
 	}
 
-	/**
-	 * Remove a bitmap from the cache by its key
-	 */
 	public function remove(key:String):Bool
 	{
 		return cache.remove(key);
 	}
 
-	/**
-	 * Set a bitmap in the cache with the given key
-	 */
 	public function set(key:String, value:flixel.graphics.FlxGraphic):Void
 	{
 		cache.set(key, value);
 	}
 
-	/**
-	 * Get all keys in the cache
-	 */
 	public function keys():Iterator<String>
 	{
 		return cache.keys();
 	}
 
-	/**
-	 * Get the number of items in the cache
-	 */
 	public function count():Int
 	{
 		var count = 0;
@@ -1034,7 +1115,7 @@ class CacheWrapper
 class HScript
 {
 	#if LUA_ALLOWED
-	public static function implement(funk:FunkinLua)
+	public static function implement(funk:LuaScript)
 	{
 		funk.addLocalCallback("runHaxeCode",
 			function(codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):Dynamic
@@ -1054,26 +1135,35 @@ class HScript
 		});
 	}
 	#end
+}
 
-	#if PYTHON_ALLOWED
-	public static function pyimplement(python:Python)
+class HxLua
+{
+	public function new(?_:Dynamic)
 	{
-		python.set("runHaxeCode", function(codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):Dynamic
-		{
-			PlayState.instance.addTextToDebug('HScript is not supported on this platform!', FlxColor.RED);
-			return null;
-		});
-		python.set("runHaxeFunction", function(funcToRun:String, ?funcArgs:Array<Dynamic> = null)
-		{
-			PlayState.instance.addTextToDebug('HScript is not supported on this platform!', FlxColor.RED);
-			return null;
-		});
-		python.set("addHaxeLibrary", function(libName:String, ?libPackage:String = '')
-		{
-			PlayState.instance.addTextToDebug('HScript is not supported on this platform!', FlxColor.RED);
-			return null;
-		});
 	}
-	#end
+
+	public static function implement(?_:Dynamic, ?__:Dynamic):Void
+	{
+	}
+
+	public function stop():Void
+	{
+	}
+}
+
+class HxPython
+{
+	public function new(?_:Dynamic)
+	{
+	}
+
+	public static function implement(?_:Dynamic, ?__:Dynamic):Void
+	{
+	}
+
+	public function stop():Void
+	{
+	}
 }
 #end

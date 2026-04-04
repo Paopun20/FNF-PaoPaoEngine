@@ -24,6 +24,8 @@ import Random;
 import js.node.Os;
 #end
 
+using PPQolTool;
+
 class LoadingState extends EditableState
 {
 	private static var loaded:Int = 0;
@@ -81,6 +83,91 @@ class LoadingState extends EditableState
 		#end
 	}
 
+	static private function ftext(text:String):Array<Map<String, String>>
+	{
+		var result:Array<Map<String, String>> = [];
+		var i = 0;
+		var len = text.length;
+
+		while (i < len)
+		{
+			var c = text.charAt(i);
+
+			if (c == '[' && text.charAt(i + 1) != '/')
+			{
+				// Opening tag: [attr="val", flag, ...]
+				var tagClose = text.indexOf(']', i);
+				if (tagClose == -1)
+					break; // malformed, stop
+
+				var tagInner = text.substring(i + 1, tagClose);
+				var attrs = parseTagAttrs(tagInner);
+
+				// Content runs until the next [/]
+				var closePos = text.indexOf('[/]', tagClose + 1);
+				if (closePos == -1)
+				{
+					attrs.set("text", text.substring(tagClose + 1));
+					result.push(attrs);
+					break;
+				}
+
+				attrs.set("text", text.substring(tagClose + 1, closePos));
+				result.push(attrs);
+				i = closePos + 3; // advance past [/]
+			}
+			else
+			{
+				// Plain text segment: run until the next [
+				var nextTag = text.indexOf('[', i);
+				var end = nextTag == -1 ? len : nextTag;
+
+				if (end > i)
+				{
+					var seg = new Map<String, String>();
+					seg.set("text", text.substring(i, end));
+					result.push(seg);
+				}
+				i = nextTag == -1 ? len : nextTag;
+			}
+		}
+
+		return result;
+	}
+
+	static private function parseTagAttrs(inner:String):Map<String, String>
+	{
+		var attrs = new Map<String, String>();
+
+		for (raw in inner.split(','))
+		{
+			var part = StringTools.trim(raw);
+			if (part.length == 0)
+				continue;
+
+			var eq = part.indexOf('=');
+			if (eq != -1)
+			{
+				var key = StringTools.trim(part.substring(0, eq));
+				var val = StringTools.trim(part.substring(eq + 1));
+				// Strip surrounding quotes  "…" or '…'
+				if (val.length >= 2)
+				{
+					var q = val.charAt(0);
+					if ((q == '"' || q == "'") && val.charAt(val.length - 1) == q)
+						val = val.substring(1, val.length - 1);
+				}
+				attrs.set(key, val);
+			}
+			else
+			{
+				attrs.set(part, "true"); // boolean flag attribute
+			}
+		}
+
+		return attrs;
+	}
+
 	function new(target:FlxState, stopMusic:Bool)
 	{
 		this.target = target;
@@ -106,6 +193,8 @@ class LoadingState extends EditableState
 
 	var loadingText:FlxText;
 	var assetText:FlxText;
+	var tipText:FlxText;
+	var ftextData:Array<Map<String, String>>;
 
 	var timePassed:Float = 0;
 
@@ -144,10 +233,28 @@ class LoadingState extends EditableState
 		loadingText.borderSize = 2;
 		addBehindBar(loadingText);
 
+		tipText = new FlxText(0, 685, FlxG.width, Language.getPhrase('loading_tip', 'Tip: {1}', ["N/A"]), 24);
+		tipText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
+		tipText.borderSize = 2;
+		addBehindBar(tipText);
+
 		assetText = new FlxText(0, 580, FlxG.width, Language.getPhrase('asset_loading', 'Asset Loading: ', ['N/A', '(67/[N/A])']), 32);
 		assetText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
 		assetText.borderSize = 2;
 		addBehindBar(assetText);
+
+		#if MODS_ALLOWED
+		var tipArray:Array<String> = Mods.mergeAllTextsNamed('data/loadingTipText.txt');
+		#else
+		var fullText:String = Assets.getText(Paths.txt('loadingTipText'));
+		var tipArray:Array<String> = fullText.split('\n');
+		#end
+
+		tipArray = tipArray.filter(function(t) return t.trim() != "");
+
+		var tip:String = tipArray.length > 0 ? tipArray.shuffle().randomItem() : "No tips available.";
+
+		ftextData = ftext(tip);
 
 		super.create();
 
@@ -168,6 +275,42 @@ class LoadingState extends EditableState
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+
+		var rendered = "";
+		var gflag = false;
+		var gkey = "";
+
+		for (segment in ftextData)
+		{
+			var text = segment.get("text");
+			var gflag = false;
+			var gkey = "";
+
+			for (key in segment.keys())
+			{
+				if (key == "FX_GTEXT")
+				{
+					gflag = true;
+					gkey = segment.get(key);
+					break;
+				}
+			}
+
+			if (gflag)
+			{
+				var charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+				var result = "";
+				for (i in 0...text.length)
+					result += text.charAt(i) == gkey ? Random.string(1, charset) : text.charAt(i);
+				rendered += result;
+			}
+			else
+			{
+				rendered += text;
+			}
+		}
+
+		tipText.text = Language.getPhrase('loading_tip', 'Tip: {1}', [rendered]);
 
 		if (dontUpdate)
 			return;

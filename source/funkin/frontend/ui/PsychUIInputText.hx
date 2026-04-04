@@ -520,22 +520,28 @@ class PsychUIInputText extends FlxSpriteGroup
 			return;
 
 		var textField = textObj.textField;
-		textField.setSelection(caretIndex, caretIndex);
+		var textLength = textField.text.length;
+		
+		// Clamp caretIndex to valid range
+		var validCaretIndex = Std.int(Math.max(0, Math.min(caretIndex, textLength)));
+		var validSelectIndex = selectIndex >= 0 ? Std.int(Math.max(0, Math.min(selectIndex, textLength))) : -1;
+		
+		textField.setSelection(validCaretIndex, validCaretIndex);
 		_caretTime = 0;
 		if (caret != null && caret.exists)
 		{
 			caret.y = textObj.y + 2;
 			caret.x = textObj.x + 1 - textObj.textField.scrollH;
-			if (caretIndex > 0)
-				caret.x += _boundaries[Std.int(Math.max(0, Math.min(_boundaries.length - 1, caretIndex - 1)))];
+			if (validCaretIndex > 0)
+				caret.x += _boundaries[Std.int(Math.max(0, Math.min(_boundaries.length - 1, validCaretIndex - 1)))];
 		}
 
 		if (selection != null && selection.exists)
 		{
 			selection.y = textObj.y + 2;
 			selection.x = textObj.x + 1 - textObj.textField.scrollH;
-			if (selectIndex > 0)
-				selection.x += _boundaries[Std.int(Math.max(0, Math.min(_boundaries.length - 1, selectIndex - 1)))];
+			if (validSelectIndex > 0)
+				selection.x += _boundaries[Std.int(Math.max(0, Math.min(_boundaries.length - 1, validSelectIndex - 1)))];
 
 			selection.scale.y = textField.textHeight;
 			selection.scale.x = caret.x - selection.x;
@@ -559,9 +565,9 @@ class PsychUIInputText extends FlxSpriteGroup
 			if (text.length > 0)
 			{
 				textObj.removeFormat(selectedFormat);
-				if (selectIndex != -1 && selectIndex != caretIndex)
+				if (validSelectIndex != -1 && validSelectIndex != validCaretIndex)
 				{
-					textObj.addFormat(selectedFormat, caretIndex < selectIndex ? caretIndex : selectIndex, caretIndex < selectIndex ? selectIndex : caretIndex);
+					textObj.addFormat(selectedFormat, validCaretIndex < validSelectIndex ? validCaretIndex : validSelectIndex, validCaretIndex < validSelectIndex ? validSelectIndex : validCaretIndex);
 				}
 			}
 		}

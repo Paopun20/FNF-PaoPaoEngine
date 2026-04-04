@@ -817,9 +817,9 @@ class PlayState extends MusicBeatState
 			for (script in scriptPack.scripts)
 			{
 				#if LUA_ALLOWED
-				if (Std.isOfType(script, FunkinLua))
+				if (Std.isOfType(script, LuaScript))
 				{
-					var luaScript:FunkinLua = cast script;
+					var luaScript:LuaScript = cast script;
 					if (luaScript.scriptName == luaFile)
 					{
 						alreadyLoaded = true;
@@ -829,7 +829,7 @@ class PlayState extends MusicBeatState
 				#end
 			}
 			if (!alreadyLoaded)
-				new FunkinLua(luaFile);
+				scriptPack.add(new LuaScript(luaFile));
 		}
 		#end
 
@@ -3618,7 +3618,7 @@ class PlayState extends MusicBeatState
 
 		#if LUA_ALLOWED
 		scriptPack.destroy();
-		FunkinLua.customFunctions.clear();
+		// FunkinLua.customFunctions.clear();
 		#else
 		scriptPack.destroy();
 		#end
@@ -3771,7 +3771,7 @@ class PlayState extends MusicBeatState
 		var newScript:HScript = null;
 		try
 		{
-			newScript = new HScript(null, file).setParent(this);
+			newScript = new HScript(file).setParent(this);
 			CoolLog.info('initialized hscript interp successfully: $file');
 			scriptPack.add(newScript);
 		}
@@ -3835,9 +3835,9 @@ class PlayState extends MusicBeatState
 		{
 			for (script in scriptPack.scripts)
 			{
-				if (Std.isOfType(script, FunkinLua))
+				if (Std.isOfType(script, LuaScript))
 				{
-					var luaScript:FunkinLua = cast script;
+					var luaScript:LuaScript = cast script;
 					if (luaScript.scriptName == luaToLoad)
 						return false;
 				}
@@ -3851,7 +3851,7 @@ class PlayState extends MusicBeatState
 	{
 		try
 		{
-			var newScript:FunkinLua = new FunkinLua(file);
+			var newScript:LuaScript = new LuaScript(file);
 			CoolLog.info('initialized lua interp successfully: $file');
 			scriptPack.add(newScript);
 		}
@@ -3909,9 +3909,9 @@ class PlayState extends MusicBeatState
 			var scriptOrigin:String = null;
 			
 			#if LUA_ALLOWED
-			if (Std.isOfType(script, FunkinLua))
+			if (Std.isOfType(script, LuaScript))
 			{
-				var luaScript:FunkinLua = cast script;
+				var luaScript:LuaScript = cast script;
 				scriptOrigin = luaScript.scriptName;
 			}
 			#end
