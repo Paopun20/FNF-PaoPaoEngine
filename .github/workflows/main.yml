@@ -157,10 +157,7 @@ jobs:
       - name: Configure Lime Android Environment
         if: matrix.target == 'android'
         run: |
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/21.4.7075529" >> $GITHUB_ENV
-          echo "JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
-          haxelib run lime setup android
+          echo "$ANDROID_SDK_ROOT\n$ANDROID_SDK_ROOT/ndk/21.4.7075529\n$JAVA_HOME" | haxelib run lime setup android
 
       - name: Compile (Android)
         if: matrix.target == 'android'
