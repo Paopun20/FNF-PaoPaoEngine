@@ -1,3 +1,4 @@
 [submodule ".agents"]
-	path = .agents
-	url = https://github.com/Paopun20/PaoPaoSkillPacks.git
+    path = .agents
+    url = https://github.com/Paopun20/PaoPaoSkillPacks.git
+    branch = main
