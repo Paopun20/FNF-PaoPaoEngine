@@ -310,7 +310,7 @@ class Achievements
 	#end
 
 	#if (LUA_ALLOWED || PYTHON_ALLOWED)
-	public static function addCallbacks(funk)
+	public static function addCallbacks(funk: Dynamic)
 	{
 		var impl = ImplementUtils.make(funk);
 		impl("getAchievementScore", function(name:String):Float

@@ -38,7 +38,7 @@ class ReflectionFunctions
 		});
 		impl("getPropertyFromClass", function(classVar:String, variable:String, ?allowMaps:Bool = false)
 		{
-			var myClass:Dynamic = Type.resolveClass(classVar);
+			var myClass:Dynamic = LuaUtils.resolveClass(classVar);
 			if (myClass == null)
 			{
 				ImplementUtils.addTextToDebug('getPropertyFromClass: Class $classVar not found', FlxColor.RED);
@@ -58,7 +58,7 @@ class ReflectionFunctions
 		});
 		impl("setPropertyFromClass", function(classVar:String, variable:String, value:Dynamic, ?allowMaps:Bool = false, ?allowInstances:Bool = false)
 		{
-			var myClass:Dynamic = Type.resolveClass(classVar);
+			var myClass:Dynamic = LuaUtils.resolveClass(classVar);
 			if (myClass == null)
 			{
 				ImplementUtils.addTextToDebug('setPropertyFromClass: Class $classVar not found', FlxColor.RED);

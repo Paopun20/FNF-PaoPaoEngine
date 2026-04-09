@@ -6,6 +6,7 @@ import funkin.backend.StageData;
 import openfl.display.BlendMode;
 import Type.ValueType;
 import funkin.substates.GameOverSubstate;
+import funkin.modding.scripts.compatibility.StructureCompatibility;
 
 typedef LuaTweenOptions =
 {
@@ -48,6 +49,11 @@ class LuaUtils
 
 	public static function getHScriptScriptObject() {
 		return (FlxG.state.subState == null ? FlxG.state : FlxG.state.subState);
+	}
+	
+	public static function resolveClass(className:String):Class<Dynamic>
+	{
+		return StructureCompatibility.resolveClass(className);
 	}
 
 	public static inline function isPlayStateScript(obj:Dynamic):Bool {

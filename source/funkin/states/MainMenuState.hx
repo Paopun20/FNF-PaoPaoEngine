@@ -366,6 +366,13 @@ class MainMenuState extends EditableState
 				FlxG.mouse.visible = false;
 				MusicBeatState.switchState(new MasterEditorMenu());
 			}
+			if (controls.justPressed('debug_2'))
+			{
+				selectedSomethin = true;
+				FlxG.mouse.visible = false;
+				WarningState.leftState = false;
+				MusicBeatState.switchState(new WarningState());
+			}
 			#end
 		}
 

@@ -28,7 +28,6 @@ class ScriptPack
 				#if LUA_ALLOWED
 				if (file.toLowerCase().endsWith('.lua')) {
 					add(new LuaScript(folder + file));
-					//add(new FunkinLua(folder + file));
 				}
 				#end
 				#if HSCRIPT_ALLOWED

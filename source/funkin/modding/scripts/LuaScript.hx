@@ -21,19 +21,20 @@ import lscript.LScript;
 #end
 
 using StringTools;
-using PPQolTool;
+using PPQolTools;
 
 class LuaScript extends Script
 {
 	#if LUA_ALLOWED
 	var internalScript:LScript;
 	var scriptPath:String;
+
+	public static var psychVariables:Map<String, Dynamic> = [];
+
 	public var scriptName(get, never):String;
 	#if HSCRIPT_ALLOWED
 	public var hscript:HScript = null;
 	#end
-	public function get_scriptName():String
-		return scriptPath;
 
 	override function set_parent(value:Dynamic):Dynamic
 		return internalScript.parent = value;
@@ -41,14 +42,16 @@ class LuaScript extends Script
 	override function get_parent():Dynamic
 		return internalScript.parent;
 
-	public static var psychVariables:Map<String, Dynamic> = [];
+	public function get_scriptName():String
+		return scriptPath;
 
-	public function new(path:String, preset:Bool = true)
+	public function new(path:String)
 	{
 		super(path);
 		this.scriptPath = path;
 
 		internalScript = new LScript(Script.getFileContent(path));
+		internalScript.tracePrefix = '[$scriptPath] ';
 		#if debug
 		internalScript.print = (line:Int, s:String) ->
 		{
@@ -67,8 +70,6 @@ class LuaScript extends Script
 		{
 			initVars();
 			PsychFunctions.implement(this);
-			ReflectionFunctions.implement(this);
-			TextFunctions.implement(this);
 			internalScript.execute();
 		}
 		catch (e:Dynamic)
@@ -79,6 +80,8 @@ class LuaScript extends Script
 
 	public function initVars()
 	{
+		set('scriptName', scriptName);
+
 		// Flixel
 		set('FlxG', FlxG);
 		set('FlxAngle', FlxAngle);
@@ -118,7 +121,6 @@ class LuaScript extends Script
 
 		set('Paths', Paths);
 
-		// #if !debug
 		set('print', (s:String) ->
 		{
 			var info:PosInfos = {
@@ -130,7 +132,6 @@ class LuaScript extends Script
 			}
 			CoolLog.info(s, info);
 		});
-		// #end
 
 		// Custom
 		/* set('add', (object:FlxBasic) -> return FlxG.state.add(object));

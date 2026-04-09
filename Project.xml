@@ -229,6 +229,9 @@
 	<!-- hscript config define -->
 	<haxedef name="hscriptPos" if="HSCRIPT_ALLOWED" />
 	<define name="CUSTOM_CLASSES" if="HSCRIPT_ALLOWED" />
+	
+	<haxedef name="analyzer-module" />
+	<haxedef name="analyzer-optimize" />
 
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
@@ -290,7 +293,7 @@
 		<haxedef name="HXCPP_CPP_GC_MARK_MOVE" />
 		<haxedef name="HXCPP_CHECK_POINTER" />
 		<haxedef name="HXCPP_CPP11" />
-		<haxedef name="analyzer-optimize" />
+		<haxedef name="HXCPP-DEBUGGER" if="debug" />
 	</section>
 
 	<section if="android">

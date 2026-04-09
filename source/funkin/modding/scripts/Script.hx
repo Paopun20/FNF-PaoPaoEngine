@@ -45,7 +45,7 @@ import sys.FileSystem;
 
 using StringTools;
 using Lambda;
-using PPQolTool;
+using PPQolTools;
 
 class Script implements IFlxDestroyable
 {

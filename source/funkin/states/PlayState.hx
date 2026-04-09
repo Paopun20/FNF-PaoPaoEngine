@@ -205,7 +205,7 @@ class PlayState extends MusicBeatState
 	public var pressMissDamage:Float = 0.05;
 
 	public var botplaySine:Float = 0;
-	public var botplayTxt:FlxText;
+	public var botplayText:FlxText;
 
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
@@ -582,14 +582,14 @@ class PlayState extends MusicBeatState
 		scoreTxt.visible = !ClientPrefs.data.hideHud;
 		uiGroup.add(scoreTxt);
 
-		botplayTxt = new FlxText(400, healthBar.y - 90, FlxG.width - 800, Language.getPhrase("Botplay").toUpperCase(), 32);
-		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		botplayTxt.scrollFactor.set();
-		botplayTxt.borderSize = 1.25;
-		botplayTxt.visible = cpuControlled;
-		uiGroup.add(botplayTxt);
+		botplayText = new FlxText(400, healthBar.y - 90, FlxG.width - 800, Language.getPhrase("Botplay").toUpperCase(), 32);
+		botplayText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		botplayText.scrollFactor.set();
+		botplayText.borderSize = 1.25;
+		botplayText.visible = cpuControlled;
+		uiGroup.add(botplayText);
 		if (ClientPrefs.data.downScroll)
-			botplayTxt.y = healthBar.y + 70;
+			botplayText.y = healthBar.y + 70;
 
 		uiGroup.cameras = [camHUD];
 		noteGroup.cameras = [camHUD];
@@ -1874,10 +1874,10 @@ class PlayState extends MusicBeatState
 		setOnScripts('curDecStep', curDecStep);
 		setOnScripts('curDecBeat', curDecBeat);
 
-		if (botplayTxt != null && botplayTxt.visible)
+		if (botplayText != null && botplayText.visible)
 		{
 			botplaySine += 180 * elapsed;
-			botplayTxt.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180);
+			botplayText.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180);
 		}
 
 		if (controls.PAUSE && startedCountdown && canPause)
@@ -3618,7 +3618,6 @@ class PlayState extends MusicBeatState
 
 		#if LUA_ALLOWED
 		scriptPack.destroy();
-		// FunkinLua.customFunctions.clear();
 		#else
 		scriptPack.destroy();
 		#end

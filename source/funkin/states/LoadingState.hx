@@ -24,7 +24,7 @@ import Random;
 import js.node.Os;
 #end
 
-using PPQolTool;
+using PPQolTools;
 
 class LoadingState extends EditableState
 {

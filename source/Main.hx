@@ -348,7 +348,7 @@ class Main extends Sprite
 		FlxG.save.bind('funkin', CoolUtil.getSavePath());
 		Highscore.load();
 
-		#if LUA_ALLOWED Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(funkin.modding.scripts.components.CallbackHandler.call)); #end
+		// #if LUA_ALLOWED Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(funkin.modding.scripts.components.CallbackHandler.call)); #end
 		Controls.instance = new Controls();
 		ClientPrefs.loadDefaultKeys();
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
@@ -382,6 +382,10 @@ class Main extends Sprite
 
 		#if DISCORD_ALLOWED
 		DiscordClient.prepare();
+		#end
+
+		#if FLX_DEBUG
+		FlxG.debugger.toggleKeys.remove(BACKSLASH);
 		#end
 
 		// shader coords fix

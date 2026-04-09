@@ -34,7 +34,7 @@ import openfl.Lib;
 import openfl.display.BitmapData;
 import openfl.utils.Assets;
 import paopao.hython.Expr as PyExpr;
-import paopao.hython.Expr.Error as PyError;
+import paopao.hython.Error.Error as PyError;
 import paopao.hython.Interp as PyInterp;
 import paopao.hython.Parser as PyParser;
 import paopao.hython.Printer as PyPrinter;
@@ -1062,6 +1062,9 @@ class Python extends Script implements IPythonInterface implements IFlxDestroyab
 		set('playAnim', function(obj:String, name:String, ?forced:Bool = false, ?reverse:Bool = false, ?startFrame:Int = 0)
 		{
 			var obj:Dynamic = LuaUtils.getObjectDirectly(obj);
+			if (obj == null)
+				return false;
+
 			if (obj.playAnim != null)
 			{
 				obj.playAnim(name, forced, reverse, startFrame);
@@ -1427,7 +1430,7 @@ class Python extends Script implements IPythonInterface implements IFlxDestroyab
 		#if DISCORD_ALLOWED DiscordClient.addPythonCallbacks(this); #end
 		#if ACHIEVEMENTS_ALLOWED Achievements.addCallbacks(this); #end // wip
 		// #if TRANSLATIONS_ALLOWED Language.addPythonCallbacks(this); #end // wip
-		// HScript.pyimplement(this);
+		new HxPy(this);
 		ReflectionFunctions.implement(this);
 		TextFunctions.implement(this);
 		ExtraFunctions.implement(this);

@@ -10,6 +10,7 @@ class StructureCompatibility
 	 */
 	public static final classAliasMap:StringMap<String> = [
 		// Psych 0.7.3 - 1.0.4
+		
 		// backend
 		'backend.Conductor' => 'funkin.backend.Conductor',
 		'backend.ClientPrefs' => 'funkin.backend.ClientPrefs',
@@ -29,6 +30,7 @@ class StructureCompatibility
 		'backend.Controls' => 'funkin.backend.Controls',
 		'backend.Discord' => 'funkin.api.Discord',
 		'backend.DiscordClient' => 'funkin.api.Discord',
+		
 		// psychlua
 		'psychlua.LuaUtils' => 'funkin.modding.scripts.utils.LuaUtils',
 		'psychlua.CallbackHandler' => 'funkin.modding.scripts.components.CallbackHandler',
@@ -40,6 +42,7 @@ class StructureCompatibility
 		'psychlua.ShaderFunctions' => 'funkin.modding.scripts.components.ShaderFunctions',
 		'psychlua.TextFunctions' => 'funkin.modding.scripts.components.TextFunctions',
 		'psychlua.ModchartAnimateSprite' => 'funkin.modding.scripts.components.ModchartAnimateSprite',
+		
 		// States
 		'states.PlayState' => 'funkin.states.PlayState',
 		'states.MainMenuState' => 'funkin.states.MainMenuState',
@@ -56,6 +59,7 @@ class StructureCompatibility
 		'states.editors.StageEditorState' => 'funkin.modding.editors.StageEditorState',
 		'states.editors.WeekEditorState' => 'funkin.modding.editors.WeekEditorState',
 		'states.editors.MenuCharacterEditorState' => 'funkin.modding.editors.MenuCharacterEditorState',
+		
 		// Objects
 		'objects.Alphabet' => 'funkin.objects.Alphabet',
 		'objects.Character' => 'funkin.objects.Character',
@@ -67,11 +71,13 @@ class StructureCompatibility
 		'objects.AttachedSprite' => 'funkin.objects.AttachedSprite',
 		'objects.AttachedText' => 'funkin.objects.AttachedText',
 		'objects.MenuCharacter' => 'funkin.objects.MenuCharacter',
+		
 		// Substates
 		'substates.GameOverSubstate' => 'funkin.substates.GameOverSubstate',
 		'substates.PauseSubState' => 'funkin.substates.PauseSubState',
 		'substates.CustomSubstate' => 'funkin.modding.scripts.components.CustomSubstate',
 		'substates.GameplayChangersSubstate' => 'funkin.options.GameplayChangersSubstate',
+		
 		// Options
 		'options.OptionsState' => 'funkin.options.OptionsState',
 		'options.GameplayChangersSubstate' => 'funkin.options.GameplayChangersSubstate',
@@ -80,6 +86,7 @@ class StructureCompatibility
 		'options.VisualsSettingsSubState' => 'funkin.options.VisualsSettingsSubState',
 		'options.GraphicsSettingsSubState' => 'funkin.options.GraphicsSettingsSubState',
 		'options.GameplaySettingsSubState' => 'funkin.options.GameplaySettingsSubState',
+		
 		// Psych 0.6.3 (no namespace)
 		'Conductor' => 'funkin.backend.Conductor',
 		'ClientPrefs' => 'funkin.backend.ClientPrefs',
@@ -146,7 +153,9 @@ class StructureCompatibility
 
 			if (myClass != null)
 			{
-				CoolLog.info('[Compatibility] Redirected "$className" to "$newClassName"');
+				#if debug
+				CoolLog.info('[Compatibility] Redirecting "$className" to "$newClassName"');
+				#end
 			}
 			else
 			{

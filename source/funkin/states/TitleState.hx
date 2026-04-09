@@ -88,11 +88,11 @@ class TitleState extends EditableState
 		#elseif CHARTING
 		MusicBeatState.switchState(new ChartingState());
 		#else
-		if (FlxG.save.data.flashing == null && !FlashingState.leftState)
+		if (((FlxG.save.data.flashing == null || FlxG.save.data.shaders == null) && !WarningState.leftState))
 		{
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
-			MusicBeatState.switchState(new FlashingState());
+			MusicBeatState.switchState(new WarningState());
 		}
 		else
 			startIntro();
