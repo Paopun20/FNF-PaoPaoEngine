@@ -196,7 +196,7 @@ jobs:
     name: Nightly Release
     needs: build
     runs-on: ubuntu-latest
-    if: ${{ (inputs.nightly || github.event_name == 'push') && always() }}
+    if: ${{ (inputs.nightly || github.event_name == 'push') && !cancelled() }}
 
     steps:
       - name: Download all artifacts
