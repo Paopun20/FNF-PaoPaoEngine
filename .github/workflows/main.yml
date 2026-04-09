@@ -55,12 +55,12 @@ jobs:
           #   lib-path: ~/haxelib
           #   setup-file: ./setup/unix.sh
 
-          - os: ubuntu-latest
+          - os: windows-latest
             target: android
             artifact-name: androidBuild
             export-path: export/release/android/bin/app/
-            lib-path: ~/haxelib
-            setup-file: ./setup/unix.sh
+            lib-path: C:/haxelib
+            setup-file: ./setup/windows.ps1
 
           # - os: macos-15
           #   target: tvos
@@ -112,7 +112,7 @@ jobs:
             ${{ runner.os }}-haxelib-
 
       - name: Install Haxelib (Unix)
-        if: matrix.target != 'windows'
+        if: runner.os != 'Windows'
         run: |
           haxelib setup ${{ matrix.lib-path }}
           haxelib --global update haxelib
@@ -121,7 +121,7 @@ jobs:
           sh ${{ matrix.setup-file }}
 
       - name: Install Haxelib (Windows)
-        if: matrix.target == 'windows'
+        if: runner.os == 'Windows'
         shell: powershell
         run: |
           haxelib setup ${{ matrix.lib-path }}
@@ -130,11 +130,11 @@ jobs:
           . ${{ matrix.setup-file }}
 
       - name: Skip SScript setup mode (Unix)
-        if: matrix.target != 'windows'
+        if: runner.os != 'Windows'
         run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> ~/settings.cocoa
 
       - name: Skip SScript setup mode (Windows)
-        if: matrix.target == 'windows'
+        if: runner.os == 'Windows'
         run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> %USERPROFILE%/settings.cocoa
         shell: cmd
 
@@ -156,11 +156,10 @@ jobs:
 
       - name: Configure Lime Android Environment
         if: matrix.target == 'android'
+        shell: powershell
         run: |
-          printf "%s\n%s\n%s\n" \
-          "$ANDROID_SDK_ROOT" \
-          "$ANDROID_SDK_ROOT/ndk/21.4.7075529" \
-          "$JAVA_HOME" | haxelib run lime setup android
+          "$env:ANDROID_SDK_ROOT`n$env:ANDROID_SDK_ROOT/ndk/21.4.7075529`n$env:JAVA_HOME" |
+            haxelib run lime setup android
 
       - name: Compile (Android)
         if: matrix.target == 'android'
