@@ -80,6 +80,21 @@ jobs:
         with:
           haxe-version: 4.3.7
 
+      - name: Setup Android SDK
+        if: matrix.target == 'android'
+        uses: android-actions/setup-android@v4
+
+      - name: Install Android packages
+        run: |
+          sdkmanager "platform-tools" "platforms;android-19" "build-tools;19.1.0" "ndk;21.4.7075529"
+
+      - name: Set up Java 11
+        if: matrix.target == 'android'
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 11
+
       - name: Install Linux dependencies
         if: matrix.target == 'linux'
         run: |
@@ -138,25 +153,17 @@ jobs:
           haxelib run lime rebuild ${{ matrix.target }}
           haxelib run lime build ios --app-version="4.0.0-${{ github.run_id }}" -D officialBuild -nosign
 
-      - name: Install Android NDK r21d
+      - name: Configure Lime Android Environment
         if: matrix.target == 'android'
         run: |
-          wget -q https://dl.google.com/android/repository/android-ndk-r28c-linux.zip -O android-ndk.zip
-          unzip -q android-ndk.zip -d /opt/
-          mv /opt/android-ndk-r21d /opt/android-ndk
-          echo "ANDROID_NDK_HOME=/opt/android-ndk" >> $GITHUB_ENV
-
-      - name: Install Android SDK platform
-        if: matrix.target == 'android'
-        run: |
-          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platforms;android-33" "build-tools;33.0.2"
+          echo "ANDROID_SDK=$env:ANDROID_HOME" >> $env:GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=$env:ANDROID_HOME\ndk\21.4.7075529" >> $env:GITHUB_ENV
+          echo "JAVA_HOME=$env:JAVA_HOME_11_X64" >> $env:GITHUB_ENV
+          haxelib run lime setup android
 
       - name: Compile (Android)
         if: matrix.target == 'android'
         run: |
-          echo "JAVA_HOME=$JAVA_HOME"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          echo -e "$ANDROID_SDK_ROOT\n$ANDROID_NDK_HOME\n$JAVA_HOME\n" | haxelib run lime setup android
           haxelib run lime build android --app-version="4.0.0-${{ github.run_id }}" -D officialBuild -release
 
       - name: Compile (Apple TV)
