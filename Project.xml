@@ -297,19 +297,15 @@
 	</section>
 
 	<section if="android">
-		<android target-sdk-version="33" min-sdk-version="21" compile-sdk-version="33" />
 		<dependency name="c++_shared" />
 		<haxedef name="HXCPP_CLANG" />
 		<haxedef name="HXCPP_ARM_MODE" value="thumb2" />
+		
 		<haxedef name="android" />
-
-		<android xmlns:android="http://schemas.android.com/apk/res/android">
-			<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-			<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-			<uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-			<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-			<uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
-		</android>
+		
+		<android permission="android.permission.READ_EXTERNAL_STORAGE"/>
+		<android permission="android.permission.WRITE_EXTERNAL_STORAGE"/>
+		<android permission="android.permission.INTERNET"/>
 
 		<set name="debug" if="debug" />
 		<haxeflag name="-debug" if="debug" />
