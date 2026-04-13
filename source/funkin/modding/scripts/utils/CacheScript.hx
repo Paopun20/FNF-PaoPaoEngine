@@ -1,4 +1,4 @@
-package funkin.modding.scripts;
+package funkin.modding.scripts.utils;
 
 import haxe.ds.StringMap;
 import hscript.Expr;

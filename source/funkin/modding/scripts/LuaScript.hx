@@ -27,11 +27,7 @@ class LuaScript extends Script
 {
 	#if LUA_ALLOWED
 	var internalScript:LScript;
-	var scriptPath:String;
 
-	public static var psychVariables:Map<String, Dynamic> = [];
-
-	public var scriptName(get, never):String;
 	#if HSCRIPT_ALLOWED
 	public var hscript:HScript = null;
 	#end
@@ -42,17 +38,12 @@ class LuaScript extends Script
 	override function get_parent():Dynamic
 		return internalScript.parent;
 
-	public function get_scriptName():String
-		return scriptPath;
-
-	public function new(path:String)
+	public override function new(path:String)
 	{
 		super(path);
-		this.scriptPath = path;
 
 		internalScript = new LScript(Script.getFileContent(path));
 		internalScript.tracePrefix = '[$scriptPath] ';
-		#if debug
 		internalScript.print = (line:Int, s:String) ->
 		{
 			var info:PosInfos = {
@@ -64,13 +55,16 @@ class LuaScript extends Script
 			}
 			CoolLog.info(s, info);
 		}
-		#end
+	}
 
+	public override function execute() {
 		try
 		{
 			initVars();
-			PsychFunctions.implement(this);
+			Script.preset(this);
+			PsychFunctions.implement(this, scriptPack);
 			internalScript.execute();
+			call('onCreate', []);
 		}
 		catch (e:Dynamic)
 		{

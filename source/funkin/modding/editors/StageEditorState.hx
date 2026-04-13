@@ -14,7 +14,7 @@ import openfl.display.Sprite;
 import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
-import funkin.modding.scripts.ModchartSprite;
+import funkin.modding.objects.ModchartSprite;
 import flash.net.FileFilter;
 import haxe.ds.StringMap;
 import funkin.modding.editors.content.Prompt;

@@ -1,6 +1,5 @@
 package funkin.plugins;
 
-import funkin.backend.Controls;
 import haxe.Exception;
 import flixel.FlxBasic;
 import flixel.FlxG;

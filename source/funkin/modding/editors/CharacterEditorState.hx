@@ -17,12 +17,13 @@ import flixel.addons.display.shapes.FlxShapeGrid;
 import flixel.util.FlxColor;
 import openfl.display.LineScaleMode;
 import flixel.util.FlxSpriteUtil;
+import openfl.display.BitmapData;
 
 #if (flixel < version("5.7.0"))
 typedef PointerGraphic = flixel.system.debug.interaction.tools.Pointer.GraphicCursorCross;
 #else
 @:bitmap("assets/images/debugger/cursorCross.png")
-class PointerGraphic extends openfl.display.BitmapData
+class PointerGraphic extends BitmapData
 {
 }
 #end
@@ -79,12 +80,12 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		super();
 	}
 
-	final assetFolder = 'week1'; // load from assets/week1/
+	// final assetFolder = 'week1'; // load from assets/week1/
 
 	inline function loadBG()
 	{
-		var lastLoaded = Paths.currentLevel;
-		Paths.currentLevel = assetFolder;
+		// var lastLoaded = Paths.currentLevel;
+		// Paths.currentLevel = assetFolder;
 
 		camEditor.bgColor = 0xFF666666;
 
@@ -109,7 +110,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		dadPosition.set(100, 100);
 		bfPosition.set(770, 100);
 
-		Paths.currentLevel = lastLoaded;
+		// Paths.currentLevel = lastLoaded;
 	}
 
 	override function create()

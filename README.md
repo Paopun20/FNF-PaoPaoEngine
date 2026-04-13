@@ -3,7 +3,7 @@
 > [!WARNING]
 This engine is currently under heavy development, Mod API is not the same as **Psych Engine** mods, ya your cook bro
 
-PaoPoa Engine is a cross-platform [Friday Night Funkin'](https://github.com/FunkinCrew/Funkin) Engine aimed at freedom of modding without source code, optimization, and lightweight, cross-platform.
+PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/FunkinCrew/Funkin) Engine aimed at freedom of modding without source code, optimization, lightweight, cross-platform.
 
 ## Features/Changes from the frok until 0.1.0 initial releases (maybe)
 

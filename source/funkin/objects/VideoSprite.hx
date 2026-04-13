@@ -1,23 +1,45 @@
 package funkin.objects;
 
+import funkin.utils.ThreadUtil;
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.addons.display.FlxBackdrop;
+import flixel.addons.display.FlxPieDial;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxMath;
+import flixel.text.FlxText;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
-import flixel.addons.display.FlxPieDial;
+import haxe.Int64;
+import haxe.io.FPHelper;
+import haxe.io.Path;
+#if sys
+import sys.io.File;
+import sys.FileSystem;
+import sys.thread.Mutex;
+#end
 #if hxvlc
 import hxvlc.flixel.FlxVideoSprite;
 #end
 
 #if VIDEOS_ALLOWED
+using PPQolTools;
+
 enum VideoState
 {
 	Idle;
+	Loading;
 	Playing;
 	Skipped;
 	Finished;
 	Destroyed;
+}
+
+typedef VideoSubtitle =
+{
+	var time:Float; // in ms
+	var subtitle:String;
 }
 
 class VideoSprite extends FlxSpriteGroup
@@ -51,9 +73,24 @@ class VideoSprite extends FlxSpriteGroup
 	var skipSprite:FlxPieDial;
 	var cover:FlxSprite;
 
+	// Loading UI
+	var loadingBackdrop:FlxBackdrop;
+	var loadingText:FlxText;
+
+	// Subtitles
+	var subtitleBg:FlxSprite;
+	var subtitleText:FlxText;
+
+	public var subtitles:Array<VideoSubtitle> = [];
+
+	var curSubtitle:Int = 0;
+
 	// Internal
 	var videoName:String;
 	var alreadyDestroyed:Bool = false;
+	#if sys
+	final mutex = new Mutex();
+	#end
 
 	public function new(videoName:String, isWaiting:Bool, allowSkip:Bool = false, shouldLoop:Bool = false)
 	{
@@ -68,6 +105,9 @@ class VideoSprite extends FlxSpriteGroup
 		if (!waiting)
 			createCover();
 
+		createLoadingUI();
+		parseSubtitles();
+		createSubtitleUI();
 		createVideo(shouldLoop);
 
 		if (allowSkip)
@@ -76,8 +116,13 @@ class VideoSprite extends FlxSpriteGroup
 
 	override function update(elapsed:Float)
 	{
-		if (state == Playing && canSkip)
-			updateSkip(elapsed);
+		if (state == Playing)
+		{
+			if (canSkip)
+				updateSkip(elapsed);
+
+			updateSubtitles();
+		}
 
 		super.update(elapsed);
 	}
@@ -100,9 +145,51 @@ class VideoSprite extends FlxSpriteGroup
 		if (!shouldLoop)
 			videoSprite.bitmap.onEndReached.add(() -> endVideo(false));
 
+		state = Loading;
+
+		#if sys
+		ThreadUtil.execAsync(function()
+		{
+			if (videoSprite.load(videoName, shouldLoop ? ['input-repeat=65545'] : null))
+				new flixel.util.FlxTimer().start(0.001, _ ->
+				{
+					mutex.acquire();
+					onVideoReady();
+					mutex.release();
+				});
+			else
+			{
+				mutex.acquire();
+				endVideo(false);
+				mutex.release();
+			}
+		});
+		#else
+		// No async support — load blocking and proceed immediately
 		videoSprite.load(videoName, shouldLoop ? ['input-repeat=65545'] : null);
+		onVideoReady();
+		#end
+	}
+
+	function onVideoReady()
+	{
+		if (loadingBackdrop != null)
+		{
+			FlxTween.cancelTweensOf(loadingBackdrop);
+			FlxTween.tween(loadingBackdrop, {alpha: 0}, 0.7, {
+				ease: FlxEase.sineInOut,
+				onComplete: function(_)
+				{
+					loadingBackdrop?.destroy();
+					loadingText?.destroy();
+					loadingBackdrop = null;
+					loadingText = null;
+				}
+			});
+		}
 
 		state = Playing;
+		videoSprite.play();
 	}
 
 	function fitVideoToScreen()
@@ -128,13 +215,159 @@ class VideoSprite extends FlxSpriteGroup
 
 		state = skipped ? Skipped : Finished;
 
-		if (skipped)
-			if (onSkip != null)
-				onSkip();
-			else if (finishCallback != null)
-				finishCallback();
+		if (skipped && onSkip != null)
+			onSkip();
+
+		if (finishCallback != null)
+			finishCallback();
 
 		cleanupAndDestroy();
+	}
+
+	// LOADING UI
+
+	function createLoadingUI()
+	{
+		loadingText = new FlxText(10, 10, Std.int(FlxG.width / 2), "Loading video...", 16);
+		loadingText.scrollFactor.set();
+		loadingText.visible = false;
+		@:privateAccess
+		loadingText.regenGraphic();
+		add(loadingText);
+
+		loadingBackdrop = new FlxBackdrop(loadingText.graphic, X);
+		loadingBackdrop.y = FlxG.height - 20 - loadingBackdrop.height;
+		loadingBackdrop.velocity.x = 70;
+		loadingBackdrop.scrollFactor.set();
+		loadingBackdrop.alpha = 0;
+		add(loadingBackdrop);
+
+		FlxTween.tween(loadingBackdrop, {alpha: 1}, 0.5, {ease: FlxEase.sineInOut});
+	}
+
+	// SUBTITLE LOGIC
+
+	function parseSubtitles()
+	{
+		#if sys
+		var srtPath = '${Path.withoutExtension(videoName)}.srt';
+
+		if (!FileSystem.exists(srtPath))
+			return;
+
+		var lines = File.getContent(srtPath).split("\n");
+
+		while (lines.length > 0)
+		{
+			var head = lines.shift();
+			if (head == null || head.trim() == "")
+				continue;
+			if (Std.parseInt(head) == null)
+				continue;
+
+			var timeLine = lines.shift();
+			if (timeLine == null)
+				continue;
+
+			var arrowIndex = timeLine.indexOf('-->');
+			if (arrowIndex < 0)
+				continue;
+
+			var beginTime = splitTime(timeLine.substr(0, arrowIndex).trim());
+			var endTime = splitTime(timeLine.substr(arrowIndex + 3).trim());
+			if (beginTime < 0 || endTime < 0)
+				continue;
+
+			var parts:Array<String> = [];
+			var t = lines.shift();
+			while (t != null && t.trim() != "")
+			{
+				parts.push(t);
+				t = lines.shift();
+			}
+			if (parts.length <= 0)
+				continue;
+
+			// Remove the auto-reset entry that would overlap this one
+			var lastSub = subtitles.last();
+			if (lastSub != null && lastSub.subtitle == "" && lastSub.time >= beginTime)
+				subtitles.pop();
+
+			subtitles.push({subtitle: parts.join(""), time: beginTime * 1000});
+			subtitles.push({subtitle: "", time: endTime * 1000});
+		}
+		#end
+	}
+
+	static function splitTime(str:String):Float
+	{
+		if (str == null || str.trim() == "")
+			return -1;
+
+		// Supports H:M:S,ms and M:S,ms formats
+		var multipliers:Array<Float> = [1, 60, 3600, 86400];
+		var parts:Array<Null<Float>> = [for (e in str.split(":")) Std.parseFloat(e.replace(",", "."))];
+		var time:Float = 0;
+
+		for (k => v in parts)
+		{
+			var mul = multipliers[parts.length - 1 - k];
+			if (v != null)
+				time += v * mul;
+		}
+		return time;
+	}
+
+	function createSubtitleUI()
+	{
+		subtitleBg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		subtitleBg.alpha = 0.5;
+		subtitleBg.visible = false;
+		subtitleBg.scrollFactor.set();
+
+		subtitleText = new FlxText(0, FlxG.height * 0.875, FlxG.width, "", 20);
+		subtitleText.alignment = CENTER;
+		subtitleText.visible = false;
+		subtitleText.scrollFactor.set();
+
+		add(subtitleBg);
+		add(subtitleText);
+	}
+
+	function updateSubtitles()
+	{
+		if (subtitles.length == 0 || curSubtitle >= subtitles.length)
+			return;
+
+		#if hxvlc
+		@:privateAccess
+		var rawTime:Int64 = videoSprite.bitmap.time;
+		var timeMs:Float = FPHelper.i64ToDouble(rawTime.low, rawTime.high);
+
+		while (curSubtitle < subtitles.length && subtitles[curSubtitle].time < timeMs)
+		{
+			setSubtitle(subtitles[curSubtitle]);
+			curSubtitle++;
+		}
+		#end
+	}
+
+	function setSubtitle(sub:VideoSubtitle)
+	{
+		if (subtitleBg == null || subtitleText == null)
+			return;
+
+		var hasText = sub.subtitle.length > 0;
+		subtitleBg.visible = subtitleText.visible = hasText;
+
+		if (hasText)
+		{
+			subtitleText.text = sub.subtitle;
+			subtitleText.screenCenter(X);
+			subtitleBg.scale.set(subtitleText.width + 8, subtitleText.height + 8);
+			subtitleBg.updateHitbox();
+			subtitleBg.setPosition(subtitleText.x - 4, subtitleText.y - 4);
+		}
 	}
 
 	// SKIP LOGIC
@@ -259,6 +492,35 @@ class VideoSprite extends FlxSpriteGroup
 			remove(cover);
 			cover.destroy();
 			cover = null;
+		}
+
+		if (loadingBackdrop != null)
+		{
+			FlxTween.cancelTweensOf(loadingBackdrop);
+			remove(loadingBackdrop);
+			loadingBackdrop.destroy();
+			loadingBackdrop = null;
+		}
+
+		if (loadingText != null)
+		{
+			remove(loadingText);
+			loadingText.destroy();
+			loadingText = null;
+		}
+
+		if (subtitleBg != null)
+		{
+			remove(subtitleBg);
+			subtitleBg.destroy();
+			subtitleBg = null;
+		}
+
+		if (subtitleText != null)
+		{
+			remove(subtitleText);
+			subtitleText.destroy();
+			subtitleText = null;
 		}
 
 		destroySkipUI();

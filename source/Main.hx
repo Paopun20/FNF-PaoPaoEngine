@@ -54,6 +54,9 @@ import winapi.WindowsAPI;
 #if hxWindowColorMode
 import hxwindowmode.WindowColorMode;
 #end
+#if hxvlc
+import hxvlc.util.Handle as VLCHandle;
+#end
 
 /**
  * Just a normal one, with error handling and stuff. You can ignore this, your code should go in your states.
@@ -134,7 +137,16 @@ final class ErrorHandle
 	private static var _sourceMap:StringMap<String> = SourceMap.build();
 
 	public static function init():Void
+	{
 		FunkinGame.onGameCrash.add(onCrash);
+		untyped __global__.__hxcpp_set_critical_error_handler(onCriticalError);
+	}
+
+	static function onCriticalError(message:String):Void // 💀 it cook
+	{
+		// Wrap as a synthetic exception so onCrash can handle it uniformly
+		onCrash(new Exception(message));
+	}
 
 	private static function onCrash(e:Exception):Void
 	{
@@ -199,7 +211,7 @@ final class ErrorHandle
 			errorType = "<Unknown Exception Type>";
 			errorDetail = "<Exception object is null>";
 		}
-		errMsg += '\n${errorType.split(".").pop()} ' + errorDetail;
+		errMsg += '\n${errorType.split(".").pop()}: ' + errorDetail;
 		#if officialBuild
 		errMsg += "\nPlease report this error to the GitHub page: https://github.com/Paopun20/FNF-PaoPaoEngine";
 		#end
@@ -294,6 +306,8 @@ class Main extends Sprite
 	public static var gameInstance:Main; // for mods to access the main class instance, if needed
 	public static var flxInstance:FunkinGame; // just FunkinGame instance, for mods to access it directly if needed
 
+	public static var onClose(default, null):FlxSignal = new FlxSignal();
+
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
 	public static function main():Void
@@ -307,9 +321,12 @@ class Main extends Sprite
 		CoolLog.init();
 
 		#if hxWindowColorMode
-		WindowColorMode.setDarkMode();
-		if (WindowColorMode.isWindows10)
-			WindowColorMode.redrawWindowHeader();
+		if (WindowColorMode.isDarkMode)
+		{
+			WindowColorMode.setDarkMode();
+			if (WindowColorMode.isWindows10)
+				WindowColorMode.redrawWindowHeader();
+		}
 		#end
 		#if CRASH_HANDLER
 		ErrorHandle.init();
@@ -318,7 +335,32 @@ class Main extends Sprite
 		CPU.init();
 		#end
 
+		#if hxvlc
+		// Initialize hxvlc's Handle here so the videos are loading faster.
+		VLCHandle.initAsync(function(success:Bool):Void
+		{
+			if (success)
+			{
+				CoolLog.info('HXVLC has LibVLC instance initialized!');
+			}
+			else
+			{
+				CoolLog.warning('HXVLC has LibVLC instance failed to initialize!');
+			}
+		});
+		#end
+
 		Lib.current.addChild(new Main());
+
+		Lib.current.stage.window.onClose.add(onClose.dispatch);
+		onClose.add(function()
+		{
+			#if hxvlc
+			// Clean up VLC threads to prevent memory leaks.
+			VLCHandle.dispose();
+			#end
+		});
+
 		funkin.plugins.ForceCrashPlugin.initialize();
 	}
 
@@ -330,7 +372,6 @@ class Main extends Sprite
 		funkin.backend.Native.fixScaling();
 		#end
 
-		// Credits to MAJigsaw77 (he's the og author for this code)
 		#if android
 		Sys.setCwd(Path.addTrailingSlash(System.applicationStorageDirectory));
 		#elseif ios
@@ -348,7 +389,6 @@ class Main extends Sprite
 		FlxG.save.bind('funkin', CoolUtil.getSavePath());
 		Highscore.load();
 
-		// #if LUA_ALLOWED Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(funkin.modding.scripts.components.CallbackHandler.call)); #end
 		Controls.instance = new Controls();
 		ClientPrefs.loadDefaultKeys();
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end

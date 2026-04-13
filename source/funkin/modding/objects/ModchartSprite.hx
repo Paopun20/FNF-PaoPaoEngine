@@ -1,4 +1,4 @@
-package funkin.modding.scripts;
+package funkin.modding.objects;
 
 class ModchartSprite extends FlxSprite
 {

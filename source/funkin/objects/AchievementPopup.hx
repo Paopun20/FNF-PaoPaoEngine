@@ -4,9 +4,10 @@ package funkin.objects;
 import openfl.events.Event;
 import openfl.geom.Matrix;
 import openfl.display.BitmapData;
+import openfl.display.Sprite;
 import openfl.Lib;
 
-class AchievementPopup extends openfl.display.Sprite
+class AchievementPopup extends Sprite
 {
 	public var onFinish:Void->Void = null;
 

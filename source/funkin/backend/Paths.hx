@@ -6,6 +6,7 @@ import flixel.graphics.FlxGraphic;
 import flixel.math.FlxRect;
 import flixel.system.FlxAssets;
 import openfl.display.BitmapData;
+import funkin.backend.display.BetterBitmapData;
 import openfl.display3D.textures.RectangleTexture;
 import openfl.utils.AssetType;
 import openfl.utils.Assets as OpenFlAssets;
@@ -271,7 +272,7 @@ class Paths
 		{
 			var file:String = getPath(key, IMAGE, parentFolder, true);
 			#if MODS_ALLOWED if (FileSystem.exists(file))
-				bitmap = BitmapData.fromFile(file);
+				bitmap = BetterBitmapData.fromFile(file);
 			else #end if (OpenFlAssets.exists(file, IMAGE))
 				bitmap = OpenFlAssets.getBitmapData(file);
 

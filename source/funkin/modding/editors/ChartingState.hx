@@ -27,6 +27,7 @@ import funkin.objects.Character;
 import funkin.objects.HealthIcon;
 import funkin.objects.Note;
 import funkin.objects.StrumNote;
+import funkin.backend.filesystem.FileDialog;
 
 using DateTools;
 
@@ -702,7 +703,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	var outputAlpha:Float = 0;
 	var songFinished:Bool = false;
 
-	var fileDialog:FileDialogHandler = new FileDialogHandler();
+	var fileDialog:FileDialog = new FileDialog();
 	var lastFocus:PsychUIInputText;
 
 	var autoSaveTime:Float = 0;
@@ -3841,8 +3842,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				upperBox.isMinimized = true;
 
 				updateChartData();
-				fileDialog.save('events.json', PsychJsonPrinter.print({events: PlayState.SONG.events, format: 'psych_v1'}, ['events']),
-					function() showOutput('Events saved successfully to: ${fileDialog.path}'), null, function() showOutput('Error on saving events!', true));
+				fileDialog.onComplete.addOnce(() -> showOutput('Events saved successfully to: ${fileDialog.filePath}'));
+				fileDialog.onCancel.addOnce(() -> showOutput('Save cancelled'));
+				fileDialog.onError.addOnce(() -> showOutput('Error on saving events!', true));
+				fileDialog.save('events.json', PsychJsonPrinter.print({events: PlayState.SONG.events, format: 'psych_v1'}, ['events']));
 			}, btnWid);
 			btn.text.alignment = LEFT;
 			tab_group.add(btn);

@@ -329,6 +329,9 @@ class PlayState extends MusicBeatState
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay');
 		guitarHeroSustains = ClientPrefs.data.guitarHeroSustains;
 
+		if (FlxG.camera.filters == null)
+			FlxG.camera.filters = [];
+
 		// var gameCam:FlxCamera = FlxG.camera;
 		camGame = initPsychCamera();
 		camHUD = new FlxCamera();
@@ -828,8 +831,11 @@ class PlayState extends MusicBeatState
 				}
 				#end
 			}
-			if (!alreadyLoaded)
-				scriptPack.add(new LuaScript(luaFile));
+			if (!alreadyLoaded) {
+				var newScript = new LuaScript(luaFile);
+				scriptPack.add(newScript);
+				newScript.execute();
+			}
 		}
 		#end
 
@@ -1140,6 +1146,7 @@ class PlayState extends MusicBeatState
 				stagesFunc(function(stage:BaseStage) stage.countdownTick(tick, swagCounter));
 				callOnLuas('onCountdownTick', [swagCounter]);
 				callOnHScript('onCountdownTick', [tick, swagCounter]);
+				callOnPython('onCountdownTick', [tick, swagCounter]);
 
 				swagCounter += 1;
 			}, 5);
@@ -1985,6 +1992,7 @@ class PlayState extends MusicBeatState
 					dunceNote.strumTime
 				]);
 				callOnHScript('onSpawnNote', [dunceNote]);
+				callOnPython('onSpawnNote', [dunceNote]);
 
 				var index:Int = unspawnNotes.indexOf(dunceNote);
 				unspawnNotes.splice(index, 1);
@@ -2288,9 +2296,9 @@ class PlayState extends MusicBeatState
 		var flValue1:Null<Float> = Std.parseFloat(value1);
 		var flValue2:Null<Float> = Std.parseFloat(value2);
 		if (Math.isNaN(flValue1))
-			flValue1 = null;
+			flValue1 = value1.length > 0 ? null : 0;
 		if (Math.isNaN(flValue2))
-			flValue2 = null;
+			flValue2 = value2.length > 0 ? null : 0;
 
 		switch (eventName)
 		{
@@ -3294,7 +3302,9 @@ class PlayState extends MusicBeatState
 			daNote.isSustainNote
 		]);
 		if (result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll)
-			callOnHScript('noteMiss', [daNote]);
+			result = callOnHScript('noteMiss', [daNote]);
+		if (result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopPython && result != LuaUtils.Function_StopAll)
+			result = callOnPython('noteMiss', [daNote]);
 	}
 
 	function noteMissPress(direction:Int = 1):Void // You pressed a key when there was no notes to press for this key
@@ -3410,6 +3420,8 @@ class PlayState extends MusicBeatState
 		]);
 		if (result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll)
 			result = callOnHScript('opponentNoteHitPre', [note]);
+		if (result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopPython && result != LuaUtils.Function_StopAll)
+			result = callOnPython('opponentNoteHitPre', [note]);
 
 		if (result == LuaUtils.Function_Stop)
 			return;
@@ -3461,7 +3473,9 @@ class PlayState extends MusicBeatState
 			note.isSustainNote
 		]);
 		if (result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll)
-			callOnHScript('opponentNoteHit', [note]);
+			result = callOnHScript('opponentNoteHit', [note]);
+		if (result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopPython && result != LuaUtils.Function_StopAll)
+			result = callOnPython('opponentNoteHit', [note]);
 
 		if (!note.isSustainNote)
 			invalidateNote(note);
@@ -3481,6 +3495,8 @@ class PlayState extends MusicBeatState
 		var result:Dynamic = callOnLuas('goodNoteHitPre', [notes.members.indexOf(note), leData, leType, isSus]);
 		if (result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll)
 			result = callOnHScript('goodNoteHitPre', [note]);
+		if (result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopPython && result != LuaUtils.Function_StopAll)
+			result = callOnPython('goodNoteHitPre', [note]);
 
 		if (result == LuaUtils.Function_Stop)
 			return;
@@ -3578,7 +3594,9 @@ class PlayState extends MusicBeatState
 		stagesFunc(function(stage:BaseStage) stage.goodNoteHit(note));
 		var result:Dynamic = callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus]);
 		if (result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopHScript && result != LuaUtils.Function_StopAll)
-			callOnHScript('goodNoteHit', [note]);
+			result = callOnHScript('goodNoteHit', [note]);
+		if (result != LuaUtils.Function_Stop && result != LuaUtils.Function_StopPython && result != LuaUtils.Function_StopAll)
+			callOnPython('goodNoteHit', [note]);
 		if (!note.isSustainNote)
 			invalidateNote(note);
 	}
@@ -3770,9 +3788,11 @@ class PlayState extends MusicBeatState
 		var newScript:HScript = null;
 		try
 		{
-			newScript = new HScript(file).setParent(this);
+			newScript = new HScript(file);
+			newScript.parent = this;
 			CoolLog.info('initialized hscript interp successfully: $file');
 			scriptPack.add(newScript);
+			newScript.execute();
 		}
 		catch (e:Dynamic)
 		{
@@ -3806,9 +3826,10 @@ class PlayState extends MusicBeatState
 	{
 		try
 		{
-			var newScript:Python = new Python(null, file);
+			var newScript:Python = new Python(file);
 			CoolLog.info('initialized python interp successfully: $file');
 			scriptPack.add(newScript);
+			newScript.execute();
 		}
 		catch (e:Dynamic)
 		{
@@ -3853,6 +3874,7 @@ class PlayState extends MusicBeatState
 			var newScript:LuaScript = new LuaScript(file);
 			CoolLog.info('initialized lua interp successfully: $file');
 			scriptPack.add(newScript);
+			newScript.execute();
 		}
 		catch (e:Dynamic)
 		{
@@ -3872,8 +3894,7 @@ class PlayState extends MusicBeatState
 	public function callOnLuas(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null,
 			excludeValues:Array<Dynamic> = null):Dynamic
 	{
-		// Deprecated: use callOnScripts instead (routes through scriptPack)
-		return callOnScripts(funcToCall, args, ignoreStops, null, excludeValues);
+		return scriptPack.callOnly(ScriptType.LUA, funcToCall, args, ignoreStops, null, excludeValues);
 	}
 	#end
 
@@ -3881,8 +3902,7 @@ class PlayState extends MusicBeatState
 	public function callOnHScript(funcToCall:String, args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null,
 			excludeValues:Array<Dynamic> = null):Dynamic
 	{
-		// Deprecated: use callOnScripts instead (routes through scriptPack)
-		return callOnScripts(funcToCall, args, ignoreStops, null, excludeValues);
+		return scriptPack.callOnly(ScriptType.HSCRIPT, funcToCall, args, ignoreStops, null, excludeValues);
 	}
 	#end
 
@@ -3890,8 +3910,7 @@ class PlayState extends MusicBeatState
 	public function callOnPython(funcToCall:String, args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null,
 			excludeValues:Array<Dynamic> = null):Dynamic
 	{
-		// Deprecated: use callOnScripts instead (routes through scriptPack)
-		return callOnScripts(funcToCall, args, ignoreStops, null, excludeValues);
+		return scriptPack.callOnly(ScriptType.PYTHON, funcToCall, args, ignoreStops, null, excludeValues);
 	}
 	#end
 
@@ -3899,14 +3918,14 @@ class PlayState extends MusicBeatState
 	{
 		if (exclusions == null)
 			exclusions = [];
-		
+
 		for (script in scriptPack.scripts)
 		{
 			if (script == null || script.closed)
 				continue;
-			
+
 			var scriptOrigin:String = null;
-			
+
 			#if LUA_ALLOWED
 			if (Std.isOfType(script, LuaScript))
 			{
@@ -3914,7 +3933,7 @@ class PlayState extends MusicBeatState
 				scriptOrigin = luaScript.scriptName;
 			}
 			#end
-			
+
 			#if HSCRIPT_ALLOWED
 			if (scriptOrigin == null && Std.isOfType(script, HScript))
 			{
@@ -3922,7 +3941,7 @@ class PlayState extends MusicBeatState
 				scriptOrigin = hscriptScript.origin;
 			}
 			#end
-			
+
 			#if PYTHON_ALLOWED
 			if (scriptOrigin == null && Std.isOfType(script, Python))
 			{
@@ -3930,7 +3949,7 @@ class PlayState extends MusicBeatState
 				scriptOrigin = pythonScript.origin;
 			}
 			#end
-			
+
 			if (scriptOrigin != null && !exclusions.contains(scriptOrigin))
 				script.set(variable, arg);
 		}

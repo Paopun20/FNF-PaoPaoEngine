@@ -1,0 +1,43 @@
+<menubar id="menubar">
+
+    <menu text="File">
+        <menu-item id="newChart" text="New" shortcutText="Ctrl+N" />
+        <menu-item id="openChart" text="Open" shortcutText="Ctrl+O" />
+        <menu-separator />
+        <menu-item id="saveChart" text="Save" shortcutText="Ctrl+S" />
+        <menu-item id="saveChartAs" text="Save As" shortcutText="Ctrl+Shift+S" />
+        <menu-item id="saveEvents" text="Save Events" shortcutText="Ctrl+Shift+E" />
+        <menu-separator />
+        <menu-item id="reloadChart" text="Reload Chart" shortcutText="Ctrl+R" />
+        <menu-separator />
+        <menu-item id="exitToMenu" text="Exit To Menu" shortcutText="Ctrl+Q" />
+    </menu>
+
+    <menu text="Edit">
+        <menu-item id="undo" text="Undo" shortcutText="Ctrl+Z" />
+        <menu-item id="redo" text="Redo" shortcutText="Ctrl+Y" />
+        <menu-separator />
+        <menu-item id="cut" text="Cut" shortcutText="Ctrl+X" />
+        <menu-item id="copy" text="Copy" shortcutText="Ctrl+C" />
+        <menu-item id="paste" text="Paste" shortcutText="Ctrl+V" />
+        <menu-separator />
+        <menu-item id="selectAll" text="Select All" shortcutText="Ctrl+A" />
+    </menu>
+
+    <menu text="Convert">
+        <menu text="To">
+            <menu-item id="toVSlice" text="V-Slice" shortcutText="" />
+        </menu>
+    </menu>
+
+    <menu text="View">
+        <menu-item id="toggleVortex" text="Toggle Vortex Editor" shortcutText="V" />
+        <menu-item id="toggleWaveform" text="Toggle Waveform" shortcutText="W" />
+        <menu-separator />
+        <menu-item id="zoomIn" text="Zoom In" shortcutText="X" />
+        <menu-item id="zoomOut" text="Zoom Out" shortcutText="Z" />
+        <menu-separator />
+        <menu-item id="toggleTheme" text="Cycle Theme" />
+    </menu>
+
+</menubar>

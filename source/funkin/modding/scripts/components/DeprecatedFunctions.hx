@@ -6,6 +6,7 @@ package funkin.modding.scripts.components;
 //
 import funkin.modding.scripts.utils.ImplementUtils;
 import funkin.modding.scripts.utils.LuaUtils;
+import funkin.modding.objects.ModchartSprite;
 
 class DeprecatedFunctions
 {

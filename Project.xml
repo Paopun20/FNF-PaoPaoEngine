@@ -12,6 +12,10 @@
 		company="Paopaodev"
 	/>
 
+	<echo value="PaoPao Engine - awesome fnf engine"/>
+	<echo value="Make a mod to UHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"/>
+	<echo value="PaoPao Engine is compile for ${project.target} on a ${project.host} machine"/>
+
 	<!--Switch
 	Export with Unique ApplicationID and Icon-->
 	<set name="APP_ID" value="0x0100f6c013bbc000" />
@@ -212,7 +216,7 @@
 	<haxelib name="hscript-improved" if="HSCRIPT_ALLOWED" />
 	<define name="hscript" if="HSCRIPT_ALLOWED debug" />
 
-	<haxelib name="hxvlc" if="VIDEOS_ALLOWED" version="2.2.5" />
+	<haxelib name="hxvlc" if="VIDEOS_ALLOWED" version="git" />
 	<haxelib name="hxdiscord_rpc" version="git" if="DISCORD_ALLOWED" />
 	<haxelib name="flxanimate" version="git" />
 

@@ -3,7 +3,7 @@ package funkin.backend;
 import openfl.utils.Assets;
 import haxe.Json;
 import funkin.backend.Song;
-import funkin.modding.scripts.ModchartSprite;
+import funkin.modding.objects.ModchartSprite;
 
 typedef StageFile =
 {

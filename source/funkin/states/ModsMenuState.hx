@@ -10,6 +10,7 @@ import haxe.Json;
 import lime.utils.Assets;
 import funkin.objects.AttachedSprite;
 import openfl.display.BitmapData;
+import funkin.backend.display.BetterBitmapData;
 import funkin.options.ModSettingsSubState;
 
 class ModsMenuState extends MusicBeatState
@@ -940,7 +941,7 @@ class ModItem extends FlxSpriteGroup
 
 		var bmp:BitmapData = null;
 		if (FileSystem.exists(file))
-			bmp = BitmapData.fromFile(file);
+			bmp = BetterBitmapData.fromFile(file);
 		else
 			isPixel = false;
 

@@ -8,7 +8,7 @@ import funkin.frontend.ui.PsychUIButton;
 import funkin.frontend.ui.PsychUIRadioGroup;
 import funkin.frontend.ui.PsychUICheckBox;
 import funkin.frontend.ui.PsychUIEventHandler;
-import funkin.modding.editors.content.FileDialogHandler;
+import funkin.backend.filesystem.FileDialog;
 
 class PreloadListSubState extends MusicBeatSubstate implements PsychUIEvent
 {
@@ -30,7 +30,7 @@ class PreloadListSubState extends MusicBeatSubstate implements PsychUIEvent
 	}
 
 	var outputTxt:FlxText;
-	var fileDialog:FileDialogHandler = new FileDialogHandler();
+	var fileDialog:FileDialog = new FileDialog();
 	var radioGrp:PsychUIRadioGroup;
 
 	var removeButton:PsychUIButton;

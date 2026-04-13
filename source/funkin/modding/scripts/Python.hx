@@ -12,10 +12,10 @@ import funkin.backend.Song;
 import funkin.backend.WeekData;
 import funkin.frontend.cutscenes.DialogueBoxPsych;
 import funkin.modding.objects.DebugLuaText;
-import funkin.modding.scripts.CacheScript.CacheParser;
-import funkin.modding.scripts.CacheScript.CacheType;
-import funkin.modding.scripts.CacheScript;
-import funkin.modding.scripts.ModchartSprite;
+import funkin.modding.scripts.utils.CacheScript.CacheParser;
+import funkin.modding.scripts.utils.CacheScript.CacheType;
+import funkin.modding.scripts.utils.CacheScript;
+import funkin.modding.objects.ModchartSprite;
 import funkin.modding.scripts.components.*;
 import funkin.modding.scripts.utils.LuaUtils.LuaTweenOptions;
 import funkin.modding.scripts.utils.LuaUtils;
@@ -48,23 +48,13 @@ import funkin.modding.scripts.HScript;
 import funkin.modding.scripts.LuaScript;
 #end
 
-interface IPythonInterface
-{
-	public var scriptName:String;
-	public function set(variable:String, data:Dynamic):Void;
-	public function get(variable:String):Dynamic;
-	public function call(functionName:String, ?args:Array<Dynamic>):Dynamic;
-	public function stop():Void;
-}
-
-class Python extends Script implements IPythonInterface implements IFlxDestroyable
+class Python extends Script implements IFlxDestroyable
 {
 	public var parser:PyParser;
 	public var printer:PyPrinter;
 	public var interp:PyInterp;
 	public var origin:Null<String>;
 	public var returnValue:Dynamic;
-	public var scriptName:String;
 
 	#if LUA_ALLOWED
 	public var parentLua:Dynamic = null;
@@ -79,7 +69,7 @@ class Python extends Script implements IPythonInterface implements IFlxDestroyab
 
 	public static var customFunctions:Map<String, Dynamic> = new Map<String, Dynamic>();
 
-	public function new(?_:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?manualRun:Bool = false)
+	public override function new(?file:String = '', ?varsToBring:Any = null)
 	{
 		super(file);
 		interp = new PyInterp();
@@ -93,21 +83,6 @@ class Python extends Script implements IPythonInterface implements IFlxDestroyab
 		#end
 
 		preset(varsToBring);
-
-		if (!manualRun && file != null && file.length > 0)
-		{
-			var code:String = null;
-			#if MODS_ALLOWED
-			if (FileSystem.exists(file))
-				code = File.getContent(file);
-			#else
-			if (Assets.exists(file, TEXT))
-				code = Assets.getText(file);
-			#end
-
-			execute(code);
-			call('onCreate', []);
-		}
 	}
 
 	public static function reset(clearCache:Bool = false)
@@ -118,7 +93,24 @@ class Python extends Script implements IPythonInterface implements IFlxDestroyab
 			CacheScript.clear(CacheType.PYTHON);
 	}
 
-	public override function execute(code:String):Dynamic
+	public override function execute() {
+		if (origin != null && origin.length > 0)
+		{
+			var code:String = null;
+			#if MODS_ALLOWED
+			if (FileSystem.exists(origin))
+				code = File.getContent(origin);
+			#else
+			if (Assets.exists(origin, TEXT))
+				code = Assets.getText(origin);
+			#end
+
+			codeExecute(code);
+			call('onCreate', []);
+		}
+	}
+
+	public function codeExecute(code:String):Dynamic
 	{
 		if (closed)
 			return null;
@@ -160,7 +152,7 @@ class Python extends Script implements IPythonInterface implements IFlxDestroyab
 		{
 			if (exists(func))
 			{
-				var result = interp.calldef(func, args);
+				var result = interp.callDef(func, args);
 				if (result == null)
 					result = LuaUtils.Function_Continue;
 				if (closed)
@@ -177,7 +169,7 @@ class Python extends Script implements IPythonInterface implements IFlxDestroyab
 
 	public function exists(func:String):Bool
 	{
-		return interp.getdef(func);
+		return interp.hasDef(func);
 	}
 
 	public override function set(variable:String, value:Dynamic)
@@ -240,103 +232,7 @@ class Python extends Script implements IPythonInterface implements IFlxDestroyab
 		set("parentLua", parentLua);
 		#end
 
-		// Stop functions
-		set('Function_StopLua', LuaUtils.Function_StopLua);
-		set('Function_StopHScript', LuaUtils.Function_StopHScript);
-		set('Function_StopPython', LuaUtils.Function_StopPython);
-		set('Function_StopAll', LuaUtils.Function_StopAll);
-		set('Function_Stop', LuaUtils.Function_Stop);
-		set('Function_Continue', LuaUtils.Function_Continue);
-
-		// Core Classes
-		set('Type', Type);
-		set('Math', Math);
-		set('Std', Std);
-		set('StringTools', StringTools);
-		#if sys
-		set('File', File);
-		set('FileSystem', FileSystem);
-		#end
-
-		// Flixel
-		set('FlxG', FlxG);
-		set('FlxMath', flixel.math.FlxMath);
-		set('FlxSprite', flixel.FlxSprite);
-		set('FlxText', flixel.text.FlxText);
-		set('FlxCamera', flixel.FlxCamera);
-		set('PsychCamera', funkin.objects.PsychCamera);
-		set('FlxTimer', flixel.util.FlxTimer);
-		set('FlxTween', flixel.tweens.FlxTween);
-		set('FlxEase', flixel.tweens.FlxEase);
-		set('FlxSound', flixel.sound.FlxSound);
-
-		// Game Classes
-		set('Countdown', funkin.backend.BaseStage.Countdown);
-		set('PlayState', PlayState);
-		set('Paths', Paths);
-		set('Conductor', Conductor);
-		set('ClientPrefs', ClientPrefs);
-		set('Difficulty', Difficulty);
-		set('CoolUtil', CoolUtil);
-		set('Character', Character);
-		set('Alphabet', Alphabet);
-		set('Note', funkin.objects.Note);
-		set('StrumNote', StrumNote);
-		set('NoteSplash', NoteSplash);
-		set('CustomSubstate', CustomSubstate);
-		set('ModchartSprite', ModchartSprite);
-
-		#if ACHIEVEMENTS_ALLOWED
-		set('Achievements', Achievements);
-		#end
-		#if (!flash && sys)
-		set('FlxRuntimeShader', flixel.addons.display.FlxRuntimeShader);
-		set('ErrorHandledRuntimeShader', funkin.shaders.ErrorHandledShader.ErrorHandledRuntimeShader);
-		#end
-		set('ShaderFilter', openfl.filters.ShaderFilter);
-		#if flxanimate
-		set('FlxAnimate', FlxAnimate);
-		#end
-
-		// Version and settings
-		set('version', MainMenuState.psychEngineVersion.trim());
-		set('modFolder', this.modFolder);
-		set('scriptName', origin);
-		set('currentModDirectory', Mods.currentModDirectory);
-		set('buildTarget', LuaUtils.getBuildTarget());
-
-		// Song/Week data
-		set('curBpm', Conductor.bpm);
-		set('bpm', PlayState.SONG.bpm);
-		set('scrollSpeed', PlayState.SONG.speed);
-		set('crochet', Conductor.crochet);
-		set('stepCrochet', Conductor.stepCrochet);
-		set('songLength', FlxG.sound.music != null ? FlxG.sound.music.length : 0);
-		set('songName', PlayState.SONG.song);
-		set('songPath', Paths.formatToSongPath(PlayState.SONG.song));
-		set('loadedSongName', Song.loadedSongName);
-		set('loadedSongPath', Paths.formatToSongPath(Song.loadedSongName));
-		set('chartPath', Song.chartPath);
-		set('startedCountdown', false);
-		set('curStage', PlayState.SONG.stage);
-		set('isStoryMode', PlayState.isStoryMode);
-		set('difficulty', PlayState.storyDifficulty);
-		set('difficultyName', Difficulty.getString(false));
-		set('difficultyPath', Difficulty.getFilePath());
-		set('difficultyNameTranslation', Difficulty.getString(true));
-		set('weekRaw', PlayState.storyWeek);
-		set('week', WeekData.weeksList[PlayState.storyWeek]);
-		set('seenCutscene', PlayState.seenCutscene);
-		set('hasVocals', PlayState.SONG.needsVoices);
-
-		set('FlxColor', function(color:String) return FlxColor.fromString(color));
-		set('getColorFromName', function(color:String) return FlxColor.fromString(color));
-		set('getColorFromString', function(color:String) return FlxColor.fromString(color));
-		set('getColorFromHex', function(color:String) return FlxColor.fromString('#$color'));
-
-		// Screen
-		set('screenWidth', FlxG.width);
-		set('screenHeight', FlxG.height);
+		Script.preset(this);
 
 		// PlayState variables
 		if (game != null)
@@ -1430,7 +1326,7 @@ class Python extends Script implements IPythonInterface implements IFlxDestroyab
 		#if DISCORD_ALLOWED DiscordClient.addPythonCallbacks(this); #end
 		#if ACHIEVEMENTS_ALLOWED Achievements.addCallbacks(this); #end // wip
 		// #if TRANSLATIONS_ALLOWED Language.addPythonCallbacks(this); #end // wip
-		new HxPy(this);
+		HxPy.implement(this);
 		ReflectionFunctions.implement(this);
 		TextFunctions.implement(this);
 		ExtraFunctions.implement(this);

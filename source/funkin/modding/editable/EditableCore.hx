@@ -65,6 +65,7 @@ class EditableCore
 		{
 			presetScript(script);
 			scripts.add(script);
+			script.execute();
 			CoolLog.info('initialized script: ${script.fileName}');
 		}
 	}
@@ -80,7 +81,8 @@ class EditableCore
 	#if HSCRIPT_ALLOWED
 	public function initHScript(file:String):Void
 	{
-		var script = new HScript(file).setParent(parent);
+		var script = new HScript(file);
+		script.parent = this;
 		initScript(script);
 	}
 	#end
@@ -88,7 +90,7 @@ class EditableCore
 	#if PYTHON_ALLOWED
 	public function initPython(file:String):Void
 	{
-		var script = new Python(null, file);
+		var script = new Python(file);
 		initScript(script);
 	}
 	#end

@@ -89,7 +89,7 @@ final class ThreadUtil
 		if (func == null)
 			return;
 
-		#if (!macro)
+		#if (!macro && target.threaded)
 		__pendingExecs.add(func);
 		if (__threadUsed >= __threads.length)
 		{

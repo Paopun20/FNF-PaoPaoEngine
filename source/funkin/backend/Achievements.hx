@@ -26,6 +26,8 @@ enum abstract AchievementOp(String)
 	var ADD = 'add';
 }
 
+class AchievementNotFoundException extends Exception {}
+
 class Achievements
 {
 	public static function init()
@@ -123,7 +125,7 @@ class Achievements
 		{
 			var achievement:Achievement = achievements.get(name);
 			if (achievement.maxScore < 1)
-				throw new Exception('Achievement has score disabled or is incorrectly configured: $name');
+				throw new AchievementNotFoundException('Achievement has score disabled or is incorrectly configured: $name');
 
 			if (achievementsUnlocked.contains(name))
 				return achievement.maxScore;

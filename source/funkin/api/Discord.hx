@@ -9,6 +9,7 @@ import hxdiscord_rpc.Types;
 #if PYTHON_ALLOWED
 import funkin.modding.scripts.Python;
 #end
+import Main;
 
 @:build(funkin.utils.macro.EnvironmentMacro.build())
 class DiscordClient
@@ -157,7 +158,7 @@ class DiscordClient
 		if (!isInitialized && ClientPrefs.data.discordRPC)
 			initialize();
 
-		Application.current.window.onClose.add(function()
+		Main.onClose.add(function()
 		{
 			if (isInitialized)
 				shutdown();
