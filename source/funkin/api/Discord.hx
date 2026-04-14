@@ -19,8 +19,6 @@ class DiscordClient
 	})
 	private inline static final _defaultID:Null<String>;
 	private static var discordPresence:DiscordRichPresence;
-	private static final button1:DiscordButton = new DiscordButton();
-	private static final button2:DiscordButton = new DiscordButton();
 
 	public static var clientID(default, set):Null<String> = _defaultID;
 	public static var whoIsConnectedTo:Null<cpp.RawConstPointer<DiscordUser>>;
@@ -43,13 +41,6 @@ class DiscordClient
 		handlers.disconnected = cpp.Function.fromStaticFunction(onDisconnected);
 		handlers.errored = cpp.Function.fromStaticFunction(onError);
 		Discord.Initialize(_defaultID, cpp.RawPointer.addressOf(handlers), false, null);
-		button1.label = "Download";
-		button1.url = "https://github.com/Paopun20/FNF-PaoPaoEngine/releases";
-		button2.label = "GitHub link";
-		button2.url = "https://github.com/Paopun20/FNF-PaoPaoEngine";
-
-		discordPresence.buttons[0] = button1;
-		discordPresence.buttons[1] = button2;
 
 		Thread.create(function():Void
 		{
@@ -97,6 +88,17 @@ class DiscordClient
 		discordPresence.details = "LOADING :3";
 		// discordPresence.largeImageKey = "";
 		// discordPresence.smallImageKey = "";
+
+		final button1:DiscordButton = new DiscordButton();
+		final button2:DiscordButton = new DiscordButton();
+		
+		button1.label = "Download";
+		button1.url = "https://github.com/Paopun20/FNF-PaoPaoEngine/releases";
+		button2.label = "GitHub link";
+		button2.url = "https://github.com/Paopun20/FNF-PaoPaoEngine";
+
+		discordPresence.buttons[0] = button1;
+		discordPresence.buttons[1] = button2;
 
 		Discord.UpdatePresence(cpp.RawConstPointer.addressOf(discordPresence));
 		changePresence();
