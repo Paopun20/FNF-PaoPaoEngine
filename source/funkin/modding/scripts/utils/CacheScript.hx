@@ -68,7 +68,7 @@ class CacheScript
 
 class CacheParser
 {
-	public static function parse(code:String, type:CacheType):Dynamic
+	public static function parse(code:String, type:CacheType, ?origin:String):Dynamic
 	{
 		return switch (type)
 		{
@@ -80,7 +80,7 @@ class CacheParser
 					p.allowMetadata = true;
 					p.allowTypes = true;
 					return p;
-				})().parseString(code);
+				})().parseString(code, origin);
 
 			case PYTHON:
 				(() ->

@@ -201,6 +201,7 @@
 	<haxelib name="flixel-addons" version="4.0.1" />
 	<haxelib name="flixel-waveform" />
 	<haxelib name="random" />
+	<haxelib name="thx.semver" />
 	<haxelib name="hxhardware" if="desktop cpp" />
 	<define name="SlWindowsAPI" if="windows desktop cpp" />
 	<haxelib name="sl-windows-api" if="SlWindowsAPI" />

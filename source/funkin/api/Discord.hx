@@ -18,7 +18,9 @@ class DiscordClient
 		required: true
 	})
 	private inline static final _defaultID:Null<String>;
-	private static var discordPresence:DiscordRichPresence;
+	public static var discordPresence:DiscordRichPresence;
+	private static var button1:DiscordButton; // ← ADD THESE
+	private static var button2:DiscordButton; // ← ADD THESE
 
 	public static var clientID(default, set):Null<String> = _defaultID;
 	public static var whoIsConnectedTo:Null<cpp.RawConstPointer<DiscordUser>>;
@@ -89,18 +91,20 @@ class DiscordClient
 		// discordPresence.largeImageKey = "";
 		// discordPresence.smallImageKey = "";
 
-		final button1:DiscordButton = new DiscordButton();
-		final button2:DiscordButton = new DiscordButton();
-		
+		discordPresence = new DiscordRichPresence();
+		discordPresence.type = DiscordActivityType_Playing;
+
+		button1 = new DiscordButton(); // ← assign to static fields, not locals
+		button2 = new DiscordButton();
+
 		button1.label = "Download";
 		button1.url = "https://github.com/Paopun20/FNF-PaoPaoEngine/releases";
 		button2.label = "GitHub link";
-		button2.url = "https://github.com/Paopun20/FNF-PaoPaoEngine";
+		button2.url = "https://github.com/Paopun20/FNF-PaoPaaEngine";
 
 		discordPresence.buttons[0] = button1;
 		discordPresence.buttons[1] = button2;
 
-		Discord.UpdatePresence(cpp.RawConstPointer.addressOf(discordPresence));
 		changePresence();
 	}
 

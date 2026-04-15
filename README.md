@@ -10,7 +10,7 @@ PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
 - Python [**Beta**] - A Simple Version of Python for mod scripting
   > Work in progress, because some Python feature contracts are yet to be completed.\
   > Want to help? Submit a pull request on the [Hython GitHub repository](https://github.com/Paopun20/Hython).
-- Hscript (Improved and QOL) [**WIP**]
+- Hscript (Improved and QOL) [**Beta**]
   > Can use without `game.`\
   > Use Own's Codename's HScript fork library, only add QOL.\
   > It's too buggy like add/remove it not work...
@@ -37,6 +37,9 @@ PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
 - Update Lib: flixel, flixel-addons (RIP, old mods)
 - GDI Effects (HScript only):
   > /J SL WINDOWS API library
+- Video Cutscene Subtitles Is Support
+  - Subtitles: subtitles/video/videoName.srt
+
 - New events:
   - Offset Timer
   > Shifts the **displayed time** forward or backward in the Time UI. Supports tweening.\

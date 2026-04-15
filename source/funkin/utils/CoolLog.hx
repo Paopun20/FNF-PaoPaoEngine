@@ -7,6 +7,7 @@ import funkin.utils.AnsiUtil;
 import funkin.utils.AnsiUtil.AnsiCode;
 
 using StringTools;
+using PPQolTools;
 
 enum Level
 {
@@ -138,16 +139,40 @@ class CoolLog
 		}
 	}
 
+
+	/**
+	 * Creates a clickable hyperlink using the OSC 8 ANSI escape sequence.
+	 * Supported in terminals like iTerm2, Windows Terminal, GNOME Terminal, etc.
+	 * Falls back to plain text in unsupported terminals.
+	 * @param url  The URL to open when clicked.
+	 * @param text The visible label shown in the terminal.
+	 */
+	private static inline function link(url:String, text:String):String
+    	return '\033]8;;$url\033\\$text\033]8;;\033\\';
+
 	private static function log(lvl:Level, v:Dynamic, ?infos:PosInfos)
 	{
-		if (levelToInt(lvl) < levelToInt(level))
+		var current = levelToInt(level);
+		if (levelToInt(lvl) < current)
 			return;
 
 		var time = AnsiUtil.apply('[' + now() + ']', [cast TIME_COLOR]);
 		var tag = AnsiUtil.apply(levelTag(lvl), COLORS.get(lvl));
-		var file = infos != null ? infos.fileName.split("/").pop() : "unknown";
-		var line = infos != null ? '${infos.lineNumber}' : "0";
+
+		var fs = infos != null ? infos.fileName.split("/") : [];
+
+		var file = "unknown";
+		var line = "0";
+
+		if (infos != null)
+		{
+			file = fs.last();
+			line = Std.string(infos.lineNumber);
+		}
+
 		var location = AnsiUtil.apply(file, [cast FILE_COLOR]) + ":" + AnsiUtil.apply(line, [cast LINE_COLOR]);
+		// location = link(location, file); // why the fack, it not working >:(
+
 		var msg = Std.isOfType(v, String) ? AnsiUtil.apply(v, [cast MSG_COLOR]) : AnsiUtil.apply(pretty(v), [cast OBJ_COLOR]);
 
 		Sys.println('$time $tag $location: $msg');

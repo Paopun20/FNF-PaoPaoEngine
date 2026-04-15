@@ -1,5 +1,7 @@
 package funkin.modding;
 
+import funkin.shaders.CustomShader;
+
 class ShaderMod {
 	#if (MODS_ALLOWED && !flash && sys)
 	public static var runtimeShaders:Map<String, Array<String>> = new Map<String, Array<String>>();

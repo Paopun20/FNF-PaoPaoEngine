@@ -29,18 +29,15 @@ import flixel.util.FlxSignal.FlxTypedSignal;
 import flixel.util.FlxSignal;
 import funkin.utils.macro.SourceMap;
 import haxe.CallStack;
+import haxe.Exception;
 import haxe.io.Path;
-import lime.app.Application;
 import openfl.Lib;
-import openfl.events.UncaughtErrorEvent;
-import openfl.events.UncaughtErrorEvent;
 import sys.FileSystem;
 import sys.io.File;
 #end
 #if CRASH_DEBUGGER
 // Placeholder for crash debugger UI library
 #end
-import haxe.Exception;
 import haxe.ds.StringMap;
 import funkin.utils.tools.ThreadTool;
 #if hxhardware
@@ -57,75 +54,7 @@ import hxwindowmode.WindowColorMode;
 #if hxvlc
 import hxvlc.util.Handle as VLCHandle;
 #end
-
-/**
- * Just a normal one, with error handling and stuff. You can ignore this, your code should go in your states.
- */
-private final class FunkinGame extends FlxGame
-{
-	#if CRASH_HANDLER
-	public static var onGameCrash(default, null):FlxTypedSignal<(Exception) -> Void> = new FlxTypedSignal<(Exception) -> Void>();
-	#end
-
-	/**
-	 * Used to instantiate the guts of the flixel game object once we have a valid reference to the root.
-	 */
-	override function create(_):Void
-	{
-		try
-			super.create(_)
-		catch (e:Exception)
-			onCrash(e);
-	}
-
-	override function onFocus(_):Void
-	{
-		try
-			super.onFocus(_)
-		catch (e:Exception)
-			onCrash(e);
-	}
-
-	override function onFocusLost(_):Void
-	{
-		try
-			super.onFocusLost(_)
-		catch (e:Exception)
-			onCrash(e);
-	}
-
-	override function onEnterFrame(_):Void
-	{
-		try
-			super.onEnterFrame(_)
-		catch (e:Exception)
-			onCrash(e);
-	}
-
-	override function update():Void
-	{
-		try
-			super.update()
-		catch (e:Exception)
-			onCrash(e);
-	}
-
-	override function draw():Void
-	{
-		try
-			super.draw()
-		catch (e:Exception)
-			onCrash(e);
-	}
-
-	private final function onCrash(e:Exception):Void
-	{
-		#if CRASH_HANDLER
-		if (onGameCrash != null)
-			onGameCrash.dispatch(e);
-		#end
-	}
-}
+import funkin.backend.game.FunkinGame;
 
 /**
  * Error and crash handling system for PaoPaoEngine
@@ -336,6 +265,8 @@ class Main extends Sprite
 		#end
 
 		#if hxvlc
+		VLCHandle.init(#if (hxvlc >= "1.8.0") ['--no-lua'] #end);
+
 		// Initialize hxvlc's Handle here so the videos are loading faster.
 		VLCHandle.initAsync(function(success:Bool):Void
 		{
@@ -358,7 +289,10 @@ class Main extends Sprite
 			#if hxvlc
 			// Clean up VLC threads to prevent memory leaks.
 			VLCHandle.dispose();
+			CoolLog.init();
 			#end
+
+			ClientPrefs.saveSettings();
 		});
 
 		funkin.plugins.ForceCrashPlugin.initialize();
@@ -376,9 +310,6 @@ class Main extends Sprite
 		Sys.setCwd(Path.addTrailingSlash(System.applicationStorageDirectory));
 		#elseif ios
 		Sys.setCwd(System.applicationStorageDirectory);
-		#end
-		#if VIDEOS_ALLOWED
-		hxvlc.util.Handle.init(#if (hxvlc >= "1.8.0") ['--no-lua'] #end);
 		#end
 
 		#if LUA_ALLOWED

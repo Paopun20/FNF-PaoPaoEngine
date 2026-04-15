@@ -140,6 +140,12 @@ class PPQolTools
 	public static inline function isEmpty<T>(arr:Array<T>):Bool
 		return arr.length == 0;
 
+	public static inline function clear<T>(arr:Array<T>):Array<T>
+	{
+		arr.splice(0, arr.length);
+		return arr;
+	}
+
 	// FlxColor extensions
 	// myColor.withAlpha(0.5)
 

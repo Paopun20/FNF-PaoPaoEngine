@@ -210,6 +210,9 @@ class Paths
 	inline static public function python(key:String, ?folder:String)
 		return getPath('$key.py', TEXT, folder, true);
 
+	inline static public function subtitles(key:String, ?folder:String)
+		return getPath('subtitles/$key.srt', TEXT, folder, true);
+
 	static public function video(key:String)
 	{
 		#if MODS_ALLOWED

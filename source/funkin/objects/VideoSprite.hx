@@ -116,6 +116,9 @@ class VideoSprite extends FlxSpriteGroup
 
 	override function update(elapsed:Float)
 	{
+		if (alreadyDestroyed || state == Destroyed)
+			return;
+
 		if (state == Playing)
 		{
 			if (canSkip)
@@ -124,7 +127,9 @@ class VideoSprite extends FlxSpriteGroup
 			updateSubtitles();
 		}
 
-		super.update(elapsed);
+		// Only drive child updates while the group is still intact
+		if (!alreadyDestroyed && state != Destroyed)
+			super.update(elapsed);
 	}
 
 	override function destroy()
@@ -154,14 +159,18 @@ class VideoSprite extends FlxSpriteGroup
 				new flixel.util.FlxTimer().start(0.001, _ ->
 				{
 					mutex.acquire();
-					onVideoReady();
+					onVideoReady(); // already guarded now
 					mutex.release();
 				});
 			else
 			{
-				mutex.acquire();
-				endVideo(false);
-				mutex.release();
+				new flixel.util.FlxTimer().start(0.001, _ ->
+				{
+					mutex.acquire();
+					if (!alreadyDestroyed)
+						endVideo(false);
+					mutex.release();
+				});
 			}
 		});
 		#else
@@ -173,6 +182,9 @@ class VideoSprite extends FlxSpriteGroup
 
 	function onVideoReady()
 	{
+		if (alreadyDestroyed || state == Destroyed) // <-- add this guard
+			return;
+
 		if (loadingBackdrop != null)
 		{
 			FlxTween.cancelTweensOf(loadingBackdrop);
@@ -250,7 +262,7 @@ class VideoSprite extends FlxSpriteGroup
 	function parseSubtitles()
 	{
 		#if sys
-		var srtPath = '${Path.withoutExtension(videoName)}.srt';
+		var srtPath = Paths.subtitles("subtitles/video/" + videoName);
 
 		if (!FileSystem.exists(srtPath))
 			return;
@@ -494,14 +506,16 @@ class VideoSprite extends FlxSpriteGroup
 			cover = null;
 		}
 
+		// loadingBackdrop
 		if (loadingBackdrop != null)
 		{
-			FlxTween.cancelTweensOf(loadingBackdrop);
+			FlxTween.cancelTweensOf(loadingBackdrop); // cancel first
 			remove(loadingBackdrop);
 			loadingBackdrop.destroy();
 			loadingBackdrop = null;
 		}
 
+		// loadingText
 		if (loadingText != null)
 		{
 			remove(loadingText);

@@ -9,31 +9,22 @@ import funkin.frontend.cutscenes.DialogueBoxPsych;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.FlxSubState;
-import flixel.animation.FlxAnimationController;
 import flixel.input.keyboard.FlxKey;
-import flixel.util.FlxSave;
 import flixel.util.FlxSort;
 import flixel.util.FlxStringUtil;
-import haxe.Json;
-import lime.utils.Assets;
 import funkin.objects.*;
 import funkin.objects.Note.EventNote;
 import funkin.objects.VideoSprite;
 import openfl.events.KeyboardEvent;
-import openfl.utils.Assets as OpenFlAssets;
 import funkin.shaders.ErrorHandledShader;
 import funkin.states.FreeplayState;
 import funkin.states.StoryMenuState;
 import funkin.modding.editors.CharacterEditorState;
 import funkin.modding.editors.ChartingState;
 import funkin.states.stages.*;
-import funkin.states.stages.objects.*;
 import funkin.substates.GameOverSubstate;
 import funkin.substates.PauseSubState;
 import flixel.tweens.FlxTween;
-#if !flash
-import openfl.filters.ShaderFilter;
-#end
 import funkin.modding.scripts.utils.LuaUtils;
 import funkin.modding.scripts.ScriptPack;
 #if LUA_ALLOWED
@@ -45,6 +36,10 @@ import funkin.modding.scripts.HScript;
 #if PYTHON_ALLOWED
 import funkin.modding.scripts.Python;
 #end
+
+import funkin.modding.ShaderMod;
+
+using PPQolTools;
 
 /**
  * This is where all the Gameplay stuff happens and is managed
@@ -329,9 +324,6 @@ class PlayState extends MusicBeatState
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay');
 		guitarHeroSustains = ClientPrefs.data.guitarHeroSustains;
 
-		if (FlxG.camera.filters == null)
-			FlxG.camera.filters = [];
-
 		// var gameCam:FlxCamera = FlxG.camera;
 		camGame = initPsychCamera();
 		camHUD = new FlxCamera();
@@ -341,6 +333,9 @@ class PlayState extends MusicBeatState
 
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camOther, false);
+
+		if (FlxG.camera.filters == null)
+			FlxG.camera.filters = [];
 
 		persistentUpdate = true;
 		persistentDraw = true;
@@ -1822,7 +1817,8 @@ class PlayState extends MusicBeatState
 		if (finishTimer != null)
 			return;
 
-		CoolLog.info('resynced vocals at ' + Math.floor(Conductor.songPosition));
+		CoolLog.info('resynced vocals at ' + FlxStringUtil.formatTime(Conductor.songPosition/1000, true));
+		// CoolLog.info('resynced vocals at ' + Math.floor(Conductor.songPosition));
 		// trace('resynced vocals at ' + Math.floor(Conductor.songPosition));
 
 		FlxG.sound.music.play();
@@ -2233,7 +2229,7 @@ class PlayState extends MusicBeatState
 				persistentDraw = false;
 				FlxTimer.globalManager.clear();
 				FlxTween.globalManager.clear();
-				FlxG.camera.filters = [];
+				FlxG.camera.filters.clear();
 
 				if (GameOverSubstate.deathDelay > 0)
 				{
@@ -3628,6 +3624,10 @@ class PlayState extends MusicBeatState
 
 	override function destroy()
 	{
+		if (FlxG.camera.filters != null) {
+			FlxG.camera.filters.clear();
+		}
+
 		if (funkin.modding.scripts.components.CustomSubstate.instance != null)
 		{
 			closeSubState();
@@ -3652,8 +3652,6 @@ class PlayState extends MusicBeatState
 
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
-
-		FlxG.camera.filters = [];
 
 		#if FLX_PITCH FlxG.sound.music.pitch = 1; #end
 		FlxG.animationTimeScale = 1;
@@ -4076,78 +4074,23 @@ class PlayState extends MusicBeatState
 	}
 	#end
 
-	#if (!flash && sys)
-	public var runtimeShaders:Map<String, Array<String>> = new Map<String, Array<String>>();
-	#end
-
 	public function createRuntimeShader(shaderName:String):ErrorHandledRuntimeShader
 	{
 		#if (!flash && sys)
 		if (!ClientPrefs.data.shaders)
 			return new ErrorHandledRuntimeShader(shaderName);
 
-		if (!runtimeShaders.exists(shaderName) && !initLuaShader(shaderName))
+		if (!ShaderMod.runtimeShaders.exists(shaderName) && !ShaderMod.initLuaShader(shaderName))
 		{
 			FlxG.log.warn('Shader $shaderName is missing!');
 			return new ErrorHandledRuntimeShader(shaderName);
 		}
 
-		var arr:Array<String> = runtimeShaders.get(shaderName);
+		var arr:Array<String> = ShaderMod.runtimeShaders.get(shaderName);
 		return new ErrorHandledRuntimeShader(shaderName, arr[0], arr[1]);
 		#else
 		FlxG.log.warn("Platform unsupported for Runtime Shaders!");
 		return null;
 		#end
-	}
-
-	public function initLuaShader(name:String, ?glslVersion:Int = 120)
-	{
-		if (!ClientPrefs.data.shaders)
-			return false;
-
-		#if (!flash && sys)
-		if (runtimeShaders.exists(name))
-		{
-			FlxG.log.warn('Shader $name was already initialized!');
-			return true;
-		}
-
-		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'shaders/'))
-		{
-			var frag:String = folder + name + '.frag';
-			var vert:String = folder + name + '.vert';
-			var found:Bool = false;
-			if (FileSystem.exists(frag))
-			{
-				frag = File.getContent(frag);
-				found = true;
-			}
-			else
-				frag = null;
-
-			if (FileSystem.exists(vert))
-			{
-				vert = File.getContent(vert);
-				found = true;
-			}
-			else
-				vert = null;
-
-			if (found)
-			{
-				runtimeShaders.set(name, [frag, vert]);
-				// trace('Found shader $name!');
-				return true;
-			}
-		}
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
-		addTextToDebug('Missing shader $name .frag AND .vert files!', FlxColor.RED);
-		#else
-		FlxG.log.warn('Missing shader $name .frag AND .vert files!');
-		#end
-		#else
-		FlxG.log.warn('This platform doesn\'t support Runtime Shaders!');
-		#end
-		return false;
 	}
 }

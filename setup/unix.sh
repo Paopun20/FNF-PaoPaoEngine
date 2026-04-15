@@ -27,6 +27,7 @@ haxelib install tink_core 2.1.1
 haxelib install moonchart 0.5.1
 haxelib install random 1.4.1
 haxelib install lime 8.3.1
+haxelib install thx.semver 0.2.2
 haxelib install sl-windows-api
 haxelib git hxvlc https://github.com/CodenameCrew/cne-hxvlc.git
 haxelib git hython https://github.com/Paopun20/hython.git dev
