@@ -76,7 +76,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.7
 
-      - uses: krdlab/setup-haxe@master
+      - uses: HaxeFoundation/setup-haxe@v2
         with:
           haxe-version: 4.3.7
 
