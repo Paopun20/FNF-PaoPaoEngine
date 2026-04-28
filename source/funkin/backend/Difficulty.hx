@@ -28,21 +28,21 @@ class Difficulty
 		var diffStr:String = week.difficulties;
 		if (diffStr != null && diffStr.length > 0)
 		{
-			var diffs:Array<String> = diffStr.trim().split(',');
-			var i:Int = diffs.length - 1;
-			while (i > 0)
+			var diffs:Array<String> = [];
+			for (entry in diffStr.split(','))
 			{
-				if (diffs[i] != null)
-				{
-					diffs[i] = diffs[i].trim();
-					if (diffs[i].length < 1)
-						diffs.remove(diffs[i]);
-				}
-				--i;
+				if (entry == null)
+					continue;
+
+				var trimmedEntry:String = entry.trim();
+				if (trimmedEntry.length > 0)
+					diffs.push(trimmedEntry);
 			}
 
-			if (diffs.length > 0 && diffs[0].length > 0)
+			if (diffs.length > 0)
 				list = diffs;
+			else
+				resetList();
 		}
 		else
 			resetList();
