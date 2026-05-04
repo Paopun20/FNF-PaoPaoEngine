@@ -55,12 +55,12 @@ jobs:
           #   lib-path: ~/haxelib
           #   setup-file: ./setup/unix.sh
 
-          - os: windows-latest
-            target: android
-            artifact-name: androidBuild
-            export-path: export/release/android/bin/app/
-            lib-path: C:/haxelib
-            setup-file: ./setup/windows.ps1
+          # - os: windows-latest
+          #   target: android
+          #   artifact-name: androidBuild
+          #   export-path: export/release/android/bin/app/
+          #   lib-path: C:/haxelib
+          #   setup-file: ./setup/windows.ps1
 
           # - os: macos-15
           #   target: tvos
@@ -75,7 +75,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4.1.7
-
+      - uses: xom9ikk/dotenv@v2.3.0
+          
       - uses: HaxeFoundation/setup-haxe@v2
         with:
           haxe-version: 4.3.7
