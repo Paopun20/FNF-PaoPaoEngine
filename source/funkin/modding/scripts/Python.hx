@@ -33,11 +33,7 @@ import haxe.Json;
 import openfl.Lib;
 import openfl.display.BitmapData;
 import openfl.utils.Assets;
-import paopao.hython.Expr as PyExpr;
-import paopao.hython.Error.Error as PyError;
-import paopao.hython.Interp as PyInterp;
-import paopao.hython.Parser as PyParser;
-import paopao.hython.Printer as PyPrinter;
+import paopao.hython.VM;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 #end
@@ -50,9 +46,7 @@ import funkin.modding.scripts.LuaScript;
 
 class Python extends Script implements IFlxDestroyable
 {
-	public var parser:PyParser;
-	public var printer:PyPrinter;
-	public var interp:PyInterp;
+	public var interp:VM;
 	public var origin:Null<String>;
 	public var returnValue:Dynamic;
 
@@ -72,8 +66,7 @@ class Python extends Script implements IFlxDestroyable
 	public override function new(?file:String = '', ?varsToBring:Any = null)
 	{
 		super(file);
-		interp = new PyInterp();
-		printer = new PyPrinter();
+		interp = new VM();
 		scriptName = origin = file;
 
 		#if MODS_ALLOWED
@@ -131,12 +124,13 @@ class Python extends Script implements IFlxDestroyable
 
 		try
 		{
-			returnValue = interp.execute(cachedExpr);
+			// execute() now returns Value; convert to Haxe Dynamic before storing.
+			returnValue = interp.toHaxe(interp.execute(cachedExpr));
 			return returnValue;
 		}
 		catch (e:Dynamic)
 		{
-			pythonTrace('Execute Error: ' + printer.exprToString(e), FlxColor.RED);
+			pythonTrace('Execute Error: ' + e, FlxColor.RED);
 			return null;
 		}
 	}
@@ -174,14 +168,23 @@ class Python extends Script implements IFlxDestroyable
 
 	public override function set(variable:String, value:Dynamic)
 	{
-		if (interp != null)
-			interp.setVar(variable, value);
+		if (interp == null)
+			return;
+
+		// setNative() only accepts functions and classes; for all other plain
+		// Haxe values (strings, ints, bools, objects, etc.) we convert to a
+		// VM Value ourselves and write directly into the global scope.
+		if (Reflect.isFunction(value) || Std.isOfType(value, Class))
+			interp.setNative(variable, value);
+		else
+			interp.setGlobal(variable, interp.toValue(value));
 	}
 
 	public override function get(variable:String):Dynamic
 	{
 		if (interp != null)
-			return interp.getVar(variable);
+			// toHaxe is now an instance method (no longer static).
+			return interp.toHaxe(interp.getGlobal(variable));
 		return null;
 	}
 
@@ -1347,17 +1350,14 @@ class Python extends Script implements IFlxDestroyable
 	public override function stop()
 	{
 		closed = true;
-		if (interp != null)
-		{
-			interp.stop();
-			interp = null;
-		}
+		// VM no longer exposes a stop() method; dropping the reference is sufficient
+		// to allow GC to reclaim the interpreter and its associated state.
+		interp = null;
 	}
 
 	public override function destroy()
 	{
 		stop();
-		parser = null;
 		interp = null;
 		returnValue = null;
 		#if LUA_ALLOWED parentLua = null; #end
