@@ -14,6 +14,7 @@ class ImplementUtils
 {
 	public static function make(interpreter:Dynamic):(String, Dynamic) -> Null<Dynamic>
 	{
+		
 		#if LUA_ALLOWED
 		if (Std.isOfType(interpreter, LuaScript))
 		{

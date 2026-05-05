@@ -1,10 +1,11 @@
 package funkin.modding.scripts.utils;
 
+import haxe.Constraints.NotVoid;
 import haxe.ds.StringMap;
 import hscript.Expr;
 import hscript.Parser;
-import paopao.hython.Expr as PyExpr;
-import paopao.hython.Parser as PyParser;
+import paopao.hython.VM;
+import paopao.hython.Bytecode;
 import haxe.crypto.Sha256;
 import haxe.io.Bytes;
 
@@ -17,7 +18,7 @@ enum CacheType
 class CacheScript
 {
 	private static var hscriptCache:StringMap<Expr> = new StringMap<Expr>();
-	private static var pythonCache:StringMap<PyExpr> = new StringMap<PyExpr>();
+	private static var pythonCache:StringMap<CodeObject> = new StringMap<CodeObject>();
 
 	public static function exists(key:String, type:CacheType):Bool
 	{
@@ -28,7 +29,7 @@ class CacheScript
 		}
 	}
 
-	public static function get(key:String, type:CacheType):Dynamic
+	public static function get(key:String, type:CacheType):NotVoid
 	{
 		return switch (type)
 		{
@@ -83,11 +84,7 @@ class CacheParser
 				})().parseString(code, origin);
 
 			case PYTHON:
-				(() ->
-				{
-					var p = new PyParser();
-					return p;
-				})().parseString(code);
+				VM.compileSource(code);
 		}
 	}
 }

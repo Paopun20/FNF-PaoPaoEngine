@@ -75,7 +75,7 @@ class HScript extends Script
 	{
 		if (Std.isOfType(e, HscriptError))
 		{
-			CoolLog.error(Printer.errorToString(e, false), this.interp.posInfos());
+			CoolLog.error(Printer.errorToString(e), this.interp.posInfos());
 		}
 	}
 
@@ -83,7 +83,7 @@ class HScript extends Script
 	{
 		if (Std.isOfType(e, HscriptError))
 		{
-			CoolLog.warning(Printer.errorToString(e, false), this.interp.posInfos());
+			CoolLog.warning(Printer.errorToString(e), this.interp.posInfos());
 		}
 	}
 
@@ -102,11 +102,11 @@ class HScript extends Script
 		// hscriptDebugMode suppresses errors in favour of warnings during development
 		if (get("hscriptDebugMode"))
 		{
-			CoolLog.warning('Import failed: $fullPath (alias: ${classAlias != null ? classAlias : "none"})');
+			CoolLog.warning('Import failed: $fullPath (alias: ${classAlias != null ? classAlias : "none"})', this.interp.posInfos());
 			return true;
 		}
 
-		CoolLog.error('Import failed: $fullPath (alias: ${classAlias != null ? classAlias : "none"})');
+		CoolLog.error('Import failed: $fullPath (alias: ${classAlias != null ? classAlias : "none"})', this.interp.posInfos());
 		return false;
 	}
 
@@ -122,7 +122,6 @@ class HScript extends Script
 		interp.importFailedCallback = onImportFailed;
 		interp.publicVariables = publicVariables;
 		interp.staticVariables = staticVariables;
-		interp.variables.set("this", this);
 
 		var activeState = FlxG.state.subState ?? FlxG.state;
 		addExHScript(this.interp, LuaUtils.isPlayStateScript(activeState));
@@ -227,6 +226,9 @@ class HScript extends Script
 		for (fieldName in Reflect.fields(parent))
 			this.set(fieldName, Reflect.field(parent, fieldName));
 
+		// Re-apply object-dependent bindings now that scriptObject is set
+		addExHScript(this.interp, LuaUtils.isPlayStateScript(FlxG.state.subState ?? FlxG.state));
+
 		return this;
 	}
 
@@ -249,7 +251,6 @@ class HScript extends Script
 	private static function registerPlayStateBindings(targetInterp:Interp):Void
 	{
 		var ps = PlayState.instance;
-
 		targetInterp.variables.set("game", ps);
 		targetInterp.variables.set("add", buildPlayStateAddFn(ps));
 		targetInterp.variables.set('insert', ps.insert);
@@ -324,13 +325,16 @@ class HScript extends Script
 	{
 		var scriptObj = targetInterp.scriptObject;
 
+		// Guard: if the parent object isn't set yet, skip object-dependent bindings.
+		// set_parent() will call this again once scriptObject is available.
+		if (scriptObj == null)
+			return;
+
 		targetInterp.variables.set("game", scriptObj);
 		targetInterp.variables.set('add', scriptObj.add);
 		targetInterp.variables.set('insert', scriptObj.insert);
 		targetInterp.variables.set('remove', scriptObj.remove);
 
-		// Store as Dynamic so the compiler doesn't narrow the type to { set } only,
-		// which would hide get() and remove() from the inferred structural type.
 		var vars:Dynamic = scriptObj.variables;
 		if (vars == null)
 			return;

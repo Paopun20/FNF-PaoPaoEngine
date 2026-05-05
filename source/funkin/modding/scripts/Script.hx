@@ -89,6 +89,7 @@ class Script implements IFlxDestroyable
 	public static function getDefaultVariables(?script:Script):Map<String, Dynamic>
 	{
 		var defaults:Map<String, Dynamic> = [];
+		var isGame = (Type.getClass(FlxG.state) is PlayState);
 
 		// Stop functions
 		defaults.set('Function_StopLua', LuaUtils.Function_StopLua);
@@ -167,29 +168,32 @@ class Script implements IFlxDestroyable
 		defaults.set('currentModDirectory', Mods.currentModDirectory);
 		defaults.set('buildTarget', LuaUtils.getBuildTarget());
 
-		// Song/Week data
-		defaults.set('curBpm', Conductor.bpm);
-		defaults.set('bpm', PlayState.SONG.bpm);
-		defaults.set('scrollSpeed', PlayState.SONG.speed);
-		defaults.set('crochet', Conductor.crochet);
-		defaults.set('stepCrochet', Conductor.stepCrochet);
-		defaults.set('songLength', FlxG.sound.music != null ? FlxG.sound.music.length : 0);
-		defaults.set('songName', PlayState.SONG.song);
-		defaults.set('songPath', Paths.formatToSongPath(PlayState.SONG.song));
-		defaults.set('loadedSongName', Song.loadedSongName);
-		defaults.set('loadedSongPath', Paths.formatToSongPath(Song.loadedSongName));
-		defaults.set('chartPath', Song.chartPath);
-		defaults.set('startedCountdown', false);
-		defaults.set('curStage', PlayState.SONG.stage);
-		defaults.set('isStoryMode', PlayState.isStoryMode);
-		defaults.set('difficulty', PlayState.storyDifficulty);
-		defaults.set('difficultyName', Difficulty.getString(false));
-		defaults.set('difficultyPath', Difficulty.getFilePath());
-		defaults.set('difficultyNameTranslation', Difficulty.getString(true));
-		defaults.set('weekRaw', PlayState.storyWeek);
-		defaults.set('week', WeekData.weeksList[PlayState.storyWeek]);
-		defaults.set('seenCutscene', PlayState.seenCutscene);
-		defaults.set('hasVocals', PlayState.SONG.needsVoices);
+		if (isGame)
+		{
+			// Song/Week data
+			defaults.set('curBpm', Conductor.bpm);
+			defaults.set('bpm', PlayState.SONG.bpm);
+			defaults.set('scrollSpeed', PlayState.SONG.speed);
+			defaults.set('crochet', Conductor.crochet);
+			defaults.set('stepCrochet', Conductor.stepCrochet);
+			defaults.set('songLength', FlxG.sound.music != null ? FlxG.sound.music.length : 0);
+			defaults.set('songName', PlayState.SONG.song);
+			defaults.set('songPath', Paths.formatToSongPath(PlayState.SONG.song));
+			defaults.set('loadedSongName', Song.loadedSongName);
+			defaults.set('loadedSongPath', Paths.formatToSongPath(Song.loadedSongName));
+			defaults.set('chartPath', Song.chartPath);
+			defaults.set('startedCountdown', false);
+			defaults.set('curStage', PlayState.SONG.stage);
+			defaults.set('isStoryMode', PlayState.isStoryMode);
+			defaults.set('difficulty', PlayState.storyDifficulty);
+			defaults.set('difficultyName', Difficulty.getString(false));
+			defaults.set('difficultyPath', Difficulty.getFilePath());
+			defaults.set('difficultyNameTranslation', Difficulty.getString(true));
+			defaults.set('weekRaw', PlayState.storyWeek);
+			defaults.set('week', WeekData.weeksList[PlayState.storyWeek]);
+			defaults.set('seenCutscene', PlayState.seenCutscene);
+			defaults.set('hasVocals', PlayState.SONG.needsVoices);
+		}
 
 		defaults.set('FlxColor', function(color:String) return FlxColor.fromString(color));
 		defaults.set('getColorFromName', function(color:String) return FlxColor.fromString(color));
@@ -234,9 +238,13 @@ class Script implements IFlxDestroyable
 	public function call(funcName:String, ?args:Array<Dynamic>):Dynamic
 		return null;
 
-	public function execute():Void {}
+	public function execute():Void
+	{
+	}
 
-	public function set(variable:String, value:Dynamic) {}
+	public function set(variable:String, value:Dynamic)
+	{
+	}
 
 	public function get(variable:String):Dynamic
 		return null;

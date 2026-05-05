@@ -250,12 +250,9 @@ class Main extends Sprite
 		CoolLog.init();
 
 		#if hxWindowColorMode
-		if (WindowColorMode.isDarkMode)
-		{
-			WindowColorMode.setDarkMode();
-			if (WindowColorMode.isWindows10)
-				WindowColorMode.redrawWindowHeader();
-		}
+		WindowColorMode.setDarkMode();
+		if (WindowColorMode.isWindows10)
+			WindowColorMode.redrawWindowHeader();
 		#end
 		#if CRASH_HANDLER
 		ErrorHandle.init();
