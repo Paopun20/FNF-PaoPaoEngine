@@ -11,6 +11,7 @@ import funkin.backend.Highscore;
 import funkin.frontend.huds.FPSCounter;
 import funkin.states.TitleState;
 import funkin.backend.utils.ThreadUtil;
+import flixel.util.FlxSignal;
 import haxe.io.Path;
 import lime.app.Application;
 import openfl.Assets;
@@ -25,8 +26,6 @@ import lime.graphics.Image;
 import funkin.backend.ALSoftConfig; // Just to make sure DCE doesn't remove this, since it's not directly referenced anywhere else.
 #end
 #if CRASH_HANDLER
-import flixel.util.FlxSignal.FlxTypedSignal;
-import flixel.util.FlxSignal;
 import funkin.backend.utils.macro.SourceMap;
 import haxe.CallStack;
 import haxe.Exception;
