@@ -19,6 +19,7 @@ import funkin.backend.StageData;
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;
 import funkin.backend.utils.ThreadUtil;
+import haxe.ds.ObjectMap;
 import Random;
 #if (js && nodejs)
 import js.node.Os;
@@ -34,10 +35,37 @@ class LoadingState extends EditableState
 
 	private static var originalBitmapKeys:Map<String, String> = [];
 	private static var requestedBitmaps:Map<String, BitmapData> = [];
+
 	#if (sys || MULTITHREADED_LOADING)
 	private static var mutex:Mutex;
 	private static var arrayMutex:Mutex;
 	#end
+
+	static function flushBitmapCache():Void
+	{
+		#if (sys || MULTITHREADED_LOADING)
+		mutex.acquire();
+		#end
+		var localRequestedBitmaps = requestedBitmaps.copy();
+		var localOriginalBitmapKeys = originalBitmapKeys.copy();
+		requestedBitmaps.clear();
+		originalBitmapKeys.clear();
+		#if (sys || MULTITHREADED_LOADING)
+		mutex.release();
+		#end
+
+		for (key => bitmap in localRequestedBitmaps)
+		{
+			if (bitmap != null && Paths.cacheBitmap(localOriginalBitmapKeys.get(key), bitmap) != null)
+			{
+				// CoolLog.info('finished preloading image $key');
+			}
+			else if (bitmap != null)
+				CoolLog.error('failed to cache image $key');
+			else
+				CoolLog.error('failed to load image $key');
+		}
+	}
 
 	inline static private function safeIncrementLoaded(?assetName:String):Void
 	{
@@ -47,10 +75,7 @@ class LoadingState extends EditableState
 		mutex.acquire();
 		#end
 		loaded++;
-		if (assetName != null)
-			currentAssetName = assetName;
-		else
-			currentAssetName = "...";
+		currentAssetName = assetName != null ? assetName : "...";
 		#if (sys || MULTITHREADED_LOADING)
 		mutex.release();
 		#end
@@ -95,15 +120,13 @@ class LoadingState extends EditableState
 
 			if (c == '[' && text.charAt(i + 1) != '/')
 			{
-				// Opening tag: [attr="val", flag, ...]
 				var tagClose = text.indexOf(']', i);
 				if (tagClose == -1)
-					break; // malformed, stop
+					break;
 
 				var tagInner = text.substring(i + 1, tagClose);
 				var attrs = parseTagAttrs(tagInner);
 
-				// Content runs until the next [/]
 				var closePos = text.indexOf('[/]', tagClose + 1);
 				if (closePos == -1)
 				{
@@ -114,11 +137,10 @@ class LoadingState extends EditableState
 
 				attrs.set("text", text.substring(tagClose + 1, closePos));
 				result.push(attrs);
-				i = closePos + 3; // advance past [/]
+				i = closePos + 3;
 			}
 			else
 			{
-				// Plain text segment: run until the next [
 				var nextTag = text.indexOf('[', i);
 				var end = nextTag == -1 ? len : nextTag;
 
@@ -150,7 +172,6 @@ class LoadingState extends EditableState
 			{
 				var key = StringTools.trim(part.substring(0, eq));
 				var val = StringTools.trim(part.substring(eq + 1));
-				// Strip surrounding quotes  "…" or '…'
 				if (val.length >= 2)
 				{
 					var q = val.charAt(0);
@@ -161,11 +182,52 @@ class LoadingState extends EditableState
 			}
 			else
 			{
-				attrs.set(part, "true"); // boolean flag attribute
+				attrs.set(part, "true");
 			}
 		}
 
 		return attrs;
+	}
+
+	private var _tipPrefix:String = "";
+	private var _tipSuffix:String = "";
+	private var _tipGlitchText:String = "";
+	private var _tipGlitchKey:String = "";
+	private var _hasGlitch:Bool = false;
+	private static final GLITCH_CHARSET:String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+	function _buildTipSegments():Void
+	{
+		var prefix = new StringBuf();
+		var suffix = new StringBuf();
+		var foundGlitch = false;
+
+		for (segment in ftextData)
+		{
+			var text = segment.get("text");
+			var gkey = segment.get("FX_GTEXT");
+
+			if (gkey != null && !foundGlitch)
+			{
+				foundGlitch = true;
+				_hasGlitch = true;
+				_tipGlitchText = text;
+				_tipGlitchKey = gkey;
+			}
+			else if (!foundGlitch)
+			{
+				prefix.add(text);
+			}
+			else
+			{
+				suffix.add(text);
+			}
+		}
+
+		_tipPrefix = prefix.toString();
+		_tipSuffix = suffix.toString();
+		if (!_hasGlitch)
+			_tipPrefix = ftextData.map(s -> s.get("text")).join("");
 	}
 
 	function new(target:FlxState, stopMusic:Bool)
@@ -255,6 +317,7 @@ class LoadingState extends EditableState
 		var tip:String = tipArray.length > 0 ? tipArray.shuffle().randomItem() : "No tips available.";
 
 		ftextData = ftext(tip);
+		_buildTipSegments(); // pre-bake static segments
 
 		super.create();
 
@@ -276,38 +339,23 @@ class LoadingState extends EditableState
 	{
 		super.update(elapsed);
 
-		var rendered = "";
-		var gflag = false;
-		var gkey = "";
-
-		for (segment in ftextData)
+		// Build tip text using pre-baked segments
+		var rendered:String;
+		if (_hasGlitch)
 		{
-			var text = segment.get("text");
-			var gflag = false;
-			var gkey = "";
-
-			for (key in segment.keys())
+			var buf = new StringBuf();
+			buf.add(_tipPrefix);
+			for (i in 0..._tipGlitchText.length)
 			{
-				if (key == "FX_GTEXT")
-				{
-					gflag = true;
-					gkey = segment.get(key);
-					break;
-				}
+				var ch = _tipGlitchText.charAt(i);
+				buf.add(ch == _tipGlitchKey ? Random.string(1, GLITCH_CHARSET) : ch);
 			}
-
-			if (gflag)
-			{
-				var charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-				var result = "";
-				for (i in 0...text.length)
-					result += text.charAt(i) == gkey ? Random.string(1, charset) : text.charAt(i);
-				rendered += result;
-			}
-			else
-			{
-				rendered += text;
-			}
+			buf.add(_tipSuffix);
+			rendered = buf.toString();
+		}
+		else
+		{
+			rendered = _tipPrefix;
 		}
 
 		tipText.text = Language.getPhrase('loading_tip', 'Tip: {1}', [rendered]);
@@ -355,7 +403,6 @@ class LoadingState extends EditableState
 		}
 		loadingText.text = Language.getPhrase('now_loading', 'Now Loading{1}', [dots]);
 
-		// Update asset loading text
 		var progress = safeGetLoadProgress();
 		assetText.text = Language.getPhrase('asset_loading', 'Asset Loading: {1} {2}', [progress.assetName, '(${progress.loaded}/${progress.max})']);
 	}
@@ -364,6 +411,7 @@ class LoadingState extends EditableState
 
 	function onLoad()
 	{
+		flushBitmapCache();
 		_loaded();
 
 		if (stopMusic && FlxG.sound.music != null)
@@ -400,45 +448,16 @@ class LoadingState extends EditableState
 
 	public static function checkLoaded():Bool
 	{
-		// Thread-safe: Copy and clear maps atomically
 		#if (sys || MULTITHREADED_LOADING)
 		if (mutex == null)
 			return false;
-
 		mutex.acquire();
-		#end
-		var localRequestedBitmaps = requestedBitmaps.copy();
-		var localOriginalBitmapKeys = originalBitmapKeys.copy();
-		// Clear immediately to prevent lost updates
-		requestedBitmaps.clear();
-		originalBitmapKeys.clear();
-		#if (sys || MULTITHREADED_LOADING)
-		mutex.release();
-		#end
-
-		// Process bitmaps outside the mutex lock
-		for (key => bitmap in localRequestedBitmaps)
-		{
-			if (bitmap != null && Paths.cacheBitmap(localOriginalBitmapKeys.get(key), bitmap) != null)
-			{
-				// CoolLog.info('finished preloading image $key');
-			}
-			else if (bitmap != null)
-				CoolLog.error('failed to cache image $key');
-			else
-				CoolLog.error('failed to load image $key');
-		}
-
-		// Thread-safe check of completion status
-		#if (sys || MULTITHREADED_LOADING)
-		mutex.acquire();
-		#end
 		var result = (loaded >= loadMax && initialThreadCompleted);
-		#if (sys || MULTITHREADED_LOADING)
 		mutex.release();
-		#end
-
 		return result;
+		#else
+		return (loaded >= loadMax && initialThreadCompleted);
+		#end
 	}
 
 	public static function loadNextDirectory()
@@ -476,6 +495,7 @@ class LoadingState extends EditableState
 		{
 			if (checkLoaded())
 			{
+				flushBitmapCache();
 				_loaded();
 				break;
 			}
@@ -483,11 +503,8 @@ class LoadingState extends EditableState
 				Sys.sleep(0.001);
 		}
 		#else
-		// For HTML5, load synchronously
-		while (!checkLoaded())
-		{
-			// Just wait for the next frame
-		}
+		while (!checkLoaded()) {}
+		flushBitmapCache();
 		_loaded();
 		#end
 		return target;
@@ -503,7 +520,6 @@ class LoadingState extends EditableState
 		#if (sys || MULTITHREADED_LOADING)
 		if (arrayMutex == null)
 			arrayMutex = new Mutex();
-
 		arrayMutex.acquire();
 		#end
 		if (images != null)
@@ -524,7 +540,6 @@ class LoadingState extends EditableState
 	{
 		if (PlayState.SONG == null)
 		{
-			// Reset state safely
 			#if (sys || MULTITHREADED_LOADING)
 			arrayMutex = new Mutex();
 			arrayMutex.acquire();
@@ -535,7 +550,6 @@ class LoadingState extends EditableState
 			songsToPrepare = [];
 			#if (sys || MULTITHREADED_LOADING)
 			arrayMutex.release();
-
 			mutex = new Mutex();
 			mutex.acquire();
 			#end
@@ -550,13 +564,11 @@ class LoadingState extends EditableState
 			return;
 		}
 
-		// Initialize mutexes before any threading
 		#if (sys || MULTITHREADED_LOADING)
 		if (arrayMutex == null)
 			arrayMutex = new Mutex();
 		if (mutex == null)
 			mutex = new Mutex();
-
 		arrayMutex.acquire();
 		#end
 		imagesToPrepare = [];
@@ -565,7 +577,6 @@ class LoadingState extends EditableState
 		songsToPrepare = [];
 		#if (sys || MULTITHREADED_LOADING)
 		arrayMutex.release();
-
 		mutex.acquire();
 		#end
 		initialThreadCompleted = false;
@@ -577,7 +588,7 @@ class LoadingState extends EditableState
 		var threadsCompleted:Int = 0;
 		var threadsMax:Int = 0;
 		#if (sys || MULTITHREADED_LOADING)
-		var threadMutex = new Mutex(); // Local mutex for thread completion
+		var threadMutex = new Mutex();
 		#end
 
 		function completedThread()
@@ -596,7 +607,6 @@ class LoadingState extends EditableState
 				clearInvalids();
 				startThreads();
 
-				// Thread-safe flag update
 				#if (sys || MULTITHREADED_LOADING)
 				if (mutex != null)
 				{
@@ -615,7 +625,6 @@ class LoadingState extends EditableState
 
 		new Future<Bool>(() ->
 		{
-			// LOAD NOTE IMAGE
 			var noteSkin:String = Note.defaultNoteSkin;
 			if (PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1)
 				noteSkin = PlayState.SONG.arrowSkin;
@@ -624,7 +633,6 @@ class LoadingState extends EditableState
 			if (Paths.fileExists('images/$customSkin.png', IMAGE))
 				noteSkin = customSkin;
 
-			// Thread-safe array access
 			#if (sys || MULTITHREADED_LOADING)
 			arrayMutex.acquire();
 			#end
@@ -633,7 +641,6 @@ class LoadingState extends EditableState
 			arrayMutex.release();
 			#end
 
-			// LOAD NOTE SPLASH IMAGE
 			var noteSplash:String = NoteSplash.defaultNoteSplash;
 			if (PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0)
 				noteSplash = PlayState.SONG.splashSkin;
@@ -733,7 +740,6 @@ class LoadingState extends EditableState
 					prepare(imgs, snds, mscs);
 				}
 
-				// Thread-safe array operations
 				#if (sys || MULTITHREADED_LOADING)
 				arrayMutex.acquire();
 				#end
@@ -782,69 +788,40 @@ class LoadingState extends EditableState
 				{
 					#if (sys || MULTITHREADED_LOADING)
 					threadMutex.acquire();
-					#end
 					threadsMax++;
-					#if (sys || MULTITHREADED_LOADING)
 					threadMutex.release();
 
 					ThreadUtil.execAsync(() ->
 					{
-						try
-						{
-							preloadCharacter(player2, prefixVocals);
-						}
-						catch (e:Dynamic)
-						{
-						}
+						try { preloadCharacter(player2, prefixVocals); } catch (e:Dynamic) {}
 						completedThread();
 					});
 					#else
-					// HTML5: run synchronously
-					try
-					{
-						preloadCharacter(player2, prefixVocals);
-					}
-					catch (e:Dynamic)
-					{
-					}
+					threadsMax++;
+					try { preloadCharacter(player2, prefixVocals); } catch (e:Dynamic) {}
 					completedThread();
 					#end
 				}
 
-				if (!stageData.hide_girlfriend && gfVersion != player2 && gfVersion != player1)
+				if (stageData != null && !stageData.hide_girlfriend && gfVersion != player2 && gfVersion != player1)
 				{
 					#if (sys || MULTITHREADED_LOADING)
 					threadMutex.acquire();
-					#end
 					threadsMax++;
-					#if (sys || MULTITHREADED_LOADING)
 					threadMutex.release();
 
 					ThreadUtil.execAsync(() ->
 					{
-						try
-						{
-							preloadCharacter(gfVersion);
-						}
-						catch (e:Dynamic)
-						{
-						}
+						try { preloadCharacter(gfVersion); } catch (e:Dynamic) {}
 						completedThread();
 					});
 					#else
-					// HTML5: run synchronously
-					try
-					{
-						preloadCharacter(gfVersion);
-					}
-					catch (e:Dynamic)
-					{
-					}
+					threadsMax++;
+					try { preloadCharacter(gfVersion); } catch (e:Dynamic) {}
 					completedThread();
 					#end
 				}
 
-				// Final check for completion
 				#if (sys || MULTITHREADED_LOADING)
 				threadMutex.acquire();
 				#end
@@ -878,20 +855,24 @@ class LoadingState extends EditableState
 
 	public static function clearInvalids()
 	{
-		// This is called from the main thread before starting threads, so no mutex needed
 		clearInvalidFrom(imagesToPrepare, 'images', '.png', IMAGE);
 		clearInvalidFrom(soundsToPrepare, 'sounds', '.${Paths.SOUND_EXT}', SOUND);
 		clearInvalidFrom(musicToPrepare, 'music', ' .${Paths.SOUND_EXT}', SOUND);
 		clearInvalidFrom(songsToPrepare, 'songs', '.${Paths.SOUND_EXT}', SOUND, 'songs');
 
-		for (arr in [imagesToPrepare, soundsToPrepare, musicToPrepare, songsToPrepare])
-			while (arr.contains(null))
-				arr.remove(null);
+		for (i in 0...4)
+		{
+			var arr = [imagesToPrepare, soundsToPrepare, musicToPrepare, songsToPrepare][i];
+			// filter() returns a new array; assign back to the static field
+		}
+		imagesToPrepare = imagesToPrepare.filter(x -> x != null);
+		soundsToPrepare = soundsToPrepare.filter(x -> x != null);
+		musicToPrepare  = musicToPrepare.filter(x -> x != null);
+		songsToPrepare  = songsToPrepare.filter(x -> x != null);
 	}
 
 	static function clearInvalidFrom(arr:Array<String>, prefix:String, ext:String, type:AssetType, ?parentFolder:String = null)
 	{
-		// Process folder expansion before filtering - this is safe as it only reads
 		for (folder in arr.copy())
 		{
 			var nam:String = folder.trim();
@@ -914,7 +895,6 @@ class LoadingState extends EditableState
 			}
 		}
 
-		// Filter invalid entries - this modifies the array
 		var i:Int = 0;
 		while (i < arr.length)
 		{
@@ -926,7 +906,7 @@ class LoadingState extends EditableState
 			var doTrace:Bool = false;
 			if (member.endsWith('/') || (!Paths.fileExists(myKey, type, false, parentFolder) && (doTrace = true)))
 			{
-				arr.remove(member);
+				arr.splice(i, 1); // O(1) at known index, not O(n) scan
 				if (doTrace)
 					CoolLog.info('Removed invalid $prefix: $member');
 			}
@@ -948,7 +928,6 @@ class LoadingState extends EditableState
 		mutex.release();
 		#end
 
-		// then start threads
 		_threadFunc();
 	}
 
@@ -960,8 +939,6 @@ class LoadingState extends EditableState
 			initThread(() -> preloadSound('music/$music'), 'music $music');
 		for (song in songsToPrepare)
 			initThread(() -> preloadSound(song, 'songs', true, false), 'song $song');
-
-		// for images, they get to have their own thread
 		for (image in imagesToPrepare)
 			initThread(() -> preloadGraphic(image), 'image $image');
 	}
@@ -997,11 +974,9 @@ class LoadingState extends EditableState
 				CoolLog.error('ERROR! fail on preloading $traceData: $e');
 			}
 
-			// Use thread-safe increment
 			safeIncrementLoaded(traceData);
 		});
 		#else
-		// HTML5: run synchronously
 		try
 		{
 			if (func() != null)
@@ -1017,7 +992,6 @@ class LoadingState extends EditableState
 		{
 			CoolLog.error('ERROR! fail on preloading $traceData: $e');
 		}
-
 		safeIncrementLoaded(traceData);
 		#end
 	}
@@ -1051,9 +1025,7 @@ class LoadingState extends EditableState
 					arrayMutex.acquire();
 				#end
 				for (file in split)
-				{
 					imagesToPrepare.push(file.trim());
-				}
 				#if (sys || MULTITHREADED_LOADING)
 				if (arrayMutex != null)
 					arrayMutex.release();
@@ -1107,7 +1079,6 @@ class LoadingState extends EditableState
 		}
 	}
 
-	// thread safe sound loader
 	static function preloadSound(key:String, ?path:String, ?modsAllowed:Bool = true, ?beepOnNull:Bool = true):Null<Sound>
 	{
 		var file:String = Paths.getPath(Language.getFileTranslation(key) + '.${Paths.SOUND_EXT}', SOUND, path, modsAllowed);
@@ -1147,7 +1118,6 @@ class LoadingState extends EditableState
 		return Paths.currentTrackedSounds.get(file);
 	}
 
-	// thread safe graphic loader
 	static function preloadGraphic(key:String):Null<BitmapData>
 	{
 		try
@@ -1168,7 +1138,6 @@ class LoadingState extends EditableState
 					var bitmap:BitmapData = OpenFlAssets.getBitmapData(file, false);
 					#end
 
-					// Thread-safe storage
 					#if (sys || MULTITHREADED_LOADING)
 					if (mutex == null)
 						mutex = new Mutex();

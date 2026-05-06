@@ -55,12 +55,12 @@ jobs:
           #   lib-path: ~/haxelib
           #   setup-file: ./setup/unix.sh
 
-          # - os: windows-latest
-          #   target: android
-          #   artifact-name: androidBuild
-          #   export-path: export/release/android/bin/app/
-          #   lib-path: C:/haxelib
-          #   setup-file: ./setup/windows.ps1
+          - os: windows-latest
+            target: android
+            artifact-name: androidBuild
+            export-path: export/release/android/bin/app/
+            lib-path: C:/haxelib
+            setup-file: ./setup/windows.ps1
 
           # - os: macos-15
           #   target: tvos
@@ -89,11 +89,13 @@ jobs:
 
       - name: Install Android packages
         if: matrix.target == 'android'
+        shell: powershell
         run: |
           sdkmanager "platform-tools" `
-                     "platforms;android-19" `
-                     "build-tools;19.1.0" `
-                     "ndk;21.4.7075529"
+                     "platforms;android-33" `
+                     "build-tools;33.0.2" `
+                     "ndk;21.4.7075529" `
+                     "cmake;3.22.1"
 
       - name: Set up Java 11
         if: matrix.target == 'android'
