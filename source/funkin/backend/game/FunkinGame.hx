@@ -5,8 +5,9 @@ import flixel.FlxGame;
 #if CRASH_HANDLER
 import flixel.util.FlxSignal.FlxTypedSignal;
 import flixel.util.FlxSignal;
-import haxe.Exception;
 #end
+
+import haxe.Exception;
 
 final class FunkinGame extends FlxGame
 {
