@@ -53,6 +53,10 @@ class Paths
 		{
 			Paths.clearMemoryByName(key);
 		}
+
+		#if cpp
+		cpp.vm.Gc.run(true);
+		#end
 	}
 
 	// define the locally tracked assets

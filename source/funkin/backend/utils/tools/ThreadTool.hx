@@ -1,4 +1,4 @@
-package funkin.utils.tools;
+package funkin.backend.utils.tools;
 
 #if cpp
 @:headerCode('

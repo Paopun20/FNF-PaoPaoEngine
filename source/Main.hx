@@ -10,7 +10,7 @@ import flixel.graphics.FlxGraphic;
 import funkin.backend.Highscore;
 import funkin.frontend.huds.FPSCounter;
 import funkin.states.TitleState;
-import funkin.utils.ThreadUtil;
+import funkin.backend.utils.ThreadUtil;
 import haxe.io.Path;
 import lime.app.Application;
 import openfl.Assets;
@@ -27,7 +27,7 @@ import funkin.backend.ALSoftConfig; // Just to make sure DCE doesn't remove this
 #if CRASH_HANDLER
 import flixel.util.FlxSignal.FlxTypedSignal;
 import flixel.util.FlxSignal;
-import funkin.utils.macro.SourceMap;
+import funkin.backend.utils.macro.SourceMap;
 import haxe.CallStack;
 import haxe.Exception;
 import haxe.io.Path;
@@ -39,7 +39,7 @@ import sys.io.File;
 // Placeholder for crash debugger UI library
 #end
 import haxe.ds.StringMap;
-import funkin.utils.tools.ThreadTool;
+import funkin.backend.utils.tools.ThreadTool;
 #if hxhardware
 import hxhardware.CPU;
 import hxhardware.GPU;
@@ -55,6 +55,9 @@ import hxwindowmode.WindowColorMode;
 import hxvlc.util.Handle as VLCHandle;
 #end
 import funkin.backend.game.FunkinGame;
+#if cpp
+import funkin.backend.utils.HxSignalKill;
+#end
 
 /**
  * Error and crash handling system for PaoPaoEngine
@@ -278,17 +281,43 @@ class Main extends Sprite
 		});
 		#end
 
+		#if cpp
+		HxSignalKill.init();
+
+		HxSignalKill.onSIGTERM = HxSignalKill.onSIGINT = function()
+		{
+			CoolLog.info("Ctrl + C is kill me");
+			ClientPrefs.saveSettings();
+			#if DISCORD_ALLOWED
+			DiscordClient.shutdown();
+			#end
+			#if hxvlc
+			VLCHandle.dispose();
+			#end
+			Sys.exit(0);
+		};
+
+		#if !windows
+		HxSignalKill.onSIGHUP = function()
+		{
+			ClientPrefs.loadDefaultKeys();
+		};
+		#end
+		#end
+
 		Lib.current.addChild(new Main());
 
 		Lib.current.stage.window.onClose.add(onClose.dispatch);
 		onClose.add(function()
 		{
+			#if cpp
+			FlxG.signals.preUpdate.remove(HxSignalKill.updateSignal);
+			FlxG.signals.postUpdate.remove(HxSignalKill.dispatchPending);
+			#end
 			#if hxvlc
-			// Clean up VLC threads to prevent memory leaks.
 			VLCHandle.dispose();
 			CoolLog.init();
 			#end
-
 			ClientPrefs.saveSettings();
 		});
 
@@ -348,6 +377,11 @@ class Main extends Sprite
 		FlxG.keys.preventDefaultKeys = [TAB];
 		FlxG.mouse.useSystemCursor = true;
 
+		#if cpp
+		FlxG.signals.preUpdate.add(HxSignalKill.updateSignal);
+		FlxG.signals.postUpdate.add(HxSignalKill.dispatchPending);
+		#end
+
 		#if DISCORD_ALLOWED
 		DiscordClient.prepare();
 		#end
@@ -360,13 +394,9 @@ class Main extends Sprite
 		FlxG.signals.gameResized.add(function(w, h)
 		{
 			if (FlxG.cameras != null)
-			{
 				for (cam in FlxG.cameras.list)
-				{
 					if (cam != null && cam.filters != null)
 						resetSpriteCache(cam.flashSprite);
-				}
-			}
 
 			if (FlxG.game != null)
 				resetSpriteCache(FlxG.game);

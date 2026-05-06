@@ -1,5 +1,5 @@
 // https://github.com/CodenameCrew/CodenameEngine/blob/main/source/funkin/backend/utils/ThreadUtil.hx
-package funkin.utils;
+package funkin.backend.utils;
 
 #if (target.threaded)
 import sys.thread.Deque;

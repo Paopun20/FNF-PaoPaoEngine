@@ -1,19 +1,17 @@
 # Friday Night Funkin' - PaoPao Engine
 
 > [!WARNING]
-This engine is currently under heavy development, Mod API is not the same as **Psych Engine** mods, ya your cook bro
+> This engine is currently under heavy development, some API is not the same as **Psych Engine** mods, ya your cook bro
 
 PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/FunkinCrew/Funkin) Engine aimed at freedom of modding without source code, optimization, lightweight, cross-platform.
 
-## Features/Changes from the frok until 0.1.0 initial releases (maybe)
+## Features/Changes from the fork until 0.1.0 initial releases (maybe)
 
 - Python [**Beta**] - A Simple Version of Python for mod scripting
   > Work in progress, because some Python feature contracts are yet to be completed.\
   > Want to help? Submit a pull request on the [Hython GitHub repository](https://github.com/Paopun20/Hython).
-- Hscript (Improved and QOL) [**Beta**]
-  > Can use without `game.`\
-  > Use Own's Codename's HScript fork library, only add QOL.\
-  > It's too buggy like add/remove it not work...
+- Hscript (Improved)
+  > Use Own's Codename's HScript library
 - Optimize by Cache AST (HScript/Python only)
   > Cache AST (Abstract Syntax Tree)\
   > Reuse Cache AST
@@ -42,11 +40,15 @@ PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
 
 - New events:
   - Offset Timer
-  > Shifts the **displayed time** forward or backward in the Time UI. Supports tweening.\
-  > Does not affect `Conductor.songPosition`.
+    > Shifts the **displayed time** forward or backward in the Time UI. Supports tweening.\
+    > Does not affect `Conductor.songPosition`.
   - Offset End
-  > Shortens the **displayed song length** in the Time UI, making the bar fill up earlier.\
-  > Useful for fake endings. Does not affect `Conductor.songPosition` or `songLength`.
+    > Shortens the **displayed song length** in the Time UI, making the bar fill up earlier.\
+    > Useful for fake endings. Does not affect `Conductor.songPosition` or `songLength`.
+
+## About
+
+I'm not really into mobile support right now, but you should definitely check out this “mobile build.” It's a fun surprise: [Mobile Support](https://youtu.be/cSQTZoZPJzs)!
 
 ## Origin
 

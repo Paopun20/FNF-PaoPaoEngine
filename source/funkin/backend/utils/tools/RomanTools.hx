@@ -1,4 +1,4 @@
-package funkin.utils.tools;
+package funkin.backend.utils.tools;
 
 // unless code is unnecessarily verbose, it's more efficient to parse and generate Roman numerals
 // using a single master symbol table, rather than separate logic for subtractive notation, overlines

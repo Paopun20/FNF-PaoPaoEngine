@@ -1,4 +1,4 @@
-package funkin.utils.macro;
+package funkin.backend.utils.macro;
 
 #if macro
 import haxe.macro.*;

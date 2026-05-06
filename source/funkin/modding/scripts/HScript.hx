@@ -3,7 +3,7 @@ package funkin.modding.scripts;
 import funkin.modding.scripts.components.*;
 import funkin.modding.scripts.utils.LuaUtils;
 import funkin.objects.Character;
-import funkin.utils.PlatformDex;
+import funkin.backend.utils.PlatformDex;
 #if LUA_ALLOWED
 import funkin.modding.scripts.LuaScript;
 #end
@@ -18,7 +18,7 @@ import funkin.modding.scripts.utils.CacheScript;
 import funkin.modding.scripts.compatibility.StructureCompatibility;
 import funkin.objects.NoteSplash;
 import funkin.objects.StrumNote;
-import funkin.utils.NdllUtil;
+import funkin.backend.utils.NdllUtil;
 import hscript.Expr.Error as HscriptError;
 import hscript.Expr;
 import hscript.Interp;
@@ -26,18 +26,11 @@ import hscript.Parser;
 import hscript.Printer;
 import hscript.Tools;
 import flixel.FlxBasic;
+import funkin.modding.scripts.ScriptPack;
 
 using StringTools;
 
 typedef StringMap<T> = Map<String, T>;
-
-interface IHscriptInterface
-{
-	public var scriptName:String;
-	public function set(variable:String, data:Dynamic):Void;
-	public function call(func:String, ?args:Array<Dynamic>):Dynamic;
-	public function stop():Void;
-}
 
 class HScript extends Script
 {
@@ -464,6 +457,23 @@ class HScript extends Script
 		});
 	}
 
+	private function registerGlobalCallback()
+	{
+		if (scriptPack != null)
+		{
+			// Register every scripts except this
+			set("createGlobalCallback", function(name:String, func:Dynamic)
+			{
+				scriptPack.set(name, Reflect.makeVarArgs(function(args:Array<Dynamic>)
+				{
+					var functionRef = interp.variables.get(func);
+					var result = Reflect.callMethod(null, functionRef, args);
+					return result ?? LuaUtils.Function_Continue;
+				}), [this]);
+			});
+		}
+	}
+
 	private function registerModSettingBinding():Void
 	{
 		set('getModSetting', function(saveTag:String, ?modName:String = null)
@@ -514,18 +524,19 @@ class HScript extends Script
 
 		try
 		{
-			if (!hasFunction(func))
+			var functionRef = interp.variables.get(func);
+			if (functionRef == null || !Reflect.isFunction(functionRef))
 				return LuaUtils.Function_Continue;
 
-			var functionRef = interp.variables.get(func);
 			var result = Reflect.callMethod(null, functionRef, args);
 			return result ?? LuaUtils.Function_Continue;
 		}
 		catch (e:Dynamic)
 		{
-			// var stack = haxe.CallStack.toString(haxe.CallStack.exceptionStack(true));
-			CoolLog.error('HScript call error function $func: $e');
+			var stack = haxe.CallStack.toString(haxe.CallStack.exceptionStack(true));
+			CoolLog.error('HScript call error in $func: $e\n$stack');
 		}
+
 		return LuaUtils.Function_Continue;
 	}
 

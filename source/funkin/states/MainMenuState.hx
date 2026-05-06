@@ -15,7 +15,7 @@ enum MainMenuColumn
 	RIGHT;
 }
 
-@:build(funkin.utils.macro.VersionMacro.build())
+@:build(funkin.backend.utils.macro.VersionMacro.build())
 class MainMenuState extends EditableState
 {
 	public static var psychEngineVersion:String = '1.0.4'; // This is also used legacy mods from Psych Engine

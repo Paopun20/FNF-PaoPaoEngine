@@ -1,15 +1,15 @@
-package funkin.utils;
+package funkin.backend.utils;
 
 import haxe.Log;
 import haxe.PosInfos;
 import haxe.format.JsonPrinter;
-import funkin.utils.AnsiUtil;
-import funkin.utils.AnsiUtil.AnsiCode;
+import funkin.backend.utils.AnsiUtil;
+import funkin.backend.utils.AnsiUtil.AnsiCode;
 
 using StringTools;
 using PPQolTools;
 
-enum Level
+private enum Level
 {
 	DEBUG;
 	INFO;

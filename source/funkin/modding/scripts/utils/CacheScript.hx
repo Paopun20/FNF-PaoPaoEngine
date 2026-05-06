@@ -1,24 +1,25 @@
 package funkin.modding.scripts.utils;
 
-import haxe.Constraints.NotVoid;
 import haxe.ds.StringMap;
 import hscript.Expr;
 import hscript.Parser;
-import paopao.hython.VM;
-import paopao.hython.Bytecode;
+import paopao.hython.Expr as PyExpr;
+import paopao.hython.Parser as PyParser;
 import haxe.crypto.Sha256;
 import haxe.io.Bytes;
 
 enum CacheType
 {
-	HSCRIPT();
-	PYTHON();
+	HSCRIPT;
+	PYTHON;
 }
 
+@:nullSafety(Strict)
+@:analyzer(optimize, local_dce, fusion, user_var_fusion)
 class CacheScript
 {
 	private static var hscriptCache:StringMap<Expr> = new StringMap<Expr>();
-	private static var pythonCache:StringMap<CodeObject> = new StringMap<CodeObject>();
+	private static var pythonCache:StringMap<PyExpr> = new StringMap<PyExpr>();
 
 	public static function exists(key:String, type:CacheType):Bool
 	{
@@ -29,12 +30,15 @@ class CacheScript
 		}
 	}
 
-	public static function get(key:String, type:CacheType):NotVoid
+	public static function get(key:String, type:CacheType):Dynamic
 	{
 		return switch (type)
 		{
-			case HSCRIPT: hscriptCache.get(key);
-			case PYTHON: pythonCache.get(key);
+			case HSCRIPT:
+				hscriptCache.exists(key) ? hscriptCache.get(key) : null;
+
+			case PYTHON:
+				pythonCache.exists(key) ? pythonCache.get(key) : null;
 		}
 	}
 
@@ -44,6 +48,7 @@ class CacheScript
 		{
 			case HSCRIPT:
 				hscriptCache.set(key, cast expr);
+
 			case PYTHON:
 				pythonCache.set(key, cast expr);
 		}
@@ -67,6 +72,7 @@ class CacheScript
 	}
 }
 
+@:nullSafety(Strict)
 class CacheParser
 {
 	public static function parse(code:String, type:CacheType, ?origin:String):Dynamic
@@ -74,17 +80,15 @@ class CacheParser
 		return switch (type)
 		{
 			case HSCRIPT:
-				(() ->
-				{
-					var p = new Parser();
-					p.allowJSON = true;
-					p.allowMetadata = true;
-					p.allowTypes = true;
-					return p;
-				})().parseString(code, origin);
+				var p = new Parser();
+				p.allowJSON = true;
+				p.allowMetadata = true;
+				p.allowTypes = true;
+				p.parseString(code, origin);
 
 			case PYTHON:
-				VM.compileSource(code);
+				var p = new PyParser();
+				p.parseString(code);
 		}
 	}
 }

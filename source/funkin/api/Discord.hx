@@ -11,7 +11,7 @@ import funkin.modding.scripts.Python;
 #end
 import Main;
 
-@:build(funkin.utils.macro.EnvironmentMacro.build())
+@:build(funkin.backend.utils.macro.EnvironmentMacro.build())
 class DiscordClient
 {
 	@:env("DISCORD_RPC_ID", {
@@ -94,7 +94,7 @@ class DiscordClient
 		discordPresence = new DiscordRichPresence();
 		discordPresence.type = DiscordActivityType_Playing;
 
-		button1 = new DiscordButton(); // ← assign to static fields, not locals
+		button1 = new DiscordButton();
 		button2 = new DiscordButton();
 
 		button1.label = "Download";
@@ -148,6 +148,9 @@ class DiscordClient
 
 	public static function updatePresence()
 	{
+		discordPresence.buttons[0] = button1;
+		discordPresence.buttons[1] = button2;
+
 		Discord.UpdatePresence(cpp.RawConstPointer.addressOf(discordPresence));
 	}
 

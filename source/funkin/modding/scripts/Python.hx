@@ -6,7 +6,6 @@ import flixel.FlxObject;
 import flixel.FlxState;
 import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.input.keyboard.FlxKey;
-import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import funkin.backend.Highscore;
 import funkin.backend.Song;
 import funkin.backend.WeekData;
@@ -28,14 +27,13 @@ import funkin.states.MainMenuState;
 import funkin.states.StoryMenuState;
 import funkin.substates.GameOverSubstate;
 import funkin.substates.PauseSubState;
-import funkin.utils.NdllUtil;
+import funkin.backend.utils.NdllUtil;
 import haxe.Json;
 import openfl.Lib;
 import openfl.display.BitmapData;
 import openfl.utils.Assets;
 import paopao.hython.Expr as PyExpr;
 import paopao.hython.Error.Error as PyError;
-import paopao.hython.Interp as PyInterp;
 import paopao.hython.Parser as PyParser;
 import paopao.hython.Printer as PyPrinter;
 #if (!flash && sys)
@@ -48,7 +46,57 @@ import funkin.modding.scripts.HScript;
 import funkin.modding.scripts.LuaScript;
 #end
 
-class Python extends Script implements IFlxDestroyable
+class PyInterp extends paopao.hython.Interp
+{
+	public var parent:Dynamic;
+	// even if they can't be created, it's still nice to be able to get them
+	public var pubVars:Map<String, Dynamic> = [];
+	public var staVars:Map<String, Dynamic> = [];
+
+	override function resetVariables():Void
+	{
+		super.resetVariables();
+		pubVars = [];
+		staVars = [];
+		parent = null;
+	}
+
+	override function resolve(id:String):Dynamic
+	{
+		var v = variables.get(id);
+		if (v == null && !variables.exists(id))
+		{
+			if (allowClassResolve)
+			{
+				var c = Type.resolveClass(id);
+				if (c != null)
+				{
+					return Reflect.makeVarArgs(function(args:Array<Dynamic>)
+					{
+						return Type.createInstance(c, args);
+					});
+				}
+			}
+
+			if (parent != null)
+				return Reflect.getProperty(parent, id);
+
+			if (v == null)
+			{
+				if (staVars.exists(id))
+					return staVars.get(id);
+				if (pubVars.exists(id))
+					return pubVars.get(id);
+			}
+
+			if (v == null)
+				error(EUnknownVariable(id));
+		}
+		return v;
+	}
+}
+
+class Python extends Script
 {
 	public var parser:PyParser;
 	public var printer:PyPrinter;
@@ -68,6 +116,12 @@ class Python extends Script implements IFlxDestroyable
 	#end
 
 	public static var customFunctions:Map<String, Dynamic> = new Map<String, Dynamic>();
+
+	override function set_parent(value:Dynamic):Dynamic
+		return interp.parent = value;
+
+	override function get_parent():Dynamic
+		return interp.parent;
 
 	public override function new(?file:String = '', ?varsToBring:Any = null)
 	{
@@ -93,7 +147,8 @@ class Python extends Script implements IFlxDestroyable
 			CacheScript.clear(CacheType.PYTHON);
 	}
 
-	public override function execute() {
+	public override function execute()
+	{
 		if (origin != null && origin.length > 0)
 		{
 			var code:String = null;
@@ -365,7 +420,7 @@ class Python extends Script implements IFlxDestroyable
 		{
 			var runningScripts:Array<String> = [];
 			#if PYTHON_ALLOWED
-			for (script in game.scriptPack.scripts)
+			for (script in scriptPack.scripts)
 			{
 				if (Std.isOfType(script, Python))
 				{

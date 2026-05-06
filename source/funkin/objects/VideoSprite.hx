@@ -1,10 +1,11 @@
 package funkin.objects;
 
-import funkin.utils.ThreadUtil;
+import funkin.backend.utils.ThreadUtil;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.addons.display.FlxBackdrop;
 import flixel.addons.display.FlxPieDial;
+import openfl.system.System;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxMath;
 import flixel.text.FlxText;
@@ -480,6 +481,7 @@ class VideoSprite extends FlxSpriteGroup
 		destroyVisuals();
 
 		super.destroy();
+		System.gc();
 	}
 
 	inline function clearCallbacks()

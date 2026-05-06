@@ -19,6 +19,7 @@ typedef LuaTweenOptions =
 	ease:EaseFunction
 }
 
+@:analyzer(optimize, local_dce, fusion, user_var_fusion)
 class LuaUtils
 {
 	public static final Function_Stop:String = "##SCRIPTENGINE_FUNCTIONSTOP";
@@ -47,16 +48,18 @@ class LuaUtils
 		} : null;
 	}
 
-	public static function getHScriptScriptObject() {
+	public static function getHScriptScriptObject()
+	{
 		return (FlxG.state.subState == null ? FlxG.state : FlxG.state.subState);
 	}
-	
+
 	public static function resolveClass(className:String):Class<Dynamic>
 	{
 		return StructureCompatibility.resolveClass(className);
 	}
 
-	public static inline function isPlayStateScript(obj:Dynamic):Bool {
+	public static inline function isPlayStateScript(obj:Dynamic):Bool
+	{
 		return (obj is PlayState && !(obj is flixel.FlxSubState));
 	}
 
@@ -474,26 +477,6 @@ class LuaUtils
 		return "tvos";
 		#elseif html5
 		return "browser";
-		#elseif flash
-		return "flash";
-		#elseif nodejs
-		return "nodejs";
-		#elseif hxcpp
-		return "cpp";
-		#elseif cs
-		return "csharp";
-		#elseif java
-		return "java";
-		#elseif python
-		return "python";
-		#elseif lua
-		return "lua";
-		#elseif hl
-		return "hashlink";
-		#elseif neko
-		return "neko";
-		#elseif php
-		return "php";
 		#elseif switch
 		return "switch";
 		#else
@@ -518,83 +501,20 @@ class LuaUtils
 		return FlxTweenType.ONESHOT;
 	}
 
-	public static function getTweenEaseByString(?ease:String = '')
+	public static function getTweenEaseByString(?ease:String = ''):EaseFunction
 	{
-		switch (ease.toLowerCase().trim())
+		ease = ease.trim().toLowerCase();
+
+		for (field in Reflect.fields(FlxEase))
 		{
-			case 'backin':
-				return FlxEase.backIn;
-			case 'backinout':
-				return FlxEase.backInOut;
-			case 'backout':
-				return FlxEase.backOut;
-			case 'bouncein':
-				return FlxEase.bounceIn;
-			case 'bounceinout':
-				return FlxEase.bounceInOut;
-			case 'bounceout':
-				return FlxEase.bounceOut;
-			case 'circin':
-				return FlxEase.circIn;
-			case 'circinout':
-				return FlxEase.circInOut;
-			case 'circout':
-				return FlxEase.circOut;
-			case 'cubein':
-				return FlxEase.cubeIn;
-			case 'cubeinout':
-				return FlxEase.cubeInOut;
-			case 'cubeout':
-				return FlxEase.cubeOut;
-			case 'elasticin':
-				return FlxEase.elasticIn;
-			case 'elasticinout':
-				return FlxEase.elasticInOut;
-			case 'elasticout':
-				return FlxEase.elasticOut;
-			case 'expoin':
-				return FlxEase.expoIn;
-			case 'expoinout':
-				return FlxEase.expoInOut;
-			case 'expoout':
-				return FlxEase.expoOut;
-			case 'quadin':
-				return FlxEase.quadIn;
-			case 'quadinout':
-				return FlxEase.quadInOut;
-			case 'quadout':
-				return FlxEase.quadOut;
-			case 'quartin':
-				return FlxEase.quartIn;
-			case 'quartinout':
-				return FlxEase.quartInOut;
-			case 'quartout':
-				return FlxEase.quartOut;
-			case 'quintin':
-				return FlxEase.quintIn;
-			case 'quintinout':
-				return FlxEase.quintInOut;
-			case 'quintout':
-				return FlxEase.quintOut;
-			case 'sinein':
-				return FlxEase.sineIn;
-			case 'sineinout':
-				return FlxEase.sineInOut;
-			case 'sineout':
-				return FlxEase.sineOut;
-			case 'smoothstepin':
-				return FlxEase.smoothStepIn;
-			case 'smoothstepinout':
-				return FlxEase.smoothStepInOut;
-			case 'smoothstepout':
-				return FlxEase.smoothStepOut;
-			case 'smootherstepin':
-				return FlxEase.smootherStepIn;
-			case 'smootherstepinout':
-				return FlxEase.smootherStepInOut;
-			case 'smootherstepout':
-				return FlxEase.smootherStepOut;
+			if (field.toLowerCase() == ease)
+			{
+				var func = Reflect.getProperty(FlxEase, field);
+				if (Reflect.isFunction(func))
+					return func;
+			}
 		}
+
 		return FlxEase.linear;
 	}
 

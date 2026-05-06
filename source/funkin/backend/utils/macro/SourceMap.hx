@@ -1,10 +1,12 @@
-package funkin.utils.macro;
+package funkin.backend.utils.macro;
 
 import haxe.ds.StringMap;
 import sys.FileSystem;
 #if macro
 import haxe.macro.Context;
 import haxe.macro.Expr;
+import sys.io.File;
+import sys.io.Process;
 
 using StringTools;
 #end
@@ -53,7 +55,7 @@ final class SourceMap
 			return [FileSystem.absolutePath("./source")];
 		}
 
-		var content = sys.io.File.getContent(xmlPath);
+		var content = File.getContent(xmlPath);
 		var xml = try Xml.parse(content) catch (e:Dynamic)
 		{
 			Context.warning('SourceMap: Failed to parse Project.xml: $e', Context.currentPos());
@@ -110,7 +112,7 @@ final class SourceMap
 
 		try
 		{
-			var proc = new sys.io.Process("haxelib", ["path", libArg]);
+			var proc = new Process("haxelib", ["path", libArg]);
 			var output = proc.stdout.readAll().toString();
 			var exitCode = proc.exitCode();
 			proc.close();
@@ -178,7 +180,7 @@ final class SourceMap
 			else if (file.endsWith(".hx"))
 			{
 				var key = full.substr(base.length + 1).replace("\\", "/");
-				var content = try sys.io.File.getContent(full) catch (e:Dynamic) continue;
+				var content = try File.getContent(full) catch (e:Dynamic) continue;
 				exprs.push(macro __sourceMap.set($v{key}, ${splitString(content)}));
 			}
 		}

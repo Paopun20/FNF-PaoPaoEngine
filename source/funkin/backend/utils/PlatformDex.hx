@@ -1,4 +1,4 @@
-package funkin.utils;
+package funkin.backend.utils;
 
 #if windows
 @:cppFileCode('

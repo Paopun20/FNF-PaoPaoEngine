@@ -18,7 +18,7 @@ import funkin.backend.Song;
 import funkin.backend.StageData;
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;
-import funkin.utils.ThreadUtil;
+import funkin.backend.utils.ThreadUtil;
 import Random;
 #if (js && nodejs)
 import js.node.Os;

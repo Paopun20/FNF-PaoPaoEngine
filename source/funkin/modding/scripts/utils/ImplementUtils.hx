@@ -10,6 +10,7 @@ import funkin.modding.scripts.Python;
 #end
 import funkin.states.PlayState;
 
+@:analyzer(optimize, local_dce, fusion, user_var_fusion)
 class ImplementUtils
 {
 	public static function make(interpreter:Dynamic):(String, Dynamic) -> Null<Dynamic>

@@ -45,6 +45,37 @@ class PPQolTools
 	public static inline function toInt(v:Float):Int
 		return Std.int(v);
 
+	public static inline function roundTo(v:Float, decimals:Int):Float
+	{
+		var f = Math.pow(10, decimals);
+		return Math.round(v * f) / f;
+	}
+
+	// Ping-pong: great for oscillating effects
+	public static inline function pingPong(v:Float, length:Float):Float
+	{
+		v = v % (length * 2);
+		return v > length ? length * 2 - v : v;
+	}
+
+	public static inline function randomRange(min:Float, max:Float):Float
+		return min + Math.random() * (max - min);
+
+	// Useful for proc-gen / loot rolls
+	public static inline function chance(percent:Float):Bool
+		return Math.random() * 100 < percent;
+
+	// Int wrap
+	public static inline function wrap(v:Int, min:Int, max:Int):Int
+	{
+		var range = max - min + 1;
+		return ((v - min) % range + range) % range + min;
+	}
+
+	// quick random int
+	public static inline function randomInt(min:Int, max:Int):Int
+		return min + Std.int(Math.random() * (max - min + 1));
+
 	// Int extensions
 	// myInt.inRange(0, 10)
 
@@ -223,6 +254,22 @@ class PPQolTools
 		return spr;
 	}
 
+	// Repeating pulse — good for UI "press me" hints
+	public static inline function pulse(spr:FlxSprite, scale:Float = 1.1, dur:Float = 0.4):FlxTween
+		return FlxTween.tween(spr.scale, {x: scale, y: scale}, dur, {
+			ease: FlxEase.sineInOut,
+			type: FlxTweenType.PINGPONG
+		});
+
+	// Color flash — hit flash, pickups, etc.
+	public static function flash(spr:FlxSprite, color:FlxColor = FlxColor.WHITE, dur:Float = 0.1):Void
+	{
+		spr.color = color;
+		FlxTween.color(spr, dur, color, FlxColor.WHITE, {
+			onComplete: _ -> spr.color = FlxColor.WHITE
+		});
+	}
+
 	// FlxPoint extensions
 	// myPoint.distanceTo(other)
 
@@ -234,4 +281,16 @@ class PPQolTools
 
 	public static inline function lerpTo(a:FlxPoint, b:FlxPoint, t:Float):FlxPoint
 		return FlxPoint.get(lerp(a.x, b.x, t), lerp(a.y, b.y, t));
+
+	public static inline function angleTo(a:FlxPoint, b:FlxPoint):Float
+		return Math.atan2(b.y - a.y, b.x - a.x) * (180 / Math.PI);
+
+	public static inline function normalize(p:FlxPoint):FlxPoint
+	{
+		var len = Math.sqrt(p.x * p.x + p.y * p.y);
+		return len > 0 ? FlxPoint.get(p.x / len, p.y / len) : FlxPoint.get(0, 0);
+	}
+
+	public static inline function dot(a:FlxPoint, b:FlxPoint):Float
+		return a.x * b.x + a.y * b.y;
 }

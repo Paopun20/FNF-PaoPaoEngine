@@ -1,4 +1,4 @@
-package funkin.utils;
+package funkin.backend.utils;
 
 import thx.semver.Version as SemVer;
 

@@ -1,4 +1,4 @@
-package funkin.utils;
+package funkin.backend.utils;
 
 #if sys
 import sys.FileSystem;
@@ -6,7 +6,7 @@ import sys.FileSystem;
 import funkin.modding.scripts.utils.LuaUtils;
 #if NDLL_ALLOWED
 import lime.system.CFFI;
-import funkin.utils.macro.MacroUtil;
+import funkin.backend.utils.macro.MacroUtil;
 #end
 
 @:keep

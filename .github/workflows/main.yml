@@ -76,8 +76,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.7
       - uses: xom9ikk/dotenv@v2.3.0
-          
-      - uses: HaxeFoundation/setup-haxe@v2
+        with:
+          path: .env
+          load-mode: skip # sets whether the program should fail when the .env file is not present (strict) or continue (skip)
+      - uses: HaxeFoundation/setup-haxe@v2.0.3
         with:
           haxe-version: 4.3.7
 
@@ -115,12 +117,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-haxelib-
 
-      - name: Install Haxelib (Unix)
-        if: runner.os != 'Windows'
+      - name: Setup Haxelib
         run: |
           haxelib setup ${{ matrix.lib-path }}
           haxelib --global update haxelib
           haxelib fixrepo
+
+      - name: Install Haxelib (Unix)
+        if: runner.os != 'Windows'
+        run: |
           chmod +x ${{ matrix.setup-file }}
           sh ${{ matrix.setup-file }}
 
@@ -128,9 +133,6 @@ jobs:
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          haxelib setup ${{ matrix.lib-path }}
-          haxelib --global update haxelib
-          haxelib fixrepo
           . ${{ matrix.setup-file }}
 
       - name: Skip SScript setup mode (Unix)
@@ -236,7 +238,7 @@ jobs:
           tag_name: nightly
           name: "Development Release"
           body: |
-            This is a nightly build of **PaoPao Engine** for commit ${{ github.sha }}.
+            This is a nightly build of **PaoPao Engine** for commit ${{ github.sha }} from ${{ github.ref_name }}.
 
             This is a development release of **PaoPao Engine**. It is not recommended for production use.
 
