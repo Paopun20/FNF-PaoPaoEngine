@@ -234,10 +234,8 @@ class Main extends Sprite {
 		#end
 
 		#if hxvlc
-		VLCHandle.init(#if (hxvlc >= "1.8.0") ['--no-lua'] #end);
-
 		// Initialize hxvlc's Handle here so the videos are loading faster.
-		VLCHandle.initAsync(function(success:Bool):Void {
+		VLCHandle.initAsync(#if (hxvlc >= "1.8.0") ['--no-lua'] #end, function(success:Bool):Void {
 			if (success) {
 				CoolLog.info('HXVLC has LibVLC instance initialized!');
 			} else {

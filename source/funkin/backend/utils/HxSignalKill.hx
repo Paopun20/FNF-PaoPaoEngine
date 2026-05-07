@@ -39,7 +39,7 @@ class HxSignalKill {
 	static var _pendingSignals:Array<Int> = [];
 	static var _pendingMutex:Mutex = new Mutex();
 
-	// Callbacks
+	// Callbacks Signals
 	public static var onSIGINT:() -> Void = null;
 	public static var onSIGTERM:() -> Void = null;
 

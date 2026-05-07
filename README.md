@@ -49,6 +49,13 @@ PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
     > Shortens the **displayed song length** in the Time UI, making the bar fill up earlier.\
     > Useful for fake endings. Does not affect `Conductor.songPosition` or `songLength`.
 
+## Mod Scripting You can use for now
+
+- Lua
+- Hscript
+- Python
+- NxScript
+
 ## About
 
 I'm not really into mobile support right now, but you should definitely check out this “mobile build.” It's a fun surprise: [Mobile Support](https://youtu.be/cSQTZoZPJzs)!
