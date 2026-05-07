@@ -3,34 +3,27 @@ package funkin.states.stages.objects;
 import funkin.objects.Note;
 import funkin.objects.Character;
 
-class DarnellBlazinHandler
-{
-	public function new()
-	{
-	}
+class DarnellBlazinHandler {
+	public function new() {}
 
 	var cantUppercut:Bool = false;
 
-	public function noteHit(note:Note)
-	{
+	public function noteHit(note:Note) {
 		// SPECIAL CASE: If Pico hits a poor note at low health (at 30% chance),
 		// Darnell may duck below Pico's punch to attempt an uppercut.
 		// TODO: Maybe add a cooldown to this?
-		if (wasNoteHitPoorly(note.rating) && isPlayerLowHealth() && FlxG.random.bool(30))
-		{
+		if (wasNoteHitPoorly(note.rating) && isPlayerLowHealth() && FlxG.random.bool(30)) {
 			playUppercutPrepAnim();
 			return;
 		}
 
-		if (cantUppercut)
-		{
+		if (cantUppercut) {
 			playPunchHighAnim();
 			return;
 		}
 
 		// Override the hit note animation.
-		switch (note.noteType)
-		{
+		switch (note.noteType) {
 			case "weekend-1-punchlow":
 				playHitLowAnim();
 			case "weekend-1-punchlowblocked":
@@ -101,30 +94,25 @@ class DarnellBlazinHandler
 		cantUppercut = false;
 	}
 
-	public function noteMiss(note:Note)
-	{
+	public function noteMiss(note:Note) {
 		// SPECIAL CASE: Darnell prepared to uppercut last time and Pico missed! FINISH HIM!
-		if (dad.getAnimationName() == 'uppercutPrep')
-		{
+		if (dad.getAnimationName() == 'uppercutPrep') {
 			playUppercutAnim();
 			return;
 		}
 
-		if (willMissBeLethal())
-		{
+		if (willMissBeLethal()) {
 			playPunchLowAnim();
 			return;
 		}
 
-		if (cantUppercut)
-		{
+		if (cantUppercut) {
 			playPunchHighAnim();
 			return;
 		}
 
 		// Override the hit note animation.
-		switch (note.noteType)
-		{
+		switch (note.noteType) {
 			// Pico tried and failed to punch, punch back!
 			case "weekend-1-punchlow":
 				playPunchLowAnim();
@@ -196,12 +184,10 @@ class DarnellBlazinHandler
 		cantUppercut = false;
 	}
 
-	public function noteMissPress(direction:Int)
-	{
+	public function noteMissPress(direction:Int) {
 		if (willMissBeLethal())
 			playPunchLowAnim(); // Darnell alternates a punch so that Pico dies.
-		else
-		{
+		else {
 			// Pico wildly throws punches but Darnell alternates between dodges and blocks.
 			var shouldDodge = FlxG.random.bool(50); // 50/50.
 			if (shouldDodge)
@@ -213,125 +199,105 @@ class DarnellBlazinHandler
 
 	var alternate:Bool = false;
 
-	function doAlternate():String
-	{
+	function doAlternate():String {
 		alternate = !alternate;
 		return alternate ? '1' : '2';
 	}
 
-	function playBlockAnim()
-	{
+	function playBlockAnim() {
 		dad.playAnim('block', true);
 		PlayState.instance.camGame.shake(0.002, 0.1);
 		moveToBack();
 	}
 
-	function playCringeAnim()
-	{
+	function playCringeAnim() {
 		dad.playAnim('cringe', true);
 		moveToBack();
 	}
 
-	function playDodgeAnim()
-	{
+	function playDodgeAnim() {
 		dad.playAnim('dodge', true, false);
 		moveToBack();
 	}
 
-	function playIdleAnim()
-	{
+	function playIdleAnim() {
 		dad.playAnim('idle', false);
 		moveToBack();
 	}
 
-	function playFakeoutAnim()
-	{
+	function playFakeoutAnim() {
 		dad.playAnim('fakeout', true);
 		moveToBack();
 	}
 
-	function playPissedConditionalAnim()
-	{
+	function playPissedConditionalAnim() {
 		if (dad.getAnimationName() == "cringe")
 			playPissedAnim();
 		else
 			playIdleAnim();
 	}
 
-	function playPissedAnim()
-	{
+	function playPissedAnim() {
 		dad.playAnim('pissed', true);
 		moveToBack();
 	}
 
-	function playUppercutPrepAnim()
-	{
+	function playUppercutPrepAnim() {
 		dad.playAnim('uppercutPrep', true);
 		moveToFront();
 	}
 
-	function playUppercutAnim()
-	{
+	function playUppercutAnim() {
 		dad.playAnim('uppercut', true);
 		moveToFront();
 	}
 
-	function playUppercutHitAnim()
-	{
+	function playUppercutHitAnim() {
 		dad.playAnim('uppercutHit', true);
 		moveToBack();
 	}
 
-	function playHitHighAnim()
-	{
+	function playHitHighAnim() {
 		dad.playAnim('hitHigh', true);
 		PlayState.instance.camGame.shake(0.0025, 0.15);
 		moveToBack();
 	}
 
-	function playHitLowAnim()
-	{
+	function playHitLowAnim() {
 		dad.playAnim('hitLow', true);
 		PlayState.instance.camGame.shake(0.0025, 0.15);
 		moveToBack();
 	}
 
-	function playPunchHighAnim()
-	{
+	function playPunchHighAnim() {
 		dad.playAnim('punchHigh' + doAlternate(), true);
 		moveToFront();
 	}
 
-	function playPunchLowAnim()
-	{
+	function playPunchLowAnim() {
 		dad.playAnim('punchLow' + doAlternate(), true);
 		moveToFront();
 	}
 
-	function playSpinAnim()
-	{
+	function playSpinAnim() {
 		dad.playAnim('hitSpin', true);
 		PlayState.instance.camGame.shake(0.0025, 0.15);
 		moveToBack();
 	}
 
-	function willMissBeLethal()
-	{
+	function willMissBeLethal() {
 		return PlayState.instance.health <= 0.0 && !PlayState.instance.practiceMode;
 	}
 
-	function wasNoteHitPoorly(rating:String)
-	{
+	function wasNoteHitPoorly(rating:String) {
 		return (rating == "bad" || rating == "shit");
 	}
 
-	function isPlayerLowHealth()
-	{
+	function isPlayerLowHealth() {
 		return PlayState.instance.health <= 0.3 * 2;
 	}
 
-	function moveToBack()
-	{
+	function moveToBack() {
 		var dadPos:Int = FlxG.state.members.indexOf(dadGroup);
 		var bfPos:Int = FlxG.state.members.indexOf(boyfriendGroup);
 		if (dadPos < bfPos)
@@ -341,8 +307,7 @@ class DarnellBlazinHandler
 		FlxG.state.members[dadPos] = boyfriendGroup;
 	}
 
-	function moveToFront()
-	{
+	function moveToFront() {
 		var dadPos:Int = FlxG.state.members.indexOf(dadGroup);
 		var bfPos:Int = FlxG.state.members.indexOf(boyfriendGroup);
 		if (dadPos > bfPos)

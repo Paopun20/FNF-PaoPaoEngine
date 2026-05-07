@@ -17,8 +17,7 @@ import openfl.Assets;
 /**
  * @author Lars Doucet
  */
-class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFlxUIWidget
-{
+class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFlxUIWidget {
 	private static var bitmapsCreated:Int = 0; // for debug
 
 	private var _bmpCanvas:BitmapData;
@@ -79,8 +78,7 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 	 */
 	public function new(X:Float, Y:Float, Graphic:Dynamic, Rect:Rectangle, Slice9:Array<Int> = null, Tile:Int = TILE_NONE, Smooth:Bool = false,
 			Id:String = "", Ratio:Float = -1, Resize_point = null, Resize_axis:Int = FlxUISprite.RESIZE_RATIO_Y, DeferResize:Bool = false,
-			Color:FlxColor = FlxColor.WHITE)
-	{
+			Color:FlxColor = FlxColor.WHITE) {
 		super(X, Y, null);
 		color = Color;
 		_slice9 = Slice9;
@@ -89,23 +87,17 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 
 		_asset_id = "";
 
-		if (Graphic == null)
-		{
+		if (Graphic == null) {
 			Graphic = FlxUIAssets.IMG_CHROME;
 		}
 
-		if ((Graphic is String))
-		{
+		if ((Graphic is String)) {
 			_asset_id = Graphic;
 			_raw_pixels = null;
-		}
-		else if ((Graphic is BitmapData))
-		{
+		} else if ((Graphic is BitmapData)) {
 			_asset_id = Id;
 			_raw_pixels = cast Graphic;
-		}
-		else if ((Graphic is FlxGraphic))
-		{
+		} else if ((Graphic is FlxGraphic)) {
 			var fg:FlxGraphic = cast Graphic;
 			_asset_id = fg.key;
 			_raw_pixels = fg.bitmap;
@@ -113,37 +105,29 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 
 		resize_ratio = Ratio;
 		resize_ratio_axis = Resize_axis;
-		if (Resize_point != null)
-		{
+		if (Resize_point != null) {
 			resize_point = Resize_point;
 		}
 
-		if (DeferResize)
-		{
+		if (DeferResize) {
 			var pt = U.applyResize(resize_ratio, resize_ratio_axis, Rect.width, Rect.height);
 			width = pt.x;
 			height = pt.y;
-		}
-		else
-		{
+		} else {
 			resize(Rect.width, Rect.height);
 		}
 	}
 
-	public override function destroy():Void
-	{
+	public override function destroy():Void {
 		noLongerUsingCachedID(paintScale9_id);
 		super.destroy();
 	}
 
-	public override function resize(w:Float, h:Float):Void
-	{
-		if (Std.int(w) < 1)
-		{
+	public override function resize(w:Float, h:Float):Void {
+		if (Std.int(w) < 1) {
 			w = 1;
 		}
-		if (Std.int(h) < 1)
-		{
+		if (Std.int(h) < 1) {
 			h = 1;
 		}
 
@@ -158,8 +142,7 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 		var iw = Std.int(pt.x);
 		var ih = Std.int(pt.y);
 
-		if (_slice9 == null || _slice9 == [])
-		{
+		if (_slice9 == null || _slice9 == []) {
 			_slice9 = [4, 4, 7, 7];
 		}
 
@@ -167,13 +150,10 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 		var key:String = _asset_id + "_" + _slice9.join(",") + "_" + iw + "x" + ih + "_" + _tile + "_" + _smooth;
 
 		// check if something just like this already exists
-		if (FlxG.bitmap.checkCache(key))
-		{
+		if (FlxG.bitmap.checkCache(key)) {
 			// just load the old one
 			loadGraphic(key, false, iw, ih);
-		}
-		else
-		{
+		} else {
 			// make a fresh one
 			var bmpCanvas = new BitmapData(Std.int(w), Std.int(h));
 			_staticFlxRect.x = 0;
@@ -187,8 +167,7 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 			var newID:String = makePaintScale9Id(_asset_id, _slice9, _staticFlxRect);
 
 			// if it's different
-			if (newID != oldID)
-			{
+			if (newID != oldID) {
 				// redraw the image and get the new identifier
 				paintScale9_id = paintScale9(bmpCanvas, _asset_id, _slice9, _staticFlxRect, _tile, _smooth, _raw_pixels);
 
@@ -205,8 +184,7 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 		var diff_w:Float = width - old_width;
 		var diff_h:Float = height - old_height;
 
-		if (resize_point != null)
-		{
+		if (resize_point != null) {
 			var delta_x:Float = diff_w * resize_point.x;
 			var delta_y:Float = diff_h * resize_point.y;
 			x -= delta_x;
@@ -214,34 +192,28 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 		}
 	}
 
-	private function noLongerUsingCachedID(id:String):Void
-	{
+	private function noLongerUsingCachedID(id:String):Void {
 		// see if the old configuration exists
-		if (cacheCounter.exists(id))
-		{
+		if (cacheCounter.exists(id)) {
 			// if so, subtract a use from the old configuration
 			var oldCounter = cacheCounter.get(id);
 			oldCounter.useCount--;
 
 			// if the use count reaches zero, purge the cached sections
-			if (oldCounter.useCount <= 0)
-			{
+			if (oldCounter.useCount <= 0) {
 				purgeSections(id);
 			}
 		}
 	}
 
-	private function purgeSections(id:String):Void
-	{
+	private function purgeSections(id:String):Void {
 		// get the section counter in question
 		var counter:SectionCounter = cacheCounter.get(id);
 
-		if (counter != null)
-		{
+		if (counter != null) {
 			// go through all its subkeys (representing cached 9-slice sections)
 			// and remove them from the cache
-			for (key in counter.subKeys)
-			{
+			for (key in counter.subKeys) {
 				sectionCache.remove(key);
 			}
 
@@ -251,12 +223,10 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 		}
 	}
 
-	public static inline function getRectFromString(str:String):Rectangle
-	{
+	public static inline function getRectFromString(str:String):Rectangle {
 		var coords:Array<String> = str.split(",");
 		var rect:Rectangle = null;
-		if (coords != null && coords.length == 4)
-		{
+		if (coords != null && coords.length == 4) {
 			var x_:Int = Std.parseInt(coords[0]);
 			var y_:Int = Std.parseInt(coords[1]);
 			var w_:Int = Std.parseInt(coords[2]);
@@ -266,11 +236,9 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 		return rect;
 	}
 
-	public static inline function getRectIntsFromString(str:String):Array<Int>
-	{
+	public static inline function getRectIntsFromString(str:String):Array<Int> {
 		var coords:Array<String> = str.split(",");
-		if (coords != null && coords.length == 4)
-		{
+		if (coords != null && coords.length == 4) {
 			var x1:Int = Std.parseInt(coords[0]);
 			var y1:Int = Std.parseInt(coords[1]);
 			var x2:Int = Std.parseInt(coords[2]);
@@ -295,30 +263,22 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 	 * @return	the new unique id
 	 */
 	public static function paintScale9(g:BitmapData, assetID:String, scale9:Array<Int>, rc:FlxRect, tile:Int = TILE_NONE, smooth:Bool = false,
-			?raw:BitmapData):String
-	{
-		if (scale9 != null)
-		{ // create parts
+			?raw:BitmapData):String {
+		if (scale9 != null) { // create parts
 
 			var w:Int;
 			var h:Int;
-			if (raw == null)
-			{
+			if (raw == null) {
 				var assetBmp = U.getBmp(assetID);
-				if (assetBmp != null)
-				{
+				if (assetBmp != null) {
 					w = assetBmp.width;
 					h = assetBmp.height;
-				}
-				else
-				{
+				} else {
 					var assetFlx = FlxG.bitmap.get(assetID);
 					w = assetFlx.width;
 					h = assetFlx.height;
 				}
-			}
-			else
-			{
+			} else {
 				w = raw.width;
 				h = raw.height;
 			}
@@ -328,8 +288,7 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 			var x2:Int = scale9[2];
 			var y2:Int = scale9[3];
 
-			if (_staticRects == null)
-			{
+			if (_staticRects == null) {
 				_staticRects = new Map<String, FlxRect>();
 				_staticRects.set("top.left", FlxRect.get());
 				_staticRects.set("top", FlxRect.get());
@@ -354,8 +313,7 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 			_staticRects.get("bottom").set(x1, y2, x2 - x1, h - y2);
 			_staticRects.get("bottom.right").set(x2, y2, w - x2, h - y2);
 
-			if (cacheCounter == null)
-			{
+			if (cacheCounter == null) {
 				cacheCounter = new Map<String, SectionCounter>();
 			}
 
@@ -365,15 +323,12 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 			// See if that combination has been used before
 			var sectionCounter = cacheCounter.get(uniqueID);
 
-			if (sectionCounter == null)
-			{
+			if (sectionCounter == null) {
 				// If not, create an entry for that and generate the subkeys for it to represent each 9-slice section
 				sectionCounter = {useCount: 0, subKeys: []};
 
-				for (i in 0...9)
-				{
-					var rect = switch (i)
-					{
+				for (i in 0...9) {
+					var rect = switch (i) {
 						case 0: _staticRects.get("top.left");
 						case 1: _staticRects.get("top");
 						case 2: _staticRects.get("top.right");
@@ -398,14 +353,12 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 		return "";
 	}
 
-	public static function makePaintScale9Id(assetId:String, slice9:Array<Int>, rect:FlxRect):String
-	{
+	public static function makePaintScale9Id(assetId:String, slice9:Array<Int>, rect:FlxRect):String {
 		return assetId + "_" + slice9.join(",") + "_" + rect.toString();
 	}
 
 	public static function paintCompoundBitmap(g:BitmapData, assetID:String, sourceRects:Map<String, FlxRect>, targetRect:FlxRect, tile:Int = TILE_NONE,
-			smooth:Bool = false, raw:BitmapData = null):Void
-	{
+			smooth:Bool = false, raw:BitmapData = null):Void {
 		targetRect.x = Std.int(targetRect.x);
 		targetRect.y = Std.int(targetRect.y);
 		targetRect.width = Std.int(targetRect.width);
@@ -413,82 +366,68 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 
 		// top row
 		var tl:FlxRect = sourceRects.get("top.left");
-		if (tl != null)
-		{
+		if (tl != null) {
 			_staticFlxRect2.set(0, 0, tl.width, tl.height);
 			paintBitmapSection(g, assetID, tl, _staticFlxRect2, null, TILE_NONE, smooth, raw);
 		}
 
 		var tr:FlxRect = sourceRects.get("top.right");
-		if (tr != null)
-		{
+		if (tr != null) {
 			_staticFlxRect2.set(targetRect.width - tr.width, 0, tr.width, tr.height);
 			paintBitmapSection(g, assetID, tr, _staticFlxRect2, null, TILE_NONE, smooth, raw);
 		}
 
 		var t:FlxRect = sourceRects.get("top");
-		if (t != null)
-		{
+		if (t != null) {
 			_staticFlxRect2.set(tl.width, 0, (targetRect.width - tl.width - tr.width), t.height);
 			paintBitmapSection(g, assetID, t, _staticFlxRect2, null, (tile & 0x10), smooth, raw);
 		}
 
 		// bottom row
 		var bl:FlxRect = sourceRects.get("bottom.left");
-		if (bl != null)
-		{
+		if (bl != null) {
 			_staticFlxRect2.set(0, targetRect.height - bl.height, bl.width, bl.height);
 			paintBitmapSection(g, assetID, bl, _staticFlxRect2, null, TILE_NONE, smooth, raw);
 		}
 
 		var br:FlxRect = sourceRects.get("bottom.right");
-		if (br != null)
-		{
+		if (br != null) {
 			_staticFlxRect2.set(targetRect.width - br.width, targetRect.height - br.height, br.width, br.height);
 			paintBitmapSection(g, assetID, br, _staticFlxRect2, null, TILE_NONE, smooth, raw);
 		}
 
 		var b:FlxRect = sourceRects.get("bottom");
-		if (b != null)
-		{
+		if (b != null) {
 			_staticFlxRect2.set(bl.width, targetRect.height - b.height, (targetRect.width - bl.width - br.width), b.height);
 			paintBitmapSection(g, assetID, b, _staticFlxRect2, null, (tile & 0x10), smooth, raw);
 		}
 
 		// middle row
 		var l:FlxRect = sourceRects.get("left");
-		if (l != null)
-		{
+		if (l != null) {
 			_staticFlxRect2.set(0, tl.height, l.width, (targetRect.height - tl.height - bl.height));
 			paintBitmapSection(g, assetID, l, _staticFlxRect2, null, (tile & 0x01), smooth, raw);
 		}
 
 		var r:FlxRect = sourceRects.get("right");
-		if (r != null)
-		{
+		if (r != null) {
 			_staticFlxRect2.set(targetRect.width - r.width, tr.height, r.width, (targetRect.height - tl.height - bl.height));
 			paintBitmapSection(g, assetID, r, _staticFlxRect2, null, (tile & 0x01), smooth, raw);
 		}
 
 		var m:FlxRect = sourceRects.get("middle");
-		if (m != null)
-		{
+		if (m != null) {
 			_staticFlxRect2.set(l.width, t.height, (targetRect.width - l.width - r.width), (targetRect.height - t.height - b.height));
 			paintBitmapSection(g, assetID, m, _staticFlxRect2, null, tile, smooth, raw);
 		}
 	}
 
 	public static function paintBitmapSection(g:BitmapData, assetId:String, src:FlxRect, dst:FlxRect, srcData:BitmapData = null, tile:Int = TILE_NONE,
-			smooth:Bool = false, raw:BitmapData = null):Void
-	{
-		if (srcData == null)
-		{
-			if (raw != null)
-			{
+			smooth:Bool = false, raw:BitmapData = null):Void {
+		if (srcData == null) {
+			if (raw != null) {
 				srcData = raw;
-			}
-			else
-			{
+			} else {
 				srcData = U.getBmp(assetId);
 			}
 		}
@@ -505,18 +444,15 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 
 		var section:BitmapData = null;
 		var cacheId:String = null;
-		if (useSectionCache == true && assetId != null)
-		{
-			if (sectionCache == null)
-			{
+		if (useSectionCache == true && assetId != null) {
+			if (sectionCache == null) {
 				sectionCache = new Map<String, BitmapData>();
 			}
 			cacheId = assetId + "_" + src.left + "_" + src.top + "_" + src.width + "_" + src.height + "_";
 			section = sectionCache.get(cacheId);
 		}
 
-		if (section == null)
-		{
+		if (section == null) {
 			var fillcolor = 0x00FFFFFF;
 			section = new BitmapData(Std.int(src.width), Std.int(src.height), true, fillcolor);
 
@@ -527,15 +463,13 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 
 			section.copyPixels(srcData, _staticRect2, _staticPointZero);
 
-			if (useSectionCache == true && cacheId != null)
-			{
+			if (useSectionCache == true && cacheId != null) {
 				sectionCache.set(cacheId, section);
 			}
 			bitmapsCreated++;
 		}
 
-		if (dst.width > 0 && dst.height > 0)
-		{
+		if (dst.width > 0 && dst.height > 0) {
 			_staticRect2.x = dst.x;
 			_staticRect2.y = dst.y;
 			_staticRect2.width = dst.width;
@@ -545,8 +479,7 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 		}
 	}
 
-	private static function bitmapFillRect(g:BitmapData, dst:Rectangle, section:BitmapData, tile:Int = TILE_NONE, smooth_:Bool = false):Void
-	{
+	private static function bitmapFillRect(g:BitmapData, dst:Rectangle, section:BitmapData, tile:Int = TILE_NONE, smooth_:Bool = false):Void {
 		// Optimization TODO:
 		// You can remove the extra bitmap being created by smartly figuring out
 		// the necessary math for drawing directly to g rather than a temp bmp
@@ -562,13 +495,11 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 		_staticRect.width = section.width;
 		_staticRect.height = section.height;
 
-		if (tile & 0x10 == 0)
-		{ // TILE H is false
+		if (tile & 0x10 == 0) { // TILE H is false
 			_staticMatrix.scale(dst.width / section.width, 1.0); // scale H
 			_staticRect.width = dst.width; // _staticRect reflects scaling
 		}
-		if (tile & 0x01 == 0)
-		{ // TILE V is false
+		if (tile & 0x01 == 0) { // TILE V is false
 			_staticMatrix.scale(1.0, dst.height / section.height); // scale V
 			_staticRect.height = dst.height; // _staticRect reflects scaling
 		}
@@ -578,37 +509,28 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 		// the section's h&v will exactly equal the destination size
 		// final_pixels.draw(section, _staticMatrix, null, null, null, smooth);
 
-		if (section.width == dst.width && section.height == dst.height)
-		{
+		if (section.width == dst.width && section.height == dst.height) {
 			_staticPoint.x = 0;
 			_staticPoint.y = 0;
 			final_pixels.copyPixels(section, section.rect, _staticPoint);
-		}
-		else
-		{
-			if (smooth_)
-			{
+		} else {
+			if (smooth_) {
 				final_pixels.draw(section, _staticMatrix, null, null, null, true);
-			}
-			else
-			{
+			} else {
 				final_pixels.draw(section, _staticMatrix, null, null, null, false);
 			}
 		}
 
 		// if we are tiling, we need to keep drawing
-		if (tile != TILE_NONE)
-		{
+		if (tile != TILE_NONE) {
 			// _staticRect currently represents rect of what we've drawn so far
 
-			if (tile & 0x10 == 0x10)
-			{ // TILE H is true
+			if (tile & 0x10 == 0x10) { // TILE H is true
 
 				_staticPoint.x = 0; // drawing destination
 				_staticPoint.y = 0;
 
-				while (_staticPoint.x < dst.width)
-				{ // tile across the entire width
+				while (_staticPoint.x < dst.width) { // tile across the entire width
 					_staticPoint.x += _staticRect.width; // jump to next drawing location
 
 					// copy section drawn so far, re-draw at next tiling point
@@ -622,8 +544,7 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 					// a custom-sized final call to fill in the last few pixels
 				}
 			}
-			if (tile & 0x01 == 0x01)
-			{ // TILE V is true
+			if (tile & 0x01 == 0x01) { // TILE V is true
 
 				_staticPoint.x = 0; // drawing destination
 				_staticPoint.y = 0;
@@ -631,8 +552,7 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 				// assume that the entire width has been spanned by now
 				_staticRect.width = final_pixels.width;
 
-				while (_staticPoint.y < dst.height)
-				{ // tile across the entire height
+				while (_staticPoint.y < dst.height) { // tile across the entire height
 					_staticPoint.y += _staticRect.height; // jump to next drawing location
 
 					// copies section drawn so far, like above, but starts with
@@ -657,8 +577,7 @@ class FlxUI9SliceSprite extends FlxUISprite implements IResizable implements IFl
 	}
 }
 
-typedef SectionCounter =
-{
+typedef SectionCounter = {
 	var useCount:Int;
 	var subKeys:Array<String>;
 }

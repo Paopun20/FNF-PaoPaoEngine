@@ -1,11 +1,9 @@
 package funkin.objects;
 
-class MenuItem extends FlxSprite
-{
+class MenuItem extends FlxSprite {
 	public var targetY:Float = 0;
 
-	public function new(x:Float, y:Float, weekName:String = '')
-	{
+	public function new(x:Float, y:Float, weekName:String = '') {
 		super(x, y);
 		loadGraphic(Paths.image('storymenu/' + weekName));
 		antialiasing = ClientPrefs.data.antialiasing;
@@ -18,20 +16,17 @@ class MenuItem extends FlxSprite
 	final _flashColor = 0xFF33FFFF;
 	final flashes_ps:Int = 6;
 
-	public function set_isFlashing(value:Bool = true):Bool
-	{
+	public function set_isFlashing(value:Bool = true):Bool {
 		isFlashing = value;
 		_flashingElapsed = 0;
 		color = (isFlashing) ? _flashColor : FlxColor.WHITE;
 		return isFlashing;
 	}
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		if (isFlashing)
-		{
+		if (isFlashing) {
 			_flashingElapsed += elapsed;
 			color = (Math.floor(_flashingElapsed * FlxG.updateFramerate * flashes_ps) % 2 == 0) ? _flashColor : FlxColor.WHITE;
 		}

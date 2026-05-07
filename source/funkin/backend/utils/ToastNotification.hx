@@ -85,8 +85,7 @@ bool ShowNotification(const std::string& title, const std::string& desc) {
     return Shell_NotifyIcon(NIM_DELETE, &m_NID);
 }
 ')
-class ToastNotification
-{
+class ToastNotification {
 	/**
 	 * Show a Windows toast notification using native C++ Shell_NotifyIcon API
 	 * @param title The notification title
@@ -96,16 +95,13 @@ class ToastNotification
 	@:functionCode('
 		return ShowNotification(title.c_str(), message.c_str());
 	')
-	public static function show(title:String, message:String):Bool
-	{
+	public static function show(title:String, message:String):Bool {
 		return false;
 	}
 }
 #else
-class ToastNotification
-{
-	public static function show(title:String, message:String):Bool
-	{
+class ToastNotification {
+	public static function show(title:String, message:String):Bool {
 		return false;
 	}
 }

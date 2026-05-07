@@ -1,13 +1,11 @@
 package funkin.states.stages.objects;
 
-class PhillyGlowParticle extends FlxSprite
-{
+class PhillyGlowParticle extends FlxSprite {
 	var lifeTime:Float = 0;
 	var decay:Float = 0;
 	var originalScale:Float = 1;
 
-	public function new(x:Float = 0, y:Float = 0, color:FlxColor = FlxColor.WHITE)
-	{
+	public function new(x:Float = 0, y:Float = 0, color:FlxColor = FlxColor.WHITE) {
 		super(x, y);
 		this.color = color;
 
@@ -16,16 +14,13 @@ class PhillyGlowParticle extends FlxSprite
 		start();
 	}
 
-	public function start()
-	{
+	public function start() {
 		lifeTime = FlxG.random.float(0.6, 0.9);
 		decay = FlxG.random.float(0.8, 1);
-		if (!ClientPrefs.data.flashing)
-		{
+		if (!ClientPrefs.data.flashing) {
 			decay *= 0.5;
 			alpha = 0.5;
-		}
-		else
+		} else
 			alpha = 1;
 
 		originalScale = FlxG.random.float(0.75, 1);
@@ -36,15 +31,12 @@ class PhillyGlowParticle extends FlxSprite
 		acceleration.set(FlxG.random.float(-10, 10), 25);
 	}
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		lifeTime -= elapsed;
-		if (lifeTime < 0)
-		{
+		if (lifeTime < 0) {
 			lifeTime = 0;
 			alpha -= decay * elapsed;
-			if (alpha > 0)
-			{
+			if (alpha > 0) {
 				scale.set(originalScale * alpha, originalScale * alpha);
 			}
 		}

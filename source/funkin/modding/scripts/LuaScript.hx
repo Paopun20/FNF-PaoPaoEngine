@@ -21,10 +21,9 @@ import lscript.LScript;
 #end
 
 using StringTools;
-using PPQolTools;
+using funkin.backend.utils.tools.PPQolTools;
 
-class LuaScript extends Script
-{
+class LuaScript extends Script {
 	#if LUA_ALLOWED
 	var internalScript:LScript;
 
@@ -38,14 +37,12 @@ class LuaScript extends Script
 	override function get_parent():Dynamic
 		return internalScript.parent;
 
-	public override function new(path:String)
-	{
+	public override function new(path:String) {
 		super(path);
 
 		internalScript = new LScript(Script.getFileContent(path));
 		internalScript.tracePrefix = '[$scriptPath] ';
-		internalScript.print = (line:Int, s:String) ->
-		{
+		internalScript.print = (line:Int, s:String) -> {
 			var info:PosInfos = {
 				fileName: '$folderName/$scriptPath',
 				lineNumber: line,
@@ -55,25 +52,21 @@ class LuaScript extends Script
 			}
 			CoolLog.info(s, info);
 		}
+		Script.preset(this);
+		PsychFunctions.implement(this, scriptPack);
 	}
 
 	public override function execute() {
-		try
-		{
+		try {
 			initVars();
-			Script.preset(this);
-			PsychFunctions.implement(this, scriptPack);
 			internalScript.execute();
 			call('onCreate', []);
-		}
-		catch (e:Dynamic)
-		{
+		} catch (e:Dynamic) {
 			CoolLog.error('Lua Script Error: $e');
 		}
 	}
 
-	public function initVars()
-	{
+	public function initVars() {
 		set('scriptName', scriptName);
 
 		// Flixel
@@ -115,8 +108,7 @@ class LuaScript extends Script
 
 		set('Paths', Paths);
 
-		set('print', (s:String) ->
-		{
+		set('print', (s:String) -> {
 			var info:PosInfos = {
 				fileName: '$folderName/$fileName',
 				lineNumber: 0,
@@ -136,39 +128,27 @@ class LuaScript extends Script
 			set('log', (value:Dynamic, type:backend.console.Logs.LogType = LogMessage) -> log(value, type, internalScript.interp.posInfos())); */
 	}
 
-	override public function call(funcName:String, ?args:Array<Dynamic>):Dynamic
-	{
-		try
-		{
+	override public function call(funcName:String, ?args:Array<Dynamic>):Dynamic {
+		try {
 			return internalScript.callFunc(funcName, args ?? []);
-		}
-		catch (e:Dynamic)
-		{
+		} catch (e:Dynamic) {
 			CoolLog.error('Lua Call Error ($funcName): $e');
 			return null;
 		}
 	}
 
-	override public function set(variable:String, value:Dynamic)
-	{
-		try
-		{
+	override public function set(variable:String, value:Dynamic) {
+		try {
 			internalScript.setVar(variable, value);
-		}
-		catch (e:Dynamic)
-		{
+		} catch (e:Dynamic) {
 			CoolLog.error('Lua Set Error ($variable): $e');
 		}
 	}
 
-	override public function get(variable:String):Dynamic
-	{
-		try
-		{
+	override public function get(variable:String):Dynamic {
+		try {
 			return internalScript.getVar(variable);
-		}
-		catch (e:Dynamic)
-		{
+		} catch (e:Dynamic) {
 			CoolLog.error('Lua Get Error ($variable): $e');
 			return null;
 		}

@@ -1,15 +1,17 @@
 # Friday Night Funkin' - PaoPao Engine
 
 > [!WARNING]
-> This engine is currently under heavy development, some API is not the same as **Psych Engine** mods, ya your cook bro
+> This engine is currently under heavy development, some API is not 100% same as **Psych Engine** mods, ya your cook bro
 
-PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/FunkinCrew/Funkin) Engine aimed at freedom of modding without source code, optimization, lightweight, cross-platform.
+PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/FunkinCrew/Funkin) Engine aimed at optimization, lightweight, cross-platform.
 
 ## Features/Changes from the fork until 0.1.0 initial releases (maybe)
 
 - Python [**Beta**] - A Simple Version of Python for mod scripting
   > Work in progress, because some Python feature contracts are yet to be completed.\
   > Want to help? Submit a pull request on the [Hython GitHub repository](https://github.com/Paopun20/Hython).
+- NxScript [**Experimental**]
+  > https://github.com/Kitsumizy/NxScript/
 - Hscript (Improved)
   > Use Own's Codename's HScript library
 - Optimize by Cache AST (HScript/Python only)
@@ -30,13 +32,14 @@ PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
 - Optimize Engine performance and memory usage without breaking everything/mods like script engine.
 - New Free-play UI (WIP)
 - Improved Loading Screen (WIP)
-- All states/substates is editable (ex: scripts/stages/[state name].hx, scripts/substates/[state name].hx) (untest)
+- All states/substates is editable (ex: scripts/stages/[state name].hx, scripts/substates/[state name].hx) [**Experimental**]
 - Improve modding experience and compatibility.
 - Update Lib: flixel, flixel-addons (RIP, old mods)
 - GDI Effects (HScript only):
   > /J SL WINDOWS API library
 - Video Cutscene Subtitles Is Support
   - Subtitles: subtitles/video/videoName.srt
+  > (I facking hate it everytime it crash without error output)
 
 - New events:
   - Offset Timer

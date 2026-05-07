@@ -8,32 +8,26 @@ import paopao.hython.Parser as PyParser;
 import haxe.crypto.Sha256;
 import haxe.io.Bytes;
 
-enum CacheType
-{
+enum CacheType {
 	HSCRIPT;
 	PYTHON;
 }
 
 @:nullSafety(Strict)
 @:analyzer(optimize, local_dce, fusion, user_var_fusion)
-class CacheScript
-{
+class CacheScript {
 	private static var hscriptCache:StringMap<Expr> = new StringMap<Expr>();
 	private static var pythonCache:StringMap<PyExpr> = new StringMap<PyExpr>();
 
-	public static function exists(key:String, type:CacheType):Bool
-	{
-		return switch (type)
-		{
+	public static function exists(key:String, type:CacheType):Bool {
+		return switch (type) {
 			case HSCRIPT: hscriptCache.exists(key);
 			case PYTHON: pythonCache.exists(key);
 		}
 	}
 
-	public static function get(key:String, type:CacheType):Dynamic
-	{
-		return switch (type)
-		{
+	public static function get(key:String, type:CacheType):Dynamic {
+		return switch (type) {
 			case HSCRIPT:
 				hscriptCache.exists(key) ? hscriptCache.get(key) : null;
 
@@ -42,10 +36,8 @@ class CacheScript
 		}
 	}
 
-	public static function set(key:String, expr:Dynamic, type:CacheType):Void
-	{
-		switch (type)
-		{
+	public static function set(key:String, expr:Dynamic, type:CacheType):Void {
+		switch (type) {
 			case HSCRIPT:
 				hscriptCache.set(key, cast expr);
 
@@ -54,10 +46,8 @@ class CacheScript
 		}
 	}
 
-	public static function clear(type:CacheType):Void
-	{
-		switch (type)
-		{
+	public static function clear(type:CacheType):Void {
+		switch (type) {
 			case HSCRIPT:
 				hscriptCache.clear();
 
@@ -66,19 +56,15 @@ class CacheScript
 		}
 	}
 
-	public static function hashCode(string:String):String
-	{
+	public static function hashCode(string:String):String {
 		return Sha256.make(Bytes.ofString(string)).toHex();
 	}
 }
 
 @:nullSafety(Strict)
-class CacheParser
-{
-	public static function parse(code:String, type:CacheType, ?origin:String):Dynamic
-	{
-		return switch (type)
-		{
+class CacheParser {
+	public static function parse(code:String, type:CacheType, ?origin:String):Dynamic {
+		return switch (type) {
 			case HSCRIPT:
 				var p = new Parser();
 				p.allowJSON = true;

@@ -10,14 +10,12 @@ import lime.media.AudioSource;
 
 using grig.audio.lime.UInt8ArrayTools;
 
-typedef Bar =
-{
+typedef Bar = {
 	var value:Float;
 	var peak:Float;
 }
 
-typedef BarObject =
-{
+typedef BarObject = {
 	var binLo:Int;
 	var binHi:Int;
 	var freqLo:Float;
@@ -25,16 +23,14 @@ typedef BarObject =
 	var recentValues:RecentPeakFinder;
 }
 
-enum MathType
-{
+enum MathType {
 	Round;
 	Floor;
 	Ceil;
 	Cast;
 }
 
-class SpectralAnalyzer
-{
+class SpectralAnalyzer {
 	public var minDb(default, set):Float = -70;
 	public var maxDb(default, set):Float = -20;
 	public var fftN(default, set):Int = 4096;
@@ -57,11 +53,9 @@ class SpectralAnalyzer
 	private var barHistories = new Array<RecentPeakFinder>();
 	#end
 
-	private function freqToBin(freq:Float, mathType:MathType = Round):Int
-	{
+	private function freqToBin(freq:Float, mathType:MathType = Round):Int {
 		var bin = freq * fftN2 / audioClip.audioBuffer.sampleRate;
-		return switch (mathType)
-		{
+		return switch (mathType) {
 			case Round: Math.round(bin);
 			case Floor: Math.floor(bin);
 			case Ceil: Math.ceil(bin);
@@ -69,16 +63,14 @@ class SpectralAnalyzer
 		}
 	}
 
-	function normalizedB(value:Float)
-	{
+	function normalizedB(value:Float) {
 		var maxValue = maxDb;
 		var minValue = minDb;
 
 		return clamp((value - minValue) / (maxValue - minValue), 0, 1);
 	}
 
-	function calcBars(barCount:Int, peakHold:Int)
-	{
+	function calcBars(barCount:Int, peakHold:Int) {
 		#if web
 		bars = [];
 		var logStep = (LogHelper.log10(maxFreq) - LogHelper.log10(minFreq)) / (barCount);
@@ -90,8 +82,7 @@ class SpectralAnalyzer
 
 		// var stride = (scaleMax - scaleMin) / bands;
 
-		for (i in 0...barCount)
-		{
+		for (i in 0...barCount) {
 			var curFreq:Float = Math.pow(10, LogHelper.log10(minFreq) + (logStep * i));
 
 			var freqLo:Float = curFreq;
@@ -109,32 +100,27 @@ class SpectralAnalyzer
 			});
 		}
 
-		if (bars[0].freqLo < minFreq)
-		{
+		if (bars[0].freqLo < minFreq) {
 			bars[0].freqLo = minFreq;
 			bars[0].binLo = freqToBin(minFreq, Floor);
 		}
 
-		if (bars[bars.length - 1].freqHi > maxFreq)
-		{
+		if (bars[bars.length - 1].freqHi > maxFreq) {
 			bars[bars.length - 1].freqHi = maxFreq;
 			bars[bars.length - 1].binHi = freqToBin(maxFreq, Floor);
 		}
 		#else
-		if (barCount > barHistories.length)
-		{
+		if (barCount > barHistories.length) {
 			barHistories.resize(barCount);
 		}
-		for (i in 0...barCount)
-		{
+		for (i in 0...barCount) {
 			if (barHistories[i] == null)
 				barHistories[i] = new RecentPeakFinder();
 		}
 		#end
 	}
 
-	public function new(audioSource:AudioSource, barCount:Int, smoothingTimeConstant:Float = 0.8, peakHold:Int = 30)
-	{
+	public function new(audioSource:AudioSource, barCount:Int, smoothingTimeConstant:Float = 0.8, peakHold:Int = 30) {
 		this.audioSource = audioSource;
 		this.audioClip = new LimeAudioClip(audioSource);
 		this.barCount = barCount;
@@ -150,22 +136,19 @@ class SpectralAnalyzer
 		calcBars(barCount, peakHold);
 	}
 
-	public function getLevels(?levels:Array<Bar>):Array<Bar>
-	{
+	public function getLevels(?levels:Array<Bar>):Array<Bar> {
 		if (levels == null)
 			levels = new Array<Bar>();
 		#if web
 		var amplitudes:Array<Float> = htmlAnalyzer.getFloatFrequencyData();
 
-		for (i in 0...bars.length)
-		{
+		for (i in 0...bars.length) {
 			var bar = bars[i];
 			var binLo = bar.binLo;
 			var binHi = bar.binHi;
 
 			var value:Float = minDb;
-			for (j in (binLo + 1)...(binHi))
-			{
+			for (j in (binLo + 1)...(binHi)) {
 				value = Math.max(value, amplitudes[Std.int(j)]);
 			}
 
@@ -175,12 +158,10 @@ class SpectralAnalyzer
 			bar.recentValues.push(value);
 			var recentPeak = bar.recentValues.peak;
 
-			if (levels[i] != null)
-			{
+			if (levels[i] != null) {
 				levels[i].value = value;
 				levels[i].peak = recentPeak;
-			}
-			else
+			} else
 				levels.push({value: value, peak: recentPeak});
 		}
 
@@ -190,8 +171,7 @@ class SpectralAnalyzer
 		var wantedLength = fftN * numOctets * audioSource.buffer.channels;
 		var startFrame = audioClip.currentFrame;
 
-		if (startFrame < 0)
-		{
+		if (startFrame < 0) {
 			return levels = [for (bar in 0...barCount) {value: 0, peak: 0}];
 		}
 
@@ -201,30 +181,23 @@ class SpectralAnalyzer
 		var signal = getSignal(segment, audioSource.buffer.bitsPerSample);
 
 		// Down-mix multichannel audio to mono for FFT analysis
-		if (audioSource.buffer.channels > 1)
-		{
+		if (audioSource.buffer.channels > 1) {
 			var mixed = new Array<Float>();
 			mixed.resize(Std.int(signal.length / audioSource.buffer.channels));
 
-			if (audioSource.buffer.channels == 2)
-			{
+			if (audioSource.buffer.channels == 2) {
 				// Stereo to mono: Web Audio API standard down-mixing
-				for (i in 0...mixed.length)
-				{
+				for (i in 0...mixed.length) {
 					var left = signal[i * 2];
 					var right = signal[i * 2 + 1];
 					mixed[i] = 0.5 * (left + right);
 				}
-			}
-			else
-			{
+			} else {
 				// Fallback for other channel counts (quad, 5.1, etc.)
 				// TODO: Implement proper down-mixing for quad and 5.1 layouts
-				for (i in 0...mixed.length)
-				{
+				for (i in 0...mixed.length) {
 					mixed[i] = 0.0;
-					for (c in 0...audioSource.buffer.channels)
-					{
+					for (c in 0...audioSource.buffer.channels) {
 						mixed[i] += signal[i * audioSource.buffer.channels + c];
 					}
 					mixed[i] /= audioSource.buffer.channels;
@@ -238,14 +211,12 @@ class SpectralAnalyzer
 		var freqs = fft.calcFreq(signal);
 		var bars = vis.makeLogGraph(freqs, barCount + 1, Math.floor(maxDb - minDb), range, fftN, audioClip.audioBuffer.sampleRate, minFreq, maxFreq);
 
-		if (bars.length - 1 > barHistories.length)
-		{
+		if (bars.length - 1 > barHistories.length) {
 			barHistories.resize(bars.length - 1);
 		}
 
 		levels.resize(bars.length - 1);
-		for (i in 0...bars.length - 1)
-		{
+		for (i in 0...bars.length - 1) {
 			if (barHistories[i] == null)
 				barHistories[i] = new RecentPeakFinder();
 			var recentValues = barHistories[i];
@@ -253,18 +224,14 @@ class SpectralAnalyzer
 
 			// Web Audio API exponential smoothing: X'[k] = τ * X'_{-1}[k] + (1 - τ) * |X[k]|
 			var lastValue = recentValues.lastValue;
-			if (smoothingTimeConstant > 0.0 && smoothingTimeConstant < 1.0)
-			{
+			if (smoothingTimeConstant > 0.0 && smoothingTimeConstant < 1.0) {
 				// Handle NaN/infinity as per Web Audio spec
-				if (Math.isNaN(value) || !Math.isFinite(value))
-				{
+				if (Math.isNaN(value) || !Math.isFinite(value)) {
 					value = 0.0;
 				}
 				// Apply exponential moving average
 				value = smoothingTimeConstant * lastValue + (1.0 - smoothingTimeConstant) * Math.abs(value);
-			}
-			else
-			{
+			} else {
 				// No smoothing or invalid smoothing constant
 				value = Math.abs(value);
 			}
@@ -272,12 +239,10 @@ class SpectralAnalyzer
 
 			var recentPeak = recentValues.peak;
 
-			if (levels[i] != null)
-			{
+			if (levels[i] != null) {
 				levels[i].value = value;
 				levels[i].peak = recentPeak;
-			}
-			else
+			} else
 				levels[i] = {value: value, peak: recentPeak};
 		}
 		return levels;
@@ -287,10 +252,8 @@ class SpectralAnalyzer
 	// Prevents a memory leak by reusing array
 	var _buffer:Array<Float> = [];
 
-	function getSignal(data:lime.utils.UInt8Array, bitsPerSample:Int):Array<Float>
-	{
-		switch (bitsPerSample)
-		{
+	function getSignal(data:lime.utils.UInt8Array, bitsPerSample:Int):Array<Float> {
+		switch (bitsPerSample) {
 			case 8:
 				_buffer.resize(data.length);
 				for (i in 0...data.length)
@@ -318,19 +281,16 @@ class SpectralAnalyzer
 	}
 
 	@:generic
-	static inline function clamp<T:Float>(val:T, min:T, max:T):T
-	{
+	static inline function clamp<T:Float>(val:T, min:T, max:T):T {
 		return val <= min ? min : val >= max ? max : val;
 	}
 
 	@:generic
-	static public inline function min<T:Float>(x:T, y:T):T
-	{
+	static public inline function min<T:Float>(x:T, y:T):T {
 		return x > y ? y : x;
 	}
 
-	function set_minDb(value:Float):Float
-	{
+	function set_minDb(value:Float):Float {
 		minDb = value;
 
 		#if web
@@ -340,8 +300,7 @@ class SpectralAnalyzer
 		return value;
 	}
 
-	function set_maxDb(value:Float):Float
-	{
+	function set_maxDb(value:Float):Float {
 		maxDb = value;
 
 		#if web
@@ -351,8 +310,7 @@ class SpectralAnalyzer
 		return value;
 	}
 
-	function set_fftN(value:Int):Int
-	{
+	function set_fftN(value:Int):Int {
 		fftN = value;
 		var pow2 = FFT.nextPow2(value);
 		fftN2 = Std.int(pow2 / 2);

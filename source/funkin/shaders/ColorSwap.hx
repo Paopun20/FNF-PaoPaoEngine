@@ -2,40 +2,34 @@ package funkin.shaders;
 
 import flixel.system.FlxAssets.FlxShader;
 
-class ColorSwap
-{
+class ColorSwap {
 	public var shader(default, null):ColorSwapShader = new ColorSwapShader();
 	public var hue(default, set):Float = 0;
 	public var saturation(default, set):Float = 0;
 	public var brightness(default, set):Float = 0;
 
-	private function set_hue(value:Float)
-	{
+	private function set_hue(value:Float) {
 		shader.uTime.value[0] = hue = value;
 		return value;
 	}
 
-	private function set_saturation(value:Float)
-	{
+	private function set_saturation(value:Float) {
 		shader.uTime.value[1] = saturation = value;
 		return value;
 	}
 
-	private function set_brightness(value:Float)
-	{
+	private function set_brightness(value:Float) {
 		shader.uTime.value[2] = brightness = value;
 		return value;
 	}
 
-	public function new()
-	{
+	public function new() {
 		shader.uTime.value = [0, 0, 0];
 		shader.awesomeOutline.value = [false];
 	}
 }
 
-class ColorSwapShader extends FlxShader
-{
+class ColorSwapShader extends FlxShader {
 	@:glFragmentSource('
 		varying float openfl_Alphav;
 		varying vec4 openfl_ColorMultiplierv;
@@ -137,8 +131,7 @@ class ColorSwapShader extends FlxShader
 
 			gl_Position = openfl_Matrix * openfl_Position;
 		}')
-	public function new()
-	{
+	public function new() {
 		super();
 	}
 }

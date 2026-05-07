@@ -7,20 +7,18 @@ import flixel.FlxG;
 #include <dwmapi.h>
 #pragma comment(lib, "Dwmapi")
 ')
-class FlxWindowUtil
-{
+class FlxWindowUtil {
 	public static var isTransparent:Bool = false;
 
 	static var lastBgColor:Int;
 	static var lastBorderless:Bool;
 	static var lastBgAttr:Dynamic;
 
-	static public function setTransparency(val:Bool):Void
-	{
-		if (val == isTransparent) return;
+	static public function setTransparency(val:Bool):Void {
+		if (val == isTransparent)
+			return;
 		isTransparent = val;
-		if (isTransparent)
-		{
+		if (isTransparent) {
 			// backup
 			lastBgColor = FlxG.camera.bgColor;
 			lastBorderless = FlxG.stage.window.borderless;
@@ -32,9 +30,7 @@ class FlxWindowUtil
 			@:privateAccess
 			FlxG.stage.window.context.attributes.background = null;
 			_enableTransparency();
-		}
-		else
-		{
+		} else {
 			FlxG.camera.bgColor = lastBgColor;
 			FlxG.stage.window.borderless = lastBorderless;
 			@:privateAccess
@@ -43,7 +39,6 @@ class FlxWindowUtil
 		}
 	}
 
-	
 	@:functionCode('
 		HWND hWnd = GetActiveWindow();
 		SetWindowLong(hWnd, GWL_EXSTYLE,

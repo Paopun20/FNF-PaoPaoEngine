@@ -23,8 +23,7 @@ import flixel.util.FlxSignal;
  * dialog.open();
  * ```
  */
-class FileDialog extends FlxBasic
-{
+class FileDialog extends FlxBasic {
 	/** Dispatched when the active operation completes successfully. */
 	public var onComplete:FlxSignal = new FlxSignal();
 
@@ -39,26 +38,31 @@ class FileDialog extends FlxBasic
 
 	/** @deprecated Use `isIdle` instead. */
 	public var completed(get, never):Bool;
-	inline function get_completed():Bool return isIdle;
+
+	inline function get_completed():Bool
+		return isIdle;
 
 	/** Raw text content of the most recently opened file. `null` until a file is opened. */
 	public var fileContent:String;
 
 	/** @deprecated Use `fileContent` instead. */
 	public var data(get, never):String;
-	inline function get_data():String return fileContent;
+
+	inline function get_data():String
+		return fileContent;
 
 	/** Filesystem path returned by the most recent dialog operation. */
 	public var filePath:String;
 
 	/** @deprecated Use `filePath` instead. */
 	public var path(get, never):String;
-	inline function get_path():String return filePath;
+
+	inline function get_path():String
+		return filePath;
 
 	var _dialog:LimeFileDialog;
 
-	public function new()
-	{
+	public function new() {
 		super();
 		_resetDialog();
 	}
@@ -72,15 +76,13 @@ class FileDialog extends FlxBasic
 	 * @param onComplete  One-shot listener added to `this.onComplete` for this call.
 	 * @param onCancel    One-shot listener added to `this.onCancel` for this call.
 	 */
-	public function save(?fileName:String = '', ?dataToSave:String = '', ?onComplete:Void->Void, ?onCancel:Void->Void, ?onError:Void->Void)
-	{
+	public function save(?fileName:String = '', ?dataToSave:String = '', ?onComplete:Void->Void, ?onCancel:Void->Void, ?onError:Void->Void) {
 		if (!isIdle)
 			throw new Exception('A file-dialog operation is already in progress.');
 
 		_beginOperation(onComplete, onCancel, onError);
 
-		_dialog.onSave.add(function(savedPath:String)
-		{
+		_dialog.onSave.add(function(savedPath:String) {
 			this.filePath = savedPath;
 			CoolLog.info('Saved file to: $filePath');
 			_completeOperation();
@@ -100,15 +102,14 @@ class FileDialog extends FlxBasic
 	 * @param onComplete   One-shot listener added to `this.onComplete` for this call.
 	 * @param onCancel     One-shot listener added to `this.onCancel` for this call.
 	 */
-	public function open(?defaultPath:String = null, ?title:String = null, ?filter:Array<FileFilter> = null, ?onComplete:Void->Void, ?onCancel:Void->Void, ?onError:Void->Void)
-	{
+	public function open(?defaultPath:String = null, ?title:String = null, ?filter:Array<FileFilter> = null, ?onComplete:Void->Void, ?onCancel:Void->Void,
+			?onError:Void->Void) {
 		if (!isIdle)
 			throw new Exception('A file-dialog operation is already in progress.');
 
 		_beginOperation(onComplete, onCancel, onError);
 
-		_dialog.onSelect.add(function(selectedPath:String)
-		{
+		_dialog.onSelect.add(function(selectedPath:String) {
 			this.filePath = selectedPath;
 			this.fileContent = File.getContent(selectedPath);
 			CoolLog.info('Loaded file from: $filePath');
@@ -129,15 +130,13 @@ class FileDialog extends FlxBasic
 	 * @param onComplete  One-shot listener added to `this.onComplete` for this call.
 	 * @param onCancel    One-shot listener added to `this.onCancel` for this call.
 	 */
-	public function openDirectory(?title:String = null, ?onComplete:Void->Void, ?onCancel:Void->Void, ?onError:Void->Void)
-	{
+	public function openDirectory(?title:String = null, ?onComplete:Void->Void, ?onCancel:Void->Void, ?onError:Void->Void) {
 		if (!isIdle)
 			throw new Exception('A file-dialog operation is already in progress.');
 
 		_beginOperation(onComplete, onCancel, onError);
 
-		_dialog.onSelect.add(function(selectedPath:String)
-		{
+		_dialog.onSelect.add(function(selectedPath:String) {
 			this.filePath = selectedPath;
 			CoolLog.info('Selected directory: $filePath');
 			_completeOperation();
@@ -150,8 +149,7 @@ class FileDialog extends FlxBasic
 	 * Stores one-shot callbacks as signal listeners (if provided), clears results
 	 * from any previous operation, and marks the handler as busy.
 	 */
-	function _beginOperation(onComplete:Void->Void, onCancel:Void->Void, onError:Void->Void)
-	{
+	function _beginOperation(onComplete:Void->Void, onCancel:Void->Void, onError:Void->Void) {
 		if (onComplete != null)
 			this.onComplete.addOnce(onComplete);
 		if (onCancel != null)
@@ -165,8 +163,7 @@ class FileDialog extends FlxBasic
 	}
 
 	/** Marks the operation as done and dispatches `onComplete`. */
-	function _completeOperation()
-	{
+	function _completeOperation() {
 		isIdle = true;
 		// Lime's FileDialog cannot be cleanly reused after firing, so replace it.
 		_resetDialog();
@@ -178,11 +175,9 @@ class FileDialog extends FlxBasic
 	 * Called on construction and after every operation (success or cancel),
 	 * because Lime does not reuse dialogs cleanly after they fire.
 	 */
-	function _resetDialog()
-	{
+	function _resetDialog() {
 		_dialog = new LimeFileDialog();
-		_dialog.onCancel.add(function()
-		{
+		_dialog.onCancel.add(function() {
 			isIdle = true;
 			_resetDialog();
 			onCancel.dispatch();
@@ -196,16 +191,14 @@ class FileDialog extends FlxBasic
 	 * OpenFL's `FileFilter.extension` is already in `"*.ext"` form, so only
 	 * joining is needed. Defaults to JSON if no filter is supplied.
 	 */
-	function _buildFilterString(?filter:Array<FileFilter>):String
-	{
+	function _buildFilterString(?filter:Array<FileFilter>):String {
 		if (filter == null)
 			// Bare "json" does not match — the wildcard prefix is required.
 			filter = [new FileFilter('Any files', '*.*')];
 		return filter.map(f -> f.extension).join(';');
 	}
 
-	override function destroy()
-	{
+	override function destroy() {
 		_dialog = null;
 		onComplete.destroy();
 		onCancel.destroy();

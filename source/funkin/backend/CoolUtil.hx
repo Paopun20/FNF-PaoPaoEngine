@@ -6,35 +6,26 @@ import lime.utils.Assets as LimeAssets;
 import funkin.backend.network.HttpClient as Client;
 import funkin.backend.utils.Version;
 
-class CoolUtil
-{
+class CoolUtil {
 	public static var version:String = funkin.states.MainMenuState.psychEngineVersion.trim();
 	public static var isoutdated:Bool = false;
 
-	public static function checkForUpdates():String
-	{
+	public static function checkForUpdates():String {
 		var url:String = 'https://github.com/Paopun20/FNF-PaoPaoEngine/raw/refs/heads/main/gitVersion.txt';
-		if (ClientPrefs.data.checkForUpdates)
-		{
+		if (ClientPrefs.data.checkForUpdates) {
 			CoolLog.info('checking for updates...');
-			Client.getRequest(url, function(suss, data)
-			{
-				if (suss)
-				{
-					if (data != null && data.length > 0)
-					{
+			Client.getRequest(url, function(suss, data) {
+				if (suss) {
+					if (data != null && data.length > 0) {
 						CoolLog.info('received data: ' + data);
 						var check = Version.isOutdated(version, data.split('\n')[0].trim());
-						if (check)
-						{
+						if (check) {
 							CoolLog.info('versions arent matching! please update');
 							version = data.split('\n')[0].trim();
 							isoutdated = true;
 						}
 					}
-				}
-				else
-				{
+				} else {
 					if (data != null)
 						CoolLog.error('failed to check for updates (error type: ' + data + ')');
 				}
@@ -43,8 +34,7 @@ class CoolUtil
 		return version;
 	}
 
-	inline public static function quantize(f:Float, snap:Float)
-	{
+	inline public static function quantize(f:Float, snap:Float) {
 		// changed so this actually works lol
 		var m:Float = Math.fround(f * snap);
 		// trace(snap);
@@ -54,8 +44,7 @@ class CoolUtil
 	inline public static function capitalize(text:String)
 		return text.charAt(0).toUpperCase() + text.substr(1).toLowerCase();
 
-	inline public static function coolTextFile(path:String):Array<String>
-	{
+	inline public static function coolTextFile(path:String):Array<String> {
 		var daList:String = null;
 		#if (sys && MODS_ALLOWED)
 		if (FileSystem.exists(path))
@@ -67,8 +56,7 @@ class CoolUtil
 		return daList != null ? listFromString(daList) : [];
 	}
 
-	inline public static function colorFromString(color:String):FlxColor
-	{
+	inline public static function colorFromString(color:String):FlxColor {
 		var hideChars = ~/[\t\n\r]/;
 		var color:String = hideChars.split(color).join('').trim();
 		if (color.startsWith('0x'))
@@ -80,8 +68,7 @@ class CoolUtil
 		return colorNum != null ? colorNum : FlxColor.WHITE;
 	}
 
-	inline public static function listFromString(string:String):Array<String>
-	{
+	inline public static function listFromString(string:String):Array<String> {
 		var daList:Array<String> = [];
 		daList = string.trim().split('\n');
 
@@ -91,24 +78,19 @@ class CoolUtil
 		return daList;
 	}
 
-	public static function floorDecimal(value:Float, decimals:Int):Float
-	{
+	public static function floorDecimal(value:Float, decimals:Int):Float {
 		if (decimals < 1)
 			return Math.floor(value);
 
 		return Math.floor(value * Math.pow(10, decimals)) / Math.pow(10, decimals);
 	}
 
-	inline public static function dominantColor(sprite:flixel.FlxSprite):Int
-	{
+	inline public static function dominantColor(sprite:flixel.FlxSprite):Int {
 		var countByColor:Map<Int, Int> = [];
-		for (col in 0...sprite.frameWidth)
-		{
-			for (row in 0...sprite.frameHeight)
-			{
+		for (col in 0...sprite.frameWidth) {
+			for (row in 0...sprite.frameHeight) {
 				var colorOfThisPixel:FlxColor = sprite.pixels.getPixel32(col, row);
-				if (colorOfThisPixel.alphaFloat > 0.05)
-				{
+				if (colorOfThisPixel.alphaFloat > 0.05) {
 					colorOfThisPixel = FlxColor.fromRGB(colorOfThisPixel.red, colorOfThisPixel.green, colorOfThisPixel.blue, 255);
 					var count:Int = countByColor.exists(colorOfThisPixel) ? countByColor[colorOfThisPixel] : 0;
 					countByColor[colorOfThisPixel] = count + 1;
@@ -119,10 +101,8 @@ class CoolUtil
 		var maxCount = 0;
 		var maxKey:Int = 0; // after the loop this will store the max color
 		countByColor[FlxColor.BLACK] = 0;
-		for (key => count in countByColor)
-		{
-			if (count >= maxCount)
-			{
+		for (key => count in countByColor) {
+			if (count >= maxCount) {
 				maxCount = count;
 				maxKey = key;
 			}
@@ -131,8 +111,7 @@ class CoolUtil
 		return maxKey;
 	}
 
-	inline public static function numberArray(max:Int, ?min = 0):Array<Int>
-	{
+	inline public static function numberArray(max:Int, ?min = 0):Array<Int> {
 		var dumbArray:Array<Int> = [];
 		for (i in min...max)
 			dumbArray.push(i);
@@ -140,8 +119,7 @@ class CoolUtil
 		return dumbArray;
 	}
 
-	inline public static function browserLoad(site:String)
-	{
+	inline public static function browserLoad(site:String) {
 		System.openURL(site);
 		// #if linux
 		// Sys.command('/usr/bin/xdg-open', [site]);
@@ -150,8 +128,7 @@ class CoolUtil
 		// #end
 	}
 
-	inline public static function openFolder(folder:String, absolute:Bool = false)
-	{
+	inline public static function openFolder(folder:String, absolute:Bool = false) {
 		#if sys
 		if (!absolute)
 			folder = Sys.getCwd() + '$folder';
@@ -183,18 +160,15 @@ class CoolUtil
 		@crowplexus
 	**/
 	@:access(flixel.util.FlxSave.validate)
-	inline public static function getSavePath():String
-	{
+	inline public static function getSavePath():String {
 		final company:String = FlxG.stage.application.meta.get('company');
 		// #if (flixel < "5.0.0") return company; #else
 		return '${company}/${flixel.util.FlxSave.validate(FlxG.stage.application.meta.get('file'))}';
 		// #end
 	}
 
-	public static function setTextBorderFromString(text:FlxText, border:String)
-	{
-		switch (border.toLowerCase().trim())
-		{
+	public static function setTextBorderFromString(text:FlxText, border:String) {
+		switch (border.toLowerCase().trim()) {
 			case 'shadow':
 				text.borderStyle = SHADOW;
 			case 'outline':

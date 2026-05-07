@@ -4,8 +4,7 @@ import funkin.frontend.animation.PsychAnimationController;
 import funkin.shaders.RGBPalette;
 import funkin.shaders.RGBPalette.RGBShaderReference;
 
-class StrumNote extends FlxSprite
-{
+class StrumNote extends FlxSprite {
 	public var rgbShader:RGBShaderReference;
 	public var resetAnim:Float = 0;
 
@@ -19,10 +18,8 @@ class StrumNote extends FlxSprite
 
 	public var texture(default, set):String = null;
 
-	private function set_texture(value:String):String
-	{
-		if (texture != value)
-		{
+	private function set_texture(value:String):String {
+		if (texture != value) {
 			texture = value;
 			reloadNote();
 		}
@@ -31,8 +28,7 @@ class StrumNote extends FlxSprite
 
 	public var useRGBShader:Bool = true;
 
-	public function new(x:Float, y:Float, leData:Int, player:Int)
-	{
+	public function new(x:Float, y:Float, leData:Int, player:Int) {
 		animation = new PsychAnimationController(this);
 
 		rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(leData));
@@ -44,8 +40,7 @@ class StrumNote extends FlxSprite
 		if (PlayState.isPixelStage)
 			arr = ClientPrefs.data.arrowRGBPixel[leData];
 
-		if (leData <= arr.length)
-		{
+		if (leData <= arr.length) {
 			@:bypassAccessor
 			{
 				rgbShader.r = arr[0];
@@ -75,14 +70,12 @@ class StrumNote extends FlxSprite
 		playAnim('static');
 	}
 
-	public function reloadNote()
-	{
+	public function reloadNote() {
 		var lastAnim:String = null;
 		if (animation.curAnim != null)
 			lastAnim = animation.curAnim.name;
 
-		if (PlayState.isPixelStage)
-		{
+		if (PlayState.isPixelStage) {
 			loadGraphic(Paths.image('pixelUI/' + texture));
 			width = width / 4;
 			height = height / 5;
@@ -95,8 +88,7 @@ class StrumNote extends FlxSprite
 			animation.add('red', [7]);
 			animation.add('blue', [5]);
 			animation.add('purple', [4]);
-			switch (Math.abs(noteData) % 4)
-			{
+			switch (Math.abs(noteData) % 4) {
 				case 0:
 					animation.add('static', [0]);
 					animation.add('pressed', [4, 8], 12, false);
@@ -114,9 +106,7 @@ class StrumNote extends FlxSprite
 					animation.add('pressed', [7, 11], 12, false);
 					animation.add('confirm', [15, 19], 24, false);
 			}
-		}
-		else
-		{
+		} else {
 			frames = Paths.getSparrowAtlas(texture);
 			animation.addByPrefix('green', 'arrowUP');
 			animation.addByPrefix('blue', 'arrowDOWN');
@@ -126,8 +116,7 @@ class StrumNote extends FlxSprite
 			antialiasing = ClientPrefs.data.antialiasing;
 			setGraphicSize(Std.int(width * 0.7));
 
-			switch (Math.abs(noteData) % 4)
-			{
+			switch (Math.abs(noteData) % 4) {
 				case 0:
 					animation.addByPrefix('static', 'arrowLEFT');
 					animation.addByPrefix('pressed', 'left press', 24, false);
@@ -148,26 +137,21 @@ class StrumNote extends FlxSprite
 		}
 		updateHitbox();
 
-		if (lastAnim != null)
-		{
+		if (lastAnim != null) {
 			playAnim(lastAnim, true);
 		}
 	}
 
-	public function playerPosition()
-	{
+	public function playerPosition() {
 		x += Note.swagWidth * noteData;
 		x += 50;
 		x += ((FlxG.width / 2) * player);
 	}
 
-	override function update(elapsed:Float)
-	{
-		if (resetAnim > 0)
-		{
+	override function update(elapsed:Float) {
+		if (resetAnim > 0) {
 			resetAnim -= elapsed;
-			if (resetAnim <= 0)
-			{
+			if (resetAnim <= 0) {
 				playAnim('static');
 				resetAnim = 0;
 			}
@@ -175,11 +159,9 @@ class StrumNote extends FlxSprite
 		super.update(elapsed);
 	}
 
-	public function playAnim(anim:String, ?force:Bool = false)
-	{
+	public function playAnim(anim:String, ?force:Bool = false) {
 		animation.play(anim, force);
-		if (animation.curAnim != null)
-		{
+		if (animation.curAnim != null) {
 			centerOffsets();
 			centerOrigin();
 		}

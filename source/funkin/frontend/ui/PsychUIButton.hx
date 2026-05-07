@@ -2,8 +2,7 @@ package funkin.frontend.ui;
 
 import funkin.frontend.ui.PsychUIBox.UIStyleData;
 
-class PsychUIButton extends FlxSpriteGroup
-{
+class PsychUIButton extends FlxSpriteGroup {
 	public static final CLICK_EVENT = 'button_click';
 
 	public var name:String;
@@ -30,8 +29,7 @@ class PsychUIButton extends FlxSpriteGroup
 		bgAlpha: 1
 	};
 
-	public function new(x:Float = 0, y:Float = 0, label:String = '', ?onClick:Void->Void = null, ?wid:Int = 80, ?hei:Int = 20)
-	{
+	public function new(x:Float = 0, y:Float = 0, label:String = '', ?onClick:Void->Void = null, ?wid:Int = 80, ?hei:Int = 20) {
 		super(x, y);
 		bg = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
 		add(bg);
@@ -54,40 +52,34 @@ class PsychUIButton extends FlxSpriteGroup
 
 	var _firstFrame:Bool = true;
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		if (_firstFrame)
-		{
+		if (_firstFrame) {
 			bg.color = normalStyle.bgColor;
 			bg.alpha = normalStyle.bgAlpha;
 			text.color = normalStyle.textColor;
 			_firstFrame = false;
 		}
 
-		if (isClicked && FlxG.mouse.released)
-		{
+		if (isClicked && FlxG.mouse.released) {
 			forceCheckNext = true;
 			isClicked = false;
 		}
 
-		if (forceCheckNext || FlxG.mouse.justMoved || FlxG.mouse.justPressed)
-		{
+		if (forceCheckNext || FlxG.mouse.justMoved || FlxG.mouse.justPressed) {
 			var overlapped:Bool = (FlxG.mouse.overlaps(bg, camera));
 
 			forceCheckNext = false;
 
-			if (!isClicked)
-			{
+			if (!isClicked) {
 				var style:UIStyleData = (overlapped) ? hoverStyle : normalStyle;
 				bg.color = style.bgColor;
 				bg.alpha = style.bgAlpha;
 				text.color = style.textColor;
 			}
 
-			if (overlapped && FlxG.mouse.justPressed)
-			{
+			if (overlapped && FlxG.mouse.justPressed) {
 				isClicked = true;
 				bg.color = clickStyle.bgColor;
 				bg.alpha = clickStyle.bgAlpha;
@@ -100,8 +92,7 @@ class PsychUIButton extends FlxSpriteGroup
 		}
 	}
 
-	public function resize(width:Int, height:Int)
-	{
+	public function resize(width:Int, height:Int) {
 		bg.setGraphicSize(width, height);
 		bg.updateHitbox();
 		text.fieldWidth = width;
@@ -109,8 +100,7 @@ class PsychUIButton extends FlxSpriteGroup
 		text.y = bg.y + height / 2 - text.height / 2;
 	}
 
-	function set_label(v:String)
-	{
+	function set_label(v:String) {
 		if (text != null && text.exists)
 			text.text = v;
 		return (label = v);

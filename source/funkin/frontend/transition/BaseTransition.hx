@@ -9,8 +9,7 @@ import flixel.util.FlxColor;
  * Base class for screen transitions in Funkin'
  * Provides common functionality and structure for all transition types
  */
-class BaseTransition extends MusicBeatSubstate
-{
+class BaseTransition extends MusicBeatSubstate {
 	/**
 	 * Callback function executed when transition completes
 	 */
@@ -46,31 +45,26 @@ class BaseTransition extends MusicBeatSubstate
 	 * @param duration Length of transition in seconds
 	 * @param isTransIn Whether transitioning in (true) or out (false)
 	 */
-	public function new(duration:Float = 0.5, isTransIn:Bool = false)
-	{
+	public function new(duration:Float = 0.5, isTransIn:Bool = false) {
 		this.duration = duration;
 		this.isTransIn = isTransIn;
 		super();
 	}
 
-	override function create()
-	{
+	override function create() {
 		// Use the topmost camera for transitions
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 		super.create();
 	}
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		if (!isComplete)
-		{
+		if (!isComplete) {
 			elapsedTime += elapsed;
 			updateTransition(elapsed);
 
-			if (shouldComplete())
-			{
+			if (shouldComplete()) {
 				completeTransition();
 			}
 		}
@@ -81,8 +75,7 @@ class BaseTransition extends MusicBeatSubstate
 	 * Called every frame until transition completes
 	 * @param elapsed Time since last frame
 	 */
-	private function updateTransition(elapsed:Float):Void
-	{
+	private function updateTransition(elapsed:Float):Void {
 		// To be overridden by child classes
 	}
 
@@ -90,8 +83,7 @@ class BaseTransition extends MusicBeatSubstate
 	 * Override this to define completion condition
 	 * @return Whether the transition should complete
 	 */
-	private function shouldComplete():Bool
-	{
+	private function shouldComplete():Bool {
 		return elapsedTime >= duration;
 	}
 
@@ -99,8 +91,7 @@ class BaseTransition extends MusicBeatSubstate
 	 * Called when transition completes
 	 * Can be overridden for cleanup or final effects
 	 */
-	private function completeTransition():Void
-	{
+	private function completeTransition():Void {
 		isComplete = true;
 		close();
 	}
@@ -109,8 +100,7 @@ class BaseTransition extends MusicBeatSubstate
 	 * Gets the width of the screen accounting for camera zoom
 	 * @return Screen width in pixels
 	 */
-	private function getScreenWidth():Int
-	{
+	private function getScreenWidth():Int {
 		return Std.int(FlxG.width / Math.max(camera.zoom, 0.001));
 	}
 
@@ -118,8 +108,7 @@ class BaseTransition extends MusicBeatSubstate
 	 * Gets the height of the screen accounting for camera zoom
 	 * @return Screen height in pixels
 	 */
-	private function getScreenHeight():Int
-	{
+	private function getScreenHeight():Int {
 		return Std.int(FlxG.height / Math.max(camera.zoom, 0.001));
 	}
 
@@ -127,8 +116,7 @@ class BaseTransition extends MusicBeatSubstate
 	 * Gets the progress of the transition (0.0 to 1.0)
 	 * @return Normalized progress value
 	 */
-	private function getProgress():Float
-	{
+	private function getProgress():Float {
 		if (duration <= 0)
 			return 1.0;
 		return Math.min(elapsedTime / duration, 1.0);
@@ -138,12 +126,10 @@ class BaseTransition extends MusicBeatSubstate
 	 * Finalizes and closes the transition
 	 * Executes the finish callback if set
 	 */
-	override function close():Void
-	{
+	override function close():Void {
 		super.close();
 
-		if (finishCallback != null)
-		{
+		if (finishCallback != null) {
 			finishCallback();
 			finishCallback = null;
 		}

@@ -25,10 +25,9 @@ import Random;
 import js.node.Os;
 #end
 
-using PPQolTools;
+using funkin.backend.utils.tools.PPQolTools;
 
-class LoadingState extends EditableState
-{
+class LoadingState extends EditableState {
 	private static var loaded:Int = 0;
 	private static var loadMax:Int = 0;
 	private static var currentAssetName:String = "...";
@@ -41,8 +40,7 @@ class LoadingState extends EditableState
 	private static var arrayMutex:Mutex;
 	#end
 
-	static function flushBitmapCache():Void
-	{
+	static function flushBitmapCache():Void {
 		#if (sys || MULTITHREADED_LOADING)
 		mutex.acquire();
 		#end
@@ -54,21 +52,17 @@ class LoadingState extends EditableState
 		mutex.release();
 		#end
 
-		for (key => bitmap in localRequestedBitmaps)
-		{
-			if (bitmap != null && Paths.cacheBitmap(localOriginalBitmapKeys.get(key), bitmap) != null)
-			{
+		for (key => bitmap in localRequestedBitmaps) {
+			if (bitmap != null && Paths.cacheBitmap(localOriginalBitmapKeys.get(key), bitmap) != null) {
 				// CoolLog.info('finished preloading image $key');
-			}
-			else if (bitmap != null)
+			} else if (bitmap != null)
 				CoolLog.error('failed to cache image $key');
 			else
 				CoolLog.error('failed to load image $key');
 		}
 	}
 
-	inline static private function safeIncrementLoaded(?assetName:String):Void
-	{
+	inline static private function safeIncrementLoaded(?assetName:String):Void {
 		#if (sys || MULTITHREADED_LOADING)
 		if (mutex == null)
 			mutex = new Mutex();
@@ -81,8 +75,7 @@ class LoadingState extends EditableState
 		#end
 	}
 
-	inline static private function safeGetLoadProgress():{loaded:Int, max:Int, assetName:String}
-	{
+	inline static private function safeGetLoadProgress():{loaded:Int, max:Int, assetName:String} {
 		#if (sys || MULTITHREADED_LOADING)
 		if (mutex == null)
 			return {loaded: 0, max: 0, assetName: "..."};
@@ -95,8 +88,7 @@ class LoadingState extends EditableState
 		#end
 	}
 
-	inline static private function safeSetLoadMax(value:Int):Void
-	{
+	inline static private function safeSetLoadMax(value:Int):Void {
 		#if (sys || MULTITHREADED_LOADING)
 		if (mutex == null)
 			mutex = new Mutex();
@@ -108,18 +100,15 @@ class LoadingState extends EditableState
 		#end
 	}
 
-	static private function ftext(text:String):Array<Map<String, String>>
-	{
+	static private function ftext(text:String):Array<Map<String, String>> {
 		var result:Array<Map<String, String>> = [];
 		var i = 0;
 		var len = text.length;
 
-		while (i < len)
-		{
+		while (i < len) {
 			var c = text.charAt(i);
 
-			if (c == '[' && text.charAt(i + 1) != '/')
-			{
+			if (c == '[' && text.charAt(i + 1) != '/') {
 				var tagClose = text.indexOf(']', i);
 				if (tagClose == -1)
 					break;
@@ -128,8 +117,7 @@ class LoadingState extends EditableState
 				var attrs = parseTagAttrs(tagInner);
 
 				var closePos = text.indexOf('[/]', tagClose + 1);
-				if (closePos == -1)
-				{
+				if (closePos == -1) {
 					attrs.set("text", text.substring(tagClose + 1));
 					result.push(attrs);
 					break;
@@ -138,14 +126,11 @@ class LoadingState extends EditableState
 				attrs.set("text", text.substring(tagClose + 1, closePos));
 				result.push(attrs);
 				i = closePos + 3;
-			}
-			else
-			{
+			} else {
 				var nextTag = text.indexOf('[', i);
 				var end = nextTag == -1 ? len : nextTag;
 
-				if (end > i)
-				{
+				if (end > i) {
 					var seg = new Map<String, String>();
 					seg.set("text", text.substring(i, end));
 					result.push(seg);
@@ -157,31 +142,25 @@ class LoadingState extends EditableState
 		return result;
 	}
 
-	static private function parseTagAttrs(inner:String):Map<String, String>
-	{
+	static private function parseTagAttrs(inner:String):Map<String, String> {
 		var attrs = new Map<String, String>();
 
-		for (raw in inner.split(','))
-		{
+		for (raw in inner.split(',')) {
 			var part = StringTools.trim(raw);
 			if (part.length == 0)
 				continue;
 
 			var eq = part.indexOf('=');
-			if (eq != -1)
-			{
+			if (eq != -1) {
 				var key = StringTools.trim(part.substring(0, eq));
 				var val = StringTools.trim(part.substring(eq + 1));
-				if (val.length >= 2)
-				{
+				if (val.length >= 2) {
 					var q = val.charAt(0);
 					if ((q == '"' || q == "'") && val.charAt(val.length - 1) == q)
 						val = val.substring(1, val.length - 1);
 				}
 				attrs.set(key, val);
-			}
-			else
-			{
+			} else {
 				attrs.set(part, "true");
 			}
 		}
@@ -194,32 +173,26 @@ class LoadingState extends EditableState
 	private var _tipGlitchText:String = "";
 	private var _tipGlitchKey:String = "";
 	private var _hasGlitch:Bool = false;
+
 	private static final GLITCH_CHARSET:String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-	function _buildTipSegments():Void
-	{
+	function _buildTipSegments():Void {
 		var prefix = new StringBuf();
 		var suffix = new StringBuf();
 		var foundGlitch = false;
 
-		for (segment in ftextData)
-		{
+		for (segment in ftextData) {
 			var text = segment.get("text");
 			var gkey = segment.get("FX_GTEXT");
 
-			if (gkey != null && !foundGlitch)
-			{
+			if (gkey != null && !foundGlitch) {
 				foundGlitch = true;
 				_hasGlitch = true;
 				_tipGlitchText = text;
 				_tipGlitchKey = gkey;
-			}
-			else if (!foundGlitch)
-			{
+			} else if (!foundGlitch) {
 				prefix.add(text);
-			}
-			else
-			{
+			} else {
 				suffix.add(text);
 			}
 		}
@@ -230,8 +203,7 @@ class LoadingState extends EditableState
 			_tipPrefix = ftextData.map(s -> s.get("text")).join("");
 	}
 
-	function new(target:FlxState, stopMusic:Bool)
-	{
+	function new(target:FlxState, stopMusic:Bool) {
 		this.target = target;
 		this.stopMusic = stopMusic;
 
@@ -260,8 +232,7 @@ class LoadingState extends EditableState
 
 	var timePassed:Float = 0;
 
-	override function create()
-	{
+	override function create() {
 		persistentUpdate = true;
 
 		barGroup = new FlxSpriteGroup();
@@ -321,40 +292,33 @@ class LoadingState extends EditableState
 
 		super.create();
 
-		if (stateChangeDelay <= 0 && checkLoaded())
-		{
+		if (stateChangeDelay <= 0 && checkLoaded()) {
 			dontUpdate = true;
 			onLoad();
 		}
 	}
 
-	function addBehindBar(obj:flixel.FlxBasic)
-	{
+	function addBehindBar(obj:flixel.FlxBasic) {
 		insert(members.indexOf(barGroup), obj);
 	}
 
 	var transitioning:Bool = false;
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		super.update(elapsed);
 
 		// Build tip text using pre-baked segments
 		var rendered:String;
-		if (_hasGlitch)
-		{
+		if (_hasGlitch) {
 			var buf = new StringBuf();
 			buf.add(_tipPrefix);
-			for (i in 0..._tipGlitchText.length)
-			{
+			for (i in 0..._tipGlitchText.length) {
 				var ch = _tipGlitchText.charAt(i);
 				buf.add(ch == _tipGlitchKey ? Random.string(1, GLITCH_CHARSET) : ch);
 			}
 			buf.add(_tipSuffix);
 			rendered = buf.toString();
-		}
-		else
-		{
+		} else {
 			rendered = _tipPrefix;
 		}
 
@@ -363,24 +327,19 @@ class LoadingState extends EditableState
 		if (dontUpdate)
 			return;
 
-		if (!transitioning)
-		{
-			if (!finishedLoading && checkLoaded())
-			{
-				if (stateChangeDelay <= 0)
-				{
+		if (!transitioning) {
+			if (!finishedLoading && checkLoaded()) {
+				if (stateChangeDelay <= 0) {
 					transitioning = true;
 					onLoad();
 					return;
-				}
-				else
+				} else
 					stateChangeDelay = Math.max(0, stateChangeDelay - elapsed);
 			}
 			intendedPercent = loaded / loadMax;
 		}
 
-		if (curPercent != intendedPercent)
-		{
+		if (curPercent != intendedPercent) {
 			if (Math.abs(curPercent - intendedPercent) < 0.001)
 				curPercent = intendedPercent;
 			else
@@ -392,8 +351,7 @@ class LoadingState extends EditableState
 
 		timePassed += elapsed;
 		var dots:String = '';
-		switch (Math.floor(timePassed % 1 * 3))
-		{
+		switch (Math.floor(timePassed % 1 * 3)) {
 			case 0:
 				dots = '.';
 			case 1:
@@ -409,8 +367,7 @@ class LoadingState extends EditableState
 
 	var finishedLoading:Bool = false;
 
-	function onLoad()
-	{
+	function onLoad() {
 		flushBitmapCache();
 		_loaded();
 
@@ -423,8 +380,7 @@ class LoadingState extends EditableState
 		finishedLoading = true;
 	}
 
-	static function _loaded()
-	{
+	static function _loaded() {
 		#if (sys || MULTITHREADED_LOADING)
 		if (mutex != null)
 			mutex.acquire();
@@ -446,8 +402,7 @@ class LoadingState extends EditableState
 		#end
 	}
 
-	public static function checkLoaded():Bool
-	{
+	public static function checkLoaded():Bool {
 		#if (sys || MULTITHREADED_LOADING)
 		if (mutex == null)
 			return false;
@@ -460,8 +415,7 @@ class LoadingState extends EditableState
 		#end
 	}
 
-	public static function loadNextDirectory()
-	{
+	public static function loadNextDirectory() {
 		var directory:String = 'shared';
 		var weekDir:String = StageData.forceNextDirectory;
 		StageData.forceNextDirectory = null;
@@ -475,8 +429,7 @@ class LoadingState extends EditableState
 
 	static var isIntrusive:Bool = false;
 
-	static function getNextState(target:FlxState, stopMusic = false, intrusive:Bool = true):FlxState
-	{
+	static function getNextState(target:FlxState, stopMusic = false, intrusive:Bool = true):FlxState {
 		#if !SHOW_LOADING_SCREEN
 		intrusive = false;
 		#end
@@ -491,15 +444,12 @@ class LoadingState extends EditableState
 			FlxG.sound.music.stop();
 
 		#if (sys || MULTITHREADED_LOADING)
-		while (true)
-		{
-			if (checkLoaded())
-			{
+		while (true) {
+			if (checkLoaded()) {
 				flushBitmapCache();
 				_loaded();
 				break;
-			}
-			else
+			} else
 				Sys.sleep(0.001);
 		}
 		#else
@@ -515,8 +465,7 @@ class LoadingState extends EditableState
 	static var musicToPrepare:Array<String> = [];
 	static var songsToPrepare:Array<String> = [];
 
-	public static function prepare(images:Array<String> = null, sounds:Array<String> = null, music:Array<String> = null)
-	{
+	public static function prepare(images:Array<String> = null, sounds:Array<String> = null, music:Array<String> = null) {
 		#if (sys || MULTITHREADED_LOADING)
 		if (arrayMutex == null)
 			arrayMutex = new Mutex();
@@ -536,10 +485,8 @@ class LoadingState extends EditableState
 	static var initialThreadCompleted:Bool = true;
 	static var dontPreloadDefaultVoices:Bool = false;
 
-	public static function prepareToSong()
-	{
-		if (PlayState.SONG == null)
-		{
+	public static function prepareToSong() {
+		if (PlayState.SONG == null) {
 			#if (sys || MULTITHREADED_LOADING)
 			arrayMutex = new Mutex();
 			arrayMutex.acquire();
@@ -591,8 +538,7 @@ class LoadingState extends EditableState
 		var threadMutex = new Mutex();
 		#end
 
-		function completedThread()
-		{
+		function completedThread() {
 			#if (sys || MULTITHREADED_LOADING)
 			threadMutex.acquire();
 			#end
@@ -602,14 +548,12 @@ class LoadingState extends EditableState
 			threadMutex.release();
 			#end
 
-			if (allCompleted)
-			{
+			if (allCompleted) {
 				clearInvalids();
 				startThreads();
 
 				#if (sys || MULTITHREADED_LOADING)
-				if (mutex != null)
-				{
+				if (mutex != null) {
 					mutex.acquire();
 					initialThreadCompleted = true;
 					mutex.release();
@@ -623,8 +567,7 @@ class LoadingState extends EditableState
 		var song:SwagSong = PlayState.SONG;
 		var folder:String = Paths.formatToSongPath(Song.loadedSongName);
 
-		new Future<Bool>(() ->
-		{
+		new Future<Bool>(() -> {
 			var noteSkin:String = Note.defaultNoteSkin;
 			if (PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1)
 				noteSkin = PlayState.SONG.arrowSkin;
@@ -655,8 +598,7 @@ class LoadingState extends EditableState
 			arrayMutex.release();
 			#end
 
-			try
-			{
+			try {
 				var path:String = Paths.json('$folder/preload');
 				var json:Dynamic = null;
 
@@ -670,18 +612,15 @@ class LoadingState extends EditableState
 				json = Json.parse(Assets.getText(path));
 				#end
 
-				if (json != null)
-				{
+				if (json != null) {
 					var imgs:Array<String> = [];
 					var snds:Array<String> = [];
 					var mscs:Array<String> = [];
-					for (asset in Reflect.fields(json))
-					{
+					for (asset in Reflect.fields(json)) {
 						var filters:Int = Reflect.field(json, asset);
 						var asset:String = asset.trim();
 
-						if (filters < 0 || StageData.validateVisibility(filters))
-						{
+						if (filters < 0 || StageData.validateVisibility(filters)) {
 							if (asset.startsWith('images/'))
 								imgs.push(asset.substr('images/'.length));
 							else if (asset.startsWith('sounds/'))
@@ -692,199 +631,178 @@ class LoadingState extends EditableState
 					}
 					prepare(imgs, snds, mscs);
 				}
-			}
-			catch (e:Dynamic)
-			{
-			}
+			} catch (e:Dynamic) {}
 
 			return true;
-		}, isIntrusive).then((_) -> new Future<Bool>(() ->
-			{
-				if (song.stage == null || song.stage.length < 1)
-					song.stage = StageData.vanillaSongStage(folder);
+		}, isIntrusive).then((_) -> new Future<Bool>(() -> {
+			if (song.stage == null || song.stage.length < 1)
+				song.stage = StageData.vanillaSongStage(folder);
 
-				var stageData:StageFile = StageData.getStageFile(song.stage);
-				if (stageData != null)
-				{
-					var imgs:Array<String> = [];
-					var snds:Array<String> = [];
-					var mscs:Array<String> = [];
-					if (stageData.preload != null)
-					{
-						for (asset in Reflect.fields(stageData.preload))
-						{
-							var filters:Int = Reflect.field(stageData.preload, asset);
-							var asset:String = asset.trim();
+			var stageData:StageFile = StageData.getStageFile(song.stage);
+			if (stageData != null) {
+				var imgs:Array<String> = [];
+				var snds:Array<String> = [];
+				var mscs:Array<String> = [];
+				if (stageData.preload != null) {
+					for (asset in Reflect.fields(stageData.preload)) {
+						var filters:Int = Reflect.field(stageData.preload, asset);
+						var asset:String = asset.trim();
 
-							if (filters < 0 || StageData.validateVisibility(filters))
-							{
-								if (asset.startsWith('images/'))
-									imgs.push(asset.substr('images/'.length));
-								else if (asset.startsWith('sounds/'))
-									snds.push(asset.substr('sounds/'.length));
-								else if (asset.startsWith('music/'))
-									mscs.push(asset.substr('music/'.length));
-							}
+						if (filters < 0 || StageData.validateVisibility(filters)) {
+							if (asset.startsWith('images/'))
+								imgs.push(asset.substr('images/'.length));
+							else if (asset.startsWith('sounds/'))
+								snds.push(asset.substr('sounds/'.length));
+							else if (asset.startsWith('music/'))
+								mscs.push(asset.substr('music/'.length));
 						}
 					}
-
-					if (stageData.objects != null)
-					{
-						for (sprite in stageData.objects)
-						{
-							if (sprite.type == 'sprite' || sprite.type == 'animatedSprite')
-								if ((sprite.filters < 0 || StageData.validateVisibility(sprite.filters)) && !imgs.contains(sprite.image))
-									imgs.push(sprite.image);
-						}
-					}
-					prepare(imgs, snds, mscs);
 				}
 
-				#if (sys || MULTITHREADED_LOADING)
-				arrayMutex.acquire();
-				#end
-				songsToPrepare.push('$folder/Inst');
-				#if (sys || MULTITHREADED_LOADING)
-				arrayMutex.release();
-				#end
-
-				var player1:String = song.player1;
-				var player2:String = song.player2;
-				var gfVersion:String = song.gfVersion;
-				var prefixVocals:String = song.needsVoices ? '$folder/Voices' : null;
-				if (gfVersion == null)
-					gfVersion = 'gf';
-
-				dontPreloadDefaultVoices = false;
-				preloadCharacter(player1, prefixVocals);
-
-				if (!dontPreloadDefaultVoices && prefixVocals != null)
-				{
-					if (Paths.fileExists('$prefixVocals-Player.${Paths.SOUND_EXT}', SOUND, false, 'songs')
-						&& Paths.fileExists('$prefixVocals-Opponent.${Paths.SOUND_EXT}', SOUND, false, 'songs'))
-					{
-						#if (sys || MULTITHREADED_LOADING)
-						arrayMutex.acquire();
-						#end
-						songsToPrepare.push('$prefixVocals-Player');
-						songsToPrepare.push('$prefixVocals-Opponent');
-						#if (sys || MULTITHREADED_LOADING)
-						arrayMutex.release();
-						#end
-					}
-					else if (Paths.fileExists('$prefixVocals.${Paths.SOUND_EXT}', SOUND, false, 'songs'))
-					{
-						#if (sys || MULTITHREADED_LOADING)
-						arrayMutex.acquire();
-						#end
-						songsToPrepare.push(prefixVocals);
-						#if (sys || MULTITHREADED_LOADING)
-						arrayMutex.release();
-						#end
+				if (stageData.objects != null) {
+					for (sprite in stageData.objects) {
+						if (sprite.type == 'sprite' || sprite.type == 'animatedSprite')
+							if ((sprite.filters < 0 || StageData.validateVisibility(sprite.filters)) && !imgs.contains(sprite.image))
+								imgs.push(sprite.image);
 					}
 				}
+				prepare(imgs, snds, mscs);
+			}
 
-				if (player2 != player1)
-				{
+			#if (sys || MULTITHREADED_LOADING)
+			arrayMutex.acquire();
+			#end
+			songsToPrepare.push('$folder/Inst');
+			#if (sys || MULTITHREADED_LOADING)
+			arrayMutex.release();
+			#end
+
+			var player1:String = song.player1;
+			var player2:String = song.player2;
+			var gfVersion:String = song.gfVersion;
+			var prefixVocals:String = song.needsVoices ? '$folder/Voices' : null;
+			if (gfVersion == null)
+				gfVersion = 'gf';
+
+			dontPreloadDefaultVoices = false;
+			preloadCharacter(player1, prefixVocals);
+
+			if (!dontPreloadDefaultVoices && prefixVocals != null) {
+				if (Paths.fileExists('$prefixVocals-Player.${Paths.SOUND_EXT}', SOUND, false, 'songs')
+					&& Paths.fileExists('$prefixVocals-Opponent.${Paths.SOUND_EXT}', SOUND, false, 'songs')) {
 					#if (sys || MULTITHREADED_LOADING)
-					threadMutex.acquire();
-					threadsMax++;
-					threadMutex.release();
-
-					ThreadUtil.execAsync(() ->
-					{
-						try { preloadCharacter(player2, prefixVocals); } catch (e:Dynamic) {}
-						completedThread();
-					});
-					#else
-					threadsMax++;
-					try { preloadCharacter(player2, prefixVocals); } catch (e:Dynamic) {}
-					completedThread();
+					arrayMutex.acquire();
+					#end
+					songsToPrepare.push('$prefixVocals-Player');
+					songsToPrepare.push('$prefixVocals-Opponent');
+					#if (sys || MULTITHREADED_LOADING)
+					arrayMutex.release();
+					#end
+				} else if (Paths.fileExists('$prefixVocals.${Paths.SOUND_EXT}', SOUND, false, 'songs')) {
+					#if (sys || MULTITHREADED_LOADING)
+					arrayMutex.acquire();
+					#end
+					songsToPrepare.push(prefixVocals);
+					#if (sys || MULTITHREADED_LOADING)
+					arrayMutex.release();
 					#end
 				}
+			}
 
-				if (stageData != null && !stageData.hide_girlfriend && gfVersion != player2 && gfVersion != player1)
-				{
-					#if (sys || MULTITHREADED_LOADING)
-					threadMutex.acquire();
-					threadsMax++;
-					threadMutex.release();
-
-					ThreadUtil.execAsync(() ->
-					{
-						try { preloadCharacter(gfVersion); } catch (e:Dynamic) {}
-						completedThread();
-					});
-					#else
-					threadsMax++;
-					try { preloadCharacter(gfVersion); } catch (e:Dynamic) {}
-					completedThread();
-					#end
-				}
-
+			if (player2 != player1) {
 				#if (sys || MULTITHREADED_LOADING)
 				threadMutex.acquire();
-				#end
-				var allCompleted = (threadsCompleted == threadsMax);
-				#if (sys || MULTITHREADED_LOADING)
+				threadsMax++;
 				threadMutex.release();
+
+				ThreadUtil.execAsync(() -> {
+					try {
+						preloadCharacter(player2, prefixVocals);
+					} catch (e:Dynamic) {}
+					completedThread();
+				});
+				#else
+				threadsMax++;
+				try {
+					preloadCharacter(player2, prefixVocals);
+				} catch (e:Dynamic) {}
+				completedThread();
 				#end
+			}
 
-				if (allCompleted)
-				{
-					clearInvalids();
-					startThreads();
+			if (stageData != null && !stageData.hide_girlfriend && gfVersion != player2 && gfVersion != player1) {
+				#if (sys || MULTITHREADED_LOADING)
+				threadMutex.acquire();
+				threadsMax++;
+				threadMutex.release();
 
-					#if (sys || MULTITHREADED_LOADING)
-					if (mutex != null)
-					{
-						mutex.acquire();
-						initialThreadCompleted = true;
-						mutex.release();
-					}
-					#else
+				ThreadUtil.execAsync(() -> {
+					try {
+						preloadCharacter(gfVersion);
+					} catch (e:Dynamic) {}
+					completedThread();
+				});
+				#else
+				threadsMax++;
+				try {
+					preloadCharacter(gfVersion);
+				} catch (e:Dynamic) {}
+				completedThread();
+				#end
+			}
+
+			#if (sys || MULTITHREADED_LOADING)
+			threadMutex.acquire();
+			#end
+			var allCompleted = (threadsCompleted == threadsMax);
+			#if (sys || MULTITHREADED_LOADING)
+			threadMutex.release();
+			#end
+
+			if (allCompleted) {
+				clearInvalids();
+				startThreads();
+
+				#if (sys || MULTITHREADED_LOADING)
+				if (mutex != null) {
+					mutex.acquire();
 					initialThreadCompleted = true;
-					#end
+					mutex.release();
 				}
-				return true;
-			}, isIntrusive)).onError((err:Dynamic) ->
-			{
-				CoolLog.error('ERROR! while preparing song: $err');
-			});
+				#else
+				initialThreadCompleted = true;
+				#end
+			}
+			return true;
+		}, isIntrusive)).onError((err:Dynamic) -> {
+			CoolLog.error('ERROR! while preparing song: $err');
+		});
 	}
 
-	public static function clearInvalids()
-	{
+	public static function clearInvalids() {
 		clearInvalidFrom(imagesToPrepare, 'images', '.png', IMAGE);
 		clearInvalidFrom(soundsToPrepare, 'sounds', '.${Paths.SOUND_EXT}', SOUND);
 		clearInvalidFrom(musicToPrepare, 'music', ' .${Paths.SOUND_EXT}', SOUND);
 		clearInvalidFrom(songsToPrepare, 'songs', '.${Paths.SOUND_EXT}', SOUND, 'songs');
 
-		for (i in 0...4)
-		{
+		for (i in 0...4) {
 			var arr = [imagesToPrepare, soundsToPrepare, musicToPrepare, songsToPrepare][i];
 			// filter() returns a new array; assign back to the static field
 		}
 		imagesToPrepare = imagesToPrepare.filter(x -> x != null);
 		soundsToPrepare = soundsToPrepare.filter(x -> x != null);
-		musicToPrepare  = musicToPrepare.filter(x -> x != null);
-		songsToPrepare  = songsToPrepare.filter(x -> x != null);
+		musicToPrepare = musicToPrepare.filter(x -> x != null);
+		songsToPrepare = songsToPrepare.filter(x -> x != null);
 	}
 
-	static function clearInvalidFrom(arr:Array<String>, prefix:String, ext:String, type:AssetType, ?parentFolder:String = null)
-	{
-		for (folder in arr.copy())
-		{
+	static function clearInvalidFrom(arr:Array<String>, prefix:String, ext:String, type:AssetType, ?parentFolder:String = null) {
+		for (folder in arr.copy()) {
 			var nam:String = folder.trim();
-			if (nam.endsWith('/'))
-			{
-				for (subfolder in Mods.directoriesWithFile(Paths.getSharedPath(), '$prefix/$nam'))
-				{
+			if (nam.endsWith('/')) {
+				for (subfolder in Mods.directoriesWithFile(Paths.getSharedPath(), '$prefix/$nam')) {
 					#if (sys || MULTITHREADED_LOADING)
-					for (file in FileSystem.readDirectory(subfolder))
-					{
-						if (file.endsWith(ext))
-						{
+					for (file in FileSystem.readDirectory(subfolder)) {
+						if (file.endsWith(ext)) {
 							var toAdd:String = nam + haxe.io.Path.withoutExtension(file);
 							if (!arr.contains(toAdd))
 								arr.push(toAdd);
@@ -896,27 +814,23 @@ class LoadingState extends EditableState
 		}
 
 		var i:Int = 0;
-		while (i < arr.length)
-		{
+		while (i < arr.length) {
 			var member:String = arr[i];
 			var myKey = '$prefix/$member$ext';
 			if (parentFolder == 'songs')
 				myKey = '$member$ext';
 
 			var doTrace:Bool = false;
-			if (member.endsWith('/') || (!Paths.fileExists(myKey, type, false, parentFolder) && (doTrace = true)))
-			{
+			if (member.endsWith('/') || (!Paths.fileExists(myKey, type, false, parentFolder) && (doTrace = true))) {
 				arr.splice(i, 1); // O(1) at known index, not O(n) scan
 				if (doTrace)
 					CoolLog.info('Removed invalid $prefix: $member');
-			}
-			else
+			} else
 				i++;
 		}
 	}
 
-	public static function startThreads()
-	{
+	public static function startThreads() {
 		#if (sys || MULTITHREADED_LOADING)
 		mutex = new Mutex();
 		mutex.acquire();
@@ -931,8 +845,7 @@ class LoadingState extends EditableState
 		_threadFunc();
 	}
 
-	static function _threadFunc()
-	{
+	static function _threadFunc() {
 		for (sound in soundsToPrepare)
 			initThread(() -> preloadSound('sounds/$sound'), 'sound $sound');
 		for (music in musicToPrepare)
@@ -943,63 +856,49 @@ class LoadingState extends EditableState
 			initThread(() -> preloadGraphic(image), 'image $image');
 	}
 
-	static function initThread(func:Void->Dynamic, traceData:String)
-	{
+	static function initThread(func:Void->Dynamic, traceData:String) {
 		#if debug
 		var threadSchedule = Sys.time();
 		#end
 
 		#if (sys || MULTITHREADED_LOADING)
-		ThreadUtil.execAsync(() ->
-		{
+		ThreadUtil.execAsync(() -> {
 			#if debug
 			var threadStart = Sys.time();
 			CoolLog.info('$traceData took ${threadStart - threadSchedule}s to start preloading');
 			#end
 
-			try
-			{
-				if (func() != null)
-				{
+			try {
+				if (func() != null) {
 					#if debug
 					var diff = Sys.time() - threadStart;
 					CoolLog.info('finished preloading $traceData in ${diff}s');
 					#end
-				}
-				else
+				} else
 					CoolLog.error('ERROR! fail on preloading $traceData');
-			}
-			catch (e:Dynamic)
-			{
+			} catch (e:Dynamic) {
 				CoolLog.error('ERROR! fail on preloading $traceData: $e');
 			}
 
 			safeIncrementLoaded(traceData);
 		});
 		#else
-		try
-		{
-			if (func() != null)
-			{
+		try {
+			if (func() != null) {
 				#if debug
 				CoolLog.info('finished preloading $traceData');
 				#end
-			}
-			else
+			} else
 				CoolLog.error('ERROR! fail on preloading $traceData');
-		}
-		catch (e:Dynamic)
-		{
+		} catch (e:Dynamic) {
 			CoolLog.error('ERROR! fail on preloading $traceData: $e');
 		}
 		safeIncrementLoaded(traceData);
 		#end
 	}
 
-	inline private static function preloadCharacter(char:String, ?prefixVocals:String)
-	{
-		try
-		{
+	inline private static function preloadCharacter(char:String, ?prefixVocals:String) {
+		try {
 			var path:String = Paths.getPath('characters/$char.json', TEXT);
 			#if MODS_ALLOWED
 			var character:Dynamic = Json.parse(File.getContent(path));
@@ -1017,8 +916,7 @@ class LoadingState extends EditableState
 				isAnimateAtlas = true;
 			#end
 
-			if (!isAnimateAtlas)
-			{
+			if (!isAnimateAtlas) {
 				var split:Array<String> = img.split(',');
 				#if (sys || MULTITHREADED_LOADING)
 				if (arrayMutex != null)
@@ -1032,20 +930,17 @@ class LoadingState extends EditableState
 				#end
 			}
 			#if flxanimate
-			else
-			{
+			else {
 				#if (sys || MULTITHREADED_LOADING)
 				if (arrayMutex != null)
 					arrayMutex.acquire();
 				#end
-				for (i in 0...10)
-				{
+				for (i in 0...10) {
 					var st:String = '$i';
 					if (i == 0)
 						st = '';
 
-					if (Paths.fileExists('images/$img/spritemap$st.png', IMAGE))
-					{
+					if (Paths.fileExists('images/$img/spritemap$st.png', IMAGE)) {
 						imagesToPrepare.push('$img/spritemap$st');
 						break;
 					}
@@ -1057,8 +952,7 @@ class LoadingState extends EditableState
 			}
 			#end
 
-			if (prefixVocals != null && character.vocals_file != null && character.vocals_file.length > 0)
-			{
+			if (prefixVocals != null && character.vocals_file != null && character.vocals_file.length > 0) {
 				#if (sys || MULTITHREADED_LOADING)
 				if (arrayMutex != null)
 					arrayMutex.acquire();
@@ -1072,21 +966,16 @@ class LoadingState extends EditableState
 				if (char == PlayState.SONG.player1)
 					dontPreloadDefaultVoices = true;
 			}
-		}
-		catch (e:haxe.Exception)
-		{
+		} catch (e:haxe.Exception) {
 			CoolLog.error(e.details());
 		}
 	}
 
-	static function preloadSound(key:String, ?path:String, ?modsAllowed:Bool = true, ?beepOnNull:Bool = true):Null<Sound>
-	{
+	static function preloadSound(key:String, ?path:String, ?modsAllowed:Bool = true, ?beepOnNull:Bool = true):Null<Sound> {
 		var file:String = Paths.getPath(Language.getFileTranslation(key) + '.${Paths.SOUND_EXT}', SOUND, path, modsAllowed);
 
-		if (!Paths.currentTrackedSounds.exists(file))
-		{
-			if (#if (sys || MULTITHREADED_LOADING) FileSystem.exists(file) || #end OpenFlAssets.exists(file, SOUND))
-			{
+		if (!Paths.currentTrackedSounds.exists(file)) {
+			if (#if (sys || MULTITHREADED_LOADING) FileSystem.exists(file) || #end OpenFlAssets.exists(file, SOUND)) {
 				var sound:Sound = #if (sys || MULTITHREADED_LOADING) Sound.fromFile(file) #else OpenFlAssets.getSound(file, false) #end;
 				#if (sys || MULTITHREADED_LOADING)
 				if (mutex != null)
@@ -1097,9 +986,7 @@ class LoadingState extends EditableState
 				if (mutex != null)
 					mutex.release();
 				#end
-			}
-			else if (beepOnNull)
-			{
+			} else if (beepOnNull) {
 				CoolLog.error('SOUND NOT FOUND: $key, PATH: $path');
 				FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
 				return FlxAssets.getSoundAddExtension('flixel/sounds/beep', true);
@@ -1118,20 +1005,16 @@ class LoadingState extends EditableState
 		return Paths.currentTrackedSounds.get(file);
 	}
 
-	static function preloadGraphic(key:String):Null<BitmapData>
-	{
-		try
-		{
+	static function preloadGraphic(key:String):Null<BitmapData> {
+		try {
 			var requestKey:String = 'images/$key';
 			#if TRANSLATIONS_ALLOWED requestKey = Language.getFileTranslation(requestKey); #end
 			if (requestKey.lastIndexOf('.') < 0)
 				requestKey += '.png';
 
-			if (!Paths.currentTrackedAssets.exists(requestKey))
-			{
+			if (!Paths.currentTrackedAssets.exists(requestKey)) {
 				var file:String = Paths.getPath(requestKey, IMAGE);
-				if (#if (sys || MULTITHREADED_LOADING) FileSystem.exists(file) || #end OpenFlAssets.exists(file, IMAGE))
-				{
+				if (#if (sys || MULTITHREADED_LOADING) FileSystem.exists(file) || #end OpenFlAssets.exists(file, IMAGE)) {
 					#if (sys || MULTITHREADED_LOADING)
 					var bitmap:BitmapData = BitmapData.fromFile(file);
 					#else
@@ -1150,15 +1033,12 @@ class LoadingState extends EditableState
 					#end
 
 					return bitmap;
-				}
-				else
+				} else
 					CoolLog.error('no such image $key exists');
 			}
 
 			return Paths.currentTrackedAssets.get(requestKey).bitmap;
-		}
-		catch (e:haxe.Exception)
-		{
+		} catch (e:haxe.Exception) {
 			CoolLog.error('ERROR! fail on preloading image $key');
 		}
 

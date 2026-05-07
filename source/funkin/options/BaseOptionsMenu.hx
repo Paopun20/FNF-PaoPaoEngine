@@ -9,8 +9,7 @@ import funkin.objects.AttachedText;
 import funkin.options.Option;
 import funkin.backend.utils.InputFormatter;
 
-class BaseOptionsMenu extends MusicBeatSubstate
-{
+class BaseOptionsMenu extends MusicBeatSubstate {
 	private var curOption:Option = null;
 	private var curSelected:Int = 0;
 	private var optionsArray:Array<Option>;
@@ -27,8 +26,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 
 	public var bg:FlxSprite;
 
-	public function new()
-	{
+	public function new() {
 		super();
 
 		if (title == null)
@@ -71,8 +69,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		descText.borderSize = 2.4;
 		add(descText);
 
-		for (i in 0...optionsArray.length)
-		{
+		for (i in 0...optionsArray.length) {
 			var optionText:Alphabet = new Alphabet(220, 260, optionsArray[i].name, false);
 			optionText.isMenuItem = true;
 			/*optionText.forceX = 300;
@@ -80,15 +77,12 @@ class BaseOptionsMenu extends MusicBeatSubstate
 			optionText.targetY = i;
 			grpOptions.add(optionText);
 
-			if (optionsArray[i].type == BOOL)
-			{
+			if (optionsArray[i].type == BOOL) {
 				var checkbox:CheckboxThingie = new CheckboxThingie(optionText.x - 105, optionText.y, Std.string(optionsArray[i].getValue()) == 'true');
 				checkbox.sprTracker = optionText;
 				checkbox.ID = i;
 				checkboxGroup.add(checkbox);
-			}
-			else
-			{
+			} else {
 				optionText.x -= 80;
 				optionText.startPosition.x -= 80;
 				// optionText.xAdd -= 80;
@@ -107,8 +101,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		reloadCheckboxes();
 	}
 
-	public function addOption(option:Option)
-	{
+	public function addOption(option:Option) {
 		if (optionsArray == null || optionsArray.length < 1)
 			optionsArray = [];
 		optionsArray.push(option);
@@ -125,38 +118,30 @@ class BaseOptionsMenu extends MusicBeatSubstate
 	var bindingText:Alphabet;
 	var bindingText2:Alphabet;
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		if (bindingKey)
-		{
+		if (bindingKey) {
 			bindingKeyUpdate(elapsed);
 			return;
 		}
 
-		if (controls.UI_UP_P)
-		{
+		if (controls.UI_UP_P) {
 			changeSelection(-1);
 		}
-		if (controls.UI_DOWN_P)
-		{
+		if (controls.UI_DOWN_P) {
 			changeSelection(1);
 		}
 
-		if (controls.BACK)
-		{
+		if (controls.BACK) {
 			close();
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 		}
 
-		if (nextAccept <= 0)
-		{
-			switch (curOption.type)
-			{
+		if (nextAccept <= 0) {
+			switch (curOption.type) {
 				case BOOL:
-					if (controls.ACCEPT)
-					{
+					if (controls.ACCEPT) {
 						FlxG.sound.play(Paths.sound('scrollMenu'));
 						curOption.setValue((curOption.getValue() == true) ? false : true);
 						curOption.change();
@@ -164,8 +149,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 					}
 
 				case KEYBIND:
-					if (controls.ACCEPT)
-					{
+					if (controls.ACCEPT) {
 						bindingBlack = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
 						bindingBlack.scale.set(FlxG.width, FlxG.height);
 						bindingBlack.updateHitbox();
@@ -189,19 +173,15 @@ class BaseOptionsMenu extends MusicBeatSubstate
 					}
 
 				default:
-					if (controls.UI_LEFT || controls.UI_RIGHT)
-					{
+					if (controls.UI_LEFT || controls.UI_RIGHT) {
 						var pressed = (controls.UI_LEFT_P || controls.UI_RIGHT_P);
-						if (holdTime > 0.5 || pressed)
-						{
-							if (pressed)
-							{
+						if (holdTime > 0.5 || pressed) {
+							if (pressed) {
 								var add:Dynamic = null;
 								if (curOption.type != STRING)
 									add = controls.UI_LEFT ? -curOption.changeValue : curOption.changeValue;
 
-								switch (curOption.type)
-								{
+								switch (curOption.type) {
 									case INT, FLOAT, PERCENT:
 										holdValue = curOption.getValue() + add;
 										if (holdValue < curOption.minValue)
@@ -209,13 +189,10 @@ class BaseOptionsMenu extends MusicBeatSubstate
 										else if (holdValue > curOption.maxValue)
 											holdValue = curOption.maxValue;
 
-										if (curOption.type == INT)
-										{
+										if (curOption.type == INT) {
 											holdValue = Math.round(holdValue);
 											curOption.setValue(holdValue);
-										}
-										else
-										{
+										} else {
 											holdValue = FlxMath.roundDecimal(holdValue, curOption.decimals);
 											curOption.setValue(holdValue);
 										}
@@ -241,17 +218,14 @@ class BaseOptionsMenu extends MusicBeatSubstate
 								updateTextFrom(curOption);
 								curOption.change();
 								FlxG.sound.play(Paths.sound('scrollMenu'));
-							}
-							else if (curOption.type != STRING)
-							{
+							} else if (curOption.type != STRING) {
 								holdValue += curOption.scrollSpeed * elapsed * (controls.UI_LEFT ? -1 : 1);
 								if (holdValue < curOption.minValue)
 									holdValue = curOption.minValue;
 								else if (holdValue > curOption.maxValue)
 									holdValue = curOption.maxValue;
 
-								switch (curOption.type)
-								{
+								switch (curOption.type) {
 									case INT:
 										curOption.setValue(Math.round(holdValue));
 
@@ -267,30 +241,23 @@ class BaseOptionsMenu extends MusicBeatSubstate
 
 						if (curOption.type != STRING)
 							holdTime += elapsed;
-					}
-					else if (controls.UI_LEFT_R || controls.UI_RIGHT_R)
-					{
+					} else if (controls.UI_LEFT_R || controls.UI_RIGHT_R) {
 						if (holdTime > 0.5)
 							FlxG.sound.play(Paths.sound('scrollMenu'));
 						holdTime = 0;
 					}
 			}
 
-			if (controls.RESET)
-			{
+			if (controls.RESET) {
 				var leOption:Option = optionsArray[curSelected];
-				if (leOption.type != KEYBIND)
-				{
+				if (leOption.type != KEYBIND) {
 					leOption.setValue(leOption.defaultValue);
-					if (leOption.type != BOOL)
-					{
+					if (leOption.type != BOOL) {
 						if (leOption.type == STRING)
 							leOption.curOption = leOption.options.indexOf(leOption.getValue());
 						updateTextFrom(leOption);
 					}
-				}
-				else
-				{
+				} else {
 					leOption.setValue(!Controls.instance.controllerMode ? leOption.defaultKeys.keyboard : leOption.defaultKeys.gamepad);
 					updateBind(leOption);
 				}
@@ -300,28 +267,21 @@ class BaseOptionsMenu extends MusicBeatSubstate
 			}
 		}
 
-		if (nextAccept > 0)
-		{
+		if (nextAccept > 0) {
 			nextAccept -= 1;
 		}
 	}
 
-	function bindingKeyUpdate(elapsed:Float)
-	{
-		if (FlxG.keys.pressed.ESCAPE || FlxG.gamepads.anyPressed(B))
-		{
+	function bindingKeyUpdate(elapsed:Float) {
+		if (FlxG.keys.pressed.ESCAPE || FlxG.gamepads.anyPressed(B)) {
 			holdingEsc += elapsed;
-			if (holdingEsc > 0.5)
-			{
+			if (holdingEsc > 0.5) {
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				closeBinding();
 			}
-		}
-		else if (FlxG.keys.pressed.BACKSPACE || FlxG.gamepads.anyPressed(BACK))
-		{
+		} else if (FlxG.keys.pressed.BACKSPACE || FlxG.gamepads.anyPressed(BACK)) {
 			holdingEsc += elapsed;
-			if (holdingEsc > 0.5)
-			{
+			if (holdingEsc > 0.5) {
 				if (!controls.controllerMode)
 					curOption.keys.keyboard = NONE;
 				else
@@ -330,48 +290,36 @@ class BaseOptionsMenu extends MusicBeatSubstate
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				closeBinding();
 			}
-		}
-		else
-		{
+		} else {
 			holdingEsc = 0;
 			var changed:Bool = false;
-			if (!controls.controllerMode)
-			{
-				if (FlxG.keys.justPressed.ANY || FlxG.keys.justReleased.ANY)
-				{
+			if (!controls.controllerMode) {
+				if (FlxG.keys.justPressed.ANY || FlxG.keys.justReleased.ANY) {
 					var keyPressed:FlxKey = cast(FlxG.keys.firstJustPressed(), FlxKey);
 					var keyReleased:FlxKey = cast(FlxG.keys.firstJustReleased(), FlxKey);
 
-					if (keyPressed != NONE && keyPressed != ESCAPE && keyPressed != BACKSPACE)
-					{
+					if (keyPressed != NONE && keyPressed != ESCAPE && keyPressed != BACKSPACE) {
 						changed = true;
 						curOption.keys.keyboard = keyPressed;
-					}
-					else if (keyReleased != NONE && (keyReleased == ESCAPE || keyReleased == BACKSPACE))
-					{
+					} else if (keyReleased != NONE && (keyReleased == ESCAPE || keyReleased == BACKSPACE)) {
 						changed = true;
 						curOption.keys.keyboard = keyReleased;
 					}
 				}
-			}
-			else if (FlxG.gamepads.anyJustPressed(ANY)
+			} else if (FlxG.gamepads.anyJustPressed(ANY)
 				|| FlxG.gamepads.anyJustPressed(LEFT_TRIGGER)
 				|| FlxG.gamepads.anyJustPressed(RIGHT_TRIGGER)
-				|| FlxG.gamepads.anyJustReleased(ANY))
-			{
+				|| FlxG.gamepads.anyJustReleased(ANY)) {
 				var keyPressed:FlxGamepadInputID = NONE;
 				var keyReleased:FlxGamepadInputID = NONE;
 				if (FlxG.gamepads.anyJustPressed(LEFT_TRIGGER))
 					keyPressed = LEFT_TRIGGER; // it wasnt working for some reason
 				else if (FlxG.gamepads.anyJustPressed(RIGHT_TRIGGER))
 					keyPressed = RIGHT_TRIGGER; // it wasnt working for some reason
-				else
-				{
-					for (i in 0...FlxG.gamepads.numActiveGamepads)
-					{
+				else {
+					for (i in 0...FlxG.gamepads.numActiveGamepads) {
 						var gamepad:FlxGamepad = FlxG.gamepads.getByID(i);
-						if (gamepad != null)
-						{
+						if (gamepad != null) {
 							keyPressed = gamepad.firstJustPressedID();
 							keyReleased = gamepad.firstJustReleasedID();
 							if (keyPressed != NONE || keyReleased != NONE)
@@ -380,30 +328,23 @@ class BaseOptionsMenu extends MusicBeatSubstate
 					}
 				}
 
-				if (keyPressed != NONE && keyPressed != FlxGamepadInputID.BACK && keyPressed != FlxGamepadInputID.B)
-				{
+				if (keyPressed != NONE && keyPressed != FlxGamepadInputID.BACK && keyPressed != FlxGamepadInputID.B) {
 					changed = true;
 					curOption.keys.gamepad = keyPressed;
-				}
-				else if (keyReleased != NONE && (keyReleased == FlxGamepadInputID.BACK || keyReleased == FlxGamepadInputID.B))
-				{
+				} else if (keyReleased != NONE && (keyReleased == FlxGamepadInputID.BACK || keyReleased == FlxGamepadInputID.B)) {
 					changed = true;
 					curOption.keys.gamepad = keyReleased;
 				}
 			}
 
-			if (changed)
-			{
+			if (changed) {
 				var key:String = null;
-				if (!controls.controllerMode)
-				{
+				if (!controls.controllerMode) {
 					if (curOption.keys.keyboard == null)
 						curOption.keys.keyboard = 'NONE';
 					curOption.setValue(curOption.keys.keyboard);
 					key = InputFormatter.getKeyName(FlxKey.fromString(curOption.keys.keyboard));
-				}
-				else
-				{
+				} else {
 					if (curOption.keys.gamepad == null)
 						curOption.keys.gamepad = 'NONE';
 					curOption.setValue(curOption.keys.gamepad);
@@ -418,12 +359,10 @@ class BaseOptionsMenu extends MusicBeatSubstate
 
 	final MAX_KEYBIND_WIDTH = 320;
 
-	function updateBind(?text:String = null, ?option:Option = null)
-	{
+	function updateBind(?text:String = null, ?option:Option = null) {
 		if (option == null)
 			option = curOption;
-		if (text == null)
-		{
+		if (text == null) {
 			text = option.getValue();
 			if (text == null)
 				text = 'NONE';
@@ -450,18 +389,15 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		bind.destroy();
 	}
 
-	function playstationCheck(alpha:Alphabet)
-	{
+	function playstationCheck(alpha:Alphabet) {
 		if (!controls.controllerMode)
 			return;
 
 		var gamepad:FlxGamepad = FlxG.gamepads.firstActive;
 		var model:FlxGamepadModel = gamepad != null ? gamepad.detectedModel : UNKNOWN;
 		var letter = alpha.letters[0];
-		if (model == PS4)
-		{
-			switch (alpha.text)
-			{
+		if (model == PS4) {
+			switch (alpha.text) {
 				case '[', ']': // Square and Triangle respectively
 					letter.image = 'alphabet_playstation';
 					letter.updateHitbox();
@@ -472,8 +408,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		}
 	}
 
-	function closeBinding()
-	{
+	function closeBinding() {
 		bindingKey = false;
 		bindingBlack.destroy();
 		remove(bindingBlack);
@@ -486,10 +421,8 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		ClientPrefs.toggleVolumeKeys(true);
 	}
 
-	function updateTextFrom(option:Option)
-	{
-		if (option.type == KEYBIND)
-		{
+	function updateTextFrom(option:Option) {
+		if (option.type == KEYBIND) {
 			updateBind(option);
 			return;
 		}
@@ -502,23 +435,20 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		option.text = text.replace('%v', val).replace('%d', def);
 	}
 
-	function changeSelection(change:Int = 0)
-	{
+	function changeSelection(change:Int = 0) {
 		curSelected = FlxMath.wrap(curSelected + change, 0, optionsArray.length - 1);
 
 		descText.text = optionsArray[curSelected].description;
 		descText.screenCenter(Y);
 		descText.y += 270;
 
-		for (num => item in grpOptions.members)
-		{
+		for (num => item in grpOptions.members) {
 			item.targetY = num - curSelected;
 			item.alpha = 0.6;
 			if (item.targetY == 0)
 				item.alpha = 1;
 		}
-		for (text in grpTexts)
-		{
+		for (text in grpTexts) {
 			text.alpha = 0.6;
 			if (text.ID == curSelected)
 				text.alpha = 1;

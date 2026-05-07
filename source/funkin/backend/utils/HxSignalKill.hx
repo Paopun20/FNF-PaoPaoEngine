@@ -3,9 +3,7 @@ package funkin.backend.utils;
 import haxe.Exception;
 import sys.thread.Mutex;
 
-class HxSignalKillUninitializedException extends Exception
-{
-}
+class HxSignalKillUninitializedException extends Exception {}
 
 #if cpp
 @:cppInclude('signal.h')
@@ -31,8 +29,7 @@ static void _haxe_signal_trampoline(int sig)
 }
 ')
 #end
-class HxSignalKill
-{
+class HxSignalKill {
 	static var _initialized:Bool = false;
 
 	// Thread safety: only one thread dispatches signals
@@ -58,8 +55,7 @@ class HxSignalKill
 
 	public static var onSignal:(Int) -> Void = null;
 
-	public static function init():Void
-	{
+	public static function init():Void {
 		if (_initialized)
 			return;
 
@@ -74,8 +70,7 @@ class HxSignalKill
 	 * Poll signals from native queue.
 	 * Safe to call from multiple threads.
 	 */
-	public static function updateSignal():Void
-	{
+	public static function updateSignal():Void {
 		if (!_initialized)
 			throw new HxSignalKillUninitializedException("HxSignalKill is not initialized");
 
@@ -84,10 +79,8 @@ class HxSignalKill
 		if (!_dispatchMutex.tryAcquire())
 			return;
 
-		try
-		{
-			while (true)
-			{
+		try {
+			while (true) {
 				var sig:Int = 0;
 
 				untyped __cpp__('
@@ -110,10 +103,7 @@ class HxSignalKill
 				_pendingSignals.push(sig);
 				_pendingMutex.release();
 			}
-		}
-		catch (e)
-		{
-		}
+		} catch (e) {}
 
 		_dispatchMutex.release();
 		#end
@@ -122,8 +112,7 @@ class HxSignalKill
 	/**
 	 * Call this ONLY on your main thread (e.g. game loop)
 	 */
-	public static function dispatchPending():Void
-	{
+	public static function dispatchPending():Void {
 		var signals:Array<Int>;
 
 		_pendingMutex.acquire();
@@ -131,20 +120,17 @@ class HxSignalKill
 		_pendingSignals = [];
 		_pendingMutex.release();
 
-		for (sig in signals)
-		{
+		for (sig in signals) {
 			_dispatch(sig);
 		}
 	}
 
-	static function _dispatch(sig:Int):Void
-	{
+	static function _dispatch(sig:Int):Void {
 		// Generic hook first
 		if (onSignal != null)
 			onSignal(sig);
 
-		switch (sig)
-		{
+		switch (sig) {
 			case 2:
 				if (onSIGINT != null)
 					onSIGINT();
@@ -171,10 +157,8 @@ class HxSignalKill
 		}
 	}
 
-	public static function name(sig:Int):String
-	{
-		return switch sig
-		{
+	public static function name(sig:Int):String {
+		return switch sig {
 			case 2: "SIGINT";
 			case 15: "SIGTERM";
 
@@ -191,8 +175,7 @@ class HxSignalKill
 	}
 
 	#if cpp
-	static function _hookSignals():Void
-	{
+	static function _hookSignals():Void {
 		untyped __cpp__('
             signal(SIGINT,  _haxe_signal_trampoline);
             signal(SIGTERM, _haxe_signal_trampoline);

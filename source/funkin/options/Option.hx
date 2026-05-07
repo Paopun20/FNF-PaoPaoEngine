@@ -1,13 +1,11 @@
 package funkin.options;
 
-typedef Keybind =
-{
+typedef Keybind = {
 	keyboard:String,
 	gamepad:String
 }
 
-enum OptionType
-{
+enum OptionType {
 	// Bool will use checkboxes
 	// Everything else will use a text
 	BOOL;
@@ -18,8 +16,7 @@ enum OptionType
 	KEYBIND;
 }
 
-class Option
-{
+class Option {
 	public var child:Alphabet;
 	public var text(get, set):String;
 	public var onChange:Void->Void = null; // Pressed enter (on Bool type options) or pressed/held left/right (on other types)
@@ -44,8 +41,7 @@ class Option
 	public var keys:Keybind = null; // Only used in keybind type
 
 	public function new(name:String, description:String = '', variable:String, type:OptionType = BOOL, ?options:Array<String> = null,
-			?translation:String = null)
-	{
+			?translation:String = null) {
 		_name = name;
 		_translationKey = translation != null ? translation : _name;
 		this.name = Language.getPhrase('setting_$_translationKey', name);
@@ -56,8 +52,7 @@ class Option
 
 		if (this.type != KEYBIND)
 			this.defaultValue = Reflect.getProperty(ClientPrefs.defaultData, variable);
-		switch (type)
-		{
+		switch (type) {
 			case BOOL:
 				if (defaultValue == null)
 					defaultValue = false;
@@ -85,13 +80,11 @@ class Option
 				keys = {gamepad: 'NONE', keyboard: 'NONE'};
 		}
 
-		try
-		{
+		try {
 			if (getValue() == null)
 				setValue(defaultValue);
 
-			switch (type)
-			{
+			switch (type) {
 				case STRING:
 					var num:Int = options.indexOf(getValue());
 					if (num > -1)
@@ -99,31 +92,24 @@ class Option
 
 				default:
 			}
-		}
-		catch (e)
-		{
-		}
+		} catch (e) {}
 	}
 
-	public function change()
-	{
+	public function change() {
 		// nothing lol
 		if (onChange != null)
 			onChange();
 	}
 
-	dynamic public function getValue():Dynamic
-	{
+	dynamic public function getValue():Dynamic {
 		var value = Reflect.getProperty(ClientPrefs.data, variable);
 		if (type == KEYBIND)
 			return !Controls.instance.controllerMode ? value.keyboard : value.gamepad;
 		return value;
 	}
 
-	dynamic public function setValue(value:Dynamic)
-	{
-		if (type == KEYBIND)
-		{
+	dynamic public function setValue(value:Dynamic) {
+		if (type == KEYBIND) {
 			var keys = Reflect.getProperty(ClientPrefs.data, variable);
 			if (!Controls.instance.controllerMode)
 				keys.keyboard = value;
@@ -141,10 +127,8 @@ class Option
 	private function get_text()
 		return _text;
 
-	private function set_text(newValue:String = '')
-	{
-		if (child != null)
-		{
+	private function set_text(newValue:String = '') {
+		if (child != null) {
 			_text = newValue;
 			child.text = Language.getPhrase('setting_$_translationKey-${getValue()}', _text);
 			return _text;

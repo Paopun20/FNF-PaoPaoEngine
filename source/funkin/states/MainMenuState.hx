@@ -8,16 +8,14 @@ import funkin.options.OptionsState;
 import CompileTime;
 import DateTools;
 
-enum MainMenuColumn
-{
+enum MainMenuColumn {
 	LEFT;
 	CENTER;
 	RIGHT;
 }
 
 @:build(funkin.backend.utils.macro.VersionMacro.build())
-class MainMenuState extends EditableState
-{
+class MainMenuState extends EditableState {
 	public static var psychEngineVersion:String = '1.0.4'; // This is also used legacy mods from Psych Engine
 
 	@:injectvar
@@ -43,8 +41,7 @@ class MainMenuState extends EditableState
 
 	static var showOutdatedWarning:Bool = true;
 
-	override function create()
-	{
+	override function create() {
 		super.create();
 
 		#if MODS_ALLOWED
@@ -84,8 +81,7 @@ class MainMenuState extends EditableState
 		menuItems = new FlxTypedGroup<FlxSprite>();
 		add(menuItems);
 
-		for (num => option in optionShit)
-		{
+		for (num => option in optionShit) {
 			var item:FlxSprite = createMenuItem(option, 0, (num * 140) + 90);
 			item.y += (4 - optionShit.length) * 70; // Offsets for when you have anything other than 4 items
 			item.screenCenter(X);
@@ -93,8 +89,7 @@ class MainMenuState extends EditableState
 
 		if (leftOption != null)
 			leftItem = createMenuItem(leftOption, 60, 490);
-		if (rightOption != null)
-		{
+		if (rightOption != null) {
 			rightItem = createMenuItem(rightOption, FlxG.width - 60, 490);
 			rightItem.x -= rightItem.width;
 		}
@@ -123,15 +118,11 @@ class MainMenuState extends EditableState
 		#end
 
 		#if CHECK_FOR_UPDATES
-		if (ClientPrefs.data.checkForUpdates == false)
-		{
+		if (ClientPrefs.data.checkForUpdates == false) {
 			showOutdatedWarning = false;
 			persistentUpdate = false;
-		}
-		else if (showOutdatedWarning)
-		{
-			if (CoolUtil.isoutdated)
-			{
+		} else if (showOutdatedWarning) {
+			if (CoolUtil.isoutdated) {
 				persistentUpdate = false;
 				showOutdatedWarning = false;
 				openSubState(new funkin.substates.OutdatedSubState());
@@ -142,8 +133,7 @@ class MainMenuState extends EditableState
 		FlxG.camera.follow(camFollow, null, 0.15);
 	}
 
-	function createMenuItem(name:String, x:Float, y:Float):FlxSprite
-	{
+	function createMenuItem(name:String, x:Float, y:Float):FlxSprite {
 		var menuItem:FlxSprite = new FlxSprite(x, y);
 		menuItem.frames = Paths.getSparrowAtlas('mainmenu/menu_$name');
 		menuItem.animation.addByPrefix('idle', '$name idle', 24, true);
@@ -161,13 +151,11 @@ class MainMenuState extends EditableState
 
 	var timeNotMoving:Float = 0;
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		if (FlxG.sound.music.volume < 0.8)
 			FlxG.sound.music.volume = Math.min(FlxG.sound.music.volume + 0.5 * elapsed, 0.8);
 
-		if (!selectedSomethin)
-		{
+		if (!selectedSomethin) {
 			if (controls.UI_UP_P)
 				changeItem(-1);
 
@@ -184,8 +172,7 @@ class MainMenuState extends EditableState
 				timeNotMoving = 0;
 
 				var selectedItem:FlxSprite;
-				switch (curColumn)
-				{
+				switch (curColumn) {
 					case CENTER:
 						selectedItem = menuItems.members[curSelected];
 					case LEFT:
@@ -194,37 +181,27 @@ class MainMenuState extends EditableState
 						selectedItem = rightItem;
 				}
 
-				if (leftItem != null && FlxG.mouse.overlaps(leftItem))
-				{
+				if (leftItem != null && FlxG.mouse.overlaps(leftItem)) {
 					allowMouse = true;
-					if (selectedItem != leftItem)
-					{
+					if (selectedItem != leftItem) {
 						curColumn = LEFT;
 						changeItem();
 					}
-				}
-				else if (rightItem != null && FlxG.mouse.overlaps(rightItem))
-				{
+				} else if (rightItem != null && FlxG.mouse.overlaps(rightItem)) {
 					allowMouse = true;
-					if (selectedItem != rightItem)
-					{
+					if (selectedItem != rightItem) {
 						curColumn = RIGHT;
 						changeItem();
 					}
-				}
-				else
-				{
+				} else {
 					var dist:Float = -1;
 					var distItem:Int = -1;
-					for (i in 0...optionShit.length)
-					{
+					for (i in 0...optionShit.length) {
 						var memb:FlxSprite = menuItems.members[i];
-						if (FlxG.mouse.overlaps(memb))
-						{
+						if (FlxG.mouse.overlaps(memb)) {
 							var distance:Float = Math.sqrt(Math.pow(memb.getGraphicMidpoint().x - FlxG.mouse.screenX, 2)
 								+ Math.pow(memb.getGraphicMidpoint().y - FlxG.mouse.screenY, 2));
-							if (dist < 0 || distance < dist)
-							{
+							if (dist < 0 || distance < dist) {
 								dist = distance;
 								distItem = i;
 								allowMouse = true;
@@ -232,60 +209,49 @@ class MainMenuState extends EditableState
 						}
 					}
 
-					if (distItem != -1 && selectedItem != menuItems.members[distItem])
-					{
+					if (distItem != -1 && selectedItem != menuItems.members[distItem]) {
 						curColumn = CENTER;
 						curSelected = distItem;
 						changeItem();
 					}
 				}
-			}
-			else
-			{
+			} else {
 				timeNotMoving += elapsed;
 				if (timeNotMoving > 2)
 					FlxG.mouse.visible = false;
 			}
 
-			switch (curColumn)
-			{
+			switch (curColumn) {
 				case CENTER:
-					if (controls.UI_LEFT_P && leftOption != null)
-					{
+					if (controls.UI_LEFT_P && leftOption != null) {
 						curColumn = LEFT;
 						changeItem();
-					}
-					else if (controls.UI_RIGHT_P && rightOption != null)
-					{
+					} else if (controls.UI_RIGHT_P && rightOption != null) {
 						curColumn = RIGHT;
 						changeItem();
 					}
 
 				case LEFT:
-					if (controls.UI_RIGHT_P)
-					{
+					if (controls.UI_RIGHT_P) {
 						curColumn = CENTER;
 						changeItem();
 					}
 
 				case RIGHT:
-					if (controls.UI_LEFT_P)
-					{
+					if (controls.UI_LEFT_P) {
 						curColumn = CENTER;
 						changeItem();
 					}
 			}
 
-			if (controls.BACK)
-			{
+			if (controls.BACK) {
 				selectedSomethin = true;
 				FlxG.mouse.visible = false;
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				MusicBeatState.switchState(new TitleState());
 			}
 
-			if (controls.ACCEPT || (FlxG.mouse.justPressed && allowMouse))
-			{
+			if (controls.ACCEPT || (FlxG.mouse.justPressed && allowMouse)) {
 				FlxG.sound.play(Paths.sound('confirmMenu'));
 				selectedSomethin = true;
 				FlxG.mouse.visible = false;
@@ -295,8 +261,7 @@ class MainMenuState extends EditableState
 
 				var item:FlxSprite;
 				var option:String;
-				switch (curColumn)
-				{
+				switch (curColumn) {
 					case CENTER:
 						option = optionShit[curSelected];
 						item = menuItems.members[curSelected];
@@ -310,10 +275,8 @@ class MainMenuState extends EditableState
 						item = rightItem;
 				}
 
-				FlxFlicker.flicker(item, 1, 0.06, false, false, function(flick:FlxFlicker)
-				{
-					switch (option)
-					{
+				FlxFlicker.flicker(item, 1, 0.06, false, false, function(flick:FlxFlicker) {
+					switch (option) {
 						case 'story_mode':
 							MusicBeatState.switchState(new StoryMenuState());
 						case 'freeplay':
@@ -334,8 +297,7 @@ class MainMenuState extends EditableState
 						case 'options':
 							MusicBeatState.switchState(new OptionsState());
 							OptionsState.onPlayState = false;
-							if (PlayState.SONG != null)
-							{
+							if (PlayState.SONG != null) {
 								PlayState.SONG.arrowSkin = null;
 								PlayState.SONG.splashSkin = null;
 								PlayState.stageUI = 'normal';
@@ -351,8 +313,7 @@ class MainMenuState extends EditableState
 					}
 				});
 
-				for (memb in menuItems)
-				{
+				for (memb in menuItems) {
 					if (memb == item)
 						continue;
 
@@ -360,14 +321,12 @@ class MainMenuState extends EditableState
 				}
 			}
 			#if desktop
-			if (controls.justPressed('debug_1'))
-			{
+			if (controls.justPressed('debug_1')) {
 				selectedSomethin = true;
 				FlxG.mouse.visible = false;
 				MusicBeatState.switchState(new MasterEditorMenu());
 			}
-			if (controls.justPressed('debug_2'))
-			{
+			if (controls.justPressed('debug_2')) {
 				selectedSomethin = true;
 				FlxG.mouse.visible = false;
 				WarningState.leftState = false;
@@ -379,22 +338,19 @@ class MainMenuState extends EditableState
 		super.update(elapsed);
 	}
 
-	function changeItem(change:Int = 0)
-	{
+	function changeItem(change:Int = 0) {
 		if (change != 0)
 			curColumn = CENTER;
 		curSelected = FlxMath.wrap(curSelected + change, 0, optionShit.length - 1);
 		FlxG.sound.play(Paths.sound('scrollMenu'));
 
-		for (item in menuItems)
-		{
+		for (item in menuItems) {
 			item.animation.play('idle');
 			item.centerOffsets();
 		}
 
 		var selectedItem:FlxSprite;
-		switch (curColumn)
-		{
+		switch (curColumn) {
 			case CENTER:
 				selectedItem = menuItems.members[curSelected];
 			case LEFT:

@@ -1,7 +1,6 @@
 package funkin.backend.utils;
 
-enum abstract AnsiCode(String) from String to String
-{
+enum abstract AnsiCode(String) from String to String {
 	var RESET = '\x1b[0m';
 	var BOLD = '\x1b[1m';
 	var DIM = '\x1b[2m';
@@ -52,8 +51,7 @@ enum abstract AnsiCode(String) from String to String
  * This class provides functionality for applying ANSI codes to strings for terminal output.
  */
 @:nullSafety
-class AnsiUtil
-{
+class AnsiUtil {
 	#if sys
 	@:noCompletion
 	private static final REGEX_TEAMCITY_VERSION:EReg = ~/^9\.(0*[1-9]\d*)\.|\d{2,}\./;
@@ -74,8 +72,7 @@ class AnsiUtil
 	/**
 	 * Safe wrapper for Sys.getEnv (returns null on non-sys targets).
 	 */
-	private static function getEnvSafe(name:String):Null<String>
-	{
+	private static function getEnvSafe(name:String):Null<String> {
 		#if sys
 		return Sys.getEnv(name);
 		#else
@@ -93,37 +90,30 @@ class AnsiUtil
 	 *
 	 * @return The styled string.
 	 */
-	public static function apply(input:Dynamic, codes:Array<AnsiCode>):String
-	{
+	public static function apply(input:Dynamic, codes:Array<AnsiCode>):String {
 		return stripCodes(codes.join('') + input + AnsiCode.RESET);
 	}
 
 	@:noCompletion
-	private static function stripCodes(output:String):String
-	{
+	private static function stripCodes(output:String):String {
 		#if sys
-		if (codesSupported == null)
-		{
+		if (codesSupported == null) {
 			final term:Null<String> = getEnvSafe('TERM');
 
 			if (term == 'dumb')
 				codesSupported = false;
-			else
-			{
+			else {
 				if (codesSupported != true && term != null)
 					codesSupported = REGEX_TERM_256.match(term) || REGEX_TERM_TYPES.match(term);
 
-				if (getEnvSafe('CI') != null)
-				{
+				if (getEnvSafe('CI') != null) {
 					final ciEnvNames:Array<String> = [
 						"GITHUB_ACTIONS", "GITEA_ACTIONS",    "TRAVIS", "CIRCLECI",
 						      "APPVEYOR",     "GITLAB_CI", "BUILDKITE",    "DRONE"
 					];
 
-					for (ci in ciEnvNames)
-					{
-						if (getEnvSafe(ci) != null)
-						{
+					for (ci in ciEnvNames) {
+						if (getEnvSafe(ci) != null) {
 							codesSupported = true;
 							break;
 						}
@@ -137,8 +127,7 @@ class AnsiUtil
 				if (codesSupported != true && teamCity != null)
 					codesSupported = REGEX_TEAMCITY_VERSION.match(teamCity);
 
-				if (codesSupported != true)
-				{
+				if (codesSupported != true) {
 					codesSupported = getEnvSafe('TERM_PROGRAM') == 'iTerm.app'
 						|| getEnvSafe('TERM_PROGRAM') == 'Apple_Terminal'
 						|| getEnvSafe('COLORTERM') != null

@@ -3,12 +3,9 @@ package funkin.modding.editors.content;
 import flixel.util.FlxDestroyUtil;
 
 // Exit confirmation prompt used on all editors, for convenience
-class ExitConfirmationPrompt extends Prompt
-{
-	public function new(?finishCallback:Void->Void)
-	{
-		super('There\'s unsaved progress,\nare you sure you want to exit?', function()
-		{
+class ExitConfirmationPrompt extends Prompt {
+	public function new(?finishCallback:Void->Void) {
+		super('There\'s unsaved progress,\nare you sure you want to exit?', function() {
 			FlxG.mouse.visible = false;
 			MusicBeatState.switchState(new funkin.modding.editors.MasterEditorMenu());
 			FlxG.sound.playMusic(Paths.music('freakyMenu'));
@@ -19,15 +16,13 @@ class ExitConfirmationPrompt extends Prompt
 }
 
 // A Simple Prompt with "OK" and "Cancel" that covers most case usages
-class Prompt extends BasePrompt
-{
+class Prompt extends BasePrompt {
 	var yesFunction:Void->Void;
 	var noFunction:Void->Void;
 	var _yesTxt:String = 'OK';
 	var _noTxt:String = 'Cancel';
 
-	public function new(title:String, yesFunction:Void->Void, ?noFunction:Void->Void, ?_yesTxt:String, ?_noTxt:String)
-	{
+	public function new(title:String, yesFunction:Void->Void, ?noFunction:Void->Void, ?_yesTxt:String, ?_noTxt:String) {
 		if (_yesTxt != null)
 			this._yesTxt = _yesTxt;
 		if (_noTxt != null)
@@ -37,11 +32,9 @@ class Prompt extends BasePrompt
 		super(title, promptCreate);
 	}
 
-	function promptCreate(_)
-	{
+	function promptCreate(_) {
 		var btnY = 390;
-		var btn:PsychUIButton = new PsychUIButton(0, btnY, _yesTxt, function()
-		{
+		var btn:PsychUIButton = new PsychUIButton(0, btnY, _yesTxt, function() {
 			yesFunction();
 			close();
 		});
@@ -59,16 +52,14 @@ class Prompt extends BasePrompt
 		add(btn);
 	}
 
-	override function close()
-	{
+	override function close() {
 		if (noFunction != null)
 			noFunction();
 		super.close();
 	}
 }
 
-class BasePrompt extends MusicBeatSubstate
-{
+class BasePrompt extends MusicBeatSubstate {
 	var _sizeX:Float = 0;
 	var _sizeY:Float = 0;
 	var _title:String;
@@ -76,8 +67,7 @@ class BasePrompt extends MusicBeatSubstate
 	public var onCreate:BasePrompt->Void;
 	public var onUpdate:BasePrompt->Float->Void;
 
-	public function new(?sizeX:Float = 420, ?sizeY:Float = 160, title:String, ?onCreate:BasePrompt->Void, ?onUpdate:BasePrompt->Float->Void)
-	{
+	public function new(?sizeX:Float = 420, ?sizeY:Float = 160, title:String, ?onCreate:BasePrompt->Void, ?onUpdate:BasePrompt->Float->Void) {
 		this._sizeX = sizeX;
 		this._sizeY = sizeY;
 		this._title = title;
@@ -89,8 +79,7 @@ class BasePrompt extends MusicBeatSubstate
 	public var bg:FlxSprite;
 	public var titleText:FlxText;
 
-	override function create()
-	{
+	override function create() {
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 		bg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
 		bg.alpha = 0.8;
@@ -113,13 +102,11 @@ class BasePrompt extends MusicBeatSubstate
 
 	var _blockInput:Float = 0.1;
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		super.update(elapsed);
 
 		_blockInput = Math.max(0, _blockInput - elapsed);
-		if (_blockInput <= 0 && FlxG.keys.justPressed.ESCAPE)
-		{
+		if (_blockInput <= 0 && FlxG.keys.justPressed.ESCAPE) {
 			close();
 			return;
 		}
@@ -128,8 +115,7 @@ class BasePrompt extends MusicBeatSubstate
 			onUpdate(this, elapsed);
 	}
 
-	override function destroy()
-	{
+	override function destroy() {
 		for (member in members)
 			FlxDestroyUtil.destroy(member);
 		super.destroy();

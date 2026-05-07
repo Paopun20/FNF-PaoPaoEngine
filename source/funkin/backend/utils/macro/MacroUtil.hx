@@ -9,15 +9,13 @@ import haxe.macro.Expr;
 import js.Browser;
 #end
 
-class MacroUtil
-{
+class MacroUtil {
 	public static var defines(get, null):Map<String, Dynamic>;
 
 	private static inline function get_defines()
 		return __getDefines();
 
-	private static macro function __getDefines()
-	{
+	private static macro function __getDefines() {
 		#if display
 		return macro $v{[]};
 		#else
@@ -25,14 +23,12 @@ class MacroUtil
 		#end
 	}
 
-	macro public static function generateReflectionLike(totalArguments:Int, funcName:String, argsName:String)
-	{
+	macro public static function generateReflectionLike(totalArguments:Int, funcName:String, argsName:String) {
 		#if macro
 		totalArguments++;
 
 		var funcCalls = [];
-		for (i in 0...totalArguments)
-		{
+		for (i in 0...totalArguments) {
 			var args = [
 				for (d in 0...i)
 					macro $i{argsName}[$v{d}]
@@ -57,8 +53,7 @@ class MacroUtil
 		#end
 	}
 
-	@:dox(hide) public static function print(str:String)
-	{
+	@:dox(hide) public static function print(str:String) {
 		#if js
 		if (Browser.console != null)
 			Browser.console.log(str);

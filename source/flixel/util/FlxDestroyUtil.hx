@@ -6,18 +6,15 @@ import openfl.display.DisplayObject;
 import openfl.display.DisplayObjectContainer;
 import flixel.util.FlxPool.IFlxPooled;
 
-class FlxDestroyUtil
-{
+class FlxDestroyUtil {
 	/**
 	 * Checks if an object is not null before calling destroy(), always returns null.
 	 *
 	 * @param	object	An IFlxDestroyable object that will be destroyed if it's not null.
 	 * @return	null
 	 */
-	public static function destroy<T:IFlxDestroyable>(object:Null<IFlxDestroyable>):T
-	{
-		if (object != null)
-		{
+	public static function destroy<T:IFlxDestroyable>(object:Null<IFlxDestroyable>):T {
+		if (object != null) {
 			object.destroy();
 		}
 		return null;
@@ -29,10 +26,8 @@ class FlxDestroyUtil
 	 * @param	array	An Array of IFlxDestroyable objects
 	 * @return	null
 	 */
-	public static function destroyArray<T:IFlxDestroyable>(array:Array<T>):Array<T>
-	{
-		if (array != null)
-		{
+	public static function destroyArray<T:IFlxDestroyable>(array:Array<T>):Array<T> {
+		if (array != null) {
 			for (e in array)
 				destroy(e);
 			array.splice(0, array.length);
@@ -46,10 +41,8 @@ class FlxDestroyUtil
 	 * @param	object	An IFlxPooled object that will be put back into the pool if it's not null
 	 * @return	null
 	 */
-	public static function put<T:IFlxPooled>(object:IFlxPooled):T
-	{
-		if (object != null)
-		{
+	public static function put<T:IFlxPooled>(object:IFlxPooled):T {
+		if (object != null) {
 			object.put();
 		}
 		return null;
@@ -62,10 +55,8 @@ class FlxDestroyUtil
 	 * @param	array	An Array of IFlxPooled objects
 	 * @return	null
 	 */
-	public static function putArray<T:IFlxPooled>(array:Array<T>):Array<T>
-	{
-		if (array != null)
-		{
+	public static function putArray<T:IFlxPooled>(array:Array<T>):Array<T> {
+		if (array != null) {
 			for (e in array)
 				put(e);
 			array.splice(0, array.length);
@@ -80,10 +71,8 @@ class FlxDestroyUtil
 	 * @param	Bitmap	A BitmapData to be disposed if not null
 	 * @return 	null
 	 */
-	public static function dispose(bitmapData:BitmapData):BitmapData
-	{
-		if (bitmapData != null)
-		{
+	public static function dispose(bitmapData:BitmapData):BitmapData {
+		if (bitmapData != null) {
 			bitmapData.dispose();
 		}
 		return null;
@@ -92,25 +81,19 @@ class FlxDestroyUtil
 	/**
 	 * Checks if a BitmapData object is not null and it's size isn't equal to specified one before calling dispose() on it.
 	 */
-	public static function disposeIfNotEqual(bitmapData:BitmapData, width:Float, height:Float):BitmapData
-	{
-		if (bitmapData != null && (bitmapData.width != width || bitmapData.height != height))
-		{
+	public static function disposeIfNotEqual(bitmapData:BitmapData, width:Float, height:Float):BitmapData {
+		if (bitmapData != null && (bitmapData.width != width || bitmapData.height != height)) {
 			bitmapData.dispose();
 			return null;
-		}
-		else if (bitmapData != null)
-		{
+		} else if (bitmapData != null) {
 			return bitmapData;
 		}
 
 		return null;
 	}
 
-	public static function removeChild<T:DisplayObject>(parent:DisplayObjectContainer, child:T):T
-	{
-		if (parent != null && child != null && parent.contains(child))
-		{
+	public static function removeChild<T:DisplayObject>(parent:DisplayObjectContainer, child:T):T {
+		if (parent != null && child != null && parent.contains(child)) {
 			parent.removeChild(child);
 		}
 		return null;
@@ -118,7 +101,6 @@ class FlxDestroyUtil
 	#end
 }
 
-interface IFlxDestroyable
-{
+interface IFlxDestroyable {
 	function destroy():Void;
 }

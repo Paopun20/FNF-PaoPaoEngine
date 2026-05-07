@@ -32,14 +32,12 @@ using StringTools;
 
 typedef StringMap<T> = Map<String, T>;
 
-class HScript extends Script
-{
+class HScript extends Script {
 	public static var printer:Printer = new Printer();
 	public static var staticVariables:StringMap<Dynamic> = new StringMap<Dynamic>();
 	public static var publicVariables:StringMap<Dynamic> = new StringMap<Dynamic>();
 
 	public var interp:Interp;
-	public var origin:Null<String>;
 	public var returnValue:Dynamic;
 
 	public var variables(get, never):StringMap<Dynamic>;
@@ -52,8 +50,7 @@ class HScript extends Script
 	public var modName:String = null;
 	#end
 
-	public static function reset(clearCache:Bool = false)
-	{
+	public static function reset(clearCache:Bool = false) {
 		CoolLog.info('Resetting HScript');
 		staticVariables = new StringMap<Dynamic>();
 		publicVariables = new StringMap<Dynamic>();
@@ -64,37 +61,30 @@ class HScript extends Script
 
 	// Error handlers
 
-	private final function onError(e:HscriptError)
-	{
-		if (Std.isOfType(e, HscriptError))
-		{
+	private final function onError(e:HscriptError) {
+		if (Std.isOfType(e, HscriptError)) {
 			CoolLog.error(Printer.errorToString(e), this.interp.posInfos());
 		}
 	}
 
-	private final function onWarning(e:HscriptError)
-	{
-		if (Std.isOfType(e, HscriptError))
-		{
+	private final function onWarning(e:HscriptError) {
+		if (Std.isOfType(e, HscriptError)) {
 			CoolLog.warning(Printer.errorToString(e), this.interp.posInfos());
 		}
 	}
 
-	private final function onImportFailed(classPath:Array<String>, classAlias:Null<String>):Bool
-	{
+	private final function onImportFailed(classPath:Array<String>, classAlias:Null<String>):Bool {
 		var varName = (classAlias != null) ? classAlias : classPath[classPath.length - 1];
 		var fullPath = classPath.join(".");
 		var classObj = LuaUtils.resolveClass(fullPath);
 
-		if (classObj != null)
-		{
+		if (classObj != null) {
 			set(varName, classObj);
 			return true;
 		}
 
 		// hscriptDebugMode suppresses errors in favour of warnings during development
-		if (get("hscriptDebugMode"))
-		{
+		if (get("hscriptDebugMode")) {
 			CoolLog.warning('Import failed: $fullPath (alias: ${classAlias != null ? classAlias : "none"})', this.interp.posInfos());
 			return true;
 		}
@@ -105,8 +95,7 @@ class HScript extends Script
 
 	// Construction
 
-	public override function new(?file:String = '', ?varsToBring:Any = null, ?parentInstance:Dynamic = null)
-	{
+	public override function new(?file:String = '', ?varsToBring:Any = null, ?parentInstance:Dynamic = null) {
 		super(file);
 
 		interp = new Interp();
@@ -132,8 +121,7 @@ class HScript extends Script
 	}
 
 	#if MODS_ALLOWED
-	private function resolveModFolder(file:String):Void
-	{
+	private function resolveModFolder(file:String):Void {
 		if (file == null || file.length == 0)
 			return;
 
@@ -148,8 +136,7 @@ class HScript extends Script
 
 	// Execution
 
-	public override function execute()
-	{
+	public override function execute() {
 		if (origin == null || origin.length == 0)
 			return;
 
@@ -161,25 +148,20 @@ class HScript extends Script
 		call('onCreate', []);
 	}
 
-	private function loadScriptContent(path:String):Null<String>
-	{
+	private function loadScriptContent(path:String):Null<String> {
 		// If origin contains a newline it is already raw code, not a file path
 		if (path.contains('\n'))
 			return path;
 
-		try
-		{
+		try {
 			return File.getContent(path);
-		}
-		catch (e:Dynamic)
-		{
+		} catch (e:Dynamic) {
 			CoolLog.error('Failed to load script file: "$path"');
 			return null;
 		}
 	}
 
-	public function codeExecute(code:String):Dynamic
-	{
+	public function codeExecute(code:String):Dynamic {
 		if (closed)
 			return null;
 
@@ -188,12 +170,10 @@ class HScript extends Script
 		return returnValue;
 	}
 
-	private function getOrParseExpr(code:String):Dynamic
-	{
+	private function getOrParseExpr(code:String):Dynamic {
 		var cacheKey = CacheScript.hashCode(#if MODS_ALLOWED modFolder + #end scriptName + code);
 
-		if (CacheScript.exists(cacheKey, CacheType.HSCRIPT))
-		{
+		if (CacheScript.exists(cacheKey, CacheType.HSCRIPT)) {
 			CoolLog.info('HScript reused AST for "$scriptName" ($cacheKey)');
 			return CacheScript.get(cacheKey, CacheType.HSCRIPT);
 		}
@@ -206,8 +186,7 @@ class HScript extends Script
 
 	// Parent binding
 
-	override function set_parent(parent:Dynamic):Dynamic
-	{
+	override function set_parent(parent:Dynamic):Dynamic {
 		if (interp == null)
 			return this;
 
@@ -230,8 +209,7 @@ class HScript extends Script
 
 	// PlayState and generic interp bindings
 
-	public static function addExHScript(targetInterp:Interp, isPlayState:Bool = false)
-	{
+	public static function addExHScript(targetInterp:Interp, isPlayState:Bool = false) {
 		if (targetInterp == null)
 			return;
 
@@ -241,8 +219,7 @@ class HScript extends Script
 			registerGenericBindings(targetInterp);
 	}
 
-	private static function registerPlayStateBindings(targetInterp:Interp):Void
-	{
+	private static function registerPlayStateBindings(targetInterp:Interp):Void {
 		var ps = PlayState.instance;
 		targetInterp.variables.set("game", ps);
 		targetInterp.variables.set("add", buildPlayStateAddFn(ps));
@@ -252,14 +229,12 @@ class HScript extends Script
 		targetInterp.variables.set('addBehindDad', ps.addBehindDad);
 		targetInterp.variables.set('addBehindBF', ps.addBehindBF);
 
-		targetInterp.variables.set('setVar', function(name:String, value:Dynamic)
-		{
+		targetInterp.variables.set('setVar', function(name:String, value:Dynamic) {
 			ps.variables.set(name, value);
 			return value;
 		});
 		targetInterp.variables.set('getVar', function(name:String) return ps.variables.exists(name) ? ps.variables.get(name) : null);
-		targetInterp.variables.set('removeVar', function(name:String):Bool
-		{
+		targetInterp.variables.set('removeVar', function(name:String):Bool {
 			if (!ps.variables.exists(name))
 				return false;
 			ps.variables.remove(name);
@@ -293,12 +268,9 @@ class HScript extends Script
 	 * Inserts a display object below the topmost character group so that
 	 * it renders behind characters by default.
 	 */
-	private static function buildPlayStateAddFn(ps:PlayState):(FlxBasic, ?Bool) -> Void
-	{
-		return function(basic:FlxBasic, ?frontOfChars:Bool = false)
-		{
-			if (frontOfChars)
-			{
+	private static function buildPlayStateAddFn(ps:PlayState):(FlxBasic, ?Bool) -> Void {
+		return function(basic:FlxBasic, ?frontOfChars:Bool = false) {
+			if (frontOfChars) {
 				ps.add(basic);
 				return;
 			}
@@ -314,8 +286,7 @@ class HScript extends Script
 		};
 	}
 
-	private static function registerGenericBindings(targetInterp:Interp):Void
-	{
+	private static function registerGenericBindings(targetInterp:Interp):Void {
 		var scriptObj = targetInterp.scriptObject;
 
 		// Guard: if the parent object isn't set yet, skip object-dependent bindings.
@@ -332,14 +303,12 @@ class HScript extends Script
 		if (vars == null)
 			return;
 
-		targetInterp.variables.set('setVar', function(name:String, value:Dynamic)
-		{
+		targetInterp.variables.set('setVar', function(name:String, value:Dynamic) {
 			vars.set(name, value);
 			return value;
 		});
 		targetInterp.variables.set('getVar', function(name:String) return vars.get(name));
-		targetInterp.variables.set('removeVar', function(name:String):Bool
-		{
+		targetInterp.variables.set('removeVar', function(name:String):Bool {
 			if (vars.get(name) == null)
 				return false;
 			vars.remove(name);
@@ -349,10 +318,8 @@ class HScript extends Script
 
 	// Preset
 
-	public function preset(?varsToBring:Any):Void
-	{
-		if (varsToBring != null)
-		{
+	public function preset(?varsToBring:Any):Void {
+		if (varsToBring != null) {
 			for (fieldName in Reflect.fields(varsToBring))
 				set(fieldName, Reflect.field(varsToBring, fieldName));
 		}
@@ -373,18 +340,15 @@ class HScript extends Script
 		registerModSettingBinding();
 	}
 
-	private function registerVarBindings():Void
-	{
-		set('setVar', function(name:String, value:Dynamic)
-		{
+	private function registerVarBindings():Void {
+		set('setVar', function(name:String, value:Dynamic) {
 			MusicBeatState.getVariables().set(name, value);
 			return value;
 		});
 		set('getVar', function(name:String) return MusicBeatState.getVariables().exists(name) ? MusicBeatState.getVariables().get(name) : null);
 	}
 
-	private function registerKeyboardBindings():Void
-	{
+	private function registerKeyboardBindings():Void {
 		set('keyboardJustPressed', function(name:String) return Reflect.getProperty(FlxG.keys.justPressed, name));
 		set('keyboardPressed', function(name:String) return Reflect.getProperty(FlxG.keys.pressed, name));
 		set('keyboardReleased', function(name:String) return Reflect.getProperty(FlxG.keys.justReleased, name));
@@ -398,13 +362,11 @@ class HScript extends Script
 	 * Maps arrow-key names to their Controls counterparts, falling back to
 	 * the generic Controls query for anything else.
 	 */
-	private function resolveNoteKey(name:String, eventType:String):Bool
-	{
+	private function resolveNoteKey(name:String, eventType:String):Bool {
 		var controls = Controls.instance;
 		name = name.toLowerCase();
 
-		return switch ([name, eventType])
-		{
+		return switch ([name, eventType]) {
 			case ['left', 'justPressed']: controls.NOTE_LEFT_P;
 			case ['down', 'justPressed']: controls.NOTE_DOWN_P;
 			case ['up', 'justPressed']: controls.NOTE_UP_P;
@@ -424,48 +386,38 @@ class HScript extends Script
 		}
 	}
 
-	private function registerGamepadBindings():Void
-	{
+	private function registerGamepadBindings():Void {
 		set('anyGamepadJustPressed', function(name:String) return FlxG.gamepads.anyJustPressed(name));
 		set('anyGamepadPressed', function(name:String) return FlxG.gamepads.anyPressed(name));
 		set('anyGamepadReleased', function(name:String) return FlxG.gamepads.anyJustReleased(name));
 
-		set('gamepadAnalogX', function(id:Int, ?leftStick:Bool = true)
-		{
+		set('gamepadAnalogX', function(id:Int, ?leftStick:Bool = true) {
 			var controller = FlxG.gamepads.getByID(id);
 			return controller != null ? controller.getXAxis(leftStick ? LEFT_ANALOG_STICK : RIGHT_ANALOG_STICK) : 0.0;
 		});
-		set('gamepadAnalogY', function(id:Int, ?leftStick:Bool = true)
-		{
+		set('gamepadAnalogY', function(id:Int, ?leftStick:Bool = true) {
 			var controller = FlxG.gamepads.getByID(id);
 			return controller != null ? controller.getYAxis(leftStick ? LEFT_ANALOG_STICK : RIGHT_ANALOG_STICK) : 0.0;
 		});
-		set('gamepadJustPressed', function(id:Int, name:String)
-		{
+		set('gamepadJustPressed', function(id:Int, name:String) {
 			var controller = FlxG.gamepads.getByID(id);
 			return controller != null && Reflect.getProperty(controller.justPressed, name) == true;
 		});
-		set('gamepadPressed', function(id:Int, name:String)
-		{
+		set('gamepadPressed', function(id:Int, name:String) {
 			var controller = FlxG.gamepads.getByID(id);
 			return controller != null && Reflect.getProperty(controller.pressed, name) == true;
 		});
-		set('gamepadReleased', function(id:Int, name:String)
-		{
+		set('gamepadReleased', function(id:Int, name:String) {
 			var controller = FlxG.gamepads.getByID(id);
 			return controller != null && Reflect.getProperty(controller.justReleased, name) == true;
 		});
 	}
 
-	private function registerGlobalCallback()
-	{
-		if (scriptPack != null)
-		{
+	private function registerGlobalCallback() {
+		if (scriptPack != null) {
 			// Register every scripts except this
-			set("createGlobalCallback", function(name:String, func:Dynamic)
-			{
-				scriptPack.set(name, Reflect.makeVarArgs(function(args:Array<Dynamic>)
-				{
+			set("createGlobalCallback", function(name:String, func:Dynamic) {
+				scriptPack.set(name, Reflect.makeVarArgs(function(args:Array<Dynamic>) {
 					var functionRef = interp.variables.get(func);
 					var result = Reflect.callMethod(null, functionRef, args);
 					return result ?? LuaUtils.Function_Continue;
@@ -474,14 +426,10 @@ class HScript extends Script
 		}
 	}
 
-	private function registerModSettingBinding():Void
-	{
-		set('getModSetting', function(saveTag:String, ?modName:String = null)
-		{
-			if (modName == null)
-			{
-				if (this.modFolder == null)
-				{
+	private function registerModSettingBinding():Void {
+		set('getModSetting', function(saveTag:String, ?modName:String = null) {
+			if (modName == null) {
+				if (this.modFolder == null) {
 					CoolLog.error('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!', this.interp.posInfos());
 					return null;
 				}
@@ -493,46 +441,39 @@ class HScript extends Script
 
 	// Variable access
 
-	public override function set(variable:String, data:Dynamic):Void
-	{
+	public override function set(variable:String, data:Dynamic):Void {
 		if (interp == null || closed)
 			return;
 		interp.variables.set(variable, data);
 	}
 
-	public override function get(variable:String):Dynamic
-	{
+	public override function get(variable:String):Dynamic {
 		if (interp == null || closed)
 			return null;
 		return interp.variables.get(variable);
 	}
 
-	public override function hasFunction(funcName:String):Bool
-	{
+	public override function hasFunction(funcName:String):Bool {
 		if (interp == null || closed)
 			return false;
 		return interp.variables.exists(funcName) && Reflect.isFunction(interp.variables.get(funcName));
 	}
 
-	public override function call(func:String, ?args:Array<Dynamic>):Dynamic
-	{
+	public override function call(func:String, ?args:Array<Dynamic>):Dynamic {
 		if (closed)
 			return LuaUtils.Function_Continue;
 
 		if (args == null)
 			args = [];
 
-		try
-		{
+		try {
 			var functionRef = interp.variables.get(func);
 			if (functionRef == null || !Reflect.isFunction(functionRef))
 				return LuaUtils.Function_Continue;
 
 			var result = Reflect.callMethod(null, functionRef, args);
 			return result ?? LuaUtils.Function_Continue;
-		}
-		catch (e:Dynamic)
-		{
+		} catch (e:Dynamic) {
 			var stack = haxe.CallStack.toString(haxe.CallStack.exceptionStack(true));
 			CoolLog.error('HScript call error in $func: $e\n$stack');
 		}
@@ -542,8 +483,7 @@ class HScript extends Script
 
 	// Lifecycle
 
-	public override function stop():Void
-	{
+	public override function stop():Void {
 		if (closed)
 			return;
 		closed = true;
@@ -552,8 +492,7 @@ class HScript extends Script
 		super.stop();
 	}
 
-	public override function destroy():Void
-	{
+	public override function destroy():Void {
 		stop();
 		super.destroy();
 	}
@@ -563,8 +502,7 @@ class HScript extends Script
 // These thin wrappers expose Flixel's abstract types as plain Int/enum values
 // so HScript can use them without needing access to Haxe abstract magic.
 
-class CustomFlxColor
-{
+class CustomFlxColor {
 	public static var TRANSPARENT(default, null):Int = FlxColor.TRANSPARENT;
 	public static var BLACK(default, null):Int = FlxColor.BLACK;
 	public static var WHITE(default, null):Int = FlxColor.WHITE;
@@ -603,31 +541,27 @@ class CustomFlxColor
 		return cast FlxColor.fromString(str);
 }
 
-class CustomFlxAxes
-{
+class CustomFlxAxes {
 	public static var X(default, null):flixel.util.FlxAxes = flixel.util.FlxAxes.X;
 	public static var Y(default, null):flixel.util.FlxAxes = flixel.util.FlxAxes.Y;
 	public static var XY(default, null):flixel.util.FlxAxes = flixel.util.FlxAxes.XY;
 }
 
-class CustomFlxTextAlign
-{
+class CustomFlxTextAlign {
 	public static var LEFT(default, null):flixel.text.FlxText.FlxTextAlign = flixel.text.FlxText.FlxTextAlign.LEFT;
 	public static var CENTER(default, null):flixel.text.FlxText.FlxTextAlign = flixel.text.FlxText.FlxTextAlign.CENTER;
 	public static var RIGHT(default, null):flixel.text.FlxText.FlxTextAlign = flixel.text.FlxText.FlxTextAlign.RIGHT;
 	public static var JUSTIFY(default, null):flixel.text.FlxText.FlxTextAlign = flixel.text.FlxText.FlxTextAlign.JUSTIFY;
 }
 
-class CustomFlxTextBorderStyle
-{
+class CustomFlxTextBorderStyle {
 	public static var NONE(default, null):flixel.text.FlxText.FlxTextBorderStyle = flixel.text.FlxText.FlxTextBorderStyle.NONE;
 	public static var SHADOW(default, null):flixel.text.FlxText.FlxTextBorderStyle = flixel.text.FlxText.FlxTextBorderStyle.SHADOW;
 	public static var OUTLINE(default, null):flixel.text.FlxText.FlxTextBorderStyle = flixel.text.FlxText.FlxTextBorderStyle.OUTLINE;
 	public static var OUTLINE_FAST(default, null):flixel.text.FlxText.FlxTextBorderStyle = flixel.text.FlxText.FlxTextBorderStyle.OUTLINE_FAST;
 }
 
-class CustomFlxPoint
-{
+class CustomFlxPoint {
 	public static inline function get(x:Float = 0, y:Float = 0):flixel.math.FlxBasePoint
 		return flixel.math.FlxPoint.get(x, y);
 
@@ -638,13 +572,11 @@ class CustomFlxPoint
 // Bitmap cache wrappers
 
 @:privateAccess(flixel.system.frontEnds.BitmapFrontEnd)
-class BitmapFrontEndWrapper
-{
+class BitmapFrontEndWrapper {
 	public static var instance(get, never):BitmapFrontEndWrapper;
 	private static var _instance:BitmapFrontEndWrapper;
 
-	static function get_instance():BitmapFrontEndWrapper
-	{
+	static function get_instance():BitmapFrontEndWrapper {
 		if (_instance == null)
 			_instance = new BitmapFrontEndWrapper();
 		return _instance;
@@ -652,9 +584,7 @@ class BitmapFrontEndWrapper
 
 	public var _cache(get, never):CacheWrapper;
 
-	private function new()
-	{
-	}
+	private function new() {}
 
 	function get__cache():CacheWrapper
 		return new CacheWrapper(@:privateAccess FlxG.bitmap._cache);
@@ -687,8 +617,7 @@ class BitmapFrontEndWrapper
 		FlxG.bitmap.clearUnused();
 }
 
-class CacheWrapper
-{
+class CacheWrapper {
 	private var cache:Map<String, flixel.graphics.FlxGraphic>;
 
 	public function new(cache:Map<String, flixel.graphics.FlxGraphic>)
@@ -709,8 +638,7 @@ class CacheWrapper
 	public function keys():Iterator<String>
 		return cache.keys();
 
-	public function count():Int
-	{
+	public function count():Int {
 		var total = 0;
 		for (_ in cache.keys())
 			total++;
@@ -718,9 +646,7 @@ class CacheWrapper
 	}
 }
 #else
-class HScript
-{
-}
+class HScript {}
 #end
 
 // HaxeBridge — shared runHaxeCode/runHaxeFunction/addHaxeLibrary logic
@@ -728,20 +654,17 @@ class HScript
 // HScript instance and exposes the three callable functions so each binding
 // only needs to wire them up.
 #if HSCRIPT_ALLOWED
-class HaxeBridge
-{
+class HaxeBridge {
 	private var hscript:HScript = null;
 
-	public function new()
-	{
-	}
+	public function new() {}
 
 	/**
 	 * Executes raw Haxe code, optionally bringing in variables from the
 	 * calling script's scope and then calling a named function.
 	 */
-	public function runHaxeCode(scriptPath:String, codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):Dynamic
-	{
+	public function runHaxeCode(scriptPath:String, codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null,
+			?funcArgs:Array<Dynamic> = null):Dynamic {
 		if (hscript == null)
 			initializeHScript(scriptPath, codeToRun, varsToBring)
 		else
@@ -754,43 +677,33 @@ class HaxeBridge
 		return (result != null && result != LuaUtils.Function_Continue) ? result : hscript?.returnValue;
 	}
 
-	private function initializeHScript(scriptPath:String, code:String, varsToBring:Any):Void
-	{
+	private function initializeHScript(scriptPath:String, code:String, varsToBring:Any):Void {
 		CoolLog.info('Initializing Haxe interp for: "$scriptPath"');
-		try
-		{
+		try {
 			hscript = new HScript();
 			hscript.scriptName = 'HxVM:${scriptPath}';
 			if (varsToBring != null)
 				for (fieldName in Reflect.fields(varsToBring))
 					hscript.set(fieldName, Reflect.field(varsToBring, fieldName));
 			hscript.returnValue = hscript.codeExecute(code);
-		}
-		catch (e:Dynamic)
-		{
+		} catch (e:Dynamic) {
 			CoolLog.error('HScript Error in $scriptPath: $e');
 			hscript = null;
 		}
 	}
 
-	private function executeInExistingHScript(code:String):Void
-	{
-		try
-		{
+	private function executeInExistingHScript(code:String):Void {
+		try {
 			hscript.returnValue = hscript.codeExecute(code);
-		}
-		catch (e:Dynamic)
-		{
+		} catch (e:Dynamic) {
 			CoolLog.error('HScript Error: $e');
 			hscript.returnValue = null;
 		}
 	}
 
 	/** Calls a function that was defined in a previous runHaxeCode call. */
-	public function runHaxeFunction(funcToRun:String, ?funcArgs:Array<Dynamic> = null):Dynamic
-	{
-		if (hscript == null)
-		{
+	public function runHaxeFunction(funcToRun:String, ?funcArgs:Array<Dynamic> = null):Dynamic {
+		if (hscript == null) {
 			CoolLog.error('runHaxeFunction: HScript is not initialized. Call runHaxeCode first.');
 			return null;
 		}
@@ -798,8 +711,7 @@ class HaxeBridge
 	}
 
 	/** Imports a Haxe class/enum into the HScript interpreter by its package path. */
-	public function addHaxeLibrary(libName:String, ?libPackage:Null<String> = ''):Void
-	{
+	public function addHaxeLibrary(libName:String, ?libPackage:Null<String> = ''):Void {
 		if (libName == null)
 			libName = '';
 
@@ -813,12 +725,9 @@ class HaxeBridge
 		if (hscript == null)
 			hscript = new HScript();
 
-		try
-		{
+		try {
 			hscript.set(libName, resolved);
-		}
-		catch (e:Dynamic)
-		{
+		} catch (e:Dynamic) {
 			CoolLog.error('addHaxeLibrary error: $e');
 		}
 	}
@@ -827,10 +736,8 @@ class HaxeBridge
 
 // Script-language bridges
 #if (LUA_ALLOWED && HSCRIPT_ALLOWED)
-class HxLua
-{
-	public static function implement(script:LuaScript):Void
-	{
+class HxLua {
+	public static function implement(script:LuaScript):Void {
 		var bridge = new HaxeBridge();
 		script.set("runHaxeCode", function(code, ?vars, ?func, ?args) return bridge.runHaxeCode(script.scriptPath, code, vars, func, args));
 		script.set("runHaxeFunction", function(func, ?args) return bridge.runHaxeFunction(func, args));
@@ -838,19 +745,14 @@ class HxLua
 	}
 }
 #else
-class HxLua
-{
-	public static function implement(?_:Dynamic):Void
-	{
-	}
+class HxLua {
+	public static function implement(?_:Dynamic):Void {}
 }
 #end
 
 #if (PYTHON_ALLOWED && HSCRIPT_ALLOWED)
-class HxPy
-{
-	public static function implement(script:Python):Void
-	{
+class HxPy {
+	public static function implement(script:Python):Void {
 		var bridge = new HaxeBridge();
 		script.set("runHaxeCode", function(code, ?vars, ?func, ?args) return bridge.runHaxeCode(script.scriptPath, code, vars, func, args));
 		script.set("runHaxeFunction", function(func, ?args) return bridge.runHaxeFunction(func, args));
@@ -858,10 +760,7 @@ class HxPy
 	}
 }
 #else
-class HxPy
-{
-	public static function implement(?_:Dynamic):Void
-	{
-	}
+class HxPy {
+	public static function implement(?_:Dynamic):Void {}
 }
 #end

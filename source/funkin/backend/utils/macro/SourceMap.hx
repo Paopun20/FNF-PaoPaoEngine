@@ -14,18 +14,15 @@ using StringTools;
 /*
 	Simple macro to build a source map of all .hx files in the project at compile time, based on the paths defined in Project.xml. This allows us to include source code in error logs without needing to read files at runtime, which is especially useful for platforms with limited file access or for packaging everything into a single binary.
  */
-final class SourceMap
-{
-	macro public static function build():ExprOf<StringMap<String>>
-	{
+final class SourceMap {
+	macro public static function build():ExprOf<StringMap<String>> {
 		var setExprs:Array<Expr> = [];
 
 		for (path in getSourcePaths())
 			if (FileSystem.exists(path) && FileSystem.isDirectory(path))
 				collectFiles(path, path, setExprs);
 
-		return macro
-		{
+		return macro {
 			var __sourceMap = new StringMap<String>();
 			$b{setExprs};
 			__sourceMap;
@@ -36,39 +33,33 @@ final class SourceMap
 	// MSVC limits string literals to ~16KB, so I chunk large files
 	private static final CHUNK_SIZE = 8000;
 
-	private static function resolvePathAttr(node:Xml):Null<String>
-	{
+	private static function resolvePathAttr(node:Xml):Null<String> {
 		var path = node.get("path");
 		if (path == null || path == "")
 			path = node.get("name");
 		return (path != null && path != "") ? FileSystem.absolutePath(path) : null;
 	}
 
-	private static function getSourcePaths():Array<String>
-	{
+	private static function getSourcePaths():Array<String> {
 		var paths:Array<String> = [];
 
 		var xmlPath = "./Project.xml";
-		if (!FileSystem.exists(xmlPath))
-		{
+		if (!FileSystem.exists(xmlPath)) {
 			Context.warning("SourceMap: Project.xml not found", Context.currentPos());
 			return [FileSystem.absolutePath("./source")];
 		}
 
 		var content = File.getContent(xmlPath);
-		var xml = try Xml.parse(content) catch (e:Dynamic)
-		{
+		var xml = try Xml.parse(content) catch (e:Dynamic) {
 			Context.warning('SourceMap: Failed to parse Project.xml: $e', Context.currentPos());
 			return [FileSystem.absolutePath("./source")];
 		};
 
-		for (node in xml.firstElement())
-		{
+		for (node in xml.firstElement()) {
 			if (node.nodeType != Xml.Element)
 				continue;
 
-			switch (node.nodeName)
-			{
+			switch (node.nodeName) {
 				case "source" | "classpath":
 					// <source path="source"/>
 					var path = resolvePathAttr(node);
@@ -82,8 +73,7 @@ final class SourceMap
 					// <haxelib name="flixel" version="5.4.0"/>
 					var name = node.get("name");
 					var version = node.get("version"); // null if not set
-					if (name != null && name != "")
-					{
+					if (name != null && name != "") {
 						var libPath = resolveHaxelibPath(name, version);
 						if (libPath != null)
 							paths.push(libPath);
@@ -96,8 +86,7 @@ final class SourceMap
 			}
 		}
 
-		if (paths.length == 0)
-		{
+		if (paths.length == 0) {
 			Context.warning("SourceMap: No paths found in Project.xml, falling back to ./source", Context.currentPos());
 			paths.push(FileSystem.absolutePath("./source"));
 		}
@@ -105,32 +94,27 @@ final class SourceMap
 		return paths;
 	}
 
-	private static function resolveHaxelibPath(name:String, ?version:String):Null<String>
-	{
+	private static function resolveHaxelibPath(name:String, ?version:String):Null<String> {
 		// haxelib path accepts "name:version" format
 		var libArg = (version != null && version != "") ? '$name:$version' : name;
 
-		try
-		{
+		try {
 			var proc = new Process("haxelib", ["path", libArg]);
 			var output = proc.stdout.readAll().toString();
 			var exitCode = proc.exitCode();
 			proc.close();
 
-			if (exitCode != 0)
-			{
+			if (exitCode != 0) {
 				Context.warning('SourceMap: haxelib path $libArg failed (exit $exitCode)', Context.currentPos());
 				return null;
 			}
 
 			// First non-flag line of `haxelib path` output is the source directory
-			for (line in output.split("\n"))
-			{
+			for (line in output.split("\n")) {
 				line = line.trim().replace("\\", "/");
 				if (line == "" || line.startsWith("-"))
 					continue;
-				if (FileSystem.exists(line) && FileSystem.isDirectory(line))
-				{
+				if (FileSystem.exists(line) && FileSystem.isDirectory(line)) {
 					Context.info('SourceMap: Resolved $libArg -> $line', Context.currentPos());
 					return line;
 				}
@@ -138,23 +122,19 @@ final class SourceMap
 
 			Context.warning('SourceMap: Could not resolve source path for haxelib $libArg', Context.currentPos());
 			return null;
-		}
-		catch (e:Dynamic)
-		{
+		} catch (e:Dynamic) {
 			Context.warning('SourceMap: Exception resolving haxelib $libArg: $e', Context.currentPos());
 			return null;
 		}
 	}
 
-	private static function splitString(s:String):Expr
-	{
+	private static function splitString(s:String):Expr {
 		if (s.length <= CHUNK_SIZE)
 			return macro $v{s};
 
 		var chunks:Array<Expr> = [];
 		var i = 0;
-		while (i < s.length)
-		{
+		while (i < s.length) {
 			var chunk = s.substr(i, CHUNK_SIZE);
 			chunks.push(macro $v{chunk});
 			i += CHUNK_SIZE;
@@ -167,18 +147,13 @@ final class SourceMap
 		return result;
 	}
 
-	private static function collectFiles(base:String, dir:String, exprs:Array<Expr>):Void
-	{
+	private static function collectFiles(base:String, dir:String, exprs:Array<Expr>):Void {
 		var items = try FileSystem.readDirectory(dir) catch (e:Dynamic) return;
-		for (file in items)
-		{
+		for (file in items) {
 			var full = dir + "/" + file;
-			if (FileSystem.isDirectory(full))
-			{
+			if (FileSystem.isDirectory(full)) {
 				collectFiles(base, full, exprs);
-			}
-			else if (file.endsWith(".hx"))
-			{
+			} else if (file.endsWith(".hx")) {
 				var key = full.substr(base.length + 1).replace("\\", "/");
 				var content = try File.getContent(full) catch (e:Dynamic) continue;
 				exprs.push(macro __sourceMap.set($v{key}, ${splitString(content)}));

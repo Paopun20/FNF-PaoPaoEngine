@@ -2,8 +2,7 @@ package funkin.backend;
 
 import funkin.backend.ClientPrefs;
 
-class Rating
-{
+class Rating {
 	public var name:String = '';
 	public var image:String = '';
 	public var hitWindow:Null<Float> = 0.0; // ms
@@ -12,23 +11,19 @@ class Rating
 	public var noteSplash:Bool = true;
 	public var hits:Int = 0;
 
-	public function new(name:String)
-	{
+	public function new(name:String) {
 		this.name = name;
 		this.image = name;
 		this.hitWindow = 0;
 
 		var window:String = name + 'Window';
-		try
-		{
+		try {
 			this.hitWindow = Reflect.field(ClientPrefs.data, window);
-		}
-		catch (e)
+		} catch (e)
 			FlxG.log.error(e);
 	}
 
-	public static function loadDefault():Array<Rating>
-	{
+	public static function loadDefault():Array<Rating> {
 		var ratingsData:Array<Rating> = [new Rating('sick')]; // highest rating goes first
 
 		var rating:Rating = new Rating('good');

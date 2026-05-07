@@ -12,8 +12,7 @@ import funkin.modding.scripts.Python;
 import Main;
 
 @:build(funkin.backend.utils.macro.EnvironmentMacro.build())
-class DiscordClient
-{
+class DiscordClient {
 	@:env("DISCORD_RPC_ID", {
 		required: true
 	})
@@ -26,10 +25,8 @@ class DiscordClient
 	public static var whoIsConnectedTo:Null<cpp.RawConstPointer<DiscordUser>>;
 	public static var isInitialized:Bool = false;
 
-	public static function initialize():Void
-	{
-		if (clientID == null)
-		{
+	public static function initialize():Void {
+		if (clientID == null) {
 			CoolLog.error("Discord client ID is not set!");
 			clientID = _defaultID;
 			CoolLog.info("Discord client ID set to default.");
@@ -44,10 +41,8 @@ class DiscordClient
 		handlers.errored = cpp.Function.fromStaticFunction(onError);
 		Discord.Initialize(_defaultID, cpp.RawPointer.addressOf(handlers), false, null);
 
-		Thread.create(function():Void
-		{
-			while (isInitialized)
-			{
+		Thread.create(function():Void {
+			while (isInitialized) {
 				#if DISCORD_DISABLE_IO_THREAD
 				Discord.UpdateConnection();
 				#end
@@ -61,26 +56,21 @@ class DiscordClient
 		isInitialized = true;
 	}
 
-	public dynamic static function shutdown()
-	{
+	public dynamic static function shutdown() {
 		isInitialized = false;
 		CoolLog.info("Shutting down Discord RPC...");
 		Discord.Shutdown();
 	}
 
-	private static function onReady(request:cpp.RawConstPointer<DiscordUser>):Void
-	{
+	private static function onReady(request:cpp.RawConstPointer<DiscordUser>):Void {
 		final username:String = request[0].username;
 		final globalName:String = request[0].username;
 		final discriminator:Int = Std.parseInt(request[0].discriminator);
 		whoIsConnectedTo = request;
 
-		if (discriminator != 0)
-		{
+		if (discriminator != 0) {
 			CoolLog.info('Discord: Connected to user ${username}#${discriminator} ($globalName)');
-		}
-		else
-		{
+		} else {
 			CoolLog.info('Discord: Connected to user @${username} ($globalName)');
 		}
 
@@ -108,25 +98,21 @@ class DiscordClient
 		changePresence();
 	}
 
-	private static function onDisconnected(errorCode:Int, message:cpp.ConstCharStar):Void
-	{
+	private static function onDisconnected(errorCode:Int, message:cpp.ConstCharStar):Void {
 		CoolLog.info('Discord: Disconnected ($errorCode:$message)');
 		whoIsConnectedTo = null;
 	}
 
-	private static function onError(errorCode:Int, message:cpp.ConstCharStar):Void
-	{
+	private static function onError(errorCode:Int, message:cpp.ConstCharStar):Void {
 		CoolLog.error('Discord: Error ($errorCode:$message)');
 	}
 
-	inline public static function resetClientID()
-	{
+	inline public static function resetClientID() {
 		clientID = _defaultID;
 	}
 
 	public static function changePresence(details:String = 'In the Menus', ?state:String, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float,
-			largeImageKey:String = 'icon')
-	{
+			largeImageKey:String = 'icon') {
 		var now:Float = Date.now().getTime();
 
 		var startTimestamp:Float = 0;
@@ -146,41 +132,35 @@ class DiscordClient
 		updatePresence();
 	}
 
-	public static function updatePresence()
-	{
+	public static function updatePresence() {
 		discordPresence.buttons[0] = button1;
 		discordPresence.buttons[1] = button2;
 
 		Discord.UpdatePresence(cpp.RawConstPointer.addressOf(discordPresence));
 	}
 
-	public static function check()
-	{
+	public static function check() {
 		if (ClientPrefs.data.discordRPC)
 			initialize();
 		else if (isInitialized)
 			shutdown();
 	}
 
-	public static function prepare()
-	{
+	public static function prepare() {
 		if (!isInitialized && ClientPrefs.data.discordRPC)
 			initialize();
 
-		Main.onClose.add(function()
-		{
+		Main.onClose.add(function() {
 			if (isInitialized)
 				shutdown();
 		});
 	}
 
-	private static function set_clientID(newID:String)
-	{
+	private static function set_clientID(newID:String) {
 		var change:Bool = (clientID != newID);
 		clientID = newID;
 
-		if (change && isInitialized)
-		{
+		if (change && isInitialized) {
 			shutdown();
 			initialize();
 			updatePresence();
@@ -189,23 +169,19 @@ class DiscordClient
 	}
 
 	#if MODS_ALLOWED
-	public static function loadModRPC()
-	{
+	public static function loadModRPC() {
 		var pack:Dynamic = Mods.getPack();
-		if (pack != null && pack.discordRPC != null && pack.discordRPC != clientID)
-		{
+		if (pack != null && pack.discordRPC != null && pack.discordRPC != clientID) {
 			clientID = pack.discordRPC;
 		}
 	}
 	#end
 
 	#if LUA_ALLOWED
-	public static function addLuaCallbacks(lua:LuaScript)
-	{
+	public static function addLuaCallbacks(lua:LuaScript) {
 		lua.set("changeDiscordPresence", changePresence);
 
-		lua.set("changeDiscordClientID", function(?newID:String = null)
-		{
+		lua.set("changeDiscordClientID", function(?newID:String = null) {
 			if (newID == null)
 				newID = _defaultID;
 			clientID = newID;
@@ -214,12 +190,10 @@ class DiscordClient
 	#end
 
 	#if PYTHON_ALLOWED
-	public static function addPythonCallbacks(py:Python)
-	{
+	public static function addPythonCallbacks(py:Python) {
 		py.set("changeDiscordPresence", changePresence);
 
-		py.set("changeDiscordClientID", function(?newID:String = null)
-		{
+		py.set("changeDiscordClientID", function(?newID:String = null) {
 			if (newID == null)
 				newID = _defaultID;
 			clientID = newID;

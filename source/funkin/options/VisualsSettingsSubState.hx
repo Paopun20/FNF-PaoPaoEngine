@@ -5,23 +5,20 @@ import funkin.objects.StrumNote;
 import funkin.objects.NoteSplash;
 import funkin.objects.Alphabet;
 
-class VisualsSettingsSubState extends BaseOptionsMenu
-{
+class VisualsSettingsSubState extends BaseOptionsMenu {
 	var noteOptionID:Int = -1;
 	var notes:FlxTypedGroup<StrumNote>;
 	var splashes:FlxTypedGroup<NoteSplash>;
 	var noteY:Float = 90;
 
-	public function new()
-	{
+	public function new() {
 		title = Language.getPhrase('visuals_menu', 'Visuals Settings');
 		rpcTitle = 'Visuals Settings Menu'; // for Discord Rich Presence
 
 		// for note skins and splash skins
 		notes = new FlxTypedGroup<StrumNote>();
 		splashes = new FlxTypedGroup<NoteSplash>();
-		for (i in 0...Note.colArray.length)
-		{
+		for (i in 0...Note.colArray.length) {
 			var note:StrumNote = new StrumNote(370 + (560 / Note.colArray.length) * i, -200, i, 0);
 			changeNoteSkin(note);
 			notes.add(note);
@@ -36,8 +33,7 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 
 		// options
 		var noteSkins:Array<String> = Mods.mergeAllTextsNamed('images/noteSkins/list.txt');
-		if (noteSkins.length > 0)
-		{
+		if (noteSkins.length > 0) {
 			if (!noteSkins.contains(ClientPrefs.data.noteSkin))
 				ClientPrefs.data.noteSkin = ClientPrefs.defaultData.noteSkin; // Reset to default if saved noteskin couldnt be found
 
@@ -49,8 +45,7 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		}
 
 		var noteSplashes:Array<String> = Mods.mergeAllTextsNamed('images/noteSplashes/list.txt');
-		if (noteSplashes.length > 0)
-		{
+		if (noteSplashes.length > 0) {
 			if (!noteSplashes.contains(ClientPrefs.data.splashSkin))
 				ClientPrefs.data.splashSkin = ClientPrefs.defaultData.splashSkin; // Reset to default if saved splashskin couldnt be found
 
@@ -127,17 +122,13 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 
 	var notesShown:Bool = false;
 
-	override function changeSelection(change:Int = 0)
-	{
+	override function changeSelection(change:Int = 0) {
 		super.changeSelection(change);
 
-		switch (curOption.variable)
-		{
+		switch (curOption.variable) {
 			case 'noteSkin', 'splashSkin', 'splashAlpha':
-				if (!notesShown)
-				{
-					for (note in notes.members)
-					{
+				if (!notesShown) {
+					for (note in notes.members) {
 						FlxTween.cancelTweensOf(note);
 						FlxTween.tween(note, {y: noteY}, Math.abs(note.y / (200 + noteY)) / 3, {ease: FlxEase.quadInOut});
 					}
@@ -147,10 +138,8 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 					playNoteSplashes();
 
 			default:
-				if (notesShown)
-				{
-					for (note in notes.members)
-					{
+				if (notesShown) {
+					for (note in notes.members) {
 						FlxTween.cancelTweensOf(note);
 						FlxTween.tween(note, {y: -200}, Math.abs(note.y / (200 + noteY)) / 3, {ease: FlxEase.quadInOut});
 					}
@@ -161,8 +150,7 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 
 	var changedMusic:Bool = false;
 
-	function onChangePauseMusic()
-	{
+	function onChangePauseMusic() {
 		if (ClientPrefs.data.pauseMusic == 'None')
 			FlxG.sound.music.volume = 0;
 		else
@@ -171,18 +159,15 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		changedMusic = true;
 	}
 
-	function onChangeNoteSkin()
-	{
-		notes.forEachAlive(function(note:StrumNote)
-		{
+	function onChangeNoteSkin() {
+		notes.forEachAlive(function(note:StrumNote) {
 			changeNoteSkin(note);
 			note.centerOffsets();
 			note.centerOrigin();
 		});
 	}
 
-	function changeNoteSkin(note:StrumNote)
-	{
+	function changeNoteSkin(note:StrumNote) {
 		var skin:String = Note.defaultNoteSkin;
 		var customSkin:String = skin + Note.getNoteSkinPostfix();
 		if (Paths.fileExists('images/$customSkin.png', IMAGE))
@@ -193,8 +178,7 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		note.playAnim('static');
 	}
 
-	function onChangeSplashSkin()
-	{
+	function onChangeSplashSkin() {
 		var skin:String = NoteSplash.defaultNoteSplash + NoteSplash.getSplashSkinPostfix();
 		for (splash in splashes)
 			splash.loadSplash(skin);
@@ -202,14 +186,12 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		playNoteSplashes();
 	}
 
-	function playNoteSplashes()
-	{
+	function playNoteSplashes() {
 		var rand:Int = 0;
 		if (splashes.members[0] != null && splashes.members[0].maxAnims > 1)
 			rand = FlxG.random.int(0, splashes.members[0].maxAnims - 1); // For playing the same random animation on all 4 splashes
 
-		for (splash in splashes)
-		{
+		for (splash in splashes) {
 			splash.revive();
 
 			splash.spawnSplashNote(0, 0, splash.ID, null, false);
@@ -222,8 +204,7 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 
 			var minFps:Int = 22;
 			var maxFps:Int = 26;
-			if (conf != null)
-			{
+			if (conf != null) {
 				offsets = conf.offsets;
 
 				minFps = conf.fps[0];
@@ -236,8 +217,7 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 			}
 
 			splash.offset.set(10, 10);
-			if (offsets != null)
-			{
+			if (offsets != null) {
 				splash.offset.x += offsets[0];
 				splash.offset.y += offsets[1];
 			}
@@ -247,8 +227,7 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 		}
 	}
 
-	override function destroy()
-	{
+	override function destroy() {
 		if (changedMusic && !OptionsState.onPlayState)
 			FlxG.sound.playMusic(Paths.music('freakyMenu'), 1, true);
 		Note.globalRgbShaders = [];
@@ -256,8 +235,7 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 	}
 
 	#if !mobile
-	function onChangeFPSCounter()
-	{
+	function onChangeFPSCounter() {
 		if (Main.fpsVar != null)
 			Main.fpsVar.visible = ClientPrefs.data.showFPS;
 	}

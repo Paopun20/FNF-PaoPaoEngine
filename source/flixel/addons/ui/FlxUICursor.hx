@@ -24,8 +24,7 @@ import flixel.util.FlxDestroyUtil;
  * Cursor object that you can use to "click" on interface elements using a keyboard or gamepad
  * TODO: need to support gamepad and/or deal with absence of mouse
  */
-class FlxUICursor extends FlxUISprite
-{
+class FlxUICursor extends FlxUISprite {
 	public var callback:String->IFlxUIWidget->Void; // callback to notify whoever's listening that I did something(presumably a FlxUI object)
 
 	public var wrap:Bool = true; // when cycling through values, loop from back to front or stop at "edges?"
@@ -44,68 +43,45 @@ class FlxUICursor extends FlxUISprite
 	 * @param	forwardIfInvisible if object @ loc is invisible, keep adding 1 until we find a good state. If false, subtract 1.
 	 * @param	wrap if true, wrap around if we reach the end of the list. If false, don't.
 	 */
-	public function findVisibleLocation(loc:Int, forwardIfInvisible:Bool = true, wrap:Bool = true):Void
-	{
+	public function findVisibleLocation(loc:Int, forwardIfInvisible:Bool = true, wrap:Bool = true):Void {
 		location = loc;
 		if (location == -1)
 			return;
 
 		var wrapped = false;
-		while (_widgets[location] == null || _widgets[location].visible == false)
-		{
-			if (forwardIfInvisible)
-			{
-				if (location == _widgets.length - 1)
-				{
-					if (wrap)
-					{
-						if (!wrapped)
-						{
+		while (_widgets[location] == null || _widgets[location].visible == false) {
+			if (forwardIfInvisible) {
+				if (location == _widgets.length - 1) {
+					if (wrap) {
+						if (!wrapped) {
 							wrapped = true;
 							location = 0;
-						}
-						else
-						{
+						} else {
 							location = -1;
 							return;
 						}
-					}
-					else
-					{
+					} else {
 						location = -1;
 						return;
 					}
-				}
-				else
-				{
+				} else {
 					location++;
 				}
-			}
-			else
-			{
-				if (location == 0)
-				{
-					if (wrap)
-					{
-						if (!wrapped)
-						{
+			} else {
+				if (location == 0) {
+					if (wrap) {
+						if (!wrapped) {
 							wrapped = true;
 							location = _widgets.length - 1;
-						}
-						else
-						{
+						} else {
 							location = -1;
 							return;
 						}
-					}
-					else
-					{
+					} else {
 						location = -1;
 						return;
 					}
-				}
-				else
-				{
+				} else {
 					location--;
 				}
 			}
@@ -116,23 +92,17 @@ class FlxUICursor extends FlxUISprite
 	 * Returns the current widget the cursor is pointing to, if any
 	 * @since 2.1.0
 	 */
-	public function getCurrentWidget():IFlxUIWidget
-	{
-		if (_widgets != null && location >= 0 && location < _widgets.length)
-		{
+	public function getCurrentWidget():IFlxUIWidget {
+		if (_widgets != null && location >= 0 && location < _widgets.length) {
 			return _widgets[location];
 		}
 		return null;
 	}
 
-	private function set_listIndex(i:Int):Int
-	{
-		if (i >= _lists.length)
-		{
+	private function set_listIndex(i:Int):Int {
+		if (i >= _lists.length) {
 			i = _lists.length - 1;
-		}
-		else if (i < 0)
-		{
+		} else if (i < 0) {
 			i = 0;
 		}
 		listIndex = i;
@@ -141,16 +111,13 @@ class FlxUICursor extends FlxUISprite
 		return listIndex;
 	}
 
-	private override function set_visible(b:Bool):Bool
-	{
+	private override function set_visible(b:Bool):Bool {
 		b = super.set_visible(b);
 		return b;
 	}
 
-	private function set_location(i:Int):Int
-	{
-		if (i >= _widgets.length)
-		{
+	private function set_location(i:Int):Int {
+		if (i >= _widgets.length) {
 			i = _widgets.length - 1;
 		}
 		location = i;
@@ -165,19 +132,14 @@ class FlxUICursor extends FlxUISprite
 
 	public var gamepad(get, set):FlxGamepad;
 
-	private function set_gamepad(g:FlxGamepad):FlxGamepad
-	{
+	private function set_gamepad(g:FlxGamepad):FlxGamepad {
 		_gamepad = g;
 		setDefaultKeys(_defaultCode);
 		var arr = [keysUp, keysDown, keysLeft, keysRight, keysClick];
-		for (list in arr)
-		{
-			if (list != null)
-			{
-				for (keys in list)
-				{
-					if ((keys is FlxMultiGamepad))
-					{
+		for (list in arr) {
+			if (list != null) {
+				for (keys in list) {
+					if ((keys is FlxMultiGamepad)) {
 						var fmg:FlxMultiGamepad = cast keys;
 						fmg.gamepad = _gamepad;
 					}
@@ -187,8 +149,7 @@ class FlxUICursor extends FlxUISprite
 		return g;
 	}
 
-	private function get_gamepad():FlxGamepad
-	{
+	private function get_gamepad():FlxGamepad {
 		return _gamepad;
 	}
 
@@ -232,16 +193,11 @@ class FlxUICursor extends FlxUISprite
 	 * @param	DefaultKeys		default hotkey layouts, accepts KEYS_TAB, ..._WASD, etc, combine using "|" operator
 	 * @param	Asset			visual asset for the cursor. If not supplied, uses default
 	 */
-	public function new(Callback:String->IFlxUIWidget->Void, InputMethod:Int = 0x01, DefaultKeys:Int = 0x00000001, ?Asset:Dynamic)
-	{
-		if (Asset == null)
-		{ // No asset detected? Guess based on game's resolution
-			if (FlxG.height < 400)
-			{
+	public function new(Callback:String->IFlxUIWidget->Void, InputMethod:Int = 0x01, DefaultKeys:Int = 0x00000001, ?Asset:Dynamic) {
+		if (Asset == null) { // No asset detected? Guess based on game's resolution
+			if (FlxG.height < 400) {
 				Asset = FlxUIAssets.IMG_FINGER_SMALL; // 16x16 pixel finger
-			}
-			else
-			{
+			} else {
 				Asset = FlxUIAssets.IMG_FINGER_BIG; // 32x32 pixel finger
 			}
 		}
@@ -266,25 +222,20 @@ class FlxUICursor extends FlxUISprite
 		scrollFactor.set(0, 0);
 
 		#if FLX_MOUSE
-		if (FlxG.mouse != null && (FlxG.mouse is FlxUIMouse) == false)
-		{
+		if (FlxG.mouse != null && (FlxG.mouse is FlxUIMouse) == false) {
 			_newMouse = new FlxUIMouse(FlxG.mouse.cursorContainer);
 			FlxG.mouse = _newMouse;
-		}
-		else
-		{
+		} else {
 			_newMouse = cast FlxG.mouse;
 		}
 		#end
 	}
 
-	public override function destroy():Void
-	{
+	public override function destroy():Void {
 		super.destroy();
 
 		#if FLX_MOUSE
-		if (FlxG.mouse == _newMouse)
-		{
+		if (FlxG.mouse == _newMouse) {
 			// remove the local pointer, but allow the replaced mouse object to carry on, it won't hurt anything
 			_newMouse = null;
 		}
@@ -298,8 +249,7 @@ class FlxUICursor extends FlxUISprite
 
 		anchor = FlxDestroyUtil.destroy(anchor);
 
-		for (l in _lists)
-		{
+		for (l in _lists) {
 			U.clearArraySoft(l.widgets);
 		}
 
@@ -307,22 +257,18 @@ class FlxUICursor extends FlxUISprite
 		_widgets = null;
 	}
 
-	public override function update(elapsed:Float):Void
-	{
+	public override function update(elapsed:Float):Void {
 		#if FLX_GAMEPAD
-		if (gamepad == null)
-		{
+		if (gamepad == null) {
 			var g = getGamepad(false);
-			if (g != null)
-			{
+			if (g != null) {
 				gamepad = g;
 			}
 		}
 		#end
 
 		#if FLX_MOUSE
-		if (lastMouseX != FlxG.mouse.x || lastMouseY != FlxG.mouse.y)
-		{
+		if (lastMouseX != FlxG.mouse.x || lastMouseY != FlxG.mouse.y) {
 			var oldVis = visible;
 
 			// Ad hoc fix to avoid world coordinates on UI elements
@@ -342,22 +288,16 @@ class FlxUICursor extends FlxUISprite
 		super.update(elapsed);
 	}
 
-	public function addWidgetsFromUI(ui:FlxUI)
-	{
-		if (ui.cursorLists != null)
-		{
-			for (list in ui.cursorLists)
-			{
+	public function addWidgetsFromUI(ui:FlxUI) {
+		if (ui.cursorLists != null) {
+			for (list in ui.cursorLists) {
 				addWidgetList(list);
 			}
 			_widgets = _lists[0].widgets;
 			location = 0;
 			listIndex = 0;
-		}
-		else
-		{
-			for (widget in ui.members)
-			{
+		} else {
+			for (widget in ui.members) {
 				if ((widget is ICursorPointable) || (widget is FlxUIGroup)) // if it's directly pointable or a group
 				{
 					addWidget(cast widget); // add it
@@ -371,26 +311,20 @@ class FlxUICursor extends FlxUISprite
 	 * @param	widget
 	 * @return	whether the widget was found or not
 	 */
-	public function jumpTo(widget:IFlxUIWidget):Bool
-	{
+	public function jumpTo(widget:IFlxUIWidget):Bool {
 		var listi:Int = 0;
 		var i:Int = 0;
-		if (_lists != null)
-		{
-			for (list in _lists)
-			{
+		if (_lists != null) {
+			for (list in _lists) {
 				i = list.widgets.indexOf(widget);
-				if (i != -1)
-				{
+				if (i != -1) {
 					listIndex = listi;
 					location = i;
 					return true;
 				}
 				listi++;
 			}
-		}
-		else
-		{
+		} else {
 			i = _widgets.indexOf(widget);
 			location = i;
 			return true;
@@ -404,28 +338,22 @@ class FlxUICursor extends FlxUISprite
 	 * @param	Y
 	 * @return
 	 */
-	public function jumpToXY(X:Float, Y:Float):Bool
-	{
+	public function jumpToXY(X:Float, Y:Float):Bool {
 		var listi:Int = 0;
 
 		var bestd2 = Math.POSITIVE_INFINITY;
 		var bestli = -1;
 		var besti = -1;
 
-		if (_lists != null)
-		{
-			for (list in _lists)
-			{
-				for (i in 0...list.widgets.length)
-				{
+		if (_lists != null) {
+			for (list in _lists) {
+				for (i in 0...list.widgets.length) {
 					var w:IFlxUIWidget = list.widgets[i];
-					if (w.visible == true && X >= w.x && Y >= w.y && X <= w.x + w.width && Y <= w.y + w.height)
-					{
+					if (w.visible == true && X >= w.x && Y >= w.y && X <= w.x + w.width && Y <= w.y + w.height) {
 						var dx = ((w.x + w.width / 2) - X);
 						var dy = ((w.y + w.height / 2) - Y);
 						var d2 = dx * dx + dy * dy;
-						if (d2 < bestd2)
-						{
+						if (d2 < bestd2) {
 							bestd2 = d2;
 							bestli = listi;
 							besti = i;
@@ -434,32 +362,25 @@ class FlxUICursor extends FlxUISprite
 				}
 				listi++;
 			}
-			if (bestli != -1 && besti != -1)
-			{
+			if (bestli != -1 && besti != -1) {
 				listIndex = bestli;
 				location = besti;
 				return true;
 			}
-		}
-		else
-		{
-			for (i in 0..._widgets.length)
-			{
+		} else {
+			for (i in 0..._widgets.length) {
 				var w:IFlxUIWidget = _widgets[i];
-				if (w.visible == true && X >= w.x && Y >= w.y && X <= w.x + w.width && Y <= w.y + w.height)
-				{
+				if (w.visible == true && X >= w.x && Y >= w.y && X <= w.x + w.width && Y <= w.y + w.height) {
 					var dx = ((w.x + w.width / 2) - X);
 					var dy = ((w.y + w.height / 2) - Y);
 					var d2 = dx * dx + dy * dy;
-					if (d2 < bestd2)
-					{
+					if (d2 < bestd2) {
 						bestd2 = d2;
 						besti = i;
 					}
 				}
 			}
-			if (besti != -1)
-			{
+			if (besti != -1) {
 				location = besti;
 				return true;
 			}
@@ -467,12 +388,9 @@ class FlxUICursor extends FlxUISprite
 		return false;
 	}
 
-	public function addWidgetList(list:Array<IFlxUIWidget>):Void
-	{
-		for (l in _lists)
-		{
-			if (FlxArrayUtil.equals(l.widgets, list))
-			{
+	public function addWidgetList(list:Array<IFlxUIWidget>):Void {
+		for (l in _lists) {
+			if (FlxArrayUtil.equals(l.widgets, list)) {
 				return;
 			}
 		}
@@ -482,8 +400,7 @@ class FlxUICursor extends FlxUISprite
 		var x2 = Math.NEGATIVE_INFINITY;
 		var y2 = Math.NEGATIVE_INFINITY;
 
-		for (w in list)
-		{
+		for (w in list) {
 			if (w.x < x1)
 				x1 = w.x;
 			if (w.y < y1)
@@ -495,17 +412,14 @@ class FlxUICursor extends FlxUISprite
 		}
 
 		var theList:WidgetList = null;
-		if (_lists.length == 1 && _lists[0].widgets != null && _lists[0].widgets.length == 0)
-		{
+		if (_lists.length == 1 && _lists[0].widgets != null && _lists[0].widgets.length == 0) {
 			_lists[0].widgets = [];
 			_lists[0].x = Std.int(x1);
 			_lists[0].y = Std.int(y1);
 			_lists[0].width = Std.int(x2 - x1);
 			_lists[0].height = Std.int(y2 - y1);
 			theList = _lists[0];
-		}
-		else
-		{
+		} else {
 			_lists.push({
 				x: Std.int(x1),
 				y: Std.int(y1),
@@ -518,32 +432,26 @@ class FlxUICursor extends FlxUISprite
 
 		var oldWidgets = _widgets;
 		_widgets = theList.widgets;
-		for (ifw in list)
-		{
+		for (ifw in list) {
 			addWidget(ifw);
 		}
 		_widgets = oldWidgets;
 
 		_lists.sort(_sortXYWidgetList);
-		for (widgetList in _lists)
-		{
+		for (widgetList in _lists) {
 			widgetList.widgets.sort(_sortXYVisible);
 		}
 	}
 
-	public function addWidget(widget:IFlxUIWidget):Void
-	{
+	public function addWidget(widget:IFlxUIWidget):Void {
 		if ((widget is ICursorPointable)) // directly pointable? add it
 		{
 			_widgets.push(widget);
-		}
-		else if ((widget is FlxUIGroup)) // it's a group?
+		} else if ((widget is FlxUIGroup)) // it's a group?
 		{
 			var g:FlxUIGroup = cast widget;
-			for (member in g.members)
-			{
-				if ((member is IFlxUIWidget))
-				{
+			for (member in g.members) {
+				if ((member is IFlxUIWidget)) {
 					addWidget(cast member); // add each member individually
 				}
 			}
@@ -551,14 +459,11 @@ class FlxUICursor extends FlxUISprite
 		_widgets.sort(_sortXYVisible);
 	}
 
-	public function sortWidgets(method:SortMethod, ?list:Array<IFlxUIWidget>):Void
-	{
-		if (list == null)
-		{
+	public function sortWidgets(method:SortMethod, ?list:Array<IFlxUIWidget>):Void {
+		if (list == null) {
 			list = _widgets;
 		}
-		switch (method)
-		{
+		switch (method) {
 			case XY:
 				list.sort(_sortXYVisible);
 			case ID:
@@ -567,22 +472,17 @@ class FlxUICursor extends FlxUISprite
 	}
 
 	/** @since 2.1.0 */
-	public function clearWidgets():Void
-	{
+	public function clearWidgets():Void {
 		FlxArrayUtil.clearArray(_widgets);
 	}
 
-	public function removeWidget(widget:IFlxUIWidget, ?list:Array<IFlxUIWidget>):Bool
-	{
-		if (list == null)
-		{
+	public function removeWidget(widget:IFlxUIWidget, ?list:Array<IFlxUIWidget>):Bool {
+		if (list == null) {
 			list = _widgets;
 		}
 		var value:Bool = false;
-		if (list != null)
-		{
-			if (list.indexOf(widget) != -1)
-			{
+		if (list != null) {
+			if (list.indexOf(widget) != -1) {
 				value = list.remove(widget);
 				list.sort(_sortXYVisible);
 			}
@@ -594,35 +494,30 @@ class FlxUICursor extends FlxUISprite
 	 * Set the default key layout quickly using a constant.
 	 * @param	code	KEYS_TAB, ..._WASD, etc, combine with "|" operator
 	 */
-	public function setDefaultKeys(code:Int):Void
-	{
+	public function setDefaultKeys(code:Int):Void {
 		_defaultCode = code;
 		_clearKeys();
 		_newKeys();
-		if (code & KEYS_TAB == KEYS_TAB)
-		{
+		if (code & KEYS_TAB == KEYS_TAB) {
 			_addToKeys(keysRight, new FlxMultiKey(TAB, null, [SHIFT])); // Tab, (but NOT Shift+Tab!)
 			_addToKeys(keysLeft, new FlxMultiKey(TAB, [SHIFT])); // Shift+Tab
 			_addToKeys(keysClick, new FlxMultiKey(ENTER));
 		}
-		if (code & KEYS_ARROWS == KEYS_ARROWS)
-		{
+		if (code & KEYS_ARROWS == KEYS_ARROWS) {
 			_addToKeys(keysRight, new FlxMultiKey(RIGHT));
 			_addToKeys(keysLeft, new FlxMultiKey(LEFT));
 			_addToKeys(keysDown, new FlxMultiKey(DOWN));
 			_addToKeys(keysUp, new FlxMultiKey(UP));
 			_addToKeys(keysClick, new FlxMultiKey(ENTER));
 		}
-		if (code & KEYS_WASD == KEYS_WASD)
-		{
+		if (code & KEYS_WASD == KEYS_WASD) {
 			_addToKeys(keysRight, new FlxMultiKey(D));
 			_addToKeys(keysLeft, new FlxMultiKey(A));
 			_addToKeys(keysDown, new FlxMultiKey(S));
 			_addToKeys(keysUp, new FlxMultiKey(W));
 			_addToKeys(keysClick, new FlxMultiKey(ENTER));
 		}
-		if (code & KEYS_NUMPAD == KEYS_NUMPAD)
-		{
+		if (code & KEYS_NUMPAD == KEYS_NUMPAD) {
 			_addToKeys(keysRight, new FlxMultiKey(NUMPADSIX));
 			_addToKeys(keysLeft, new FlxMultiKey(NUMPADFOUR));
 			_addToKeys(keysDown, new FlxMultiKey(NUMPADTWO));
@@ -631,35 +526,30 @@ class FlxUICursor extends FlxUISprite
 		}
 
 		#if FLX_GAMEPAD
-		if (gamepad == null)
-		{
+		if (gamepad == null) {
 			_gamepad = getGamepad(); // set _gamepad to avoid a stack overflow loop
 		}
 
-		if (code & GAMEPAD_DPAD == GAMEPAD_DPAD)
-		{
+		if (code & GAMEPAD_DPAD == GAMEPAD_DPAD) {
 			_addToKeys(keysLeft, new FlxMultiGamepad(gamepad, FlxGamepadInputID.DPAD_LEFT));
 			_addToKeys(keysRight, new FlxMultiGamepad(gamepad, FlxGamepadInputID.DPAD_RIGHT));
 			_addToKeys(keysDown, new FlxMultiGamepad(gamepad, FlxGamepadInputID.DPAD_DOWN));
 			_addToKeys(keysUp, new FlxMultiGamepad(gamepad, FlxGamepadInputID.DPAD_UP));
 			_addToKeys(keysClick, new FlxMultiGamepad(gamepad, FlxGamepadInputID.A));
 		}
-		if (code & GAMEPAD_SHOULDER_BUTTONS == GAMEPAD_SHOULDER_BUTTONS)
-		{
+		if (code & GAMEPAD_SHOULDER_BUTTONS == GAMEPAD_SHOULDER_BUTTONS) {
 			_addToKeys(keysLeft, new FlxMultiGamepad(gamepad, FlxGamepadInputID.LEFT_SHOULDER));
 			_addToKeys(keysRight, new FlxMultiGamepad(gamepad, FlxGamepadInputID.RIGHT_SHOULDER));
 			_addToKeys(keysClick, new FlxMultiGamepad(gamepad, FlxGamepadInputID.A));
 		}
-		if (code & GAMEPAD_LEFT_STICK == GAMEPAD_LEFT_STICK)
-		{
+		if (code & GAMEPAD_LEFT_STICK == GAMEPAD_LEFT_STICK) {
 			_addToKeys(keysLeft, new FlxMultiGamepadAnalogStick(gamepad, {id: LEFT_ANALOG_STICK, axis: X, positive: false}));
 			_addToKeys(keysRight, new FlxMultiGamepadAnalogStick(gamepad, {id: LEFT_ANALOG_STICK, axis: X, positive: true}));
 			_addToKeys(keysUp, new FlxMultiGamepadAnalogStick(gamepad, {id: LEFT_ANALOG_STICK, axis: Y, positive: false}));
 			_addToKeys(keysDown, new FlxMultiGamepadAnalogStick(gamepad, {id: LEFT_ANALOG_STICK, axis: Y, positive: true}));
 			_addToKeys(keysClick, new FlxMultiGamepad(gamepad, FlxGamepadInputID.A));
 		}
-		if (code & GAMEPAD_RIGHT_STICK == GAMEPAD_RIGHT_STICK)
-		{
+		if (code & GAMEPAD_RIGHT_STICK == GAMEPAD_RIGHT_STICK) {
 			_addToKeys(keysLeft, new FlxMultiGamepadAnalogStick(gamepad, {id: RIGHT_ANALOG_STICK, axis: X, positive: false}));
 			_addToKeys(keysRight, new FlxMultiGamepadAnalogStick(gamepad, {id: RIGHT_ANALOG_STICK, axis: X, positive: true}));
 			_addToKeys(keysUp, new FlxMultiGamepadAnalogStick(gamepad, {id: RIGHT_ANALOG_STICK, axis: Y, positive: false}));
@@ -690,22 +580,17 @@ class FlxUICursor extends FlxUISprite
 	private var _clickTime:Float = 0;
 
 	#if FLX_GAMEPAD
-	private function getGamepad(exhaustive:Bool = true):FlxGamepad
-	{
-		var gamepad = switch (gamepadAutoConnect)
-		{
+	private function getGamepad(exhaustive:Bool = true):FlxGamepad {
+		var gamepad = switch (gamepadAutoConnect) {
 			case Never: null;
 			case FirstActive: FlxG.gamepads.getFirstActiveGamepad();
 			case LastActive: FlxG.gamepads.lastActive;
 			case GamepadID(i): FlxG.gamepads.getByID(i);
 		}
-		if (gamepad == null && exhaustive)
-		{
-			for (i in 0...FlxG.gamepads.numActiveGamepads)
-			{
+		if (gamepad == null && exhaustive) {
+			for (i in 0...FlxG.gamepads.numActiveGamepads) {
 				gamepad = FlxG.gamepads.getByID(i);
-				if (gamepad != null)
-				{
+				if (gamepad != null) {
 					return gamepad;
 				}
 			}
@@ -714,8 +599,7 @@ class FlxUICursor extends FlxUISprite
 	}
 	#end
 
-	private function _sortIDVisible(a:IFlxUIWidget, b:IFlxUIWidget):Int
-	{
+	private function _sortIDVisible(a:IFlxUIWidget, b:IFlxUIWidget):Int {
 		if (a.visible && !b.visible)
 			return -1;
 		if (b.visible && !a.visible)
@@ -727,8 +611,7 @@ class FlxUICursor extends FlxUISprite
 		return 0;
 	}
 
-	private function _sortXYWidgetList(a:WidgetList, b:WidgetList):Int
-	{
+	private function _sortXYWidgetList(a:WidgetList, b:WidgetList):Int {
 		if (a.y < b.y)
 			return -1;
 		if (a.y > b.y)
@@ -740,8 +623,7 @@ class FlxUICursor extends FlxUISprite
 		return 0;
 	}
 
-	private function _sortXYVisible(a:IFlxUIWidget, b:IFlxUIWidget):Int
-	{
+	private function _sortXYVisible(a:IFlxUIWidget, b:IFlxUIWidget):Int {
 		if (a.visible && !b.visible)
 			return -1;
 		if (b.visible && !a.visible)
@@ -757,25 +639,20 @@ class FlxUICursor extends FlxUISprite
 		return 0;
 	}
 
-	private function _addToKeys(keys:Array<FlxBaseMultiInput>, m:FlxBaseMultiInput)
-	{
+	private function _addToKeys(keys:Array<FlxBaseMultiInput>, m:FlxBaseMultiInput) {
 		var exists:Bool = false;
-		for (mk in keys)
-		{
-			if (m.equals(mk))
-			{
+		for (mk in keys) {
+			if (m.equals(mk)) {
 				exists = true;
 				break;
 			}
 		}
-		if (!exists)
-		{
+		if (!exists) {
 			keys.push(m);
 		}
 	}
 
-	private function _clearKeys():Void
-	{
+	private function _clearKeys():Void {
 		U.clearArray(keysUp);
 		keysUp = null;
 		U.clearArray(keysDown);
@@ -788,8 +665,7 @@ class FlxUICursor extends FlxUISprite
 		keysClick = null;
 	}
 
-	private function _newKeys():Void
-	{
+	private function _newKeys():Void {
 		keysUp = [];
 		keysDown = [];
 		keysLeft = [];
@@ -797,59 +673,46 @@ class FlxUICursor extends FlxUISprite
 		keysClick = [];
 	}
 
-	private function _checkKeys():Void
-	{
+	private function _checkKeys():Void {
 		var wasInvisible = (visible == false);
 		var lastLocation = location;
 
-		for (key in keysUp)
-		{
-			if (key.justPressed())
-			{
+		for (key in keysUp) {
+			if (key.justPressed()) {
 				_doInput(0, -1);
 				break;
 			}
 		}
-		for (key in keysDown)
-		{
-			if (key.justPressed())
-			{
+		for (key in keysDown) {
+			if (key.justPressed()) {
 				_doInput(0, 1);
 				break;
 			}
 		}
-		for (key in keysLeft)
-		{
-			if (key.justPressed())
-			{
+		for (key in keysLeft) {
+			if (key.justPressed()) {
 				_doInput(-1, 0);
 				break;
 			}
 		}
-		for (key in keysRight)
-		{
-			if (key.justPressed())
-			{
+		for (key in keysRight) {
+			if (key.justPressed()) {
 				_doInput(1, 0);
 				break;
 			}
 		}
 
-		if (wasInvisible && visible && lastLocation != -1)
-		{
+		if (wasInvisible && visible && lastLocation != -1) {
 			location = lastLocation;
 		}
 
 		if (_clickKeysJustPressed()) // JUST PRESSED: send a press event only the first time it's pressed
 		{
-			if (!ignoreNextInput)
-			{
+			if (!ignoreNextInput) {
 				_clickPressed = true;
 				_clickTime = 0;
 				_doPress();
-			}
-			else
-			{
+			} else {
 				ignoreNextInput = false;
 			}
 		}
@@ -858,8 +721,7 @@ class FlxUICursor extends FlxUISprite
 		{
 			_clickPressed = true;
 			_doMouseMove();
-		}
-		else if (_clickTime > 0) // NOT PRESSED and not exact same frame as when it was just pressed
+		} else if (_clickTime > 0) // NOT PRESSED and not exact same frame as when it was just pressed
 		{
 			if (_clickPressed) // if we were previously just pressed...
 			{
@@ -869,39 +731,31 @@ class FlxUICursor extends FlxUISprite
 		}
 	}
 
-	private function _clickKeysJustPressed():Bool
-	{
-		for (key in keysClick)
-		{
-			if (key.justPressed())
-			{
+	private function _clickKeysJustPressed():Bool {
+		for (key in keysClick) {
+			if (key.justPressed()) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private function _clickKeysPressed():Bool
-	{
-		for (key in keysClick)
-		{
-			if (key.pressed())
-			{
+	private function _clickKeysPressed():Bool {
+		for (key in keysClick) {
+			if (key.pressed()) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private function _getWidgetPoint(?Camera:FlxCamera):FlxPoint
-	{
+	private function _getWidgetPoint(?Camera:FlxCamera):FlxPoint {
 		if (Camera == null)
 			Camera = FlxG.camera;
 
 		// get the widget;
 		var currWidget:IFlxUIWidget = _widgets[location];
-		if (currWidget == null)
-		{
+		if (currWidget == null) {
 			return null;
 		}
 
@@ -909,8 +763,7 @@ class FlxUICursor extends FlxUISprite
 		var widgetPoint:FlxPoint = null;
 
 		// Try to convert to FlxObject if possible
-		if ((currWidget is FlxObject))
-		{
+		if ((currWidget is FlxObject)) {
 			fo = cast currWidget;
 			// success! Get ScreenXY, to deal with any possible scrolling/camera craziness
 			widgetPoint = fo.getScreenPosition();
@@ -919,8 +772,7 @@ class FlxUICursor extends FlxUISprite
 		widgetPoint.x *= Camera.totalScaleX;
 		widgetPoint.y *= Camera.totalScaleY;
 
-		if (widgetPoint == null)
-		{
+		if (widgetPoint == null) {
 			// otherwise just make your best guess from current raw position
 			widgetPoint = FlxPoint.get(currWidget.x, currWidget.y);
 		}
@@ -932,26 +784,21 @@ class FlxUICursor extends FlxUISprite
 		return widgetPoint;
 	}
 
-	private function _doMouseMove(?pt:FlxPoint):Void
-	{
+	private function _doMouseMove(?pt:FlxPoint):Void {
 		var dispose:Bool = false;
-		if (pt == null)
-		{
+		if (pt == null) {
 			pt = _getWidgetPoint();
-			if (pt == null)
-			{
+			if (pt == null) {
 				return;
 			}
 			dispose = true;
 		}
-		if (dispatchEvents)
-		{
+		if (dispatchEvents) {
 			#if FLX_MOUSE
 			// REALLY force it to this location
 			FlxG.mouse.setGlobalScreenPositionUnsafe(pt.x, pt.y);
 
-			if (_newMouse != null)
-			{
+			if (_newMouse != null) {
 				_newMouse.updateGlobalScreenPosition = false; // don't low-level-update the mouse while I'm overriding the mouse position
 			}
 
@@ -961,34 +808,28 @@ class FlxUICursor extends FlxUISprite
 			#end
 			#end
 		}
-		if (dispose)
-		{
+		if (dispose) {
 			pt.put();
 		}
 	}
 
-	private function _doPress(?pt:FlxPoint):Void
-	{
+	private function _doPress(?pt:FlxPoint):Void {
 		var currWidget:IFlxUIWidget = _widgets[location];
-		if (currWidget == null)
-		{
+		if (currWidget == null) {
 			return;
 		}
 
 		var dispose:Bool = false;
-		if (pt == null)
-		{
+		if (pt == null) {
 			pt = _getWidgetPoint();
-			if (pt == null)
-			{
+			if (pt == null) {
 				return;
 			}
 			dispose = true;
 		}
 
 		#if FLX_MOUSE
-		if (dispatchEvents)
-		{
+		if (dispatchEvents) {
 			var rawMouseX:Float = pt.x * FlxG.camera.zoom;
 			var rawMouseY:Float = pt.y * FlxG.camera.zoom;
 			#if FLX_KEYBOARD
@@ -1000,31 +841,25 @@ class FlxUICursor extends FlxUISprite
 		}
 		#end
 
-		if (callback != null)
-		{
+		if (callback != null) {
 			// notify the listener that we just "pressed" the widget
 			callback("cursor_down", currWidget);
 		}
-		if (dispose)
-		{
+		if (dispose) {
 			pt.put();
 		}
 	}
 
-	private function _doRelease(?pt:FlxPoint):Void
-	{
+	private function _doRelease(?pt:FlxPoint):Void {
 		var currWidget:IFlxUIWidget = _widgets[location];
-		if (currWidget == null)
-		{
+		if (currWidget == null) {
 			return;
 		}
 
 		var dispose:Bool = false;
-		if (pt == null)
-		{
+		if (pt == null) {
 			pt = _getWidgetPoint();
-			if (pt == null)
-			{
+			if (pt == null) {
 				return;
 			}
 			dispose = true;
@@ -1034,8 +869,7 @@ class FlxUICursor extends FlxUISprite
 		var rawMouseX:Float = pt.x * FlxG.camera.zoom;
 		var rawMouseY:Float = pt.y * FlxG.camera.zoom;
 
-		if (dispatchEvents)
-		{
+		if (dispatchEvents) {
 			// dispatch a low-level mouse event to the FlxG.stage object itself
 			#if FLX_KEYBOARD
 			FlxG.stage.dispatchEvent(new MouseEvent(MouseEvent.MOUSE_UP, true, false, rawMouseX, rawMouseY, FlxG.stage, FlxG.keys.pressed.CONTROL,
@@ -1051,39 +885,32 @@ class FlxUICursor extends FlxUISprite
 		}
 		#end
 
-		if (callback != null)
-		{
+		if (callback != null) {
 			// notify the listener that we just "clicked" the widget
 			callback("cursor_click", currWidget);
 		}
-		if (dispose)
-		{
+		if (dispose) {
 			pt.put();
 		}
 
 		#if FLX_MOUSE
-		if (_newMouse != null)
-		{
+		if (_newMouse != null) {
 			_newMouse.updateGlobalScreenPosition = true; // resume low-level-mouse updating now that I'm done overriding it
 			_newMouse.setGlobalScreenPositionUnsafe(Std.int(FlxG.game.mouseX), Std.int(FlxG.game.mouseY));
 		}
 		#end
 	}
 
-	private function _findNextY(Y:Int, indexValue:Int, listWidget:Array<IFlxUIWidget>, listLists:Array<WidgetList>):Int
-	{
+	private function _findNextY(Y:Int, indexValue:Int, listWidget:Array<IFlxUIWidget>, listLists:Array<WidgetList>):Int {
 		var currX:Int = 0;
 		var currY:Int = 0;
 		var length:Int = 0;
 
-		if (listWidget != null)
-		{
+		if (listWidget != null) {
 			currX = Std.int(listWidget[indexValue].x);
 			currY = Std.int(listWidget[indexValue].y);
 			length = listWidget.length;
-		}
-		else if (listLists != null)
-		{
+		} else if (listLists != null) {
 			currX = listLists[indexValue].x;
 			currY = listLists[indexValue].y;
 			length = listLists.length;
@@ -1103,17 +930,12 @@ class FlxUICursor extends FlxUISprite
 		// DESIRED BEHAVIOR: Jump to the CLOSEST OBJECT that ALSO:
 		// is located ABOVE/BELOW me (depending on Y's sign)
 
-		for (i in 0...length)
-		{
-			if (i != indexValue)
-			{
-				if (listWidget != null)
-				{
+		for (i in 0...length) {
+			if (i != indexValue) {
+				if (listWidget != null) {
 					nextX = Std.int(listWidget[i].x);
 					nextY = Std.int(listWidget[i].y);
-				}
-				else if (listLists != null)
-				{
+				} else if (listLists != null) {
 					nextX = listLists[i].x;
 					nextY = listLists[i].y;
 				}
@@ -1127,12 +949,9 @@ class FlxUICursor extends FlxUISprite
 						bestdy = dy;
 						bestdx = Math.abs(currX - nextX); // reset this every time a better dy is found
 						besti = i;
-					}
-					else if (dy == bestdy)
-					{
+					} else if (dy == bestdy) {
 						dx = Math.abs(currX - nextX); // If abs. x distance is closest so far
-						if (dx < bestdx)
-						{
+						if (dx < bestdx) {
 							bestdx = dx;
 							besti = i;
 						}
@@ -1143,21 +962,16 @@ class FlxUICursor extends FlxUISprite
 		return besti;
 	}
 
-	private function _wrapX(X:Int, indexValue:Int, listLength:Int):Int
-	{
-		if (indexValue + X < 0)
-		{
+	private function _wrapX(X:Int, indexValue:Int, listLength:Int):Int {
+		if (indexValue + X < 0) {
 			indexValue = (indexValue + X) + listLength;
-		}
-		else if (indexValue + X >= listLength)
-		{
+		} else if (indexValue + X >= listLength) {
 			indexValue = (indexValue + X) - listLength;
 		}
 		return indexValue;
 	}
 
-	private function _wrapY(Y:Int, indexValue:Int, listWidget:Array<IFlxUIWidget>, listLists:Array<WidgetList>):Int
-	{
+	private function _wrapY(Y:Int, indexValue:Int, listWidget:Array<IFlxUIWidget>, listLists:Array<WidgetList>):Int {
 		var dx:Float = Math.POSITIVE_INFINITY;
 		var dy:Float = Math.POSITIVE_INFINITY;
 
@@ -1173,52 +987,40 @@ class FlxUICursor extends FlxUISprite
 		var currX:Int = 0;
 		var currY:Int = 0;
 
-		if (listWidget != null)
-		{
+		if (listWidget != null) {
 			length = listWidget.length;
 			currX = Std.int(listWidget[indexValue].x);
 			currY = Std.int(listWidget[indexValue].y);
 		}
-		if (listLists != null)
-		{
+		if (listLists != null) {
 			length = listLists.length;
 			currX = listLists[indexValue].x;
 			currY = listLists[indexValue].y;
 		}
 
-		for (i in 0...length)
-		{
-			if (i != location)
-			{
+		for (i in 0...length) {
+			if (i != location) {
 				var xx = 0;
 				var yy = 0;
-				if (listWidget != null)
-				{
+				if (listWidget != null) {
 					xx = Std.int(listWidget[i].x);
 					yy = Std.int(listWidget[i].y);
-				}
-				else if (listLists != null)
-				{
+				} else if (listLists != null) {
 					xx = Std.int(listLists[i].x);
 					yy = Std.int(listLists[i].y);
 				}
 
 				dy = yy - currY;
 
-				if (FlxMath.sameSign(dy, Y) == false && dy != 0)
-				{ // I want the WRONG direction this time
+				if (FlxMath.sameSign(dy, Y) == false && dy != 0) { // I want the WRONG direction this time
 					dy = Math.abs(dy);
-					if (dy > bestdy)
-					{
+					if (dy > bestdy) {
 						bestdy = dy;
 						bestdx = Math.abs(currX - xx);
 						besti = i;
-					}
-					else if (dy == bestdy)
-					{
+					} else if (dy == bestdy) {
 						dx = Math.abs(currX - xx);
-						if (dx < bestdx)
-						{
+						if (dx < bestdx) {
 							bestdx = dx;
 							besti = i;
 						}
@@ -1226,17 +1028,14 @@ class FlxUICursor extends FlxUISprite
 				}
 			}
 		}
-		if (besti != -1)
-		{
+		if (besti != -1) {
 			indexValue = besti;
 		}
 		return indexValue;
 	}
 
-	private function _doInput(X:Int, Y:Int, recursion:Int = 0):Void
-	{
-		if (ignoreNextInput)
-		{
+	private function _doInput(X:Int, Y:Int, recursion:Int = 0):Void {
+		if (ignoreNextInput) {
 			ignoreNextInput = false;
 			return;
 		}
@@ -1249,35 +1048,28 @@ class FlxUICursor extends FlxUISprite
 			if (location + X >= 0 && location + X < _widgets.length) // within bounds
 			{
 				location = location + X;
-			}
-			else // at the boundary
+			} else // at the boundary
 			{
 				if (wrap) // if wrapping
 				{
 					if (_lists.length == 1) // if we only have one list, wrap within the list
 					{
 						location = _wrapX(X, location, _widgets.length);
-					}
-					else // if we have multiple lists, go to the next list
+					} else // if we have multiple lists, go to the next list
 					{
-						if (listIndex + X >= 0 && listIndex + X < _lists.length)
-						{
+						if (listIndex + X >= 0 && listIndex + X < _lists.length) {
 							listIndex = listIndex + X;
-						}
-						else
-						{
+						} else {
 							listIndex = _wrapX(X, listIndex, _lists.length);
 						}
-						if (X == -1)
-						{
+						if (X == -1) {
 							location = _widgets.length - 1;
 						}
 					}
 				}
 			}
 			currWidget = _widgets[location];
-		}
-		else // move UP/DOWN
+		} else // move UP/DOWN
 		{
 			// Harder: iterate through array, looking for widget with higher or lower y value
 			var nextY = _findNextY(Y, location, _widgets, null);
@@ -1286,8 +1078,7 @@ class FlxUICursor extends FlxUISprite
 			{
 				location = nextY;
 				currWidget = _widgets[location];
-			}
-			else // didn't find anything
+			} else // didn't find anything
 			{
 				if (wrap) // try wrapping around
 				{
@@ -1295,21 +1086,18 @@ class FlxUICursor extends FlxUISprite
 					{
 						location = _wrapY(Y, location, _widgets, null);
 						currWidget = _widgets[location];
-					}
-					else // if we have several, go to the next list
+					} else // if we have several, go to the next list
 					{
 						var nextListY = _findNextY(Y, listIndex, null, _lists);
 						if (nextListY != -1) // within bounds, just go there
 						{
 							listIndex = nextListY;
 							currWidget = _widgets[location];
-						}
-						else // out of bounds, try wrapping
+						} else // out of bounds, try wrapping
 						{
 							listIndex = _wrapY(Y, listIndex, null, _lists);
 						}
-						if (Y == -1)
-						{
+						if (Y == -1) {
 							location = _widgets.length - 1;
 						}
 					}
@@ -1318,28 +1106,23 @@ class FlxUICursor extends FlxUISprite
 			}
 		}
 
-		if (currWidget != null && _widgets != null)
-		{
-			if (currWidget.visible == false && (recursion < _widgets.length))
-			{
+		if (currWidget != null && _widgets != null) {
+			if (currWidget.visible == false && (recursion < _widgets.length)) {
 				_doInput(X, Y, recursion + 1);
 				return;
 			}
 		}
 
-		if (callback != null)
-		{
+		if (callback != null) {
 			// notify the listener that the cursor has moved
 			callback("cursor_jump", currWidget);
 		}
 	}
 
-	private function _updateCursor():Void
-	{
+	private function _updateCursor():Void {
 		_widgets = _lists[listIndex].widgets;
 
-		if (location < 0 || _lists == null || _widgets == null)
-		{
+		if (location < 0 || _lists == null || _widgets == null) {
 			visible = false;
 			return;
 		}
@@ -1350,43 +1133,33 @@ class FlxUICursor extends FlxUISprite
 		var flippedX:Bool = false;
 		var flippedY:Bool = false;
 
-		if (currWidget != null)
-		{
+		if (currWidget != null) {
 			var target:FlxObject = cast currWidget;
 
-			if ((target is FlxSprite))
-			{
+			if ((target is FlxSprite)) {
 				var fs:FlxSprite = cast target;
-				if (fs != null && fs.scrollFactor != null)
-				{
+				if (fs != null && fs.scrollFactor != null) {
 					scrollFactor.set(fs.scrollFactor.x, fs.scrollFactor.y);
 				}
 			}
 
-			if ((currWidget is FlxUICheckBox))
-			{
+			if ((currWidget is FlxUICheckBox)) {
 				var check:FlxUICheckBox = cast target;
 				target = check.box;
 			}
 
 			anchor.anchorThing(this, target);
-			if (x < 0)
-			{
+			if (x < 0) {
 				_flipAnchor(Anchor.LEFT, target);
 				flippedX = true;
-			}
-			else if (x > FlxG.width + width)
-			{
+			} else if (x > FlxG.width + width) {
 				_flipAnchor(Anchor.RIGHT, target);
 				flippedX = true;
 			}
-			if (y < 0)
-			{
+			if (y < 0) {
 				_flipAnchor(Anchor.TOP, target);
 				flippedY = true;
-			}
-			else if (y > FlxG.height + height)
-			{
+			} else if (y > FlxG.height + height) {
 				_flipAnchor(Anchor.BOTTOM, target);
 				flippedY = true;
 			}
@@ -1395,45 +1168,37 @@ class FlxUICursor extends FlxUISprite
 		}
 	}
 
-	private function _flipAnchor(AnchorDir:String, destination:FlxObject):Void
-	{
+	private function _flipAnchor(AnchorDir:String, destination:FlxObject):Void {
 		var theAnchor = null;
-		switch (AnchorDir)
-		{
+		switch (AnchorDir) {
 			case Anchor.LEFT:
-				if (anchor.x.side == Anchor.LEFT)
-				{
+				if (anchor.x.side == Anchor.LEFT) {
 					_leftAnchor = anchor.getFlipped(true, false, _leftAnchor);
 					theAnchor = _leftAnchor;
 				}
 			case Anchor.RIGHT:
-				if (anchor.x.side == Anchor.RIGHT)
-				{
+				if (anchor.x.side == Anchor.RIGHT) {
 					_topAnchor = anchor.getFlipped(true, false, _rightAnchor);
 					theAnchor = _rightAnchor;
 				}
 			case Anchor.TOP:
-				if (anchor.y.side == Anchor.TOP)
-				{
+				if (anchor.y.side == Anchor.TOP) {
 					_topAnchor = anchor.getFlipped(true, false, _topAnchor);
 					theAnchor = _topAnchor;
 				}
 			case Anchor.BOTTOM:
-				if (anchor.y.side == Anchor.BOTTOM)
-				{
+				if (anchor.y.side == Anchor.BOTTOM) {
 					_bottomAnchor = anchor.getFlipped(true, false, _bottomAnchor);
 					theAnchor = _bottomAnchor;
 				}
 		}
-		if (theAnchor != null)
-		{
+		if (theAnchor != null) {
 			theAnchor.anchorThing(this, destination);
 		}
 	}
 }
 
-typedef WidgetList =
-{
+typedef WidgetList = {
 	var x:Int;
 	var y:Int;
 	var width:Int;
@@ -1441,16 +1206,14 @@ typedef WidgetList =
 	var widgets:Array<IFlxUIWidget>;
 }
 
-enum GamepadAutoConnectPreference
-{
+enum GamepadAutoConnectPreference {
 	Never;
 	FirstActive;
 	LastActive;
 	GamepadID(i:Int);
 }
 
-enum SortMethod
-{
+enum SortMethod {
 	XY;
 	ID;
 }

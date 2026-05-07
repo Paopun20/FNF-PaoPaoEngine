@@ -46,33 +46,26 @@ import funkin.modding.scripts.HScript;
 import funkin.modding.scripts.LuaScript;
 #end
 
-class PyInterp extends paopao.hython.Interp
-{
+class PyInterp extends paopao.hython.Interp {
 	public var parent:Dynamic;
 	// even if they can't be created, it's still nice to be able to get them
 	public var pubVars:Map<String, Dynamic> = [];
 	public var staVars:Map<String, Dynamic> = [];
 
-	override function resetVariables():Void
-	{
+	override function resetVariables():Void {
 		super.resetVariables();
 		pubVars = [];
 		staVars = [];
 		parent = null;
 	}
 
-	override function resolve(id:String):Dynamic
-	{
+	override function resolve(id:String):Dynamic {
 		var v = variables.get(id);
-		if (v == null && !variables.exists(id))
-		{
-			if (allowClassResolve)
-			{
+		if (v == null && !variables.exists(id)) {
+			if (allowClassResolve) {
 				var c = Type.resolveClass(id);
-				if (c != null)
-				{
-					return Reflect.makeVarArgs(function(args:Array<Dynamic>)
-					{
+				if (c != null) {
+					return Reflect.makeVarArgs(function(args:Array<Dynamic>) {
 						return Type.createInstance(c, args);
 					});
 				}
@@ -81,8 +74,7 @@ class PyInterp extends paopao.hython.Interp
 			if (parent != null)
 				return Reflect.getProperty(parent, id);
 
-			if (v == null)
-			{
+			if (v == null) {
 				if (staVars.exists(id))
 					return staVars.get(id);
 				if (pubVars.exists(id))
@@ -96,12 +88,10 @@ class PyInterp extends paopao.hython.Interp
 	}
 }
 
-class Python extends Script
-{
+class Python extends Script {
 	public var parser:PyParser;
 	public var printer:PyPrinter;
 	public var interp:PyInterp;
-	public var origin:Null<String>;
 	public var returnValue:Dynamic;
 
 	#if LUA_ALLOWED
@@ -123,8 +113,7 @@ class Python extends Script
 	override function get_parent():Dynamic
 		return interp.parent;
 
-	public override function new(?file:String = '', ?varsToBring:Any = null)
-	{
+	public override function new(?file:String = '', ?varsToBring:Any = null) {
 		super(file);
 		interp = new PyInterp();
 		printer = new PyPrinter();
@@ -139,18 +128,15 @@ class Python extends Script
 		preset(varsToBring);
 	}
 
-	public static function reset(clearCache:Bool = false)
-	{
+	public static function reset(clearCache:Bool = false) {
 		CoolLog.info('Resetting Python');
 
 		if (clearCache)
 			CacheScript.clear(CacheType.PYTHON);
 	}
 
-	public override function execute()
-	{
-		if (origin != null && origin.length > 0)
-		{
+	public override function execute() {
+		if (origin != null && origin.length > 0) {
 			var code:String = null;
 			#if MODS_ALLOWED
 			if (FileSystem.exists(origin))
@@ -165,48 +151,38 @@ class Python extends Script
 		}
 	}
 
-	public function codeExecute(code:String):Dynamic
-	{
+	public function codeExecute(code:String):Dynamic {
 		if (closed)
 			return null;
 
 		var cachedExpr:Dynamic;
 		var cacheKey:String = CacheScript.hashCode(#if MODS_ALLOWED modFolder + #end scriptName + code);
-		if (!(CacheScript.exists(cacheKey, CacheType.PYTHON)))
-		{
+		if (!(CacheScript.exists(cacheKey, CacheType.PYTHON))) {
 			cachedExpr = CacheParser.parse(code, CacheType.PYTHON);
 			CacheScript.set(cacheKey, cachedExpr, CacheType.PYTHON);
 			CoolLog.info('Python parsed AST for "${scriptName}"');
-		}
-		else
-		{
+		} else {
 			cachedExpr = CacheScript.get(cacheKey, CacheType.PYTHON);
 			CoolLog.info('Python reused AST for "${scriptName}"');
 		}
 
-		try
-		{
+		try {
 			returnValue = interp.execute(cachedExpr);
 			return returnValue;
-		}
-		catch (e:Dynamic)
-		{
+		} catch (e:Dynamic) {
 			pythonTrace('Execute Error: ' + printer.exprToString(e), FlxColor.RED);
 			return null;
 		}
 	}
 
-	public override function call(func:String, ?args:Array<Dynamic>):Dynamic
-	{
+	public override function call(func:String, ?args:Array<Dynamic>):Dynamic {
 		if (closed)
 			return LuaUtils.Function_Continue;
 		if (args == null)
 			args = [];
 
-		try
-		{
-			if (exists(func))
-			{
+		try {
+			if (exists(func)) {
 				var result = interp.callDef(func, args);
 				if (result == null)
 					result = LuaUtils.Function_Continue;
@@ -214,34 +190,28 @@ class Python extends Script
 					stop();
 				return result;
 			}
-		}
-		catch (e:Dynamic)
-		{
+		} catch (e:Dynamic) {
 			pythonTrace('Call Error ($func): ' + e, FlxColor.RED);
 		}
 		return LuaUtils.Function_Continue;
 	}
 
-	public function exists(func:String):Bool
-	{
+	public function exists(func:String):Bool {
 		return interp.hasDef(func);
 	}
 
-	public override function set(variable:String, value:Dynamic)
-	{
+	public override function set(variable:String, value:Dynamic) {
 		if (interp != null)
 			interp.setVar(variable, value);
 	}
 
-	public override function get(variable:String):Dynamic
-	{
+	public override function get(variable:String):Dynamic {
 		if (interp != null)
 			return interp.getVar(variable);
 		return null;
 	}
 
-	private function noteTweenFunction(tag:String, note:Int, data:Dynamic, duration:Float, ease:String)
-	{
+	private function noteTweenFunction(tag:String, note:Int, data:Dynamic, duration:Float, ease:String) {
 		if (PlayState.instance == null)
 			return null;
 
@@ -249,8 +219,7 @@ class Python extends Script
 		if (strumNote == null)
 			return null;
 
-		if (tag != null)
-		{
+		if (tag != null) {
 			var originalTag:String = tag;
 			tag = LuaUtils.formatVariable('tween_$tag');
 			LuaUtils.cancelTween(tag);
@@ -258,27 +227,23 @@ class Python extends Script
 			var variables = MusicBeatState.getVariables();
 			variables.set(tag, FlxTween.tween(strumNote, data, duration, {
 				ease: LuaUtils.getTweenEaseByString(ease),
-				onComplete: function(twn:FlxTween)
-				{
+				onComplete: function(twn:FlxTween) {
 					variables.remove(tag);
 					if (PlayState.instance != null)
 						PlayState.instance.callOnLuas('onTweenCompleted', [originalTag]);
 				}
 			}));
 			return tag;
-		}
-		else
+		} else
 			FlxTween.tween(strumNote, data, duration, {ease: LuaUtils.getTweenEaseByString(ease)});
 		return null;
 	}
 
-	function preset(varsToBring:Any)
-	{
+	function preset(varsToBring:Any) {
 		var game:PlayState = PlayState.instance;
 
 		// Bring variables from Lua / Haxe
-		if (varsToBring != null)
-		{
+		if (varsToBring != null) {
 			for (k in Reflect.fields(varsToBring))
 				set(k, Reflect.field(varsToBring, k));
 		}
@@ -331,8 +296,7 @@ class Python extends Script
 			set('botPlay', game.cpuControlled);
 			set('practice', game.practiceMode);
 
-			for (i in 0...4)
-			{
+			for (i in 0...4) {
 				set('defaultPlayerStrumX$i', 0);
 				set('defaultPlayerStrumY$i', 0);
 				set('defaultOpponentStrumX$i', 0);
@@ -375,55 +339,43 @@ class Python extends Script
 		// === FUNCTIONS ===
 
 		// Variable management
-		set('setVar', function(name:String, value:Dynamic)
-		{
+		set('setVar', function(name:String, value:Dynamic) {
 			MusicBeatState.getVariables().set(name, value);
 			return value;
 		});
-		set('getVar', function(name:String)
-		{
+		set('getVar', function(name:String) {
 			return MusicBeatState.getVariables().get(name);
 		});
-		set('removeVar', function(name:String)
-		{
-			if (MusicBeatState.getVariables().exists(name))
-			{
+		set('removeVar', function(name:String) {
+			if (MusicBeatState.getVariables().exists(name)) {
 				MusicBeatState.getVariables().remove(name);
 				return true;
 			}
 			return false;
 		});
 
-		set("noteTweenX", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear')
-		{
+		set("noteTweenX", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
 			return noteTweenFunction(tag, note, {x: value}, duration, ease);
 		});
-		set("noteTweenY", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear')
-		{
+		set("noteTweenY", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
 			return noteTweenFunction(tag, note, {y: value}, duration, ease);
 		});
-		set("noteTweenAngle", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear')
-		{
+		set("noteTweenAngle", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
 			return noteTweenFunction(tag, note, {angle: value}, duration, ease);
 		});
-		set("noteTweenAlpha", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear')
-		{
+		set("noteTweenAlpha", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
 			return noteTweenFunction(tag, note, {alpha: value}, duration, ease);
 		});
-		set("noteTweenDirection", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear')
-		{
+		set("noteTweenDirection", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
 			return noteTweenFunction(tag, note, {direction: value}, duration, ease);
 		});
 
 		// Script management
-		set('getRunningScripts', function()
-		{
+		set('getRunningScripts', function() {
 			var runningScripts:Array<String> = [];
 			#if PYTHON_ALLOWED
-			for (script in scriptPack.scripts)
-			{
-				if (Std.isOfType(script, Python))
-				{
+			for (script in scriptPack.scripts) {
+				if (Std.isOfType(script, Python)) {
 					var pythonScript:Python = cast script;
 					runningScripts.push(pythonScript.origin);
 				}
@@ -432,8 +384,7 @@ class Python extends Script
 			return runningScripts;
 		});
 
-		set('setOnScripts', function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null)
-		{
+		set('setOnScripts', function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) {
 			if (exclusions == null)
 				exclusions = [];
 			if (ignoreSelf && !exclusions.contains(origin))
@@ -443,8 +394,7 @@ class Python extends Script
 
 		set('callOnScripts',
 			function(funcName:String, ?args:Array<Dynamic> = null, ?ignoreStops = false, ?ignoreSelf:Bool = true, ?excludeScripts:Array<String> = null,
-					?excludeValues:Array<Dynamic> = null)
-			{
+					?excludeValues:Array<Dynamic> = null) {
 				if (excludeScripts == null)
 					excludeScripts = [];
 				if (ignoreSelf && !excludeScripts.contains(origin))
@@ -453,14 +403,11 @@ class Python extends Script
 			});
 
 		// Tweens
-		set('startTween', function(tag:String, vars:String, values:Any = null, duration:Float, ?options:Any = null)
-		{
+		set('startTween', function(tag:String, vars:String, values:Any = null, duration:Float, ?options:Any = null) {
 			var penisExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
-			if (penisExam != null && values != null)
-			{
+			if (penisExam != null && values != null) {
 				var myOptions:LuaTweenOptions = LuaUtils.getLuaTween(options);
-				if (tag != null)
-				{
+				if (tag != null) {
 					var variables = MusicBeatState.getVariables();
 					var originalTag:String = 'tween_' + LuaUtils.formatVariable(tag);
 					variables.set(tag, FlxTween.tween(penisExam, values, duration, myOptions != null ? {
@@ -468,18 +415,15 @@ class Python extends Script
 						ease: myOptions.ease,
 						startDelay: myOptions.startDelay,
 						loopDelay: myOptions.loopDelay,
-						onUpdate: function(twn:FlxTween)
-						{
+						onUpdate: function(twn:FlxTween) {
 							if (myOptions.onUpdate != null)
 								game.callOnScripts(myOptions.onUpdate, [originalTag, vars]);
 						},
-						onStart: function(twn:FlxTween)
-						{
+						onStart: function(twn:FlxTween) {
 							if (myOptions.onStart != null)
 								game.callOnScripts(myOptions.onStart, [originalTag, vars]);
 						},
-						onComplete: function(twn:FlxTween)
-						{
+						onComplete: function(twn:FlxTween) {
 							if (twn.type == FlxTweenType.ONESHOT || twn.type == FlxTweenType.BACKWARD)
 								variables.remove(tag);
 							if (myOptions.onComplete != null)
@@ -492,20 +436,17 @@ class Python extends Script
 			return null;
 		});
 
-		set('cancelTween', function(tag:String)
-		{
+		set('cancelTween', function(tag:String) {
 			LuaUtils.cancelTween(tag);
 		});
 
 		// Timers
-		set('runTimer', function(tag:String, time:Float = 1, loops:Int = 1)
-		{
+		set('runTimer', function(tag:String, time:Float = 1, loops:Int = 1) {
 			LuaUtils.cancelTimer(tag);
 			var variables = MusicBeatState.getVariables();
 			var originalTag:String = tag;
 			tag = LuaUtils.formatVariable('timer_$tag');
-			variables.set(tag, new FlxTimer().start(time, function(tmr:FlxTimer)
-			{
+			variables.set(tag, new FlxTimer().start(time, function(tmr:FlxTimer) {
 				if (tmr.finished)
 					variables.remove(tag);
 				game.callOnScripts('onTimerCompleted', [originalTag, tmr.loops, tmr.loopsLeft]);
@@ -513,79 +454,63 @@ class Python extends Script
 			return tag;
 		});
 
-		set('cancelTimer', function(tag:String)
-		{
+		set('cancelTimer', function(tag:String) {
 			LuaUtils.cancelTimer(tag);
 		});
 
 		// Game state
-		set('addScore', function(value:Int = 0)
-		{
+		set('addScore', function(value:Int = 0) {
 			game.songScore += value;
 			game.RecalculateRating();
 		});
-		set('addMisses', function(value:Int = 0)
-		{
+		set('addMisses', function(value:Int = 0) {
 			game.songMisses += value;
 			game.RecalculateRating();
 		});
-		set('addHits', function(value:Int = 0)
-		{
+		set('addHits', function(value:Int = 0) {
 			game.songHits += value;
 			game.RecalculateRating();
 		});
-		set('setScore', function(value:Int = 0)
-		{
+		set('setScore', function(value:Int = 0) {
 			game.songScore = value;
 			game.RecalculateRating();
 		});
-		set('setMisses', function(value:Int = 0)
-		{
+		set('setMisses', function(value:Int = 0) {
 			game.songMisses = value;
 			game.RecalculateRating();
 		});
-		set('setHits', function(value:Int = 0)
-		{
+		set('setHits', function(value:Int = 0) {
 			game.songHits = value;
 			game.RecalculateRating();
 		});
-		set('setHealth', function(value:Float = 1)
-		{
+		set('setHealth', function(value:Float = 1) {
 			game.health = value;
 		});
-		set('addHealth', function(value:Float = 0)
-		{
+		set('addHealth', function(value:Float = 0) {
 			game.health += value;
 		});
-		set('getHealth', function()
-		{
+		set('getHealth', function() {
 			return game.health;
 		});
 
 		// Colors
-		set('FlxColor', function(color:String)
-		{
+		set('FlxColor', function(color:String) {
 			return FlxColor.fromString(color);
 		});
-		set('getColorFromName', function(color:String)
-		{
+		set('getColorFromName', function(color:String) {
 			return FlxColor.fromString(color);
 		});
-		set('getColorFromString', function(color:String)
-		{
+		set('getColorFromString', function(color:String) {
 			return FlxColor.fromString(color);
 		});
-		set('getColorFromHex', function(color:String)
-		{
+		set('getColorFromHex', function(color:String) {
 			return FlxColor.fromString('#$color');
 		});
 
 		// Precaching
-		set('addCharacterToList', function(name:String, type:String)
-		{
+		set('addCharacterToList', function(name:String, type:String) {
 			var charType:Int = 0;
-			switch (type.toLowerCase())
-			{
+			switch (type.toLowerCase()) {
 				case 'dad':
 					charType = 1;
 				case 'gf' | 'girlfriend':
@@ -593,49 +518,40 @@ class Python extends Script
 			}
 			game.addCharacterToList(name, charType);
 		});
-		set('precacheImage', function(name:String, ?allowGPU:Bool = true)
-		{
+		set('precacheImage', function(name:String, ?allowGPU:Bool = true) {
 			Paths.image(name, allowGPU);
 		});
-		set('precacheSound', function(name:String)
-		{
+		set('precacheSound', function(name:String) {
 			Paths.sound(name);
 		});
-		set('precacheMusic', function(name:String)
-		{
+		set('precacheMusic', function(name:String) {
 			Paths.music(name);
 		});
 
 		// Events
-		set('triggerEvent', function(name:String, ?value1:String = '', ?value2:String = '')
-		{
+		set('triggerEvent', function(name:String, ?value1:String = '', ?value2:String = '') {
 			game.triggerEvent(name, value1, value2, Conductor.songPosition);
 			return true;
 		});
 
 		// Song control
-		set('startCountdown', function()
-		{
+		set('startCountdown', function() {
 			game.startCountdown();
 			return true;
 		});
-		set('endSong', function()
-		{
+		set('endSong', function() {
 			game.KillNotes();
 			game.endSong();
 			return true;
 		});
-		set('restartSong', function(?skipTransition:Bool = false)
-		{
+		set('restartSong', function(?skipTransition:Bool = false) {
 			game.persistentUpdate = false;
 			FlxG.camera.followLerp = 0;
 			PauseSubState.restartSong(skipTransition);
 			return true;
 		});
-		set('exitSong', function(?skipTransition:Bool = false)
-		{
-			if (skipTransition)
-			{
+		set('exitSong', function(?skipTransition:Bool = false) {
+			if (skipTransition) {
 				FlxTransitionableState.skipNextTransIn = true;
 				FlxTransitionableState.skipNextTransOut = true;
 			}
@@ -653,16 +569,13 @@ class Python extends Script
 			Mods.loadTopMod();
 			return true;
 		});
-		set('getSongPosition', function()
-		{
+		set('getSongPosition', function() {
 			return Conductor.songPosition;
 		});
 
 		// Character control
-		set('getCharacterX', function(type:String)
-		{
-			switch (type.toLowerCase())
-			{
+		set('getCharacterX', function(type:String) {
+			switch (type.toLowerCase()) {
 				case 'dad' | 'opponent':
 					return game.dadGroup.x;
 				case 'gf' | 'girlfriend':
@@ -671,10 +584,8 @@ class Python extends Script
 					return game.boyfriendGroup.x;
 			}
 		});
-		set('setCharacterX', function(type:String, value:Float)
-		{
-			switch (type.toLowerCase())
-			{
+		set('setCharacterX', function(type:String, value:Float) {
+			switch (type.toLowerCase()) {
 				case 'dad' | 'opponent':
 					game.dadGroup.x = value;
 				case 'gf' | 'girlfriend':
@@ -683,10 +594,8 @@ class Python extends Script
 					game.boyfriendGroup.x = value;
 			}
 		});
-		set('getCharacterY', function(type:String)
-		{
-			switch (type.toLowerCase())
-			{
+		set('getCharacterY', function(type:String) {
+			switch (type.toLowerCase()) {
 				case 'dad' | 'opponent':
 					return game.dadGroup.y;
 				case 'gf' | 'girlfriend':
@@ -695,10 +604,8 @@ class Python extends Script
 					return game.boyfriendGroup.y;
 			}
 		});
-		set('setCharacterY', function(type:String, value:Float)
-		{
-			switch (type.toLowerCase())
-			{
+		set('setCharacterY', function(type:String, value:Float) {
+			switch (type.toLowerCase()) {
 				case 'dad' | 'opponent':
 					game.dadGroup.y = value;
 				case 'gf' | 'girlfriend':
@@ -707,10 +614,8 @@ class Python extends Script
 					game.boyfriendGroup.y = value;
 			}
 		});
-		set('cameraSetTarget', function(target:String)
-		{
-			switch (target.trim().toLowerCase())
-			{
+		set('cameraSetTarget', function(target:String) {
+			switch (target.trim().toLowerCase()) {
 				case 'gf', 'girlfriend':
 					game.moveCameraToGirlfriend();
 				case 'dad', 'opponent':
@@ -719,10 +624,8 @@ class Python extends Script
 					game.moveCamera(false);
 			}
 		});
-		set('characterDance', function(character:String)
-		{
-			switch (character.toLowerCase())
-			{
+		set('characterDance', function(character:String) {
+			switch (character.toLowerCase()) {
 				case 'dad':
 					game.dad.dance();
 				case 'gf' | 'girlfriend':
@@ -734,66 +637,51 @@ class Python extends Script
 		});
 
 		// Camera
-		set('setCameraScroll', function(x:Float, y:Float)
-		{
+		set('setCameraScroll', function(x:Float, y:Float) {
 			FlxG.camera.scroll.set(x - FlxG.width / 2, y - FlxG.height / 2);
 		});
-		set('setCameraFollowPoint', function(x:Float, y:Float)
-		{
+		set('setCameraFollowPoint', function(x:Float, y:Float) {
 			game.camFollow.setPosition(x, y);
 		});
-		set('addCameraScroll', function(?x:Float = 0, ?y:Float = 0)
-		{
+		set('addCameraScroll', function(?x:Float = 0, ?y:Float = 0) {
 			FlxG.camera.scroll.add(x, y);
 		});
-		set('addCameraFollowPoint', function(?x:Float = 0, ?y:Float = 0)
-		{
+		set('addCameraFollowPoint', function(?x:Float = 0, ?y:Float = 0) {
 			game.camFollow.x += x;
 			game.camFollow.y += y;
 		});
-		set('getCameraScrollX', function()
-		{
+		set('getCameraScrollX', function() {
 			return FlxG.camera.scroll.x + FlxG.width / 2;
 		});
-		set('getCameraScrollY', function()
-		{
+		set('getCameraScrollY', function() {
 			return FlxG.camera.scroll.y + FlxG.height / 2;
 		});
-		set('getCameraFollowX', function()
-		{
+		set('getCameraFollowX', function() {
 			return game.camFollow.x;
 		});
-		set('getCameraFollowY', function()
-		{
+		set('getCameraFollowY', function() {
 			return game.camFollow.y;
 		});
-		set('cameraShake', function(camera:String, intensity:Float, duration:Float)
-		{
+		set('cameraShake', function(camera:String, intensity:Float, duration:Float) {
 			LuaUtils.cameraFromString(camera).shake(intensity, duration);
 		});
-		set('cameraFlash', function(camera:String, color:String, duration:Float, forced:Bool)
-		{
+		set('cameraFlash', function(camera:String, color:String, duration:Float, forced:Bool) {
 			LuaUtils.cameraFromString(camera).flash(CoolUtil.colorFromString(color), duration, null, forced);
 		});
-		set('cameraFade', function(camera:String, color:String, duration:Float, forced:Bool, ?fadeOut:Bool = false)
-		{
+		set('cameraFade', function(camera:String, color:String, duration:Float, forced:Bool, ?fadeOut:Bool = false) {
 			LuaUtils.cameraFromString(camera).fade(CoolUtil.colorFromString(color), duration, fadeOut, null, forced);
 		});
 
 		// Mouse
-		set('getMouseX', function(?camera:String = 'game')
-		{
+		set('getMouseX', function(?camera:String = 'game') {
 			return FlxG.mouse.getScreenPosition(LuaUtils.cameraFromString(camera)).x;
 		});
-		set('getMouseY', function(?camera:String = 'game')
-		{
+		set('getMouseY', function(?camera:String = 'game') {
 			return FlxG.mouse.getScreenPosition(LuaUtils.cameraFromString(camera)).y;
 		});
-		set('mouseClicked', function(?button:String = 'left')
-		{
+		set('mouseClicked', function(?button:String = 'left') {
 			var click:Bool = FlxG.mouse.justPressed;
-			switch (button.trim().toLowerCase())
-			{
+			switch (button.trim().toLowerCase()) {
 				case 'middle':
 					click = FlxG.mouse.justPressedMiddle;
 				case 'right':
@@ -801,11 +689,9 @@ class Python extends Script
 			}
 			return click;
 		});
-		set('mousePressed', function(?button:String = 'left')
-		{
+		set('mousePressed', function(?button:String = 'left') {
 			var press:Bool = FlxG.mouse.pressed;
-			switch (button.trim().toLowerCase())
-			{
+			switch (button.trim().toLowerCase()) {
 				case 'middle':
 					press = FlxG.mouse.pressedMiddle;
 				case 'right':
@@ -813,11 +699,9 @@ class Python extends Script
 			}
 			return press;
 		});
-		set('mouseReleased', function(?button:String = 'left')
-		{
+		set('mouseReleased', function(?button:String = 'left') {
 			var released:Bool = FlxG.mouse.justReleased;
-			switch (button.trim().toLowerCase())
-			{
+			switch (button.trim().toLowerCase()) {
 				case 'middle':
 					released = FlxG.mouse.justReleasedMiddle;
 				case 'right':
@@ -827,8 +711,7 @@ class Python extends Script
 		});
 
 		// Sprites
-		set('makePythonSprite', function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0)
-		{
+		set('makePythonSprite', function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0) {
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
 			var leSprite:ModchartSprite = new ModchartSprite(x, y);
@@ -837,8 +720,7 @@ class Python extends Script
 			MusicBeatState.getVariables().set(tag, leSprite);
 			leSprite.active = true;
 		});
-		set('makeAnimatedPythonSprite', function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?spriteType:String = 'auto')
-		{
+		set('makeAnimatedPythonSprite', function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?spriteType:String = 'auto') {
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
 			var leSprite:ModchartSprite = new ModchartSprite(x, y);
@@ -846,24 +728,21 @@ class Python extends Script
 				LuaUtils.loadFrames(leSprite, image, spriteType);
 			MusicBeatState.getVariables().set(tag, leSprite);
 		});
-		set('addPythonSprite', function(tag:String, ?inFront:Bool = false)
-		{
+		set('addPythonSprite', function(tag:String, ?inFront:Bool = false) {
 			var mySprite:FlxSprite = MusicBeatState.getVariables().get(tag);
 			if (mySprite == null)
 				return;
 			var instance = LuaUtils.getTargetInstance();
 			if (inFront)
 				instance.add(mySprite);
-			else
-			{
+			else {
 				if (PlayState.instance == null || !PlayState.instance.isDead)
 					instance.insert(instance.members.indexOf(LuaUtils.getLowestCharacterGroup()), mySprite);
 				else
 					GameOverSubstate.instance.insert(GameOverSubstate.instance.members.indexOf(GameOverSubstate.instance.boyfriend), mySprite);
 			}
 		});
-		set('removePythonSprite', function(tag:String, destroy:Bool = true, ?group:String = null)
-		{
+		set('removePythonSprite', function(tag:String, destroy:Bool = true, ?group:String = null) {
 			var obj:FlxSprite = LuaUtils.getObjectDirectly(tag);
 			if (obj == null || obj.destroy == null)
 				return;
@@ -873,33 +752,27 @@ class Python extends Script
 			else
 				groupObj = LuaUtils.getObjectDirectly(group);
 			groupObj.remove(obj, true);
-			if (destroy)
-			{
+			if (destroy) {
 				MusicBeatState.getVariables().remove(tag);
 				obj.destroy();
 			}
 		});
 
 		// Sound
-		set('playMusic', function(sound:String, ?volume:Float = 1, ?loop:Bool = false)
-		{
+		set('playMusic', function(sound:String, ?volume:Float = 1, ?loop:Bool = false) {
 			FlxG.sound.playMusic(Paths.music(sound), volume, loop);
 		});
-		set('playSound', function(sound:String, ?volume:Float = 1, ?tag:String = null, ?loop:Bool = false)
-		{
-			if (tag != null && tag.length > 0)
-			{
+		set('playSound', function(sound:String, ?volume:Float = 1, ?tag:String = null, ?loop:Bool = false) {
+			if (tag != null && tag.length > 0) {
 				var originalTag:String = tag;
 				tag = LuaUtils.formatVariable('sound_$tag');
 				var variables = MusicBeatState.getVariables();
 				var oldSnd = variables.get(tag);
-				if (oldSnd != null)
-				{
+				if (oldSnd != null) {
 					oldSnd.stop();
 					oldSnd.destroy();
 				}
-				variables.set(tag, FlxG.sound.play(Paths.sound(sound), volume, loop, null, true, function()
-				{
+				variables.set(tag, FlxG.sound.play(Paths.sound(sound), volume, loop, null, true, function() {
 					if (!loop)
 						variables.remove(tag);
 					if (game != null)
@@ -910,64 +783,47 @@ class Python extends Script
 			FlxG.sound.play(Paths.sound(sound), volume);
 			return null;
 		});
-		set('stopSound', function(tag:String)
-		{
-			if (tag == null || tag.length < 1)
-			{
+		set('stopSound', function(tag:String) {
+			if (tag == null || tag.length < 1) {
 				if (FlxG.sound.music != null)
 					FlxG.sound.music.stop();
-			}
-			else
-			{
+			} else {
 				tag = LuaUtils.formatVariable('sound_$tag');
 				var variables = MusicBeatState.getVariables();
 				var snd:FlxSound = variables.get(tag);
-				if (snd != null)
-				{
+				if (snd != null) {
 					snd.stop();
 					variables.remove(tag);
 				}
 			}
 		});
-		set('pauseSound', function(tag:String)
-		{
-			if (tag == null || tag.length < 1)
-			{
+		set('pauseSound', function(tag:String) {
+			if (tag == null || tag.length < 1) {
 				if (FlxG.sound.music != null)
 					FlxG.sound.music.pause();
-			}
-			else
-			{
+			} else {
 				tag = LuaUtils.formatVariable('sound_$tag');
 				var snd:FlxSound = MusicBeatState.getVariables().get(tag);
 				if (snd != null)
 					snd.pause();
 			}
 		});
-		set('resumeSound', function(tag:String)
-		{
-			if (tag == null || tag.length < 1)
-			{
+		set('resumeSound', function(tag:String) {
+			if (tag == null || tag.length < 1) {
 				if (FlxG.sound.music != null)
 					FlxG.sound.music.play();
-			}
-			else
-			{
+			} else {
 				tag = LuaUtils.formatVariable('sound_$tag');
 				var snd:FlxSound = MusicBeatState.getVariables().get(tag);
 				if (snd != null)
 					snd.play();
 			}
 		});
-		set('getSoundVolume', function(tag:String)
-		{
-			if (tag == null || tag.length < 1)
-			{
+		set('getSoundVolume', function(tag:String) {
+			if (tag == null || tag.length < 1) {
 				if (FlxG.sound.music != null)
 					return FlxG.sound.music.volume;
-			}
-			else
-			{
+			} else {
 				tag = LuaUtils.formatVariable('sound_$tag');
 				var snd:FlxSound = MusicBeatState.getVariables().get(tag);
 				if (snd != null)
@@ -975,15 +831,11 @@ class Python extends Script
 			}
 			return 0;
 		});
-		set('setSoundVolume', function(tag:String, value:Float)
-		{
-			if (tag == null || tag.length < 1)
-			{
+		set('setSoundVolume', function(tag:String, value:Float) {
+			if (tag == null || tag.length < 1) {
 				if (FlxG.sound.music != null)
 					FlxG.sound.music.volume = value;
-			}
-			else
-			{
+			} else {
 				tag = LuaUtils.formatVariable('sound_$tag');
 				var snd:FlxSound = MusicBeatState.getVariables().get(tag);
 				if (snd != null)
@@ -992,14 +844,11 @@ class Python extends Script
 		});
 
 		// Animation
-		set('addAnimationByPrefix', function(obj:String, name:String, prefix:String, framerate:Float = 24, loop:Bool = true)
-		{
+		set('addAnimationByPrefix', function(obj:String, name:String, prefix:String, framerate:Float = 24, loop:Bool = true) {
 			var obj:FlxSprite = cast LuaUtils.getObjectDirectly(obj);
-			if (obj != null && obj.animation != null)
-			{
+			if (obj != null && obj.animation != null) {
 				obj.animation.addByPrefix(name, prefix, framerate, loop);
-				if (obj.animation.curAnim == null)
-				{
+				if (obj.animation.curAnim == null) {
 					var dyn:Dynamic = cast obj;
 					if (dyn.playAnim != null)
 						dyn.playAnim(name, true);
@@ -1010,19 +859,15 @@ class Python extends Script
 			}
 			return false;
 		});
-		set('playAnim', function(obj:String, name:String, ?forced:Bool = false, ?reverse:Bool = false, ?startFrame:Int = 0)
-		{
+		set('playAnim', function(obj:String, name:String, ?forced:Bool = false, ?reverse:Bool = false, ?startFrame:Int = 0) {
 			var obj:Dynamic = LuaUtils.getObjectDirectly(obj);
 			if (obj == null)
 				return false;
 
-			if (obj.playAnim != null)
-			{
+			if (obj.playAnim != null) {
 				obj.playAnim(name, forced, reverse, startFrame);
 				return true;
-			}
-			else
-			{
+			} else {
 				if (obj.anim != null)
 					obj.anim.play(name, forced, reverse, startFrame);
 				else
@@ -1033,16 +878,14 @@ class Python extends Script
 		});
 
 		// Object utilities
-		set('getProperty', function(variable:String)
-		{
+		set('getProperty', function(variable:String) {
 			var split:Array<String> = variable.split('.');
 			var obj:Dynamic = LuaUtils.getObjectDirectly(split[0]);
 			if (split.length > 1)
 				obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 			return obj;
 		});
-		set('setProperty', function(variable:String, value:Dynamic)
-		{
+		set('setProperty', function(variable:String, value:Dynamic) {
 			var split:Array<String> = variable.split('.');
 			if (split.length > 1)
 				LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1], value);
@@ -1050,21 +893,17 @@ class Python extends Script
 				LuaUtils.setVarInArray(LuaUtils.getTargetInstance(), variable, value);
 			return true;
 		});
-		set('getPropertyFromClass', function(className:String, variable:String)
-		{
+		set('getPropertyFromClass', function(className:String, variable:String) {
 			var myClass:Dynamic = Type.resolveClass(className);
-			if (myClass == null)
-			{
+			if (myClass == null) {
 				pythonTrace('getPropertyFromClass: Class $className not found', false, false, FlxColor.RED);
 				return null;
 			}
 			return Reflect.getProperty(myClass, variable);
 		});
-		set('setPropertyFromClass', function(className:String, variable:String, value:Dynamic)
-		{
+		set('setPropertyFromClass', function(className:String, variable:String, value:Dynamic) {
 			var myClass:Dynamic = Type.resolveClass(className);
-			if (myClass == null)
-			{
+			if (myClass == null) {
 				pythonTrace('setPropertyFromClass: Class $className not found', false, false, FlxColor.RED);
 				return false;
 			}
@@ -1073,8 +912,7 @@ class Python extends Script
 		});
 
 		// Object position utilities
-		set('getMidpointX', function(variable:String)
-		{
+		set('getMidpointX', function(variable:String) {
 			var split:Array<String> = variable.split('.');
 			var obj:FlxObject = LuaUtils.getObjectDirectly(split[0]);
 			if (split.length > 1)
@@ -1083,8 +921,7 @@ class Python extends Script
 				return obj.getMidpoint().x;
 			return 0;
 		});
-		set('getMidpointY', function(variable:String)
-		{
+		set('getMidpointY', function(variable:String) {
 			var split:Array<String> = variable.split('.');
 			var obj:FlxObject = LuaUtils.getObjectDirectly(split[0]);
 			if (split.length > 1)
@@ -1093,8 +930,7 @@ class Python extends Script
 				return obj.getMidpoint().y;
 			return 0;
 		});
-		set('getGraphicMidpointX', function(variable:String)
-		{
+		set('getGraphicMidpointX', function(variable:String) {
 			var split:Array<String> = variable.split('.');
 			var obj:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
 			if (split.length > 1)
@@ -1103,8 +939,7 @@ class Python extends Script
 				return obj.getGraphicMidpoint().x;
 			return 0;
 		});
-		set('getGraphicMidpointY', function(variable:String)
-		{
+		set('getGraphicMidpointY', function(variable:String) {
 			var split:Array<String> = variable.split('.');
 			var obj:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
 			if (split.length > 1)
@@ -1113,8 +948,7 @@ class Python extends Script
 				return obj.getGraphicMidpoint().y;
 			return 0;
 		});
-		set('getScreenPositionX', function(variable:String, ?camera:String = 'game')
-		{
+		set('getScreenPositionX', function(variable:String, ?camera:String = 'game') {
 			var split:Array<String> = variable.split('.');
 			var obj:FlxObject = LuaUtils.getObjectDirectly(split[0]);
 			if (split.length > 1)
@@ -1123,8 +957,7 @@ class Python extends Script
 				return obj.getScreenPosition(LuaUtils.cameraFromString(camera)).x;
 			return 0;
 		});
-		set('getScreenPositionY', function(variable:String, ?camera:String = 'game')
-		{
+		set('getScreenPositionY', function(variable:String, ?camera:String = 'game') {
 			var split:Array<String> = variable.split('.');
 			var obj:FlxObject = LuaUtils.getObjectDirectly(split[0]);
 			if (split.length > 1)
@@ -1135,14 +968,12 @@ class Python extends Script
 		});
 
 		// Object transform
-		set('setGraphicSize', function(obj:String, x:Float, y:Float = 0, updateHitbox:Bool = true)
-		{
+		set('setGraphicSize', function(obj:String, x:Float, y:Float = 0, updateHitbox:Bool = true) {
 			var split:Array<String> = obj.split('.');
 			var poop:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
 			if (split.length > 1)
 				poop = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			if (poop != null)
-			{
+			if (poop != null) {
 				poop.setGraphicSize(x, y);
 				if (updateHitbox)
 					poop.updateHitbox();
@@ -1150,14 +981,12 @@ class Python extends Script
 			}
 			pythonTrace('setGraphicSize: Couldnt find object: ' + obj, false, false, FlxColor.RED);
 		});
-		set('scaleObject', function(obj:String, x:Float, y:Float, updateHitbox:Bool = true)
-		{
+		set('scaleObject', function(obj:String, x:Float, y:Float, updateHitbox:Bool = true) {
 			var split:Array<String> = obj.split('.');
 			var poop:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
 			if (split.length > 1)
 				poop = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			if (poop != null)
-			{
+			if (poop != null) {
 				poop.scale.set(x, y);
 				if (updateHitbox)
 					poop.updateHitbox();
@@ -1165,33 +994,27 @@ class Python extends Script
 			}
 			pythonTrace('scaleObject: Couldnt find object: ' + obj, false, false, FlxColor.RED);
 		});
-		set('updateHitbox', function(obj:String)
-		{
+		set('updateHitbox', function(obj:String) {
 			var split:Array<String> = obj.split('.');
 			var poop:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
 			if (split.length > 1)
 				poop = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			if (poop != null)
-			{
+			if (poop != null) {
 				poop.updateHitbox();
 				return;
 			}
 			pythonTrace('updateHitbox: Couldnt find object: ' + obj, false, false, FlxColor.RED);
 		});
-		set('screenCenter', function(obj:String, pos:String = 'xy')
-		{
+		set('screenCenter', function(obj:String, pos:String = 'xy') {
 			var spr:FlxObject = LuaUtils.getObjectDirectly(obj);
-			if (spr == null)
-			{
+			if (spr == null) {
 				var split:Array<String> = obj.split('.');
 				spr = LuaUtils.getObjectDirectly(split[0]);
 				if (split.length > 1)
 					spr = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 			}
-			if (spr != null)
-			{
-				switch (pos.trim().toLowerCase())
-				{
+			if (spr != null) {
+				switch (pos.trim().toLowerCase()) {
 					case 'x':
 						spr.screenCenter(X);
 						return;
@@ -1205,11 +1028,9 @@ class Python extends Script
 			}
 			pythonTrace("screenCenter: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
 		});
-		set('setObjectCamera', function(obj:String, camera:String = 'game')
-		{
+		set('setObjectCamera', function(obj:String, camera:String = 'game') {
 			var real:FlxBasic = LuaUtils.getObjectDirectly(obj);
-			if (real != null)
-			{
+			if (real != null) {
 				real.cameras = [LuaUtils.cameraFromString(camera)];
 				return true;
 			}
@@ -1217,24 +1038,21 @@ class Python extends Script
 			var object:FlxBasic = LuaUtils.getObjectDirectly(split[0]);
 			if (split.length > 1)
 				object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			if (object != null)
-			{
+			if (object != null) {
 				object.cameras = [LuaUtils.cameraFromString(camera)];
 				return true;
 			}
 			pythonTrace("setObjectCamera: Object " + obj + " doesn't exist!", false, false, FlxColor.RED);
 			return false;
 		});
-		set('setScrollFactor', function(obj:String, scrollX:Float, scrollY:Float)
-		{
+		set('setScrollFactor', function(obj:String, scrollX:Float, scrollY:Float) {
 			var object:FlxObject = LuaUtils.getObjectDirectly(obj);
 			if (object != null)
 				object.scrollFactor.set(scrollX, scrollY);
 		});
 
 		// Bar colors
-		set('setHealthBarColors', function(left:String, right:String)
-		{
+		set('setHealthBarColors', function(left:String, right:String) {
 			var left_color:Null<FlxColor> = null;
 			var right_color:Null<FlxColor> = null;
 			if (left != null && left != '')
@@ -1243,8 +1061,7 @@ class Python extends Script
 				right_color = CoolUtil.colorFromString(right);
 			game.healthBar.setColors(left_color, right_color);
 		});
-		set('setTimeBarColors', function(left:String, right:String)
-		{
+		set('setTimeBarColors', function(left:String, right:String) {
 			var left_color:Null<FlxColor> = null;
 			var right_color:Null<FlxColor> = null;
 			if (left != null && left != '')
@@ -1255,8 +1072,7 @@ class Python extends Script
 		});
 
 		// Dialogue & video
-		set('startDialogue', function(dialogueFile:String, ?music:String = null)
-		{
+		set('startDialogue', function(dialogueFile:String, ?music:String = null) {
 			var path:String;
 			var songPath:String = Paths.formatToSongPath(Song.loadedSongName);
 			#if TRANSLATIONS_ALLOWED
@@ -1278,17 +1094,14 @@ class Python extends Script
 			#end
 			{
 				var shit:DialogueFile = DialogueBoxPsych.parseDialogue(path);
-				if (shit.dialogue.length > 0)
-				{
+				if (shit.dialogue.length > 0) {
 					game.startDialogue(shit, music);
 					pythonTrace('startDialogue: Successfully loaded dialogue', false, false, FlxColor.GREEN);
 					return true;
-				}
-				else
+				} else
 					pythonTrace('startDialogue: Your dialogue file is badly formatted!', false, false, FlxColor.RED);
 			}
-		else
-		{
+		else {
 			pythonTrace('startDialogue: Dialogue file not found', false, false, FlxColor.RED);
 			if (game.endingSong)
 				game.endSong();
@@ -1298,28 +1111,22 @@ class Python extends Script
 			return false;
 		});
 
-		set('startVideo', function(videoFile:String, ?canSkip:Bool = true, ?forMidSong:Bool = false, ?shouldLoop:Bool = false, ?playOnLoad:Bool = true)
-		{
+		set('startVideo', function(videoFile:String, ?canSkip:Bool = true, ?forMidSong:Bool = false, ?shouldLoop:Bool = false, ?playOnLoad:Bool = true) {
 			#if VIDEOS_ALLOWED
-			if (FileSystem.exists(Paths.video(videoFile)))
-			{
-				if (game.videoCutscene != null)
-				{
+			if (FileSystem.exists(Paths.video(videoFile))) {
+				if (game.videoCutscene != null) {
 					game.remove(game.videoCutscene);
 					game.videoCutscene.destroy();
 				}
 				game.videoCutscene = game.startVideo(videoFile, forMidSong, canSkip, shouldLoop, playOnLoad);
 				return true;
-			}
-			else
-			{
+			} else {
 				pythonTrace('startVideo: Video file not found: ' + videoFile, false, false, FlxColor.RED);
 			}
 			return false;
 			#else
 			PlayState.instance.inCutscene = true;
-			new FlxTimer().start(0.1, function(tmr:FlxTimer)
-			{
+			new FlxTimer().start(0.1, function(tmr:FlxTimer) {
 				PlayState.instance.inCutscene = false;
 				if (game.endingSong)
 					game.endSong();
@@ -1331,12 +1138,10 @@ class Python extends Script
 		});
 
 		// Debug
-		set('debugPrint', function(text:Dynamic = '', ?color:FlxColor = null)
-		{
+		set('debugPrint', function(text:Dynamic = '', ?color:FlxColor = null) {
 			if (color == null)
 				color = FlxColor.WHITE;
-			if (PlayState.instance != null)
-			{
+			if (PlayState.instance != null) {
 				PlayState.instance.addTextToDebug(text, color);
 				return;
 			}
@@ -1344,13 +1149,10 @@ class Python extends Script
 		});
 
 		// Mod settings
-		set("getModSetting", function(saveTag:String, ?modName:String = null)
-		{
+		set("getModSetting", function(saveTag:String, ?modName:String = null) {
 			#if MODS_ALLOWED
-			if (modName == null)
-			{
-				if (this.modFolder == null)
-				{
+			if (modName == null) {
+				if (this.modFolder == null) {
 					pythonTrace('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!', false, false, FlxColor.RED);
 					return null;
 				}
@@ -1364,16 +1166,14 @@ class Python extends Script
 		});
 
 		// Close script
-		set("close", function()
-		{
+		set("close", function() {
 			closed = true;
 			CoolLog.info('Closing Python script $origin');
 			return closed;
 		});
 
 		// Add custom functions
-		for (name => func in customFunctions)
-		{
+		for (name => func in customFunctions) {
 			if (func != null)
 				set(name, func);
 		}
@@ -1389,28 +1189,23 @@ class Python extends Script
 		ShaderFunctions.pyimplement(this);
 	}
 
-	public static function pythonTrace(text:String, ignoreCheck:Bool = false, deprecated:Bool = false, color:FlxColor = FlxColor.WHITE)
-	{
-		if (PlayState.instance != null)
-		{
+	public static function pythonTrace(text:String, ignoreCheck:Bool = false, deprecated:Bool = false, color:FlxColor = FlxColor.WHITE) {
+		if (PlayState.instance != null) {
 			PlayState.instance.addTextToDebug(text, color);
 			return;
 		}
 		CoolLog.debug('[Python] $text');
 	}
 
-	public override function stop()
-	{
+	public override function stop() {
 		closed = true;
-		if (interp != null)
-		{
+		if (interp != null) {
 			interp.stop();
 			interp = null;
 		}
 	}
 
-	public override function destroy()
-	{
+	public override function destroy() {
 		stop();
 		parser = null;
 		interp = null;
@@ -1421,59 +1216,51 @@ class Python extends Script
 }
 #else
 // Fallback version if Python is not allowed
-class Python
-{
+class Python {
 	public var origin:String = null;
 	public var closed:Bool = true;
 
-	public function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?manualRun:Bool = false)
-	{
+	public function new(?parent:Dynamic, ?file:String = '', ?varsToBring:Any = null, ?manualRun:Bool = false) {
 		CoolLog.error("[Python] Python is not allowed on this platform!");
 		if (PlayState.instance != null)
 			PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
 	}
 
-	public function execute(code:String):Dynamic
-	{
+	public function execute(code:String):Dynamic {
 		CoolLog.error("[Python] Python is not allowed on this platform!");
 		if (PlayState.instance != null)
 			PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
 		return null;
 	}
 
-	public function call(func:String, ?args:Array<Dynamic>):Dynamic
-	{
+	public function call(func:String, ?args:Array<Dynamic>):Dynamic {
 		if (PlayState.instance != null)
 			PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
 		CoolLog.error("[Python] Python is not allowed on this platform!");
 		return null;
 	}
 
-	public function exists(func:String):Bool
-	{
+	public function exists(func:String):Bool {
 		if (PlayState.instance != null)
 			PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
 		CoolLog.error("[Python] Python is not allowed on this platform!");
 		return false;
 	}
 
-	public function set(variable:String, arg:Dynamic)
-	{
+	public function set(variable:String, arg:Dynamic) {
 		if (PlayState.instance != null)
 			PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
 		CoolLog.error("[Python] Python is not allowed on this platform!");
 		return null;
 	}
 
-	public function stop()
-	{
+	public function stop() {
 		if (PlayState.instance != null)
 			PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
 		CoolLog.error("[Python] Python is not allowed on this platform!");
 	}
 
-	public function destroy()
-	{
+	public function destroy() {
 		if (PlayState.instance != null)
 			PlayState.instance.addTextToDebug("Python: Python is not allowed on this platform!", FlxColor.RED);
 		CoolLog.error("[Python] Python is not allowed on this platform!");

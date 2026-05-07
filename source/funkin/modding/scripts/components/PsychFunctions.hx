@@ -57,14 +57,11 @@ import funkin.modding.scripts.HScript;
 import funkin.modding.scripts.Python;
 #end
 
-class PsychFunctions
-{
-	public static function implement(lua:LuaScript, pack:ScriptPack)
-	{
+class PsychFunctions {
+	public static function implement(lua:LuaScript, pack:ScriptPack) {
 		var game = PlayState.instance;
 
-		inline function resolveExclusions(exclusions:Array<String>, ignoreSelf:Bool):Array<Script>
-		{
+		inline function resolveExclusions(exclusions:Array<String>, ignoreSelf:Bool):Array<Script> {
 			if (exclusions == null)
 				exclusions = [];
 
@@ -158,13 +155,11 @@ class PsychFunctions
 		// build target (windows, mac, linux, etc.)
 		lua.set('buildTarget', LuaUtils.getBuildTarget());
 
-		lua.set("getRunningScripts", function():Array<String>
-		{
+		lua.set("getRunningScripts", function():Array<String> {
 			var runningScripts:Array<String> = [];
 			if (pack == null)
 				return runningScripts;
-			for (script in pack.scripts)
-			{
+			for (script in pack.scripts) {
 				#if LUA_ALLOWED
 				if (Std.isOfType(script, LuaScript))
 					runningScripts.push(cast(script, LuaScript).scriptName);
@@ -173,8 +168,7 @@ class PsychFunctions
 			return runningScripts;
 		});
 
-		lua.set("setOnScripts", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null)
-		{
+		lua.set("setOnScripts", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) {
 			if (exclusions == null)
 				exclusions = [];
 			if (ignoreSelf && !exclusions.contains(lua.scriptName))
@@ -183,8 +177,7 @@ class PsychFunctions
 			pack.set(varName, arg, excludeObjs);
 		});
 
-		lua.set("setOnHScript", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null)
-		{
+		lua.set("setOnHScript", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) {
 			if (exclusions == null)
 				exclusions = [];
 			if (ignoreSelf && !exclusions.contains(lua.scriptName))
@@ -193,8 +186,7 @@ class PsychFunctions
 			pack.setOnly(ScriptType.HSCRIPT, varName, arg, excludeObjs);
 		});
 
-		lua.set("setOnLuas", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null)
-		{
+		lua.set("setOnLuas", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) {
 			if (exclusions == null)
 				exclusions = [];
 			if (ignoreSelf && !exclusions.contains(lua.scriptName))
@@ -203,8 +195,7 @@ class PsychFunctions
 			pack.setOnly(ScriptType.LUA, varName, arg, excludeObjs);
 		});
 
-		lua.set("setOnPython", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null)
-		{
+		lua.set("setOnPython", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) {
 			if (exclusions == null)
 				exclusions = [];
 			if (ignoreSelf && !exclusions.contains(lua.scriptName))
@@ -215,8 +206,7 @@ class PsychFunctions
 
 		lua.set("callOnScripts",
 			function(funcName:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, ?ignoreSelf:Bool = true, ?excludeScripts:Array<String> = null,
-					?excludeValues:Array<Dynamic> = null)
-			{
+					?excludeValues:Array<Dynamic> = null) {
 				var excludeObjs = resolveExclusions(excludeScripts, ignoreSelf);
 				var result = pack.call(funcName, args, ignoreStops, excludeObjs, excludeValues);
 				return result != null ? result : LuaUtils.Function_Continue;
@@ -224,8 +214,7 @@ class PsychFunctions
 
 		lua.set("callOnLuas",
 			function(funcName:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, ?ignoreSelf:Bool = true, ?excludeScripts:Array<String> = null,
-					?excludeValues:Array<Dynamic> = null)
-			{
+					?excludeValues:Array<Dynamic> = null) {
 				var excludeObjs = resolveExclusions(excludeScripts, ignoreSelf);
 				var result = pack.callOnly(ScriptType.LUA, funcName, args, ignoreStops, excludeObjs, excludeValues);
 				return result != null ? result : LuaUtils.Function_Continue;
@@ -233,8 +222,7 @@ class PsychFunctions
 
 		lua.set("callOnHScript",
 			function(funcName:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, ?ignoreSelf:Bool = true, ?excludeScripts:Array<String> = null,
-					?excludeValues:Array<Dynamic> = null)
-			{
+					?excludeValues:Array<Dynamic> = null) {
 				var excludeObjs = resolveExclusions(excludeScripts, ignoreSelf);
 				var result = pack.callOnly(ScriptType.HSCRIPT, funcName, args, ignoreStops, excludeObjs, excludeValues);
 				return result != null ? result : LuaUtils.Function_Continue;
@@ -242,24 +230,20 @@ class PsychFunctions
 
 		lua.set("callOnPython",
 			function(funcName:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, ?ignoreSelf:Bool = true, ?excludeScripts:Array<String> = null,
-					?excludeValues:Array<Dynamic> = null)
-			{
+					?excludeValues:Array<Dynamic> = null) {
 				var excludeObjs = resolveExclusions(excludeScripts, ignoreSelf);
 				var result = pack.callOnly(ScriptType.PYTHON, funcName, args, ignoreStops, excludeObjs, excludeValues);
 				return result != null ? result : LuaUtils.Function_Continue;
 			});
 
-		lua.set("callScript", function(luaFile:String, funcName:String, ?args:Array<Dynamic> = null)
-		{
+		lua.set("callScript", function(luaFile:String, funcName:String, ?args:Array<Dynamic> = null) {
 			if (args == null)
 				args = [];
 			var luaPath:String = findScript(luaFile);
 			if (luaPath != null)
-				for (script in pack.scripts)
-				{
+				for (script in pack.scripts) {
 					#if LUA_ALLOWED
-					if (Std.isOfType(script, LuaScript))
-					{
+					if (Std.isOfType(script, LuaScript)) {
 						var luaInstance:LuaScript = cast script;
 						if (luaInstance.scriptName == luaPath)
 							return luaInstance.call(funcName, args);
@@ -269,16 +253,12 @@ class PsychFunctions
 			return null;
 		});
 
-		lua.set("isRunning", function(scriptFile:String):Bool
-		{
+		lua.set("isRunning", function(scriptFile:String):Bool {
 			var luaPath:String = findScript(scriptFile);
-			if (luaPath != null)
-			{
-				for (script in pack.scripts)
-				{
+			if (luaPath != null) {
+				for (script in pack.scripts) {
 					#if LUA_ALLOWED
-					if (Std.isOfType(script, LuaScript))
-					{
+					if (Std.isOfType(script, LuaScript)) {
 						var luaInstance:LuaScript = cast script;
 						if (luaInstance.scriptName == luaPath)
 							return true;
@@ -288,12 +268,9 @@ class PsychFunctions
 			}
 			#if HSCRIPT_ALLOWED
 			var hscriptPath:String = findScript(scriptFile, '.hx');
-			if (hscriptPath != null)
-			{
-				for (script in pack.scripts)
-				{
-					if (Std.isOfType(script, HScript))
-					{
+			if (hscriptPath != null) {
+				for (script in pack.scripts) {
+					if (Std.isOfType(script, HScript)) {
 						var hscriptInstance:HScript = cast script;
 						if (hscriptInstance.origin == hscriptPath)
 							return true;
@@ -303,12 +280,9 @@ class PsychFunctions
 			#end
 			#if PYTHON_ALLOWED
 			var pythonPath:String = findScript(scriptFile, '.py');
-			if (pythonPath != null)
-			{
-				for (script in pack.scripts)
-				{
-					if (Std.isOfType(script, Python))
-					{
+			if (pythonPath != null) {
+				for (script in pack.scripts) {
+					if (Std.isOfType(script, Python)) {
 						var pythonInstance:Python = cast script;
 						if (pythonInstance.origin == pythonPath)
 							return true;
@@ -319,31 +293,24 @@ class PsychFunctions
 			return false;
 		});
 
-		lua.set("setVar", function(varName:String, value:Dynamic)
-		{
+		lua.set("setVar", function(varName:String, value:Dynamic) {
 			MusicBeatState.getVariables().set(varName, ReflectionFunctions.parseSingleInstance(value));
 			return value;
 		});
 
-		lua.set("getVar", function(varName:String):Dynamic
-		{
+		lua.set("getVar", function(varName:String):Dynamic {
 			return MusicBeatState.getVariables().get(varName);
 		});
 
-		lua.set("addLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false)
-		{
+		lua.set("addLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) {
 			var luaPath:String = findScript(luaFile);
-			if (luaPath != null)
-			{
+			if (luaPath != null) {
 				if (!ignoreAlreadyRunning)
-					for (script in pack.scripts)
-					{
+					for (script in pack.scripts) {
 						#if LUA_ALLOWED
-						if (Std.isOfType(script, LuaScript))
-						{
+						if (Std.isOfType(script, LuaScript)) {
 							var luaInstance:LuaScript = cast script;
-							if (luaInstance.scriptName == luaPath)
-							{
+							if (luaInstance.scriptName == luaPath) {
 								CoolLog.info('addLuaScript: The script "' + luaPath + '" is already running!');
 								return;
 							}
@@ -360,21 +327,15 @@ class PsychFunctions
 			CoolLog.info("addLuaScript: Script doesn't exist!");
 		});
 
-		lua.set("addHScript", function(scriptFile:String, ?ignoreAlreadyRunning:Bool = false)
-		{
+		lua.set("addHScript", function(scriptFile:String, ?ignoreAlreadyRunning:Bool = false) {
 			#if HSCRIPT_ALLOWED
 			var scriptPath:String = findScript(scriptFile, '.hx');
-			if (scriptPath != null)
-			{
-				if (!ignoreAlreadyRunning)
-				{
-					for (script in pack.scripts)
-					{
-						if (Std.isOfType(script, HScript))
-						{
+			if (scriptPath != null) {
+				if (!ignoreAlreadyRunning) {
+					for (script in pack.scripts) {
+						if (Std.isOfType(script, HScript)) {
 							var hscriptInstance:HScript = cast script;
-							if (hscriptInstance.origin == scriptPath)
-							{
+							if (hscriptInstance.origin == scriptPath) {
 								CoolLog.info('addHScript: The script "' + scriptPath + '" is already running!');
 								return;
 							}
@@ -392,21 +353,15 @@ class PsychFunctions
 			#end
 		});
 
-		lua.set("addPython", function(scriptFile:String, ?ignoreAlreadyRunning:Bool = false)
-		{
+		lua.set("addPython", function(scriptFile:String, ?ignoreAlreadyRunning:Bool = false) {
 			#if PYTHON_ALLOWED
 			var scriptPath:String = findScript(scriptFile, '.py');
-			if (scriptPath != null)
-			{
-				if (!ignoreAlreadyRunning)
-				{
-					for (script in pack.scripts)
-					{
-						if (Std.isOfType(script, Python))
-						{
+			if (scriptPath != null) {
+				if (!ignoreAlreadyRunning) {
+					for (script in pack.scripts) {
+						if (Std.isOfType(script, Python)) {
 							var pythonInstance:Python = cast script;
-							if (pythonInstance.origin == scriptPath)
-							{
+							if (pythonInstance.origin == scriptPath) {
 								CoolLog.info('addPython: The script "' + scriptPath + '" is already running!');
 								return;
 							}
@@ -424,20 +379,15 @@ class PsychFunctions
 			#end
 		});
 
-		lua.set("removeLuaScript", function(luaFile:String):Bool
-		{
+		lua.set("removeLuaScript", function(luaFile:String):Bool {
 			var luaPath:String = findScript(luaFile);
-			if (luaPath != null)
-			{
+			if (luaPath != null) {
 				var foundAny:Bool = false;
-				for (script in pack.scripts)
-				{
+				for (script in pack.scripts) {
 					#if LUA_ALLOWED
-					if (Std.isOfType(script, LuaScript))
-					{
+					if (Std.isOfType(script, LuaScript)) {
 						var luaInstance:LuaScript = cast script;
-						if (luaInstance.scriptName == luaPath)
-						{
+						if (luaInstance.scriptName == luaPath) {
 							luaInstance.stop();
 							pack.remove(luaInstance);
 							foundAny = true;
@@ -452,20 +402,15 @@ class PsychFunctions
 			return false;
 		});
 
-		lua.set("removeHScript", function(scriptFile:String):Bool
-		{
+		lua.set("removeHScript", function(scriptFile:String):Bool {
 			#if HSCRIPT_ALLOWED
 			var scriptPath:String = findScript(scriptFile, '.hx');
-			if (scriptPath != null)
-			{
+			if (scriptPath != null) {
 				var foundAny:Bool = false;
-				for (script in pack.scripts)
-				{
-					if (Std.isOfType(script, HScript))
-					{
+				for (script in pack.scripts) {
+					if (Std.isOfType(script, HScript)) {
 						var hscriptInstance:HScript = cast script;
-						if (hscriptInstance.origin == scriptPath)
-						{
+						if (hscriptInstance.origin == scriptPath) {
 							hscriptInstance.destroy();
 							pack.remove(hscriptInstance);
 							foundAny = true;
@@ -483,20 +428,15 @@ class PsychFunctions
 			#end
 		});
 
-		lua.set("removePython", function(scriptFile:String):Bool
-		{
+		lua.set("removePython", function(scriptFile:String):Bool {
 			#if PYTHON_ALLOWED
 			var scriptPath:String = findScript(scriptFile, '.py');
-			if (scriptPath != null)
-			{
+			if (scriptPath != null) {
 				var foundAny:Bool = false;
-				for (script in pack.scripts)
-				{
-					if (Std.isOfType(script, Python))
-					{
+				for (script in pack.scripts) {
+					if (Std.isOfType(script, Python)) {
 						var pythonInstance:Python = cast script;
-						if (pythonInstance.origin == scriptPath)
-						{
+						if (pythonInstance.origin == scriptPath) {
 							pythonInstance.destroy();
 							pack.remove(pythonInstance);
 							foundAny = true;
@@ -514,73 +454,57 @@ class PsychFunctions
 			#end
 		});
 
-		lua.set("loadGraphic", function(variable:String, image:String, ?gridX:Int = 0, ?gridY:Int = 0)
-		{
+		lua.set("loadGraphic", function(variable:String, image:String, ?gridX:Int = 0, ?gridY:Int = 0) {
 			var split:Array<String> = variable.split('.');
 			var spr:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
 			var animated = gridX != 0 || gridY != 0;
 
-			if (split.length > 1)
-			{
+			if (split.length > 1) {
 				spr = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 			}
 
-			if (spr != null && image != null && image.length > 0)
-			{
+			if (spr != null && image != null && image.length > 0) {
 				spr.loadGraphic(Paths.image(image), animated, gridX, gridY);
 			}
 		});
 
-		lua.set("loadFrames", function(variable:String, image:String, spriteType:String = 'auto')
-		{
+		lua.set("loadFrames", function(variable:String, image:String, spriteType:String = 'auto') {
 			var split:Array<String> = variable.split('.');
 			var spr:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1)
-			{
+			if (split.length > 1) {
 				spr = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 			}
 
-			if (spr != null && image != null && image.length > 0)
-			{
+			if (spr != null && image != null && image.length > 0) {
 				LuaUtils.loadFrames(spr, image, spriteType);
 			}
 		});
 
-		lua.set("loadMultipleFrames", function(variable:String, images:Array<String>)
-		{
+		lua.set("loadMultipleFrames", function(variable:String, images:Array<String>) {
 			var split:Array<String> = variable.split('.');
 			var spr:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1)
-			{
+			if (split.length > 1) {
 				spr = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 			}
 
-			if (spr != null && images != null && images.length > 0)
-			{
+			if (spr != null && images != null && images.length > 0) {
 				spr.frames = Paths.getMultiAtlas(images);
 			}
 		});
 
-		lua.set("getObjectOrder", function(obj:String, ?group:String = null):Int
-		{
+		lua.set("getObjectOrder", function(obj:String, ?group:String = null):Int {
 			var leObj:FlxBasic = LuaUtils.getObjectDirectly(obj);
-			if (leObj != null)
-			{
-				if (group != null)
-				{
+			if (leObj != null) {
+				if (group != null) {
 					var groupOrArray:Dynamic = Reflect.getProperty(LuaUtils.getTargetInstance(), group);
-					if (groupOrArray != null)
-					{
-						switch (Type.typeof(groupOrArray))
-						{
+					if (groupOrArray != null) {
+						switch (Type.typeof(groupOrArray)) {
 							case TClass(Array):
 								return groupOrArray.indexOf(leObj);
 							default:
 								return Reflect.getProperty(groupOrArray, 'members').indexOf(leObj);
 						}
-					}
-					else
-					{
+					} else {
 						CoolLog.info('getObjectOrder: Group $group doesn\'t exist!');
 						return -1;
 					}
@@ -592,18 +516,13 @@ class PsychFunctions
 			return -1;
 		});
 
-		lua.set("setObjectOrder", function(obj:String, position:Int, ?group:String = null)
-		{
+		lua.set("setObjectOrder", function(obj:String, position:Int, ?group:String = null) {
 			var leObj:FlxBasic = LuaUtils.getObjectDirectly(obj);
-			if (leObj != null)
-			{
-				if (group != null)
-				{
+			if (leObj != null) {
+				if (group != null) {
 					var groupOrArray:Dynamic = Reflect.getProperty(LuaUtils.getTargetInstance(), group);
-					if (groupOrArray != null)
-					{
-						switch (Type.typeof(groupOrArray))
-						{
+					if (groupOrArray != null) {
+						switch (Type.typeof(groupOrArray)) {
 							case TClass(Array):
 								groupOrArray.remove(leObj);
 								groupOrArray.insert(position, leObj);
@@ -611,12 +530,9 @@ class PsychFunctions
 								groupOrArray.remove(leObj, true);
 								groupOrArray.insert(position, leObj);
 						}
-					}
-					else
+					} else
 						CoolLog.info('setObjectOrder: Group $group doesn\'t exist!');
-				}
-				else
-				{
+				} else {
 					var groupOrArray:Dynamic = CustomSubstate.instance != null ? CustomSubstate.instance : LuaUtils.getTargetInstance();
 					groupOrArray.remove(leObj, true);
 					groupOrArray.insert(position, leObj);
@@ -626,16 +542,12 @@ class PsychFunctions
 			CoolLog.info('setObjectOrder: Object $obj doesn\'t exist!');
 		});
 
-		lua.set("startTween", function(tag:String, vars:String, values:Any = null, duration:Float, ?options:Any = null)
-		{
+		lua.set("startTween", function(tag:String, vars:String, values:Any = null, duration:Float, ?options:Any = null) {
 			var penisExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
-			if (penisExam != null)
-			{
-				if (values != null)
-				{
+			if (penisExam != null) {
+				if (values != null) {
 					var myOptions:LuaTweenOptions = LuaUtils.getLuaTween(options);
-					if (tag != null)
-					{
+					if (tag != null) {
 						var variables = MusicBeatState.getVariables();
 						var originalTag:String = 'tween_' + LuaUtils.formatVariable(tag);
 						variables.set(tag, FlxTween.tween(penisExam, values, duration, myOptions != null ? {
@@ -643,18 +555,15 @@ class PsychFunctions
 							ease: myOptions.ease,
 							startDelay: myOptions.startDelay,
 							loopDelay: myOptions.loopDelay,
-							onUpdate: function(twn:FlxTween)
-							{
+							onUpdate: function(twn:FlxTween) {
 								if (myOptions.onUpdate != null)
 									pack.callOnly(ScriptType.LUA, myOptions.onUpdate, [originalTag, vars]);
 							},
-							onStart: function(twn:FlxTween)
-							{
+							onStart: function(twn:FlxTween) {
 								if (myOptions.onStart != null)
 									pack.callOnly(ScriptType.LUA, myOptions.onStart, [originalTag, vars]);
 							},
-							onComplete: function(twn:FlxTween)
-							{
+							onComplete: function(twn:FlxTween) {
 								if (twn.type == FlxTweenType.ONESHOT || twn.type == FlxTweenType.BACKWARD)
 									variables.remove(tag);
 								if (myOptions.onComplete != null)
@@ -662,62 +571,50 @@ class PsychFunctions
 							}
 						} : null));
 						return tag;
-					}
-					else
+					} else
 						FlxTween.tween(penisExam, values, duration, myOptions != null ? {
 							type: myOptions.type,
 							ease: myOptions.ease,
 							startDelay: myOptions.startDelay,
 							loopDelay: myOptions.loopDelay,
-							onUpdate: function(twn:FlxTween)
-							{
+							onUpdate: function(twn:FlxTween) {
 								if (myOptions.onUpdate != null)
 									pack.callOnly(ScriptType.LUA, myOptions.onUpdate, [null, vars]);
 							},
-							onStart: function(twn:FlxTween)
-							{
+							onStart: function(twn:FlxTween) {
 								if (myOptions.onStart != null)
 									pack.callOnly(ScriptType.LUA, myOptions.onStart, [null, vars]);
 							},
-							onComplete: function(twn:FlxTween)
-							{
+							onComplete: function(twn:FlxTween) {
 								if (myOptions.onComplete != null)
 									pack.callOnly(ScriptType.LUA, myOptions.onComplete, [null, vars]);
 							}
 						} : null);
-				}
-				else
+				} else
 					CoolLog.info('startTween: No values on 2nd argument!');
-			}
-			else
+			} else
 				CoolLog.info('startTween: Couldnt find object: ' + vars);
 			return null;
 		});
 
-		lua.set("doTweenX", function(tag:String, vars:String, value:Dynamic, duration:Float, ?ease:String = 'linear')
-		{
+		lua.set("doTweenX", function(tag:String, vars:String, value:Dynamic, duration:Float, ?ease:String = 'linear') {
 			return oldTweenFunction(pack, tag, vars, {x: value}, duration, ease, 'doTweenX');
 		});
 
-		lua.set("doTweenY", function(tag:String, vars:String, value:Dynamic, duration:Float, ?ease:String = 'linear')
-		{
+		lua.set("doTweenY", function(tag:String, vars:String, value:Dynamic, duration:Float, ?ease:String = 'linear') {
 			return oldTweenFunction(pack, tag, vars, {y: value}, duration, ease, 'doTweenY');
 		});
 
-		lua.set("doTweenAngle", function(tag:String, vars:String, value:Dynamic, duration:Float, ?ease:String = 'linear')
-		{
+		lua.set("doTweenAngle", function(tag:String, vars:String, value:Dynamic, duration:Float, ?ease:String = 'linear') {
 			return oldTweenFunction(pack, tag, vars, {angle: value}, duration, ease, 'doTweenAngle');
 		});
 
-		lua.set("doTweenAlpha", function(tag:String, vars:String, value:Dynamic, duration:Float, ?ease:String = 'linear')
-		{
+		lua.set("doTweenAlpha", function(tag:String, vars:String, value:Dynamic, duration:Float, ?ease:String = 'linear') {
 			return oldTweenFunction(pack, tag, vars, {alpha: value}, duration, ease, 'doTweenAlpha');
 		});
 
-		lua.set("doTweenZoom", function(tag:String, camera:String, value:Dynamic, duration:Float, ?ease:String = 'linear')
-		{
-			switch (camera.toLowerCase())
-			{
+		lua.set("doTweenZoom", function(tag:String, camera:String, value:Dynamic, duration:Float, ?ease:String = 'linear') {
+			switch (camera.toLowerCase()) {
 				case 'camgame' | 'game':
 					camera = 'camGame';
 				case 'camhud' | 'hud':
@@ -732,67 +629,54 @@ class PsychFunctions
 			return oldTweenFunction(pack, tag, camera, {zoom: value}, duration, ease, 'doTweenZoom');
 		});
 
-		lua.set("doTweenColor", function(tag:String, vars:String, targetColor:String, duration:Float, ?ease:String = 'linear')
-		{
+		lua.set("doTweenColor", function(tag:String, vars:String, targetColor:String, duration:Float, ?ease:String = 'linear') {
 			var penisExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
-			if (penisExam != null)
-			{
+			if (penisExam != null) {
 				var curColor:FlxColor = penisExam.color;
 				curColor.alphaFloat = penisExam.alpha;
 
-				if (tag != null)
-				{
+				if (tag != null) {
 					var originalTag:String = tag;
 					tag = LuaUtils.formatVariable('tween_$tag');
 					var variables = MusicBeatState.getVariables();
 					variables.set(tag, FlxTween.color(penisExam, duration, curColor, CoolUtil.colorFromString(targetColor), {
 						ease: LuaUtils.getTweenEaseByString(ease),
-						onComplete: function(twn:FlxTween)
-						{
+						onComplete: function(twn:FlxTween) {
 							variables.remove(tag);
 							pack.callOnly(ScriptType.LUA, 'onTweenCompleted', [originalTag, vars]);
 						}
 					}));
 					return tag;
-				}
-				else
+				} else
 					FlxTween.color(penisExam, duration, curColor, CoolUtil.colorFromString(targetColor), {ease: LuaUtils.getTweenEaseByString(ease)});
-			}
-			else
+			} else
 				CoolLog.info('doTweenColor: Couldnt find object: ' + vars);
 			return null;
 		});
 
-		lua.set("noteTweenX", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear')
-		{
+		lua.set("noteTweenX", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
 			return noteTweenFunction(game, pack, tag, note, {x: value}, duration, ease);
 		});
 
-		lua.set("noteTweenY", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear')
-		{
+		lua.set("noteTweenY", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
 			return noteTweenFunction(game, pack, tag, note, {y: value}, duration, ease);
 		});
 
-		lua.set("noteTweenAngle", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear')
-		{
+		lua.set("noteTweenAngle", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
 			return noteTweenFunction(game, pack, tag, note, {angle: value}, duration, ease);
 		});
 
-		lua.set("noteTweenAlpha", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear')
-		{
+		lua.set("noteTweenAlpha", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
 			return noteTweenFunction(game, pack, tag, note, {alpha: value}, duration, ease);
 		});
 
-		lua.set("noteTweenDirection", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear')
-		{
+		lua.set("noteTweenDirection", function(tag:String, note:Int, value:Dynamic, duration:Float, ?ease:String = 'linear') {
 			return noteTweenFunction(game, pack, tag, note, {direction: value}, duration, ease);
 		});
 
-		lua.set("mouseClicked", function(?button:String = 'left'):Bool
-		{
+		lua.set("mouseClicked", function(?button:String = 'left'):Bool {
 			var click:Bool = FlxG.mouse.justPressed;
-			switch (button.trim().toLowerCase())
-			{
+			switch (button.trim().toLowerCase()) {
 				case 'middle':
 					click = FlxG.mouse.justPressedMiddle;
 				case 'right':
@@ -801,11 +685,9 @@ class PsychFunctions
 			return click;
 		});
 
-		lua.set("mousePressed", function(?button:String = 'left'):Bool
-		{
+		lua.set("mousePressed", function(?button:String = 'left'):Bool {
 			var press:Bool = FlxG.mouse.pressed;
-			switch (button.trim().toLowerCase())
-			{
+			switch (button.trim().toLowerCase()) {
 				case 'middle':
 					press = FlxG.mouse.pressedMiddle;
 				case 'right':
@@ -814,11 +696,9 @@ class PsychFunctions
 			return press;
 		});
 
-		lua.set("mouseReleased", function(?button:String = 'left'):Bool
-		{
+		lua.set("mouseReleased", function(?button:String = 'left'):Bool {
 			var released:Bool = FlxG.mouse.justReleased;
-			switch (button.trim().toLowerCase())
-			{
+			switch (button.trim().toLowerCase()) {
 				case 'middle':
 					released = FlxG.mouse.justReleasedMiddle;
 				case 'right':
@@ -829,18 +709,26 @@ class PsychFunctions
 
 		lua.set("cancelTween", function(tag:String) LuaUtils.cancelTween(tag));
 
-		lua.set("runTimer", function(tag:String, time:Float = 1, loops:Int = 1)
-		{
+		lua.set("runTimer", function(tag:String, time:Float = 1, loops:Int = 1) {
 			LuaUtils.cancelTimer(tag);
 			var variables = MusicBeatState.getVariables();
 
 			var originalTag:String = tag;
 			tag = LuaUtils.formatVariable('timer_$tag');
-			variables.set(tag, new FlxTimer().start(time, function(tmr:FlxTimer)
-			{
-				if (tmr.finished)
-					variables.remove(tag);
-				pack.callOnly(ScriptType.LUA, 'onTimerCompleted', [originalTag, tmr.loops, tmr.loopsLeft]);
+
+			var localPack = pack;
+
+			variables.set(tag, new FlxTimer().start(time, function(tmr:FlxTimer) {
+				try {
+					if (tmr.finished)
+						variables.remove(tag);
+
+					if (localPack != null) {
+						localPack.callOnly(ScriptType.LUA, 'onTimerCompleted', [originalTag, tmr.loops, tmr.loopsLeft]);
+					}
+				} catch (e:Dynamic) {
+					CoolLog.error('Timer callback error: ' + e);
+				}
 			}, loops));
 			return tag;
 		});
@@ -852,13 +740,11 @@ class PsychFunctions
 		lua.set("getColorFromString", function(color:String) return FlxColor.fromString(color));
 		lua.set("getColorFromHex", function(color:String) return FlxColor.fromString('#$color'));
 
-		lua.set("addCharacterToList", function(name:String, type:String)
-		{
+		lua.set("addCharacterToList", function(name:String, type:String) {
 			if (game == null)
 				return;
 			var charType:Int = 0;
-			switch (type.toLowerCase())
-			{
+			switch (type.toLowerCase()) {
 				case 'dad':
 					charType = 1;
 				case 'gf' | 'girlfriend':
@@ -867,27 +753,22 @@ class PsychFunctions
 			game.addCharacterToList(name, charType);
 		});
 
-		lua.set("precacheImage", function(name:String, ?allowGPU:Bool = true)
-		{
+		lua.set("precacheImage", function(name:String, ?allowGPU:Bool = true) {
 			Paths.image(name, allowGPU);
 		});
 
-		lua.set("precacheSound", function(name:String)
-		{
+		lua.set("precacheSound", function(name:String) {
 			Paths.sound(name);
 		});
 
-		lua.set("precacheMusic", function(name:String)
-		{
+		lua.set("precacheMusic", function(name:String) {
 			Paths.music(name);
 		});
 
-		lua.set("cameraSetTarget", function(target:String)
-		{
+		lua.set("cameraSetTarget", function(target:String) {
 			if (game == null)
 				return;
-			switch (target.trim().toLowerCase())
-			{
+			switch (target.trim().toLowerCase()) {
 				case 'gf', 'girlfriend':
 					game.moveCameraToGirlfriend();
 				case 'dad', 'opponent':
@@ -901,10 +782,8 @@ class PsychFunctions
 		lua.set("setCameraFollowPoint", function(x:Float, y:Float) if (game != null)
 			game.camFollow.setPosition(x, y));
 		lua.set("addCameraScroll", function(?x:Float = 0, ?y:Float = 0) FlxG.camera.scroll.add(x, y));
-		lua.set("addCameraFollowPoint", function(?x:Float = 0, ?y:Float = 0)
-		{
-			if (game != null)
-			{
+		lua.set("addCameraFollowPoint", function(?x:Float = 0, ?y:Float = 0) {
+			if (game != null) {
 				game.camFollow.x += x;
 				game.camFollow.y += y;
 			}
@@ -912,43 +791,34 @@ class PsychFunctions
 		lua.set("getCameraScrollX", function():Float return FlxG.camera.scroll.x + FlxG.width / 2);
 		lua.set("getCameraScrollY", function():Float return FlxG.camera.scroll.y + FlxG.height / 2);
 
-		lua.set("cameraShake", function(camera:String, intensity:Float, duration:Float)
-		{
+		lua.set("cameraShake", function(camera:String, intensity:Float, duration:Float) {
 			LuaUtils.cameraFromString(camera).shake(intensity, duration);
 		});
 
-		lua.set("cameraFlash", function(camera:String, color:String, duration:Float, forced:Bool)
-		{
+		lua.set("cameraFlash", function(camera:String, color:String, duration:Float, forced:Bool) {
 			LuaUtils.cameraFromString(camera).flash(CoolUtil.colorFromString(color), duration, null, forced);
 		});
 
-		lua.set("cameraFade", function(camera:String, color:String, duration:Float, forced:Bool, ?fadeOut:Bool = false)
-		{
+		lua.set("cameraFade", function(camera:String, color:String, duration:Float, forced:Bool, ?fadeOut:Bool = false) {
 			LuaUtils.cameraFromString(camera).fade(CoolUtil.colorFromString(color), duration, fadeOut, null, forced);
 		});
 
-		lua.set("setRatingPercent", function(value:Float)
-		{
-			if (game != null)
-			{
+		lua.set("setRatingPercent", function(value:Float) {
+			if (game != null) {
 				game.ratingPercent = value;
 				pack.set('rating', game.ratingPercent);
 			}
 		});
 
-		lua.set("setRatingName", function(value:String)
-		{
-			if (game != null)
-			{
+		lua.set("setRatingName", function(value:String) {
+			if (game != null) {
 				game.ratingName = value;
 				pack.set('ratingName', game.ratingName);
 			}
 		});
 
-		lua.set("setRatingFC", function(value:String)
-		{
-			if (game != null)
-			{
+		lua.set("setRatingFC", function(value:String) {
+			if (game != null) {
 				game.ratingFC = value;
 				pack.set('ratingFC', game.ratingFC);
 			}
@@ -957,24 +827,20 @@ class PsychFunctions
 		lua.set("updateScoreText", function() if (game != null)
 			game.updateScoreText());
 
-		lua.set("getMouseX", function(?camera:String = 'game'):Float
-		{
+		lua.set("getMouseX", function(?camera:String = 'game'):Float {
 			var cam:FlxCamera = LuaUtils.cameraFromString(camera);
 			return FlxG.mouse.getScreenPosition(cam).x;
 		});
 
-		lua.set("getMouseY", function(?camera:String = 'game'):Float
-		{
+		lua.set("getMouseY", function(?camera:String = 'game'):Float {
 			var cam:FlxCamera = LuaUtils.cameraFromString(camera);
 			return FlxG.mouse.getScreenPosition(cam).y;
 		});
 
-		lua.set("getMidpointX", function(variable:String):Float
-		{
+		lua.set("getMidpointX", function(variable:String):Float {
 			var split:Array<String> = variable.split('.');
 			var obj:FlxObject = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1)
-			{
+			if (split.length > 1) {
 				obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 			}
 			if (obj != null)
@@ -982,12 +848,10 @@ class PsychFunctions
 			return 0;
 		});
 
-		lua.set("getMidpointY", function(variable:String):Float
-		{
+		lua.set("getMidpointY", function(variable:String):Float {
 			var split:Array<String> = variable.split('.');
 			var obj:FlxObject = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1)
-			{
+			if (split.length > 1) {
 				obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 			}
 			if (obj != null)
@@ -995,12 +859,10 @@ class PsychFunctions
 			return 0;
 		});
 
-		lua.set("getGraphicMidpointX", function(variable:String):Float
-		{
+		lua.set("getGraphicMidpointX", function(variable:String):Float {
 			var split:Array<String> = variable.split('.');
 			var obj:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1)
-			{
+			if (split.length > 1) {
 				obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 			}
 			if (obj != null)
@@ -1008,12 +870,10 @@ class PsychFunctions
 			return 0;
 		});
 
-		lua.set("getGraphicMidpointY", function(variable:String):Float
-		{
+		lua.set("getGraphicMidpointY", function(variable:String):Float {
 			var split:Array<String> = variable.split('.');
 			var obj:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1)
-			{
+			if (split.length > 1) {
 				obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 			}
 			if (obj != null)
@@ -1021,12 +881,10 @@ class PsychFunctions
 			return 0;
 		});
 
-		lua.set("getScreenPositionX", function(variable:String, ?camera:String = 'game'):Float
-		{
+		lua.set("getScreenPositionX", function(variable:String, ?camera:String = 'game'):Float {
 			var split:Array<String> = variable.split('.');
 			var obj:FlxObject = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1)
-			{
+			if (split.length > 1) {
 				obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 			}
 			if (obj != null)
@@ -1034,12 +892,10 @@ class PsychFunctions
 			return 0;
 		});
 
-		lua.set("getScreenPositionY", function(variable:String, ?camera:String = 'game'):Float
-		{
+		lua.set("getScreenPositionY", function(variable:String, ?camera:String = 'game'):Float {
 			var split:Array<String> = variable.split('.');
 			var obj:FlxObject = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1)
-			{
+			if (split.length > 1) {
 				obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 			}
 			if (obj != null)
@@ -1047,12 +903,10 @@ class PsychFunctions
 			return 0;
 		});
 
-		lua.set("characterDance", function(character:String)
-		{
+		lua.set("characterDance", function(character:String) {
 			if (game == null)
 				return;
-			switch (character.toLowerCase())
-			{
+			switch (character.toLowerCase()) {
 				case 'dad':
 					game.dad.dance();
 				case 'gf' | 'girlfriend':
@@ -1063,47 +917,39 @@ class PsychFunctions
 			}
 		});
 
-		lua.set("makeLuaSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0)
-		{
+		lua.set("makeLuaSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0) {
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
 			var leSprite:ModchartSprite = new ModchartSprite(x, y);
-			if (image != null && image.length > 0)
-			{
+			if (image != null && image.length > 0) {
 				leSprite.loadGraphic(Paths.image(image));
 			}
 			MusicBeatState.getVariables().set(tag, leSprite);
 			leSprite.active = true;
 		});
 
-		lua.set("makeAnimatedLuaSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?spriteType:String = 'auto')
-		{
+		lua.set("makeAnimatedLuaSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?spriteType:String = 'auto') {
 			tag = tag.replace('.', '');
 			LuaUtils.destroyObject(tag);
 			var leSprite:ModchartSprite = new ModchartSprite(x, y);
 
-			if (image != null && image.length > 0)
-			{
+			if (image != null && image.length > 0) {
 				LuaUtils.loadFrames(leSprite, image, spriteType);
 			}
 			MusicBeatState.getVariables().set(tag, leSprite);
 		});
 
-		lua.set("makeGraphic", function(obj:String, width:Int = 256, height:Int = 256, color:String = 'FFFFFF')
-		{
+		lua.set("makeGraphic", function(obj:String, width:Int = 256, height:Int = 256, color:String = 'FFFFFF') {
 			var spr:FlxSprite = LuaUtils.getObjectDirectly(obj);
 			if (spr != null)
 				spr.makeGraphic(width, height, CoolUtil.colorFromString(color));
 		});
 
-		lua.set("addAnimationByPrefix", function(obj:String, name:String, prefix:String, framerate:Float = 24, loop:Bool = true):Bool
-		{
+		lua.set("addAnimationByPrefix", function(obj:String, name:String, prefix:String, framerate:Float = 24, loop:Bool = true):Bool {
 			var obj:FlxSprite = cast LuaUtils.getObjectDirectly(obj);
-			if (obj != null && obj.animation != null)
-			{
+			if (obj != null && obj.animation != null) {
 				obj.animation.addByPrefix(name, prefix, framerate, loop);
-				if (obj.animation.curAnim == null)
-				{
+				if (obj.animation.curAnim == null) {
 					var dyn:Dynamic = cast obj;
 					if (dyn.playAnim != null)
 						dyn.playAnim(name, true);
@@ -1115,29 +961,23 @@ class PsychFunctions
 			return false;
 		});
 
-		lua.set("addAnimation", function(obj:String, name:String, frames:Any, framerate:Float = 24, loop:Bool = true):Bool
-		{
+		lua.set("addAnimation", function(obj:String, name:String, frames:Any, framerate:Float = 24, loop:Bool = true):Bool {
 			return LuaUtils.addAnimByIndices(obj, name, null, frames, framerate, loop);
 		});
 
-		lua.set("addAnimationByIndices", function(obj:String, name:String, prefix:String, indices:Any, framerate:Float = 24, loop:Bool = false):Bool
-		{
+		lua.set("addAnimationByIndices", function(obj:String, name:String, prefix:String, indices:Any, framerate:Float = 24, loop:Bool = false):Bool {
 			return LuaUtils.addAnimByIndices(obj, name, prefix, indices, framerate, loop);
 		});
 
-		lua.set("playAnim", function(obj:String, name:String, ?forced:Bool = false, ?reverse:Bool = false, ?startFrame:Int = 0):Bool
-		{
+		lua.set("playAnim", function(obj:String, name:String, ?forced:Bool = false, ?reverse:Bool = false, ?startFrame:Int = 0):Bool {
 			var obj:Dynamic = LuaUtils.getObjectDirectly(obj);
 			if (obj == null)
 				return false;
 
-			if (obj.playAnim != null)
-			{
+			if (obj.playAnim != null) {
 				obj.playAnim(name, forced, reverse, startFrame);
 				return true;
-			}
-			else
-			{
+			} else {
 				if (obj.anim != null)
 					obj.anim.play(name, forced, reverse, startFrame);
 				else
@@ -1147,34 +987,28 @@ class PsychFunctions
 			return false;
 		});
 
-		lua.set("addOffset", function(obj:String, anim:String, x:Float, y:Float):Bool
-		{
+		lua.set("addOffset", function(obj:String, anim:String, x:Float, y:Float):Bool {
 			var obj:Dynamic = LuaUtils.getObjectDirectly(obj);
-			if (obj != null && obj.addOffset != null)
-			{
+			if (obj != null && obj.addOffset != null) {
 				obj.addOffset(anim, x, y);
 				return true;
 			}
 			return false;
 		});
 
-		lua.set("setScrollFactor", function(obj:String, scrollX:Float, scrollY:Float)
-		{
-			if (game != null && game.getLuaObject(obj) != null)
-			{
+		lua.set("setScrollFactor", function(obj:String, scrollX:Float, scrollY:Float) {
+			if (game != null && game.getLuaObject(obj) != null) {
 				game.getLuaObject(obj).scrollFactor.set(scrollX, scrollY);
 				return;
 			}
 
 			var object:FlxObject = Reflect.getProperty(LuaUtils.getTargetInstance(), obj);
-			if (object != null)
-			{
+			if (object != null) {
 				object.scrollFactor.set(scrollX, scrollY);
 			}
 		});
 
-		lua.set("addLuaSprite", function(tag:String, ?inFront:Bool = false)
-		{
+		lua.set("addLuaSprite", function(tag:String, ?inFront:Bool = false) {
 			var mySprite:FlxSprite = MusicBeatState.getVariables().get(tag);
 			if (mySprite == null)
 				return;
@@ -1182,8 +1016,7 @@ class PsychFunctions
 			var instance = LuaUtils.getTargetInstance();
 			if (inFront)
 				instance.add(mySprite);
-			else
-			{
+			else {
 				if (game == null || !game.isDead)
 					instance.insert(instance.members.indexOf(LuaUtils.getLowestCharacterGroup()), mySprite);
 				else if (GameOverSubstate.instance != null)
@@ -1191,10 +1024,8 @@ class PsychFunctions
 			}
 		});
 
-		lua.set("setGraphicSize", function(obj:String, x:Float, y:Float = 0, updateHitbox:Bool = true)
-		{
-			if (game != null && game.getLuaObject(obj) != null)
-			{
+		lua.set("setGraphicSize", function(obj:String, x:Float, y:Float = 0, updateHitbox:Bool = true) {
+			if (game != null && game.getLuaObject(obj) != null) {
 				var shit:FlxSprite = game.getLuaObject(obj);
 				shit.setGraphicSize(x, y);
 				if (updateHitbox)
@@ -1204,13 +1035,11 @@ class PsychFunctions
 
 			var split:Array<String> = obj.split('.');
 			var poop:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1)
-			{
+			if (split.length > 1) {
 				poop = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 			}
 
-			if (poop != null)
-			{
+			if (poop != null) {
 				poop.setGraphicSize(x, y);
 				if (updateHitbox)
 					poop.updateHitbox();
@@ -1219,10 +1048,8 @@ class PsychFunctions
 			CoolLog.info('setGraphicSize: Couldnt find object: ' + obj);
 		});
 
-		lua.set("scaleObject", function(obj:String, x:Float, y:Float, updateHitbox:Bool = true)
-		{
-			if (game != null && game.getLuaObject(obj) != null)
-			{
+		lua.set("scaleObject", function(obj:String, x:Float, y:Float, updateHitbox:Bool = true) {
+			if (game != null && game.getLuaObject(obj) != null) {
 				var shit:FlxSprite = game.getLuaObject(obj);
 				shit.scale.set(x, y);
 				if (updateHitbox)
@@ -1232,13 +1059,11 @@ class PsychFunctions
 
 			var split:Array<String> = obj.split('.');
 			var poop:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1)
-			{
+			if (split.length > 1) {
 				poop = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 			}
 
-			if (poop != null)
-			{
+			if (poop != null) {
 				poop.scale.set(x, y);
 				if (updateHitbox)
 					poop.updateHitbox();
@@ -1247,10 +1072,8 @@ class PsychFunctions
 			CoolLog.info('scaleObject: Couldnt find object: ' + obj);
 		});
 
-		lua.set("updateHitbox", function(obj:String)
-		{
-			if (game != null && game.getLuaObject(obj) != null)
-			{
+		lua.set("updateHitbox", function(obj:String) {
+			if (game != null && game.getLuaObject(obj) != null) {
 				var shit:FlxSprite = game.getLuaObject(obj);
 				shit.updateHitbox();
 				return;
@@ -1258,21 +1081,18 @@ class PsychFunctions
 
 			var split:Array<String> = obj.split('.');
 			var poop:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1)
-			{
+			if (split.length > 1) {
 				poop = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 			}
 
-			if (poop != null)
-			{
+			if (poop != null) {
 				poop.updateHitbox();
 				return;
 			}
 			CoolLog.info('updateHitbox: Couldnt find object: ' + obj);
 		});
 
-		lua.set("removeLuaSprite", function(tag:String, destroy:Bool = true, ?group:String = null)
-		{
+		lua.set("removeLuaSprite", function(tag:String, destroy:Bool = true, ?group:String = null) {
 			var obj:FlxSprite = LuaUtils.getObjectDirectly(tag);
 			if (obj == null || obj.destroy == null)
 				return;
@@ -1284,33 +1104,28 @@ class PsychFunctions
 				groupObj = LuaUtils.getObjectDirectly(group);
 
 			groupObj.remove(obj, true);
-			if (destroy)
-			{
+			if (destroy) {
 				MusicBeatState.getVariables().remove(tag);
 				obj.destroy();
 			}
 		});
 
-		lua.set("luaSpriteExists", function(tag:String):Bool
-		{
+		lua.set("luaSpriteExists", function(tag:String):Bool {
 			var obj:FlxSprite = MusicBeatState.getVariables().get(tag);
 			return (obj != null && (Std.isOfType(obj, ModchartSprite) || Std.isOfType(obj, ModchartAnimateSprite)));
 		});
 
-		lua.set("luaTextExists", function(tag:String):Bool
-		{
+		lua.set("luaTextExists", function(tag:String):Bool {
 			var obj:FlxText = MusicBeatState.getVariables().get(tag);
 			return (obj != null && Std.isOfType(obj, FlxText));
 		});
 
-		lua.set("luaSoundExists", function(tag:String):Bool
-		{
+		lua.set("luaSoundExists", function(tag:String):Bool {
 			var obj:FlxSound = MusicBeatState.getVariables().get('sound_$tag');
 			return (obj != null && Std.isOfType(obj, FlxSound));
 		});
 
-		lua.set("setHealthBarColors", function(left:String, right:String)
-		{
+		lua.set("setHealthBarColors", function(left:String, right:String) {
 			if (game == null)
 				return;
 			var left_color:Null<FlxColor> = null;
@@ -1322,8 +1137,7 @@ class PsychFunctions
 			game.healthBar.setColors(left_color, right_color);
 		});
 
-		lua.set("setTimeBarColors", function(left:String, right:String)
-		{
+		lua.set("setTimeBarColors", function(left:String, right:String) {
 			if (game == null)
 				return;
 			var left_color:Null<FlxColor> = null;
@@ -1335,13 +1149,10 @@ class PsychFunctions
 			game.timeBar.setColors(left_color, right_color);
 		});
 
-		lua.set("setObjectCamera", function(obj:String, camera:String = 'game'):Bool
-		{
-			if (game != null)
-			{
+		lua.set("setObjectCamera", function(obj:String, camera:String = 'game'):Bool {
+			if (game != null) {
 				var real:FlxBasic = game.getLuaObject(obj);
-				if (real != null)
-				{
+				if (real != null) {
 					real.cameras = [LuaUtils.cameraFromString(camera)];
 					return true;
 				}
@@ -1349,13 +1160,11 @@ class PsychFunctions
 
 			var split:Array<String> = obj.split('.');
 			var object:FlxBasic = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1)
-			{
+			if (split.length > 1) {
 				object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 			}
 
-			if (object != null)
-			{
+			if (object != null) {
 				object.cameras = [LuaUtils.cameraFromString(camera)];
 				return true;
 			}
@@ -1363,13 +1172,10 @@ class PsychFunctions
 			return false;
 		});
 
-		lua.set("setBlendMode", function(obj:String, blend:String = ''):Bool
-		{
-			if (game != null)
-			{
+		lua.set("setBlendMode", function(obj:String, blend:String = ''):Bool {
+			if (game != null) {
 				var real:FlxSprite = game.getLuaObject(obj);
-				if (real != null)
-				{
+				if (real != null) {
 					real.blend = LuaUtils.blendModeFromString(blend);
 					return true;
 				}
@@ -1377,13 +1183,11 @@ class PsychFunctions
 
 			var split:Array<String> = obj.split('.');
 			var spr:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1)
-			{
+			if (split.length > 1) {
 				spr = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 			}
 
-			if (spr != null)
-			{
+			if (spr != null) {
 				spr.blend = LuaUtils.blendModeFromString(blend);
 				return true;
 			}
@@ -1391,26 +1195,21 @@ class PsychFunctions
 			return false;
 		});
 
-		lua.set("screenCenter", function(obj:String, pos:String = 'xy')
-		{
+		lua.set("screenCenter", function(obj:String, pos:String = 'xy') {
 			var spr:FlxObject = null;
 			if (game != null)
 				spr = game.getLuaObject(obj);
 
-			if (spr == null)
-			{
+			if (spr == null) {
 				var split:Array<String> = obj.split('.');
 				spr = LuaUtils.getObjectDirectly(split[0]);
-				if (split.length > 1)
-				{
+				if (split.length > 1) {
 					spr = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 				}
 			}
 
-			if (spr != null)
-			{
-				switch (pos.trim().toLowerCase())
-				{
+			if (spr != null) {
+				switch (pos.trim().toLowerCase()) {
 					case 'x':
 						spr.screenCenter(X);
 						return;
@@ -1425,12 +1224,10 @@ class PsychFunctions
 			CoolLog.info("screenCenter: Object " + obj + " doesn't exist!");
 		});
 
-		lua.set("objectsOverlap", function(obj1:String, obj2:String):Bool
-		{
+		lua.set("objectsOverlap", function(obj1:String, obj2:String):Bool {
 			var namesArray:Array<String> = [obj1, obj2];
 			var objectsArray:Array<FlxBasic> = [];
-			for (i in 0...namesArray.length)
-			{
+			for (i in 0...namesArray.length) {
 				var real:FlxBasic = null;
 				if (game != null)
 					real = game.getLuaObject(namesArray[i]);
@@ -1442,12 +1239,10 @@ class PsychFunctions
 			return (!objectsArray.contains(null) && FlxG.overlap(objectsArray[0], objectsArray[1]));
 		});
 
-		lua.set("getPixelColor", function(obj:String, x:Int, y:Int)
-		{
+		lua.set("getPixelColor", function(obj:String, x:Int, y:Int) {
 			var split:Array<String> = obj.split('.');
 			var spr:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1)
-			{
+			if (split.length > 1) {
 				spr = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
 			}
 
@@ -1456,16 +1251,13 @@ class PsychFunctions
 			return FlxColor.BLACK;
 		});
 
-		lua.set("debugPrint", function(text:Dynamic = '', color:String = 'WHITE')
-		{
+		lua.set("debugPrint", function(text:Dynamic = '', color:String = 'WHITE') {
 			CoolLog.info(text);
 		});
 
-		lua.set("getModSetting", function(saveTag:String, ?modName:String = null):Dynamic
-		{
+		lua.set("getModSetting", function(saveTag:String, ?modName:String = null):Dynamic {
 			#if MODS_ALLOWED
-			if (modName == null)
-			{
+			if (modName == null) {
 				modName = lua.folderName;
 			}
 			return LuaUtils.getModSetting(saveTag, modName);
@@ -1475,28 +1267,23 @@ class PsychFunctions
 			#end
 		});
 
-		lua.set("close", function():Bool
-		{
+		lua.set("close", function():Bool {
 			lua.closed = true;
 			return lua.closed;
 		});
 
-		lua.set("playSound", function(sound:String, ?volume:Float = 1, ?tag:String = null, ?loop:Bool = false)
-		{
-			if (tag != null && tag.length > 0)
-			{
+		lua.set("playSound", function(sound:String, ?volume:Float = 1, ?tag:String = null, ?loop:Bool = false) {
+			if (tag != null && tag.length > 0) {
 				var originalTag:String = tag;
 				tag = LuaUtils.formatVariable('sound_$tag');
 				var variables = MusicBeatState.getVariables();
 				var oldSnd = variables.get(tag);
-				if (oldSnd != null)
-				{
+				if (oldSnd != null) {
 					oldSnd.stop();
 					oldSnd.destroy();
 				}
 
-				variables.set(tag, FlxG.sound.play(Paths.sound(sound), volume, loop, null, true, function()
-				{
+				variables.set(tag, FlxG.sound.play(Paths.sound(sound), volume, loop, null, true, function() {
 					if (!loop)
 						variables.remove(tag);
 					pack.callOnly(ScriptType.LUA, 'onSoundFinished', [originalTag]);
@@ -1507,100 +1294,74 @@ class PsychFunctions
 			return null;
 		});
 
-		lua.set("playMusic", function(sound:String, ?volume:Float = 1, ?loop:Bool = false)
-		{
+		lua.set("playMusic", function(sound:String, ?volume:Float = 1, ?loop:Bool = false) {
 			FlxG.sound.playMusic(Paths.music(sound), volume, loop);
 		});
 
-		lua.set("stopSound", function(tag:String)
-		{
-			if (tag == null || tag.length < 1)
-			{
+		lua.set("stopSound", function(tag:String) {
+			if (tag == null || tag.length < 1) {
 				if (FlxG.sound.music != null)
 					FlxG.sound.music.stop();
-			}
-			else
-			{
+			} else {
 				tag = LuaUtils.formatVariable('sound_$tag');
 				var variables = MusicBeatState.getVariables();
 				var snd:FlxSound = variables.get(tag);
-				if (snd != null)
-				{
+				if (snd != null) {
 					snd.stop();
 					variables.remove(tag);
 				}
 			}
 		});
 
-		lua.set("pauseSound", function(tag:String)
-		{
-			if (tag == null || tag.length < 1)
-			{
+		lua.set("pauseSound", function(tag:String) {
+			if (tag == null || tag.length < 1) {
 				if (FlxG.sound.music != null)
 					FlxG.sound.music.pause();
-			}
-			else
-			{
+			} else {
 				tag = LuaUtils.formatVariable('sound_$tag');
 				var snd:FlxSound = MusicBeatState.getVariables().get(tag);
 				if (snd != null)
 					snd.pause();
 			}
 		});
-		lua.set("soundFadeIn", function(tag:String, duration:Float, fromValue:Float = 0, toValue:Float = 1)
-		{
-			if (tag == null || tag.length < 1)
-			{
+		lua.set("soundFadeIn", function(tag:String, duration:Float, fromValue:Float = 0, toValue:Float = 1) {
+			if (tag == null || tag.length < 1) {
 				if (FlxG.sound.music != null)
 					FlxG.sound.music.fadeIn(duration, fromValue, toValue);
-			}
-			else
-			{
+			} else {
 				tag = LuaUtils.formatVariable('sound_$tag');
 				var snd:FlxSound = MusicBeatState.getVariables().get(tag);
 				if (snd != null)
 					snd.fadeIn(duration, fromValue, toValue);
 			}
 		});
-		lua.set("soundFadeOut", function(tag:String, duration:Float, toValue:Float = 0)
-		{
-			if (tag == null || tag.length < 1)
-			{
+		lua.set("soundFadeOut", function(tag:String, duration:Float, toValue:Float = 0) {
+			if (tag == null || tag.length < 1) {
 				if (FlxG.sound.music != null)
 					FlxG.sound.music.fadeOut(duration, toValue);
-			}
-			else
-			{
+			} else {
 				tag = LuaUtils.formatVariable('sound_$tag');
 				var snd:FlxSound = MusicBeatState.getVariables().get(tag);
 				if (snd != null)
 					snd.fadeOut(duration, toValue);
 			}
 		});
-		lua.set("soundFadeCancel", function(tag:String)
-		{
-			if (tag == null || tag.length < 1)
-			{
+		lua.set("soundFadeCancel", function(tag:String) {
+			if (tag == null || tag.length < 1) {
 				if (FlxG.sound.music != null && FlxG.sound.music.fadeTween != null)
 					FlxG.sound.music.fadeTween.cancel();
-			}
-			else
-			{
+			} else {
 				tag = LuaUtils.formatVariable('sound_$tag');
 				var snd:FlxSound = MusicBeatState.getVariables().get(tag);
 				if (snd != null && snd.fadeTween != null)
 					snd.fadeTween.cancel();
 			}
 		});
-		lua.set("getSoundVolume", function(tag:String)
-		{
-			if (tag == null || tag.length < 1)
-			{
+		lua.set("getSoundVolume", function(tag:String) {
+			if (tag == null || tag.length < 1) {
 				if (FlxG.sound.music != null)
 					return FlxG.sound.music.volume;
-			}
-			else
-			{
+			} else {
 				tag = LuaUtils.formatVariable('sound_$tag');
 				var snd:FlxSound = MusicBeatState.getVariables().get(tag);
 				if (snd != null)
@@ -1608,55 +1369,42 @@ class PsychFunctions
 			}
 			return 0;
 		});
-		lua.set("setSoundVolume", function(tag:String, value:Float)
-		{
-			if (tag == null || tag.length < 1)
-			{
+		lua.set("setSoundVolume", function(tag:String, value:Float) {
+			if (tag == null || tag.length < 1) {
 				tag = LuaUtils.formatVariable('sound_$tag');
-				if (FlxG.sound.music != null)
-				{
+				if (FlxG.sound.music != null) {
 					FlxG.sound.music.volume = value;
 					return;
 				}
-			}
-			else
-			{
+			} else {
 				tag = LuaUtils.formatVariable('sound_$tag');
 				var snd:FlxSound = MusicBeatState.getVariables().get(tag);
 				if (snd != null)
 					snd.volume = value;
 			}
 		});
-		lua.set("getSoundTime", function(tag:String)
-		{
-			if (tag == null || tag.length < 1)
-			{
+		lua.set("getSoundTime", function(tag:String) {
+			if (tag == null || tag.length < 1) {
 				return FlxG.sound.music != null ? FlxG.sound.music.time : 0;
 			}
 			tag = LuaUtils.formatVariable('sound_$tag');
 			var snd:FlxSound = MusicBeatState.getVariables().get(tag);
 			return snd != null ? snd.time : 0;
 		});
-		lua.set("setSoundTime", function(tag:String, value:Float)
-		{
-			if (tag == null || tag.length < 1)
-			{
-				if (FlxG.sound.music != null)
-				{
+		lua.set("setSoundTime", function(tag:String, value:Float) {
+			if (tag == null || tag.length < 1) {
+				if (FlxG.sound.music != null) {
 					FlxG.sound.music.time = value;
 					return;
 				}
-			}
-			else
-			{
+			} else {
 				tag = LuaUtils.formatVariable('sound_$tag');
 				var snd:FlxSound = MusicBeatState.getVariables().get(tag);
 				if (snd != null)
 					snd.time = value;
 			}
 		});
-		lua.set("getSoundPitch", function(tag:String)
-		{
+		lua.set("getSoundPitch", function(tag:String) {
 			#if FLX_PITCH
 			tag = LuaUtils.formatVariable('sound_$tag');
 			var snd:FlxSound = MusicBeatState.getVariables().get(tag);
@@ -1666,13 +1414,11 @@ class PsychFunctions
 			return 1;
 			#end
 		});
-		lua.set("setSoundPitch", function(tag:String, value:Float, ?doPause:Bool = false)
-		{
+		lua.set("setSoundPitch", function(tag:String, value:Float, ?doPause:Bool = false) {
 			#if FLX_PITCH
 			tag = LuaUtils.formatVariable('sound_$tag');
 			var snd:FlxSound = MusicBeatState.getVariables().get(tag);
-			if (snd != null)
-			{
+			if (snd != null) {
 				var wasResumed:Bool = snd.playing;
 				if (doPause)
 					snd.pause();
@@ -1681,10 +1427,8 @@ class PsychFunctions
 					snd.play();
 			}
 
-			if (tag == null || tag.length < 1)
-			{
-				if (FlxG.sound.music != null)
-				{
+			if (tag == null || tag.length < 1) {
+				if (FlxG.sound.music != null) {
 					var wasResumed:Bool = FlxG.sound.music.playing;
 					if (doPause)
 						FlxG.sound.music.pause();
@@ -1693,12 +1437,9 @@ class PsychFunctions
 						FlxG.sound.music.play();
 					return;
 				}
-			}
-			else
-			{
+			} else {
 				var snd:FlxSound = MusicBeatState.getVariables().get(tag);
-				if (snd != null)
-				{
+				if (snd != null) {
 					var wasResumed:Bool = snd.playing;
 					if (doPause)
 						snd.pause();
@@ -1712,8 +1453,7 @@ class PsychFunctions
 			#end
 		});
 
-		if (game != null)
-		{
+		if (game != null) {
 			// Gameplay settings
 			lua.set('healthGainMult', game.healthGain);
 			lua.set('healthLossMult', game.healthLoss);
@@ -1729,8 +1469,7 @@ class PsychFunctions
 			lua.set('botPlay', game.cpuControlled);
 			lua.set('practice', game.practiceMode);
 
-			for (i in 0...4)
-			{
+			for (i in 0...4) {
 				lua.set('defaultPlayerStrumX' + i, 0);
 				lua.set('defaultPlayerStrumY' + i, 0);
 				lua.set('defaultOpponentStrumX' + i, 0);
@@ -1750,62 +1489,51 @@ class PsychFunctions
 			lua.set('dadName', PlayState.SONG.player2);
 			lua.set('gfName', PlayState.SONG.gfVersion);
 
-			lua.set("startVideo", function(videoFile:String, ?canSkip:Bool = true, ?forMidSong:Bool = false, ?shouldLoop:Bool = false, ?playOnLoad:Bool = true)
-			{
-				#if VIDEOS_ALLOWED
-				if (FileSystem.exists(Paths.video(videoFile)))
-				{
-					if (game.videoCutscene != null)
-					{
-						game.remove(game.videoCutscene);
-						game.videoCutscene.destroy();
+			lua.set("startVideo",
+				function(videoFile:String, ?canSkip:Bool = true, ?forMidSong:Bool = false, ?shouldLoop:Bool = false, ?playOnLoad:Bool = true) {
+					#if VIDEOS_ALLOWED
+					if (FileSystem.exists(Paths.video(videoFile))) {
+						if (game.videoCutscene != null) {
+							game.remove(game.videoCutscene);
+							game.videoCutscene.destroy();
+						}
+						game.videoCutscene = game.startVideo(videoFile, forMidSong, canSkip, shouldLoop, playOnLoad);
+						return true;
+					} else {
+						CoolLog.warning('startVideo: Video file not found: ' + videoFile);
 					}
-					game.videoCutscene = game.startVideo(videoFile, forMidSong, canSkip, shouldLoop, playOnLoad);
+					return false;
+					#else
+					game.inCutscene = true;
+					new FlxTimer().start(0.1, function(tmr:FlxTimer) {
+						game.inCutscene = false;
+						if (game.endingSong)
+							game.endSong();
+						else
+							game.startCountdown();
+					});
 					return true;
-				}
-				else
-				{
-					CoolLog.warning('startVideo: Video file not found: ' + videoFile);
-				}
-				return false;
-				#else
-				game.inCutscene = true;
-				new FlxTimer().start(0.1, function(tmr:FlxTimer)
-				{
-					game.inCutscene = false;
-					if (game.endingSong)
-						game.endSong();
-					else
-						game.startCountdown();
+					#end
 				});
-				return true;
-				#end
-			});
 
-			lua.set("triggerEvent", function(name:String, ?value1:String = '', ?value2:String = ''):Bool
-			{
-				if (game != null)
-				{
+			lua.set("triggerEvent", function(name:String, ?value1:String = '', ?value2:String = ''):Bool {
+				if (game != null) {
 					game.triggerEvent(name, value1, value2, Conductor.songPosition);
 					return true;
 				}
 				return false;
 			});
 
-			lua.set("startCountdown", function():Bool
-			{
-				if (game != null)
-				{
+			lua.set("startCountdown", function():Bool {
+				if (game != null) {
 					game.startCountdown();
 					return true;
 				}
 				return false;
 			});
 
-			lua.set("endSong", function():Bool
-			{
-				if (game != null)
-				{
+			lua.set("endSong", function():Bool {
+				if (game != null) {
 					game.KillNotes();
 					game.endSong();
 					return true;
@@ -1813,10 +1541,8 @@ class PsychFunctions
 				return false;
 			});
 
-			lua.set("restartSong", function(?skipTransition:Bool = false):Bool
-			{
-				if (game != null)
-				{
+			lua.set("restartSong", function(?skipTransition:Bool = false):Bool {
+				if (game != null) {
 					game.persistentUpdate = false;
 					FlxG.camera.followLerp = 0;
 					PauseSubState.restartSong(skipTransition);
@@ -1825,10 +1551,8 @@ class PsychFunctions
 				return false;
 			});
 
-			lua.set("exitSong", function(?skipTransition:Bool = false):Bool
-			{
-				if (skipTransition)
-				{
+			lua.set("exitSong", function(?skipTransition:Bool = false):Bool {
+				if (skipTransition) {
 					FlxTransitionableState.skipNextTransIn = true;
 					FlxTransitionableState.skipNextTransOut = true;
 				}
@@ -1852,12 +1576,10 @@ class PsychFunctions
 
 			lua.set("getSongPosition", function():Float return Conductor.songPosition);
 
-			lua.set("getCharacterX", function(type:String):Float
-			{
+			lua.set("getCharacterX", function(type:String):Float {
 				if (game == null)
 					return 0;
-				switch (type.toLowerCase())
-				{
+				switch (type.toLowerCase()) {
 					case 'dad' | 'opponent':
 						return game.dadGroup.x;
 					case 'gf' | 'girlfriend':
@@ -1867,12 +1589,10 @@ class PsychFunctions
 				}
 			});
 
-			lua.set("setCharacterX", function(type:String, value:Float)
-			{
+			lua.set("setCharacterX", function(type:String, value:Float) {
 				if (game == null)
 					return;
-				switch (type.toLowerCase())
-				{
+				switch (type.toLowerCase()) {
 					case 'dad' | 'opponent':
 						game.dadGroup.x = value;
 					case 'gf' | 'girlfriend':
@@ -1882,12 +1602,10 @@ class PsychFunctions
 				}
 			});
 
-			lua.set("getCharacterY", function(type:String):Float
-			{
+			lua.set("getCharacterY", function(type:String):Float {
 				if (game == null)
 					return 0;
-				switch (type.toLowerCase())
-				{
+				switch (type.toLowerCase()) {
 					case 'dad' | 'opponent':
 						return game.dadGroup.y;
 					case 'gf' | 'girlfriend':
@@ -1897,12 +1615,10 @@ class PsychFunctions
 				}
 			});
 
-			lua.set("setCharacterY", function(type:String, value:Float)
-			{
+			lua.set("setCharacterY", function(type:String, value:Float) {
 				if (game == null)
 					return;
-				switch (type.toLowerCase())
-				{
+				switch (type.toLowerCase()) {
 					case 'dad' | 'opponent':
 						game.dadGroup.y = value;
 					case 'gf' | 'girlfriend':
@@ -1912,8 +1628,7 @@ class PsychFunctions
 				}
 			});
 
-			lua.set("loadSong", function(?name:String = null, ?difficultyNum:Int = -1)
-			{
+			lua.set("loadSong", function(?name:String = null, ?difficultyNum:Int = -1) {
 				if (name == null || name.length < 1)
 					name = Song.loadedSongName;
 				if (difficultyNum == -1 && game != null)
@@ -1926,89 +1641,72 @@ class PsychFunctions
 				FlxG.state.persistentUpdate = false;
 				LoadingState.loadAndSwitchState(new PlayState());
 
-				if (FlxG.sound.music != null)
-				{
+				if (FlxG.sound.music != null) {
 					FlxG.sound.music.pause();
 					FlxG.sound.music.volume = 0;
 				}
-				if (game != null && game.vocals != null)
-				{
+				if (game != null && game.vocals != null) {
 					game.vocals.pause();
 					game.vocals.volume = 0;
 				}
 				FlxG.camera.followLerp = 0;
 			});
 
-			lua.set("addScore", function(value:Int = 0)
-			{
-				if (game != null)
-				{
+			lua.set("addScore", function(value:Int = 0) {
+				if (game != null) {
 					game.songScore += value;
 					game.RecalculateRating();
 				}
 			});
 
-			lua.set("addMisses", function(value:Int = 0)
-			{
-				if (game != null)
-				{
+			lua.set("addMisses", function(value:Int = 0) {
+				if (game != null) {
 					game.songMisses += value;
 					game.RecalculateRating();
 				}
 			});
 
-			lua.set("addHits", function(value:Int = 0)
-			{
-				if (game != null)
-				{
+			lua.set("addHits", function(value:Int = 0) {
+				if (game != null) {
 					game.songHits += value;
 					game.RecalculateRating();
 				}
 			});
 
-			lua.set("setScore", function(value:Int = 0)
-			{
-				if (game != null)
-				{
+			lua.set("setScore", function(value:Int = 0) {
+				if (game != null) {
 					game.songScore = value;
 					game.RecalculateRating();
 				}
 			});
 
-			lua.set("getScore", function():Int
-			{
+			lua.set("getScore", function():Int {
 				if (game != null)
 					return game.songScore;
 				return 0;
 			});
 
-			lua.set("setMisses", function(value:Int = 0)
-			{
-				if (game != null)
-				{
+			lua.set("setMisses", function(value:Int = 0) {
+				if (game != null) {
 					game.songMisses = value;
 					game.RecalculateRating();
 				}
 			});
 
-			lua.set("getMisses", function():Int
-			{
+			lua.set("getMisses", function():Int {
 				if (game != null)
 					return game.songMisses;
 				return 0;
 			});
 
-			lua.set("setHits", function(value:Int = 0)
-			{
-				if (game != null)
-				{
+			lua.set("setHits", function(value:Int = 0) {
+				if (game != null) {
 					game.songHits = value;
 					game.RecalculateRating();
 				}
 			});
 
-			lua.set("getHits", function():Int
-			{
+			lua.set("getHits", function():Int {
 				if (game != null)
 					return game.songHits;
 				return 0;
@@ -2019,7 +1717,7 @@ class PsychFunctions
 			lua.set("addHealth", function(value:Float = 0) if (game != null)
 				game.health += value);
 			lua.set("getHealth", function():Float return game != null ? game.health : 0);
-			
+
 			lua.set("getCameraFollowX", function():Float return game != null ? game.camFollow.x : 0);
 			lua.set("getCameraFollowY", function():Float return game != null ? game.camFollow.y : 0);
 		}
@@ -2037,8 +1735,7 @@ class PsychFunctions
 		DeprecatedFunctions.implement(lua);
 	}
 
-	private static function findScript(scriptFile:String, ext:String = '.lua'):String
-	{
+	private static function findScript(scriptFile:String, ext:String = '.lua'):String {
 		if (!scriptFile.endsWith(ext))
 			scriptFile += ext;
 		var preloadPath:String = Paths.getSharedPath(scriptFile);
@@ -2059,42 +1756,38 @@ class PsychFunctions
 		return null;
 	}
 
-	private static function oldTweenFunction(pack:ScriptPack, tag:String, vars:String, tweenValue:Any, duration:Float, ease:String, funcName:String):Dynamic
-	{
+	private static function oldTweenFunction(pack:ScriptPack, tag:String, vars:String, tweenValue:Any, duration:Float, ease:String, funcName:String):Dynamic {
 		var target:Dynamic = LuaUtils.tweenPrepare(tag, vars);
 		var variables = MusicBeatState.getVariables();
-		if (target != null)
-		{
-			if (tag != null)
-			{
+		if (target != null) {
+			if (tag != null) {
 				var originalTag:String = tag;
 				tag = LuaUtils.formatVariable('tween_$tag');
+				var localPack = pack;
 				variables.set(tag, FlxTween.tween(target, tweenValue, duration, {
 					ease: LuaUtils.getTweenEaseByString(ease),
-					onComplete: function(twn:FlxTween)
-					{
-						variables.remove(tag);
-						pack.callOnly(ScriptType.LUA, 'onTweenCompleted', [originalTag, vars]);
+					onComplete: function(twn:FlxTween) {
+						try {
+							variables.remove(tag);
+							if (pack != null)
+								pack.callOnly(ScriptType.LUA, 'onTweenCompleted', [originalTag, vars]);
+						} catch (e:Dynamic) {
+							CoolLog.error('Timer callback error: ' + e);
+						}
 					}
 				}));
 			}
-			else
-				FlxTween.tween(target, tweenValue, duration, {ease: LuaUtils.getTweenEaseByString(ease)});
-			return tag;
-		}
-		else
+		} else
 			CoolLog.warning('$funcName: Couldnt find object: $vars');
 		return null;
 	}
 
-	private static function noteTweenFunction(game:PlayState, pack:ScriptPack, tag:String, note:Int, data:Dynamic, duration:Float, ease:String):Dynamic
-	{
+	private static function noteTweenFunction(game:PlayState, pack:ScriptPack, tag:String, note:Int, data:Dynamic, duration:Float, ease:String):Dynamic {
 		var strumNote:StrumNote = game.strumLineNotes.members[note % game.strumLineNotes.length];
 		if (strumNote == null)
 			return null;
 
-		if (tag != null)
-		{
+		if (tag != null) {
 			var originalTag:String = tag;
 			tag = LuaUtils.formatVariable('tween_$tag');
 			LuaUtils.cancelTween(tag);
@@ -2102,15 +1795,13 @@ class PsychFunctions
 			var variables = MusicBeatState.getVariables();
 			variables.set(tag, FlxTween.tween(strumNote, data, duration, {
 				ease: LuaUtils.getTweenEaseByString(ease),
-				onComplete: function(twn:FlxTween)
-				{
+				onComplete: function(twn:FlxTween) {
 					variables.remove(tag);
 					pack.callOnly(ScriptType.LUA, 'onTweenCompleted', [originalTag]);
 				}
 			}));
 			return tag;
-		}
-		else
+		} else
 			FlxTween.tween(strumNote, data, duration, {ease: LuaUtils.getTweenEaseByString(ease)});
 		return null;
 	}

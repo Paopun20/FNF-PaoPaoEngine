@@ -7,15 +7,13 @@ import openfl.display.BitmapData;
 import openfl.display.Sprite;
 import openfl.Lib;
 
-class AchievementPopup extends Sprite
-{
+class AchievementPopup extends Sprite {
 	public var onFinish:Void->Void = null;
 
 	var alphaTween:FlxTween;
 	var lastScale:Float = 1;
 
-	public function new(achieve:String, onFinish:Void->Void)
-	{
+	public function new(achieve:String, onFinish:Void->Void) {
 		super();
 
 		// bg
@@ -37,12 +35,10 @@ class AchievementPopup extends Sprite
 			Mods.currentModDirectory = achievement.mod != null ? achievement.mod : '';
 		#end
 
-		if (Paths.fileExists('images/$image-pixel.png', IMAGE))
-		{
+		if (Paths.fileExists('images/$image-pixel.png', IMAGE)) {
 			graphic = Paths.image('$image-pixel', false);
 			hasAntialias = false;
-		}
-		else
+		} else
 			graphic = Paths.image(image, false);
 
 		#if MODS_ALLOWED
@@ -64,8 +60,7 @@ class AchievementPopup extends Sprite
 		// achievement name/description
 		var name:String = 'Unknown';
 		var desc:String = 'Description not found';
-		if (achievement != null)
-		{
+		if (achievement != null) {
 			if (achievement.name != null)
 				name = Language.getPhrase('achievement_$achieve', achievement.name);
 			if (achievement.description != null)
@@ -102,8 +97,7 @@ class AchievementPopup extends Sprite
 
 	var bitmaps:Array<BitmapData> = [];
 
-	function drawTextAt(text:FlxText, str:String, textX:Float, textY:Float)
-	{
+	function drawTextAt(text:FlxText, str:String, textX:Float, textY:Float) {
 		text.text = str;
 		text.updateHitbox();
 
@@ -119,10 +113,8 @@ class AchievementPopup extends Sprite
 
 	public var intendedY:Float = 0;
 
-	function update(e:Event)
-	{
-		if (timePassed < 0)
-		{
+	function update(e:Event) {
+		if (timePassed < 0) {
 			timePassed = Lib.getTimer();
 			return;
 		}
@@ -136,21 +128,17 @@ class AchievementPopup extends Sprite
 			return; // most likely passed through a loading
 
 		countedTime += elapsed;
-		if (countedTime < 3)
-		{
+		if (countedTime < 3) {
 			lerpTime = Math.min(1, lerpTime + elapsed);
 			y = ((FlxEase.elasticOut(lerpTime) * (intendedY + 130)) - 130) * lastScale;
-		}
-		else
-		{
+		} else {
 			y -= FlxG.height * 2 * elapsed * lastScale;
 			if (y <= -130 * lastScale)
 				destroy();
 		}
 	}
 
-	private function onResize(e:Event)
-	{
+	private function onResize(e:Event) {
 		var mult = (FlxG.stage.stageHeight / FlxG.height);
 		scaleX = mult;
 		scaleY = mult;
@@ -160,13 +148,11 @@ class AchievementPopup extends Sprite
 		lastScale = mult;
 	}
 
-	public function destroy()
-	{
+	public function destroy() {
 		@:privateAccess Achievements._popups.remove(this);
 		// trace('destroyed achievement, new count: ' + Achievements._popups.length);
 
-		if (FlxG.game.contains(this))
-		{
+		if (FlxG.game.contains(this)) {
 			FlxG.game.removeChild(this);
 		}
 		FlxG.stage.removeEventListener(Event.RESIZE, onResize);
@@ -174,12 +160,9 @@ class AchievementPopup extends Sprite
 		deleteClonedBitmaps();
 	}
 
-	function deleteClonedBitmaps()
-	{
-		for (clonedBitmap in bitmaps)
-		{
-			if (clonedBitmap != null)
-			{
+	function deleteClonedBitmaps() {
+		for (clonedBitmap in bitmaps) {
+			if (clonedBitmap != null) {
 				clonedBitmap.dispose();
 				clonedBitmap.disposeImage();
 			}

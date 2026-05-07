@@ -4,8 +4,7 @@ package funkin.states.stages.objects;
 import funkin.vis.dsp.SpectralAnalyzer;
 #end
 
-class ABotSpeaker extends FlxSpriteGroup
-{
+class ABotSpeaker extends FlxSpriteGroup {
 	final VIZ_MAX = 7; // ranges from viz1 to viz7
 	final VIZ_POS_X:Array<Float> = [0, 59, 56, 66, 54, 52, 51];
 	final VIZ_POS_Y:Array<Float> = [0, -8, -3.5, -0.4, 0.5, 4.7, 7];
@@ -23,8 +22,7 @@ class ABotSpeaker extends FlxSpriteGroup
 
 	public var snd(default, set):FlxSound;
 
-	function set_snd(changed:FlxSound)
-	{
+	function set_snd(changed:FlxSound) {
 		snd = changed;
 		#if funkin.vis
 		initAnalyzer();
@@ -32,8 +30,7 @@ class ABotSpeaker extends FlxSpriteGroup
 		return snd;
 	}
 
-	public function new(x:Float = 0, y:Float = 0)
-	{
+	public function new(x:Float = 0, y:Float = 0) {
 		super(x, y);
 
 		var antialias = ClientPrefs.data.antialiasing;
@@ -45,8 +42,7 @@ class ABotSpeaker extends FlxSpriteGroup
 		var vizX:Float = 0;
 		var vizY:Float = 0;
 		var vizFrames = Paths.getSparrowAtlas('abot/aBotViz');
-		for (i in 1...VIZ_MAX + 1)
-		{
+		for (i in 1...VIZ_MAX + 1) {
 			volumes.push(0.0);
 			vizX += VIZ_POS_X[i - 1];
 			vizY += VIZ_POS_Y[i - 1];
@@ -88,8 +84,7 @@ class ABotSpeaker extends FlxSpriteGroup
 	var levels:Array<Bar>;
 	var levelMax:Int = 0;
 
-	override function update(elapsed:Float):Void
-	{
+	override function update(elapsed:Float):Void {
 		super.update(elapsed);
 		if (analyzer == null)
 			return;
@@ -97,8 +92,7 @@ class ABotSpeaker extends FlxSpriteGroup
 		levels = analyzer.getLevels(levels);
 		var oldLevelMax = levelMax;
 		levelMax = 0;
-		for (i in 0...Std.int(Math.min(vizSprites.length, levels.length)))
-		{
+		for (i in 0...Std.int(Math.min(vizSprites.length, levels.length))) {
 			var animFrame:Int = Math.round(levels[i].value * 5);
 			animFrame = Std.int(Math.abs(FlxMath.bound(animFrame, 0, 5) - 5)); // shitty dumbass flip, cuz dave got da shit backwards lol!
 
@@ -106,8 +100,7 @@ class ABotSpeaker extends FlxSpriteGroup
 			levelMax = Std.int(Math.max(levelMax, 5 - animFrame));
 		}
 
-		if (levelMax >= 4)
-		{
+		if (levelMax >= 4) {
 			// trace(levelMax);
 			if (oldLevelMax <= levelMax && (levelMax >= 5 || speaker.anim.curFrame >= 3))
 				beatHit();
@@ -115,14 +108,12 @@ class ABotSpeaker extends FlxSpriteGroup
 	}
 	#end
 
-	public function beatHit()
-	{
+	public function beatHit() {
 		speaker.anim.play('anim', true);
 	}
 
 	#if funkin.vis
-	public function initAnalyzer()
-	{
+	public function initAnalyzer() {
 		@:privateAccess
 		analyzer = new SpectralAnalyzer(snd._channel.__audioSource, 7, 0.1, 40);
 
@@ -136,15 +127,13 @@ class ABotSpeaker extends FlxSpriteGroup
 
 	var lookingAtRight:Bool = true;
 
-	public function lookLeft()
-	{
+	public function lookLeft() {
 		if (lookingAtRight)
 			eyes.anim.play('lookleft', true);
 		lookingAtRight = false;
 	}
 
-	public function lookRight()
-	{
+	public function lookRight() {
 		if (!lookingAtRight)
 			eyes.anim.play('lookright', true);
 		lookingAtRight = true;

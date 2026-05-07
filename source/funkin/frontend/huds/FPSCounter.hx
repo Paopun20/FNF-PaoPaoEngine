@@ -14,8 +14,7 @@ import hxhardware.Memory;
 	The FPS class provides an easy-to-use monitor to display
 	the current frame rate of an OpenFL project
 **/
-class FPSCounter extends TextField
-{
+class FPSCounter extends TextField {
 	/**
 		The current frame rate, expressed using frames-per-second
 	**/
@@ -36,8 +35,7 @@ class FPSCounter extends TextField
 
 	@:noCompletion private var times:Array<Float>;
 
-	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000)
-	{
+	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000) {
 		super();
 
 		this.x = x;
@@ -59,8 +57,7 @@ class FPSCounter extends TextField
 	var deltaSysTO:Float = 0.0;
 
 	// Event Handlers
-	private override function __enterFrame(deltaTime:Float):Void
-	{
+	private override function __enterFrame(deltaTime:Float):Void {
 		final now:Float = haxe.Timer.stamp() * 1000;
 		times.push(now);
 		while (times[0] < now - 1000)
@@ -69,8 +66,7 @@ class FPSCounter extends TextField
 		deltaTimeout += deltaTime;
 		deltaSysTO += deltaTime;
 
-		if (deltaSysTO >= 500)
-		{
+		if (deltaSysTO >= 500) {
 			#if hxhardware
 			cpuUsage = CPU.getProcessCPUUsage();
 			ramUsage = Memory.getProcessPhysicalMemoryUsage();
@@ -89,8 +85,7 @@ class FPSCounter extends TextField
 		deltaTimeout = 0;
 	}
 
-	private function format2(v:Float):String
-	{
+	private function format2(v:Float):String {
 		var rounded = Math.round(v * 100) / 100;
 		var s = Std.string(rounded);
 
@@ -104,8 +99,7 @@ class FPSCounter extends TextField
 		return s;
 	}
 
-	public dynamic function updateText():Void
-	{ // so people can override it in hscript
+	public dynamic function updateText():Void { // so people can override it in hscript
 		text = 'FPS: ${currentFPS}\n';
 
 		#if hxhardware
@@ -122,8 +116,7 @@ class FPSCounter extends TextField
 			textColor = 0xFFFF0000;
 	}
 
-	inline function get_memoryMegas():Float
-	{
+	inline function get_memoryMegas():Float {
 		#if cpp
 		return cpp.vm.Gc.memInfo64(cpp.vm.Gc.MEM_INFO_USAGE);
 		#elseif hl

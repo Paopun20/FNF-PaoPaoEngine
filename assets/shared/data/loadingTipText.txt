@@ -1,4 +1,14 @@
 sudo touch grass bro
+take a break once in a while
+sudo rm -rf fnf && touch grass
+sudo apt remove fnf && sudo apt install sunlight
+git commit -m "life reset" && touch grass
+rm -rf anxiety && cd outside
+systemctl start brain.service
+alias coffee="life --restore-energy"
+echo "drink water"
+rm -rf stress && echo "i am free"
+sudo apt install happiness
 Use more than one hand :tro:
 Turn off distractions
 Keybinds is matter
@@ -41,3 +51,4 @@ Just play
 Having trouble playing? Check on Settings visuals
 PLEASE PLAY FNF ON FRIDAY NIGHT!!!
 :keoiki:
+Just play

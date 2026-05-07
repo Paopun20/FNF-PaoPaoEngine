@@ -7,10 +7,9 @@ import funkin.backend.utils.AnsiUtil;
 import funkin.backend.utils.AnsiUtil.AnsiCode;
 
 using StringTools;
-using PPQolTools;
+using funkin.backend.utils.tools.PPQolTools;
 
-private enum Level
-{
+private enum Level {
 	DEBUG;
 	INFO;
 	WARNING;
@@ -19,8 +18,7 @@ private enum Level
 	TRACE;
 }
 
-class CoolLog
-{
+class CoolLog {
 	private static final COLORS:Map<Level, Array<AnsiCode>> = [
 		DEBUG => [AnsiCode.CYAN],
 		INFO => [AnsiCode.GREEN],
@@ -45,44 +43,37 @@ class CoolLog
 
 	private static var nativeTrace:(Dynamic, ?PosInfos) -> Void;
 
-	public static function init()
-	{
+	public static function init() {
 		nativeTrace = Log.trace;
 		Log.trace = (v, ?infos) -> log(Level.TRACE, v, infos); // Fixed
 	}
 
-	public static function uninit()
-	{
+	public static function uninit() {
 		if (nativeTrace != null)
 			Log.trace = nativeTrace;
 	}
 
-	public static function setLevel(lvl:Level)
-	{
+	public static function setLevel(lvl:Level) {
 		level = lvl;
 	}
 
-	public static function getLevel():Level
-	{
+	public static function getLevel():Level {
 		return level;
 	}
 
-	private static inline function now():String
-	{
+	private static inline function now():String {
 		var t = Date.now();
 		return lpad('${t.getHours()}', 2, "0") + ":" + lpad('${t.getMinutes()}', 2, "0") + ":" + lpad('${t.getSeconds()}', 2, "0") + "."
 			+ lpad('${Std.int(t.getTime() % 1000)}', 3, "0");
 	}
 
-	private static inline function lpad(s:String, len:Int, c:String):String
-	{
+	private static inline function lpad(s:String, len:Int, c:String):String {
 		while (s.length < len)
 			s = c + s;
 		return s;
 	}
 
-	public static function getColorByHex(hex:String):AnsiCode
-	{
+	public static function getColorByHex(hex:String):AnsiCode {
 		if (hex.startsWith("#"))
 			hex = hex.substr(1);
 		if (hex.length != 6)
@@ -101,22 +92,16 @@ class CoolLog
 	private static inline function rgb(r:Int, g:Int, b:Int):String
 		return '\x1b[38;2;${r};${g};${b}m';
 
-	private static inline function pretty(v:Dynamic):String
-	{
-		try
-		{
+	private static inline function pretty(v:Dynamic):String {
+		try {
 			return JsonPrinter.print(v, null, "  ");
-		}
-		catch (_)
-		{
+		} catch (_) {
 			return Std.string(v);
 		}
 	}
 
-	private static function levelToInt(lvl:Level):Int
-	{
-		return switch (lvl)
-		{
+	private static function levelToInt(lvl:Level):Int {
+		return switch (lvl) {
 			case DEBUG: 10;
 			case INFO: 20;
 			case WARNING: 30;
@@ -126,10 +111,8 @@ class CoolLog
 		}
 	}
 
-	private static function levelTag(lvl:Level):String
-	{
-		return switch (lvl)
-		{
+	private static function levelTag(lvl:Level):String {
+		return switch (lvl) {
 			case DEBUG: "DEBUG";
 			case INFO: "INFO";
 			case WARNING: "WARNING";
@@ -139,7 +122,6 @@ class CoolLog
 		}
 	}
 
-
 	/**
 	 * Creates a clickable hyperlink using the OSC 8 ANSI escape sequence.
 	 * Supported in terminals like iTerm2, Windows Terminal, GNOME Terminal, etc.
@@ -148,10 +130,9 @@ class CoolLog
 	 * @param text The visible label shown in the terminal.
 	 */
 	private static inline function link(url:String, text:String):String
-    	return '\033]8;;$url\033\\$text\033]8;;\033\\';
+		return '\033]8;;$url\033\\$text\033]8;;\033\\';
 
-	private static function log(lvl:Level, v:Dynamic, ?infos:PosInfos)
-	{
+	private static function log(lvl:Level, v:Dynamic, ?infos:PosInfos) {
 		var current = levelToInt(level);
 		if (levelToInt(lvl) < current)
 			return;
@@ -164,8 +145,7 @@ class CoolLog
 		var file = "unknown";
 		var line = "0";
 
-		if (infos != null)
-		{
+		if (infos != null) {
 			file = fs.last();
 			line = Std.string(infos.lineNumber);
 		}

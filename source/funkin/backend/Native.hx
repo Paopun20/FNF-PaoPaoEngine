@@ -54,15 +54,12 @@ void getHandle() {
 }
 ')
 #end
-class Native
-{
-	public static function __init__():Void
-	{
+class Native {
+	public static function __init__():Void {
 		registerDPIAware();
 	}
 
-	public static function registerDPIAware():Void
-	{
+	public static function registerDPIAware():Void {
 		#if (cpp && windows)
 		// DPI Scaling fix for windows
 		// this shouldn't be needed for other systems
@@ -84,16 +81,14 @@ class Native
 
 	private static var fixedScaling:Bool = false;
 
-	public static function fixScaling():Void
-	{
+	public static function fixScaling():Void {
 		if (fixedScaling)
 			return;
 		fixedScaling = true;
 
 		#if (cpp && windows)
 		final display:Null<Display> = System.getDisplay(0);
-		if (display != null)
-		{
+		if (display != null) {
 			final dpiScale:Float = display.dpi / 96;
 			@:privateAccess Application.current.window.width = Std.int(Main.game.width * dpiScale);
 			@:privateAccess Application.current.window.height = Std.int(Main.game.height * dpiScale);

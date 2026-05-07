@@ -3,14 +3,12 @@ package funkin.states.stages;
 import funkin.states.stages.objects.*;
 import funkin.objects.Character;
 
-class StageWeek1 extends BaseStage
-{
+class StageWeek1 extends BaseStage {
 	var dadbattleBlack:BGSprite;
 	var dadbattleLight:BGSprite;
 	var dadbattleFog:DadBattleFog;
 
-	override function create()
-	{
+	override function create() {
 		var bg:BGSprite = new BGSprite('stageback', -600, -200, 0.9, 0.9);
 		add(bg);
 
@@ -18,8 +16,7 @@ class StageWeek1 extends BaseStage
 		stageFront.setGraphicSize(Std.int(stageFront.width * 1.1));
 		stageFront.updateHitbox();
 		add(stageFront);
-		if (!ClientPrefs.data.lowQuality)
-		{
+		if (!ClientPrefs.data.lowQuality) {
 			var stageLight:BGSprite = new BGSprite('stage_light', -125, -100, 0.9, 0.9);
 			stageLight.setGraphicSize(Std.int(stageLight.width * 1.1));
 			stageLight.updateHitbox();
@@ -37,10 +34,8 @@ class StageWeek1 extends BaseStage
 		}
 	}
 
-	override function eventPushed(event:funkin.objects.Note.EventNote)
-	{
-		switch (event.event)
-		{
+	override function eventPushed(event:funkin.objects.Note.EventNote) {
+		switch (event.event) {
 			case "Dadbattle Spotlight":
 				dadbattleBlack = new BGSprite(null, -800, -400, 0, 0);
 				dadbattleBlack.makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), FlxColor.BLACK);
@@ -60,17 +55,14 @@ class StageWeek1 extends BaseStage
 		}
 	}
 
-	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float)
-	{
-		switch (eventName)
-		{
+	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float) {
+		switch (eventName) {
 			case "Dadbattle Spotlight":
 				if (flValue1 == null)
 					flValue1 = 0;
 				var val:Int = Math.round(flValue1);
 
-				switch (val)
-				{
+				switch (val) {
 					case 1, 2, 3: // enable and target dad
 						if (val == 1) // enable
 						{
@@ -85,8 +77,7 @@ class StageWeek1 extends BaseStage
 							who = boyfriend;
 						// 2 only targets dad
 						dadbattleLight.alpha = 0;
-						new FlxTimer().start(0.12, function(tmr:FlxTimer)
-						{
+						new FlxTimer().start(0.12, function(tmr:FlxTimer) {
 							dadbattleLight.alpha = 0.375;
 						});
 						dadbattleLight.setPosition(who.getGraphicMidpoint().x - dadbattleLight.width / 2, who.y + who.height - dadbattleLight.height + 50);

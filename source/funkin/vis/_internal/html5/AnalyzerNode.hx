@@ -9,8 +9,7 @@ import js.html.audio.AnalyserNode as AnalyseWebAudio;
 // note: analyze and analyse are both correct spellings of the word,
 // but "AnalyserNode" is the correct class name in the Web Audio API
 // and we use the Z variant here...
-class AnalyzerNode
-{
+class AnalyzerNode {
 	#if lime_howlerjs
 	public var analyzer:AnalyseWebAudio;
 	public var maxDecibels:Float = -30;
@@ -19,8 +18,7 @@ class AnalyzerNode
 	#end
 
 	// #region yoooo
-	public function new(?audioClip:AudioClip)
-	{
+	public function new(?audioClip:AudioClip) {
 		trace("Loading audioClip");
 
 		#if lime_howlerjs
@@ -35,8 +33,7 @@ class AnalyzerNode
 		#end
 	}
 
-	public function getFloatFrequencyData():Array<Float>
-	{
+	public function getFloatFrequencyData():Array<Float> {
 		#if lime_howlerjs
 		var array:js.lib.Float32Array = new js.lib.Float32Array(analyzer.frequencyBinCount);
 		analyzer.fftSize = fftSize;

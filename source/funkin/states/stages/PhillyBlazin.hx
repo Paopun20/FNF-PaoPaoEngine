@@ -8,8 +8,7 @@ import funkin.substates.GameOverSubstate;
 import funkin.states.stages.objects.*;
 import funkin.objects.Note;
 
-class PhillyBlazin extends BaseStage
-{
+class PhillyBlazin extends BaseStage {
 	var rainShader:RainShader;
 	var rainTimeScale:Float = 1;
 
@@ -23,17 +22,14 @@ class PhillyBlazin extends BaseStage
 
 	var abot:ABotSpeaker;
 
-	override function create()
-	{
+	override function create() {
 		FlxTransitionableState.skipNextTransOut = true; // skip the original transition fade
-		function setupScale(spr:BGSprite)
-		{
+		function setupScale(spr:BGSprite) {
 			spr.scale.set(1.75, 1.75);
 			spr.updateHitbox();
 		}
 
-		if (!ClientPrefs.data.lowQuality)
-		{
+		if (!ClientPrefs.data.lowQuality) {
 			var skyImage = Paths.image('phillyBlazin/skyBlur');
 			scrollingSky = new FlxTiledSprite(skyImage, Std.int(skyImage.width * 1.1) + 475, Std.int(skyImage.height / 1.1), true, false);
 			scrollingSky.antialiasing = ClientPrefs.data.antialiasing;
@@ -56,8 +52,7 @@ class PhillyBlazin extends BaseStage
 		setupScale(phillyForegroundCity);
 		add(phillyForegroundCity);
 
-		if (!ClientPrefs.data.lowQuality)
-		{
+		if (!ClientPrefs.data.lowQuality) {
 			foregroundMultiply = new BGSprite('phillyBlazin/streetBlur', -600, -175, 0.0, 0.0);
 			setupScale(foregroundMultiply);
 			foregroundMultiply.blend = MULTIPLY;
@@ -93,13 +88,10 @@ class PhillyBlazin extends BaseStage
 		setDefaultGF('nene');
 		precache();
 
-		if (isStoryMode)
-		{
-			switch (songName)
-			{
+		if (isStoryMode) {
+			switch (songName) {
 				case 'blazin':
-					setEndCallback(function()
-					{
+					setEndCallback(function() {
 						game.endingSong = true;
 						inCutscene = true;
 						canPause = false;
@@ -112,25 +104,21 @@ class PhillyBlazin extends BaseStage
 		}
 	}
 
-	override function createPost()
-	{
+	override function createPost() {
 		FlxG.camera.focusOn(camFollow.getPosition());
 		FlxG.camera.fade(FlxColor.BLACK, 1.5, true, null, true);
 
-		for (character in boyfriendGroup.members)
-		{
+		for (character in boyfriendGroup.members) {
 			if (character == null)
 				continue;
 			character.color = 0xFFDEDEDE;
 		}
-		for (character in dadGroup.members)
-		{
+		for (character in dadGroup.members) {
 			if (character == null)
 				continue;
 			character.color = 0xFFDEDEDE;
 		}
-		for (character in gfGroup.members)
-		{
+		for (character in gfGroup.members) {
 			if (character == null)
 				continue;
 			character.color = 0xFF888888;
@@ -138,8 +126,7 @@ class PhillyBlazin extends BaseStage
 		abot.color = 0xFF888888;
 
 		var unspawnNotes:Array<Note> = cast game.unspawnNotes;
-		for (note in unspawnNotes)
-		{
+		for (note in unspawnNotes) {
 			if (note == null)
 				continue;
 
@@ -151,54 +138,45 @@ class PhillyBlazin extends BaseStage
 		addBehindBF(dadGroup);
 	}
 
-	override function beatHit()
-	{
+	override function beatHit() {
 		// if(curBeat % 2 == 0) abot.beatHit();
 	}
 
-	override function startSong()
-	{
+	override function startSong() {
 		abot.snd = FlxG.sound.music;
 	}
 
-	function setupRainShader()
-	{
+	function setupRainShader() {
 		rainShader = new RainShader();
 		rainShader.scale = FlxG.height / 200;
 		rainShader.intensity = 0.5;
 		FlxG.camera.filters.push(new ShaderFilter(rainShader));
 	}
 
-	function precache()
-	{
-		for (i in 1...4)
-		{
+	function precache() {
+		for (i in 1...4) {
 			Paths.sound('lightning/Lightning$i');
 		}
 	}
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		if (scrollingSky != null)
 			scrollingSky.scrollX -= elapsed * 35;
 
-		if (rainShader != null)
-		{
+		if (rainShader != null) {
 			rainShader.updateViewInfo(FlxG.width, FlxG.height, FlxG.camera);
 			rainShader.update(elapsed * rainTimeScale);
 			rainTimeScale = FlxMath.lerp(0.02, Math.min(1, rainTimeScale), Math.exp(-elapsed / (1 / 3)));
 		}
 
 		lightningTimer -= elapsed;
-		if (lightningTimer <= 0)
-		{
+		if (lightningTimer <= 0) {
 			applyLightning();
 			lightningTimer = FlxG.random.float(7, 15);
 		}
 	}
 
-	function applyLightning():Void
-	{
+	function applyLightning():Void {
 		if (ClientPrefs.data.lowQuality || game.endingSong)
 			return;
 
@@ -208,8 +186,7 @@ class PhillyBlazin extends BaseStage
 		skyAdditive.visible = true;
 		skyAdditive.alpha = 0.7;
 		FlxTween.tween(skyAdditive, {alpha: 0.0}, LIGHTNING_FULL_DURATION, {
-			onComplete: function(_)
-			{
+			onComplete: function(_) {
 				skyAdditive.visible = false;
 				lightning.visible = false;
 				foregroundMultiply.visible = false;
@@ -247,31 +224,27 @@ class PhillyBlazin extends BaseStage
 	var picoFight:PicoBlazinHandler = new PicoBlazinHandler();
 	var darnellFight:DarnellBlazinHandler = new DarnellBlazinHandler();
 
-	override function goodNoteHit(note:Note)
-	{
+	override function goodNoteHit(note:Note) {
 		// trace('hit note! ${note.noteType}');
 		rainTimeScale += 0.7;
 		picoFight.noteHit(note);
 		darnellFight.noteHit(note);
 	}
 
-	override function noteMiss(note:Note)
-	{
+	override function noteMiss(note:Note) {
 		// trace('missed note!');
 		picoFight.noteMiss(note);
 		darnellFight.noteMiss(note);
 	}
 
-	override function noteMissPress(direction:Int)
-	{
+	override function noteMissPress(direction:Int) {
 		// trace('misinput!');
 		picoFight.noteMissPress(direction);
 		darnellFight.noteMissPress(direction);
 	}
 
 	// Darnell Note functions
-	override function opponentNoteHit(note:Note)
-	{
+	override function opponentNoteHit(note:Note) {
 		// trace('opponent hit!');
 		picoFight.noteMiss(note);
 		darnellFight.noteMiss(note);

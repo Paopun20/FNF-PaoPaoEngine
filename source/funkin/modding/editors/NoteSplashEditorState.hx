@@ -12,8 +12,7 @@ import openfl.net.FileReference;
 import haxe.Json;
 
 @:access(funkin.objects.NoteSplash)
-class NoteSplashEditorState extends MusicBeatState
-{
+class NoteSplashEditorState extends MusicBeatState {
 	var strums:FlxTypedSpriteGroup<StrumNote> = new FlxTypedSpriteGroup();
 	var splashes:FlxTypedSpriteGroup<NoteSplash> = new FlxTypedSpriteGroup();
 	var config = NoteSplash.createConfig();
@@ -30,8 +29,7 @@ class NoteSplashEditorState extends MusicBeatState
 	var properUI:PsychUIBox;
 	var shaderUI:PsychUIBox;
 
-	override function create()
-	{
+	override function create() {
 		if (imageSkin == null)
 			imageSkin = NoteSplash.defaultNoteSplash + NoteSplash.getSplashSkinPostfix();
 
@@ -77,8 +75,7 @@ class NoteSplashEditorState extends MusicBeatState
 		tipText.setPosition(properUI.x - properUI.width + 15, UI.y);
 		add(tipText);
 
-		for (i in 0...4)
-		{
+		for (i in 0...4) {
 			var babyArrow:StrumNote = new StrumNote(-273, 50, i % 4, 1);
 			babyArrow.playerPosition();
 			babyArrow.screenCenter(Y);
@@ -127,8 +124,7 @@ class NoteSplashEditorState extends MusicBeatState
 	var numericStepperData:PsychUINumericStepper;
 	var templateButton:PsychUIButton;
 
-	function addAnimTab()
-	{
+	function addAnimTab() {
 		var UI = UI.getTab("Animation").menu;
 
 		UI.add(new FlxText(20, 20, 0, "Animation Name:", 8));
@@ -157,13 +153,10 @@ class NoteSplashEditorState extends MusicBeatState
 		var maxFps:PsychUINumericStepper = new PsychUINumericStepper(150, 127.5, 1, 26, 1, 120);
 		UI.add(maxFps);
 
-		animDropDown = new PsychUIDropDownMenu(-155, 57, [""], function(id:Int, name:String)
-		{
-			if (config != null && name.length > 0)
-			{
+		animDropDown = new PsychUIDropDownMenu(-155, 57, [""], function(id:Int, name:String) {
+			if (config != null && name.length > 0) {
 				var i = config.animations.get(name);
-				if (i != null)
-				{
+				if (i != null) {
 					name_input.text = name;
 					prefix_input.text = i.prefix;
 					numericStepperData.min = 0;
@@ -179,12 +172,10 @@ class NoteSplashEditorState extends MusicBeatState
 			}
 		});
 
-		function setAnimDropDown()
-		{
+		function setAnimDropDown() {
 			var anims:Array<String> = [];
 			if (config != null && config.animations != null)
-				for (i in config.animations.keys())
-				{
+				for (i in config.animations.keys()) {
 					anims.push(i);
 				}
 
@@ -200,8 +191,7 @@ class NoteSplashEditorState extends MusicBeatState
 
 		setAnimDropDown();
 
-		templateButton.onClick = function()
-		{
+		templateButton.onClick = function() {
 			NoteSplash.configs.clear();
 			config = NoteSplash.createConfig();
 
@@ -218,16 +208,12 @@ class NoteSplashEditorState extends MusicBeatState
 			changeShader.onSelect(0, "Red");
 		}
 
-		addButton = new PsychUIButton(20, 185, "Add/Update", function()
-		{
+		addButton = new PsychUIButton(20, 185, "Add/Update", function() {
 			var indices:Array<Int> = [];
-			if (indices_input.text.split(',').length > 1)
-			{
-				for (i in indices_input.text.split(','))
-				{
+			if (indices_input.text.split(',').length > 1) {
+				for (i in indices_input.text.split(',')) {
 					var index:Null<Int> = Std.parseInt(i);
-					if (!Math.isNaN(index) && index != null)
-					{
+					if (!Math.isNaN(index) && index != null) {
 						indices.push(index);
 					}
 				}
@@ -253,12 +239,9 @@ class NoteSplashEditorState extends MusicBeatState
 		});
 		UI.add(addButton);
 
-		var removeButton:PsychUIButton = new PsychUIButton(185, 185, "Remove", function()
-		{
-			if (config != null)
-			{
-				if (config.animations.exists(curAnim))
-				{
+		var removeButton:PsychUIButton = new PsychUIButton(185, 185, "Remove", function() {
+			if (config != null) {
+				if (config.animations.exists(curAnim)) {
 					config.animations.remove(curAnim);
 
 					curAnim = null;
@@ -273,22 +256,18 @@ class NoteSplashEditorState extends MusicBeatState
 		UI.add(removeButton);
 		UI.add(animDropDown);
 
-		reloadImage = function()
-		{
+		reloadImage = function() {
 			imageSkin = imageInputText.text;
 
 			errorText.color = FlxColor.RED;
 			FlxTween.cancelTweensOf(errorText);
 
 			var image = Paths.image(imageSkin);
-			if (image == null)
-			{
+			if (image == null) {
 				errorText.text = 'ERROR! Couldn\'t find $imageSkin.png';
 				errorText.alpha = 1;
 				return;
-			}
-			else
-			{
+			} else {
 				errorText.color = FlxColor.GREEN;
 				errorText.alpha = 1;
 				errorText.text = 'Succesfully loaded $imageSkin.png';
@@ -298,8 +277,7 @@ class NoteSplashEditorState extends MusicBeatState
 
 			FlxTween.tween(errorText, {alpha: 0}, 1, {
 				startDelay: 1,
-				onComplete: (twn) ->
-				{
+				onComplete: (twn) -> {
 					errorText.color = FlxColor.RED;
 				}
 			});
@@ -329,16 +307,14 @@ class NoteSplashEditorState extends MusicBeatState
 	var imageInputText:PsychUIInputText;
 	var scaleNumericStepper:PsychUINumericStepper;
 
-	function addPropertiesTab()
-	{
+	function addPropertiesTab() {
 		var ui = properUI.getTab("Properties").menu;
 
 		ui.add(new FlxText(20, 10, 0, "Image:"));
 		imageInputText = new PsychUIInputText(60, 10, 120, imageSkin, 8);
 		ui.add(imageInputText);
 
-		var reloadButton:PsychUIButton = new PsychUIButton(185, 6.8, "Reload Image", function()
-		{
+		var reloadButton:PsychUIButton = new PsychUIButton(185, 6.8, "Reload Image", function() {
 			reloadImage();
 		});
 		ui.add(reloadButton);
@@ -361,8 +337,7 @@ class NoteSplashEditorState extends MusicBeatState
 		ui.add(loadButton);
 
 		var allowRGBCheck:PsychUICheckBox = new PsychUICheckBox(20, 105, "", 1);
-		function check()
-		{
+		function check() {
 			if (config != null)
 				config.allowRGB = allowRGBCheck.checked;
 		}
@@ -377,8 +352,7 @@ class NoteSplashEditorState extends MusicBeatState
 		ui.add(allowRGBCheck);
 
 		var allowPixelCheck:PsychUICheckBox = new PsychUICheckBox(allowRGBCheck.x + 110, allowRGBCheck.y, "", 1);
-		function check()
-		{
+		function check() {
 			if (config != null)
 				config.allowPixel = allowPixelCheck.checked;
 		}
@@ -402,8 +376,7 @@ class NoteSplashEditorState extends MusicBeatState
 	var changeShader:PsychUIDropDownMenu;
 	var defaultButton:PsychUICheckBox;
 
-	function addShadersTab()
-	{
+	function addShadersTab() {
 		var tab = shaderUI.getTab("Shader").menu;
 
 		tab.add(new FlxText(40, 10, "Replacing Color:"));
@@ -412,10 +385,8 @@ class NoteSplashEditorState extends MusicBeatState
 		tab.add(new FlxText(25, 70, "Blue:"));
 
 		var red = new PsychUINumericStepper(60, 30, 1, redShader[0], 0, 255, 0);
-		red.onValueChange = () ->
-		{
-			var shader = switch (changeShader.selectedLabel)
-			{
+		red.onValueChange = () -> {
+			var shader = switch (changeShader.selectedLabel) {
 				case "Red": redShader[0] = Std.int(red.value);
 				case "Green": greenShader[0] = Std.int(red.value);
 				case _: blueShader[0] = Std.int(red.value);
@@ -425,10 +396,8 @@ class NoteSplashEditorState extends MusicBeatState
 		tab.add(red);
 
 		var green = new PsychUINumericStepper(60, 50, 1, redShader[1], 0, 255, 0);
-		green.onValueChange = () ->
-		{
-			var shader = switch (changeShader.selectedLabel)
-			{
+		green.onValueChange = () -> {
+			var shader = switch (changeShader.selectedLabel) {
 				case "Red": redShader[1] = Std.int(green.value);
 				case "Green": greenShader[1] = Std.int(green.value);
 				case _: blueShader[1] = Std.int(green.value);
@@ -438,10 +407,8 @@ class NoteSplashEditorState extends MusicBeatState
 		tab.add(green);
 
 		var blue = new PsychUINumericStepper(60, 70, 1, redShader[2], 0, 255, 0);
-		blue.onValueChange = () ->
-		{
-			var shader = switch (changeShader.selectedLabel)
-			{
+		blue.onValueChange = () -> {
+			var shader = switch (changeShader.selectedLabel) {
 				case "Red": redShader[2] = Std.int(blue.value);
 				case "Green": greenShader[2] = Std.int(blue.value);
 				case _: blueShader[2] = Std.int(blue.value);
@@ -450,16 +417,14 @@ class NoteSplashEditorState extends MusicBeatState
 		};
 		tab.add(blue);
 
-		function onCheck(change:Bool = true)
-		{
+		function onCheck(change:Bool = true) {
 			if (!defaultButton.checked)
 				shaderUI.alpha = 1;
 			else
 				shaderUI.alpha = 0.6;
 
 			if (change)
-				switch (changeShader.selectedLabel)
-				{
+				switch (changeShader.selectedLabel) {
 					case "Red":
 						redEnabled = !defaultButton.checked;
 					case "Green":
@@ -472,10 +437,8 @@ class NoteSplashEditorState extends MusicBeatState
 		}
 
 		add(new FlxText(shaderUI.x + 20, shaderUI.y + 135, 0, "Color to Replace:"));
-		changeShader = new PsychUIDropDownMenu(shaderUI.x + 20, shaderUI.y + 150, ["Red", "Green", "Blue"], function(id:Int, name:String)
-		{
-			var shader = switch (name)
-			{
+		changeShader = new PsychUIDropDownMenu(shaderUI.x + 20, shaderUI.y + 150, ["Red", "Green", "Blue"], function(id:Int, name:String) {
+			var shader = switch (name) {
 				case "Red": redShader;
 				case "Green": greenShader;
 				case _: blueShader;
@@ -486,8 +449,7 @@ class NoteSplashEditorState extends MusicBeatState
 			blue.value = shader[2];
 
 			// changing checked doesn't initiate onCheck!!
-			defaultButton.checked = switch (name)
-			{
+			defaultButton.checked = switch (name) {
 				case "Red": !redEnabled;
 				case "Green": !greenEnabled;
 				case _: !blueEnabled;
@@ -513,8 +475,7 @@ class NoteSplashEditorState extends MusicBeatState
 	var holdingArrowsElapsed:Float = 0;
 	var copiedOffset:Array<Float> = [0, 0];
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		super.update(elapsed);
 
 		errorText.x = FlxG.width - errorText.width - 5;
@@ -522,14 +483,12 @@ class NoteSplashEditorState extends MusicBeatState
 		curText.text = 'Copied Offsets: ${Std.string(copiedOffset).replace(',', ', ')}\n';
 		curText.text += 'Current Animation: ${curAnim == null || curAnim.length < 1 ? "NONE" : curAnim}';
 
-		if (config != null && !curText.text.contains('NONE'))
-		{
+		if (config != null && !curText.text.contains('NONE')) {
 			var offsets:Array<Float> = try config.animations.get(curAnim).offsets catch (e) [0, 0];
 			curText.text += ' ($offsets)'.replace(',', ', ');
 		}
 
-		if (config != null)
-		{
+		if (config != null) {
 			var currentAnim:String = curAnimText.text;
 			if (config.animations.exists(currentAnim) && config.animations.get(currentAnim) != null)
 				addButton.label = 'Update';
@@ -540,12 +499,9 @@ class NoteSplashEditorState extends MusicBeatState
 		}
 
 		var blockInput:Bool = PsychUIInputText.focusOn != null;
-		if (!blockInput && config != null && config.animations != null && config.animations.exists(curAnim) && curAnim != null && curAnim.length > 0)
-		{
-			function splash()
-			{
-				if (config.animations.get(curAnim) != null)
-				{
+		if (!blockInput && config != null && config.animations != null && config.animations.exists(curAnim) && curAnim != null && curAnim.length > 0) {
+			function splash() {
+				if (config.animations.get(curAnim) != null) {
 					playStrumAnim(curAnim, config.animations.get(curAnim).noteData);
 					FlxTween.cancelTweensOf(errorText);
 					errorText.alpha = 0;
@@ -553,21 +509,15 @@ class NoteSplashEditorState extends MusicBeatState
 			}
 
 			var changedOffset = false;
-			if (FlxG.keys.pressed.CONTROL && config.animations.get(curAnim) != null)
-			{
-				if (FlxG.keys.justPressed.C)
-				{
+			if (FlxG.keys.pressed.CONTROL && config.animations.get(curAnim) != null) {
+				if (FlxG.keys.justPressed.C) {
 					copiedOffset = config.animations.get(curAnim).offsets.copy();
-				}
-				else if (FlxG.keys.justPressed.V)
-				{
+				} else if (FlxG.keys.justPressed.V) {
 					var conf = config.animations.get(curAnim);
 					conf.offsets = copiedOffset.copy();
 					config.animations.set(curAnim, conf);
 					changedOffset = true;
-				}
-				else if (FlxG.keys.justPressed.R)
-				{
+				} else if (FlxG.keys.justPressed.R) {
 					var conf = config.animations.get(curAnim);
 					conf.offsets = [0, 0];
 					config.animations.set(curAnim, conf);
@@ -583,8 +533,7 @@ class NoteSplashEditorState extends MusicBeatState
 				FlxG.keys.justPressed.UP,
 				FlxG.keys.justPressed.DOWN
 			];
-			if (moveKeysP.contains(true))
-			{
+			if (moveKeysP.contains(true)) {
 				config.animations[curAnim].offsets[0] += ((moveKeysP[0] ? 1 : 0) - (moveKeysP[1] ? 1 : 0)) * multiplier;
 				config.animations[curAnim].offsets[1] += ((moveKeysP[2] ? 1 : 0) - (moveKeysP[3] ? 1 : 0)) * multiplier;
 				changedOffset = true;
@@ -596,49 +545,38 @@ class NoteSplashEditorState extends MusicBeatState
 				FlxG.keys.pressed.UP,
 				FlxG.keys.pressed.DOWN
 			];
-			if (moveKeys.contains(true))
-			{
+			if (moveKeys.contains(true)) {
 				holdingArrowsTime += elapsed;
-				if (holdingArrowsTime > 0.6)
-				{
+				if (holdingArrowsTime > 0.6) {
 					holdingArrowsElapsed += elapsed;
-					while (holdingArrowsElapsed > (1 / 60))
-					{
+					while (holdingArrowsElapsed > (1 / 60)) {
 						config.animations[curAnim].offsets[0] += ((moveKeys[0] ? 1 : 0) - (moveKeys[1] ? 1 : 0)) * multiplier;
 						config.animations[curAnim].offsets[1] += ((moveKeys[2] ? 1 : 0) - (moveKeys[3] ? 1 : 0)) * multiplier;
 						holdingArrowsElapsed -= (1 / 60);
 						changedOffset = true;
 					}
 				}
-			}
-			else
+			} else
 				holdingArrowsTime = 0;
 
 			if (changedOffset || FlxG.keys.justPressed.SPACE)
 				splash();
 		}
 
-		if (!blockInput)
-		{
+		if (!blockInput) {
 			if (controls.BACK)
 				MusicBeatState.switchState(new MasterEditorMenu());
 			if (FlxG.keys.justPressed.F1)
 				openSubState(new NoteSplashEditorHelpSubState());
 		}
 
-		if (FlxG.mouse.overlaps(strums))
-		{
-			strums.forEach(function(strum:StrumNote)
-			{
-				if (FlxG.mouse.overlaps(strum))
-				{
-					if (!FlxG.mouse.justPressed)
-					{
+		if (FlxG.mouse.overlaps(strums)) {
+			strums.forEach(function(strum:StrumNote) {
+				if (FlxG.mouse.overlaps(strum)) {
+					if (!FlxG.mouse.justPressed) {
 						if (strum.animation.curAnim.name != 'pressed' && strum.animation.curAnim.name != 'confirm')
 							strum.playAnim('pressed');
-					}
-					else
-					{
+					} else {
 						strum.playAnim('confirm', true);
 						// strum.holdTimer = Math.POSITIVE_INFINITY;
 
@@ -649,35 +587,28 @@ class NoteSplashEditorState extends MusicBeatState
 						splash.spawnSplashNote(0, 0, strum.ID % 4);
 						splashes.add(splash);
 					}
-				}
-				else
+				} else
 					strum.playAnim('static');
 			});
-		}
-		else
-		{
+		} else {
 			for (strum in strums)
 				strum.playAnim('static');
 		}
 	}
 
-	function playStrumAnim(?name:String, noteData:Int)
-	{
+	function playStrumAnim(?name:String, noteData:Int) {
 		var splash:NoteSplash = new NoteSplash(0, 0, imageSkin);
 		splash.inEditor = true;
 		splash.config = config;
 		if (noteData < 0)
 			noteData = 0;
 
-		if (name != null && splash.animation.exists(name))
-		{
+		if (name != null && splash.animation.exists(name)) {
 			splash.babyArrow = strums.members[noteData % 4];
 			splash.spawnSplashNote(0, 0, noteData, null, false);
 			splash.alpha = 1;
 			splashes.add(splash);
-		}
-		else
-		{
+		} else {
 			errorText.alpha = 1;
 			errorText.text = "ERROR while playing splash";
 
@@ -686,25 +617,21 @@ class NoteSplashEditorState extends MusicBeatState
 		}
 	}
 
-	function resetRGB()
-	{
+	function resetRGB() {
 		redShader = [0, 0, 0];
 		greenShader = [0, 0, 0];
 		blueShader = [0, 0, 0];
 	}
 
-	function parseRGB()
-	{
+	function parseRGB() {
 		resetRGB();
 		if (config.rgb != null)
-			for (i in 0...config.rgb.length)
-			{
+			for (i in 0...config.rgb.length) {
 				if (i > 2)
 					break;
 
 				var rgb = config.rgb[i];
-				if (rgb == null)
-				{
+				if (rgb == null) {
 					if (i == 0)
 						redEnabled = false;
 					else if (i == 1)
@@ -713,9 +640,7 @@ class NoteSplashEditorState extends MusicBeatState
 						blueEnabled = false;
 
 					continue;
-				}
-				else
-				{
+				} else {
 					if (i == 0)
 						redEnabled = true;
 					else if (i == 1)
@@ -732,20 +657,17 @@ class NoteSplashEditorState extends MusicBeatState
 				else if (i == 2)
 					blueShader = colors;
 			}
-		else
-		{
+		else {
 			resetRGB();
 			redEnabled = blueEnabled = greenEnabled = false;
 		}
 	}
 
-	function setConfigRGB()
-	{
+	function setConfigRGB() {
 		if (config == null)
 			config = NoteSplash.createConfig();
 
-		if (!redEnabled && !greenEnabled && !blueEnabled)
-		{
+		if (!redEnabled && !greenEnabled && !blueEnabled) {
 			config.rgb = null;
 			return;
 		}
@@ -770,8 +692,7 @@ class NoteSplashEditorState extends MusicBeatState
 
 	var _file:FileReference;
 
-	function onSaveComplete(_):Void
-	{
+	function onSaveComplete(_):Void {
 		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
 		_file.removeEventListener(Event.CANCEL, onSaveCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
@@ -782,8 +703,7 @@ class NoteSplashEditorState extends MusicBeatState
 	/**
 	 * Called when the save file dialog is cancelled.
 	 */
-	function onSaveCancel(_):Void
-	{
+	function onSaveCancel(_):Void {
 		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
 		_file.removeEventListener(Event.CANCEL, onSaveCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
@@ -793,8 +713,7 @@ class NoteSplashEditorState extends MusicBeatState
 	/**
 	 * Called if there is an error while saving the gameplay recording.
 	 */
-	function onSaveError(_):Void
-	{
+	function onSaveError(_):Void {
 		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
 		_file.removeEventListener(Event.CANCEL, onSaveCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
@@ -802,12 +721,10 @@ class NoteSplashEditorState extends MusicBeatState
 		FlxG.log.error("Problem saving file");
 	}
 
-	function saveSplash()
-	{
+	function saveSplash() {
 		imageSkin = imageInputText.text;
 		var data:String = Json.stringify(config, "\t");
-		if (data.length > 0)
-		{
+		if (data.length > 0) {
 			_file = new FileReference();
 			_file.addEventListener(Event.COMPLETE, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
@@ -816,8 +733,7 @@ class NoteSplashEditorState extends MusicBeatState
 		}
 	}
 
-	public function loadTxt()
-	{
+	public function loadTxt() {
 		var jsonFilter:FileFilter = new FileFilter('Select a note splash TXT', '*.txt');
 		_file = new FileReference();
 		_file.addEventListener(Event.SELECT, onLoadComplete);
@@ -826,23 +742,18 @@ class NoteSplashEditorState extends MusicBeatState
 		_file.browse([#if !mac jsonFilter #end]);
 	}
 
-	function onLoadComplete(_):Void
-	{
+	function onLoadComplete(_):Void {
 		_file.removeEventListener(Event.SELECT, onLoadComplete);
 		_file.removeEventListener(Event.CANCEL, onLoadCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 
-		try
-		{
+		try {
 			var txtLoaded:Dynamic = Json.parse(Json.stringify(_file));
 			var txt:String = null;
 			var file:String = "config.json";
 			#if MODS_ALLOWED
-			if (txtLoaded.__path != null)
-			{
-				try
-					txt = File.getContent(txtLoaded.__path)
-				catch (e)
+			if (txtLoaded.__path != null) {
+				try txt = File.getContent(txtLoaded.__path) catch (e)
 					txt = null;
 				file = txtLoaded.__path;
 				file = file.substring(0, file.length - 4) + ".json";
@@ -855,9 +766,7 @@ class NoteSplashEditorState extends MusicBeatState
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(Json.stringify(conf, "\t"), file);
 			#end
-		}
-		catch (e)
-		{
+		} catch (e) {
 			CoolLog.error(e.stack);
 			// trace(e.stack);
 		}
@@ -866,8 +775,7 @@ class NoteSplashEditorState extends MusicBeatState
 	/**
 	 * Called when the save file dialog is cancelled.
 	 */
-	function onLoadCancel(_):Void
-	{
+	function onLoadCancel(_):Void {
 		_file.removeEventListener(Event.SELECT, onLoadComplete);
 		_file.removeEventListener(Event.CANCEL, onLoadCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
@@ -879,8 +787,7 @@ class NoteSplashEditorState extends MusicBeatState
 	/**
 	 * Called if there is an error while saving the gameplay recording.
 	 */
-	function onLoadError(_):Void
-	{
+	function onLoadError(_):Void {
 		_file.removeEventListener(Event.SELECT, onLoadComplete);
 		_file.removeEventListener(Event.CANCEL, onLoadCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
@@ -889,8 +796,7 @@ class NoteSplashEditorState extends MusicBeatState
 		CoolLog.error("Problem loading file");
 	}
 
-	override function destroy()
-	{
+	override function destroy() {
 		NoteSplash.configs.clear();
 		super.destroy();
 
@@ -900,8 +806,7 @@ class NoteSplashEditorState extends MusicBeatState
 		FlxG.sound.volumeUpKeys = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
 	}
 
-	public static function parseTxt(content:String):NoteSplashConfig
-	{
+	public static function parseTxt(content:String):NoteSplashConfig {
 		var config = NoteSplash.createConfig();
 		if (content == null)
 			return config;
@@ -917,8 +822,7 @@ class NoteSplashEditorState extends MusicBeatState
 
 		var animation:String = configs[0].rtrim();
 		var fps:Array<Null<Int>> = [22, 26];
-		if (configs[1] != null && configs[1].trim() != "")
-		{
+		if (configs[1] != null && configs[1].trim() != "") {
 			var newFps = configs[1].trim().split(" ");
 			fps = [Std.parseInt(newFps[0]), Std.parseInt(newFps[1])];
 			if (fps[0] == null)
@@ -928,14 +832,11 @@ class NoteSplashEditorState extends MusicBeatState
 		}
 
 		var offsets:Array<Array<Null<Float>>> = [[0, 0]];
-		if (configs.length > 2)
-		{
+		if (configs.length > 2) {
 			offsets = [];
-			for (i in 2...configs.length)
-			{
+			for (i in 2...configs.length) {
 				var offset = configs[i].trim();
-				if (offset != "")
-				{
+				if (offset != "") {
 					var offset:Array<String> = offset.split(" ");
 					var x:Float = Std.parseFloat(offset[0]);
 					var y:Float = Std.parseFloat(offset[1]);
@@ -950,10 +851,8 @@ class NoteSplashEditorState extends MusicBeatState
 
 		var i = 0;
 		var k = 1;
-		while (true)
-		{
-			for (col in Note.colArray)
-			{
+		while (true) {
+			for (col in Note.colArray) {
 				var anim = k <= 1 ? col : '$col' + k;
 				var offset = offsets[FlxMath.wrap(i, 0, Std.int(offsets.length - 1))];
 
@@ -969,10 +868,8 @@ class NoteSplashEditorState extends MusicBeatState
 	}
 }
 
-class NoteSplashEditorHelpSubState extends MusicBeatSubstate
-{
-	public function new()
-	{
+class NoteSplashEditorHelpSubState extends MusicBeatSubstate {
+	public function new() {
 		super();
 
 		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
@@ -995,8 +892,7 @@ class NoteSplashEditorHelpSubState extends MusicBeatSubstate
 		];
 
 		var helpTexts:FlxSpriteGroup = new FlxSpriteGroup();
-		for (i => txt in str)
-		{
+		for (i => txt in str) {
 			if (txt.length < 1)
 				continue;
 
@@ -1021,8 +917,7 @@ class NoteSplashEditorHelpSubState extends MusicBeatSubstate
 		add(noteDataText);
 	}
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		super.update(elapsed);
 
 		if (controls.BACK || FlxG.keys.justPressed.F1)

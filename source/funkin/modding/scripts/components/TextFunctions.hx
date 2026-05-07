@@ -3,14 +3,11 @@ package funkin.modding.scripts.components;
 import funkin.modding.scripts.utils.ImplementUtils;
 import funkin.modding.scripts.utils.LuaUtils;
 
-class TextFunctions
-{
-	public static function implement(funk:Dynamic)
-	{
+class TextFunctions {
+	public static function implement(funk:Dynamic) {
 		var impl = ImplementUtils.make(funk);
 
-		impl("makeLuaText", function(tag:String, ?text:String = '', ?width:Int = 0, ?x:Float = 0, ?y:Float = 0)
-		{
+		impl("makeLuaText", function(tag:String, ?text:String = '', ?width:Int = 0, ?x:Float = 0, ?y:Float = 0) {
 			tag = tag.replace('.', '');
 
 			LuaUtils.destroyObject(tag);
@@ -23,78 +20,66 @@ class TextFunctions
 			MusicBeatState.getVariables().set(tag, leText);
 		});
 
-		impl("setTextString", function(tag:String, text:String)
-		{
+		impl("setTextString", function(tag:String, text:String) {
 			var split:Array<String> = tag.split('.');
 			var obj:FlxText = split.length > 1 ? (LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split),
 				split[split.length - 1])) : LuaUtils.getObjectDirectly(split[0]);
-			if (obj != null)
-			{
+			if (obj != null) {
 				obj.text = text;
 				return true;
 			}
 			ImplementUtils.addTextToDebug("setTextString: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
-		impl("setTextSize", function(tag:String, size:Int)
-		{
+		impl("setTextSize", function(tag:String, size:Int) {
 			var split:Array<String> = tag.split('.');
 			var obj:FlxText = split.length > 1 ? (LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split),
 				split[split.length - 1])) : LuaUtils.getObjectDirectly(split[0]);
-			if (obj != null)
-			{
+			if (obj != null) {
 				obj.size = size;
 				return true;
 			}
 			ImplementUtils.addTextToDebug("setTextSize: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
-		impl("setTextWidth", function(tag:String, width:Float)
-		{
+		impl("setTextWidth", function(tag:String, width:Float) {
 			var split:Array<String> = tag.split('.');
 			var obj:FlxText = split.length > 1 ? (LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split),
 				split[split.length - 1])) : LuaUtils.getObjectDirectly(split[0]);
-			if (obj != null)
-			{
+			if (obj != null) {
 				obj.fieldWidth = width;
 				return true;
 			}
 			ImplementUtils.addTextToDebug("setTextWidth: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
-		impl("setTextHeight", function(tag:String, height:Float)
-		{
+		impl("setTextHeight", function(tag:String, height:Float) {
 			var split:Array<String> = tag.split('.');
 			var obj:FlxText = split.length > 1 ? (LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split),
 				split[split.length - 1])) : LuaUtils.getObjectDirectly(split[0]);
-			if (obj != null)
-			{
+			if (obj != null) {
 				obj.fieldHeight = height;
 				return true;
 			}
 			ImplementUtils.addTextToDebug("setTextHeight: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
-		impl("setTextAutoSize", function(tag:String, value:Bool)
-		{
+		impl("setTextAutoSize", function(tag:String, value:Bool) {
 			var split:Array<String> = tag.split('.');
 			var obj:FlxText = split.length > 1 ? (LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split),
 				split[split.length - 1])) : LuaUtils.getObjectDirectly(split[0]);
-			if (obj != null)
-			{
+			if (obj != null) {
 				obj.autoSize = value;
 				return true;
 			}
 			ImplementUtils.addTextToDebug("setTextAutoSize: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
-		impl("setTextBorder", function(tag:String, size:Float, color:String, ?style:String = 'outline')
-		{
+		impl("setTextBorder", function(tag:String, size:Float, color:String, ?style:String = 'outline') {
 			var split:Array<String> = tag.split('.');
 			var obj:FlxText = split.length > 1 ? (LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split),
 				split[split.length - 1])) : LuaUtils.getObjectDirectly(split[0]);
-			if (obj != null)
-			{
+			if (obj != null) {
 				CoolUtil.setTextBorderFromString(obj, (size > 0 ? style : 'none'));
 				if (size > 0)
 					obj.borderSize = size;
@@ -105,55 +90,46 @@ class TextFunctions
 			ImplementUtils.addTextToDebug("setTextBorder: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
-		impl("setTextColor", function(tag:String, color:String)
-		{
+		impl("setTextColor", function(tag:String, color:String) {
 			var split:Array<String> = tag.split('.');
 			var obj:FlxText = split.length > 1 ? (LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split),
 				split[split.length - 1])) : LuaUtils.getObjectDirectly(split[0]);
-			if (obj != null)
-			{
+			if (obj != null) {
 				obj.color = CoolUtil.colorFromString(color);
 				return true;
 			}
 			ImplementUtils.addTextToDebug("setTextColor: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
-		impl("setTextFont", function(tag:String, newFont:String)
-		{
+		impl("setTextFont", function(tag:String, newFont:String) {
 			var split:Array<String> = tag.split('.');
 			var obj:FlxText = split.length > 1 ? (LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split),
 				split[split.length - 1])) : LuaUtils.getObjectDirectly(split[0]);
-			if (obj != null)
-			{
+			if (obj != null) {
 				obj.font = Paths.font(newFont);
 				return true;
 			}
 			ImplementUtils.addTextToDebug("setTextFont: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
-		impl("setTextItalic", function(tag:String, italic:Bool)
-		{
+		impl("setTextItalic", function(tag:String, italic:Bool) {
 			var split:Array<String> = tag.split('.');
 			var obj:FlxText = split.length > 1 ? (LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split),
 				split[split.length - 1])) : LuaUtils.getObjectDirectly(split[0]);
-			if (obj != null)
-			{
+			if (obj != null) {
 				obj.italic = italic;
 				return true;
 			}
 			ImplementUtils.addTextToDebug("setTextItalic: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return false;
 		});
-		impl("setTextAlignment", function(tag:String, alignment:String = 'left')
-		{
+		impl("setTextAlignment", function(tag:String, alignment:String = 'left') {
 			var split:Array<String> = tag.split('.');
 			var obj:FlxText = split.length > 1 ? (LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split),
 				split[split.length - 1])) : LuaUtils.getObjectDirectly(split[0]);
-			if (obj != null)
-			{
+			if (obj != null) {
 				obj.alignment = LEFT;
-				switch (alignment.trim().toLowerCase())
-				{
+				switch (alignment.trim().toLowerCase()) {
 					case 'right':
 						obj.alignment = RIGHT;
 					case 'center':
@@ -167,63 +143,53 @@ class TextFunctions
 			return false;
 		});
 
-		impl("getTextString", function(tag:String)
-		{
+		impl("getTextString", function(tag:String) {
 			var split:Array<String> = tag.split('.');
 			var obj:FlxText = split.length > 1 ? (LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split),
 				split[split.length - 1])) : LuaUtils.getObjectDirectly(split[0]);
-			if (obj != null && obj.text != null)
-			{
+			if (obj != null && obj.text != null) {
 				return obj.text;
 			}
 			ImplementUtils.addTextToDebug("getTextString: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return null;
 		});
-		impl("getTextSize", function(tag:String)
-		{
+		impl("getTextSize", function(tag:String) {
 			var split:Array<String> = tag.split('.');
 			var obj:FlxText = split.length > 1 ? (LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split),
 				split[split.length - 1])) : LuaUtils.getObjectDirectly(split[0]);
-			if (obj != null)
-			{
+			if (obj != null) {
 				return obj.size;
 			}
 			ImplementUtils.addTextToDebug("getTextSize: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return -1;
 		});
-		impl("getTextFont", function(tag:String)
-		{
+		impl("getTextFont", function(tag:String) {
 			var split:Array<String> = tag.split('.');
 			var obj:FlxText = split.length > 1 ? (LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split),
 				split[split.length - 1])) : LuaUtils.getObjectDirectly(split[0]);
-			if (obj != null)
-			{
+			if (obj != null) {
 				return obj.font;
 			}
 			ImplementUtils.addTextToDebug("getTextFont: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return null;
 		});
-		impl("getTextWidth", function(tag:String)
-		{
+		impl("getTextWidth", function(tag:String) {
 			var split:Array<String> = tag.split('.');
 			var obj:FlxText = split.length > 1 ? (LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split),
 				split[split.length - 1])) : LuaUtils.getObjectDirectly(split[0]);
-			if (obj != null)
-			{
+			if (obj != null) {
 				return obj.fieldWidth;
 			}
 			ImplementUtils.addTextToDebug("getTextWidth: Object " + tag + " doesn't exist!", FlxColor.RED);
 			return 0;
 		});
 
-		impl("addLuaText", function(tag:String)
-		{
+		impl("addLuaText", function(tag:String) {
 			var text:FlxText = MusicBeatState.getVariables().get(tag);
 			if (text != null)
 				LuaUtils.getTargetInstance().add(text);
 		});
-		impl("removeLuaText", function(tag:String, destroy:Bool = true)
-		{
+		impl("removeLuaText", function(tag:String, destroy:Bool = true) {
 			var variables = MusicBeatState.getVariables();
 			var text:FlxText = variables.get(tag);
 			if (text == null)
@@ -231,8 +197,7 @@ class TextFunctions
 
 			var instance:Dynamic = CustomSubstate.instance != null ? CustomSubstate.instance : LuaUtils.getTargetInstance();
 			instance.remove(text, true);
-			if (destroy)
-			{
+			if (destroy) {
 				text.destroy();
 				variables.remove(tag);
 			}

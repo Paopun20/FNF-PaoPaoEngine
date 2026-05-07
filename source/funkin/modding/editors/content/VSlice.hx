@@ -7,8 +7,7 @@ import flixel.util.FlxSort;
 import funkin.states.MainMenuState;
 
 // Chart
-typedef VSliceChart =
-{
+typedef VSliceChart = {
 	var scrollSpeed:Dynamic; // Map<String, Float>
 	var events:Array<VSliceEvent>;
 	var notes:Dynamic; // Map<String, Array<VSliceNote>>
@@ -16,24 +15,21 @@ typedef VSliceChart =
 	var version:String;
 }
 
-typedef VSliceNote =
-{
+typedef VSliceNote = {
 	var t:Float; // Strum time
 	var d:Int; // Note data
 	@:optional var l:Null<Float>; // Sustain Length
 	@:optional var k:String; // Note type
 }
 
-typedef VSliceEvent =
-{
+typedef VSliceEvent = {
 	var t:Float; // Strum time
 	var e:String; // Event name
 	var v:Dynamic; // Values
 }
 
 // Metadata
-typedef VSliceMetadata =
-{
+typedef VSliceMetadata = {
 	var songName:String;
 	var artist:String;
 	var charter:String;
@@ -45,53 +41,45 @@ typedef VSliceMetadata =
 	var version:String;
 }
 
-typedef VSlicePlayData =
-{
+typedef VSlicePlayData = {
 	var difficulties:Array<String>;
 	var characters:VSliceCharacters;
 	var noteStyle:String;
 	var stage:String;
 }
 
-typedef VSliceCharacters =
-{
+typedef VSliceCharacters = {
 	var player:String;
 	var girlfriend:String;
 	var opponent:String;
 }
 
-typedef VSliceTimeChange =
-{
+typedef VSliceTimeChange = {
 	var t:Float;
 	var bpm:Float;
 }
 
-typedef PsychEventChart =
-{
+typedef PsychEventChart = {
 	var events:Array<Dynamic>;
 	var format:String;
 }
 
 // Package
-typedef VSlicePackage =
-{
+typedef VSlicePackage = {
 	var chart:VSliceChart;
 	var metadata:VSliceMetadata;
 }
 
-typedef PsychPackage =
-{
+typedef PsychPackage = {
 	var difficulties:Map<String, SwagSong>;
 	var events:PsychEventChart;
 }
 
-class VSlice
-{
+class VSlice {
 	public static final metadataVersion = '2.2.3';
 	public static final chartVersion = '2.0.0';
 
-	public static function convertToPsych(chart:VSliceChart, metadata:VSliceMetadata):PsychPackage
-	{
+	public static function convertToPsych(chart:VSliceChart, metadata:VSliceMetadata):PsychPackage {
 		var songDifficulties:Map<String, SwagSong> = [];
 		var timeChanges:Array<VSliceTimeChange> = cast metadata.timeChanges;
 		timeChanges.sort(sortByTime);
@@ -117,8 +105,7 @@ class VSlice
 		}
 		var lastNoteTime:Float = 0;
 		var notesMap:Map<String, Dynamic> = [];
-		for (diff in metadata.playData.difficulties)
-		{
+		for (diff in metadata.playData.difficulties) {
 			var notes:Array<VSliceNote> = cast Reflect.field(chart.notes, diff);
 			if (notes == null)
 				notes = [];
@@ -135,36 +122,29 @@ class VSlice
 
 		var focusCameraEvents:Array<Dynamic> = [];
 		var allEvents:Array<Dynamic> = chart.events;
-		if (allEvents != null && allEvents.length > 0)
-		{
+		if (allEvents != null && allEvents.length > 0) {
 			var time:Float = 0;
 			allEvents.sort(sortByTime);
 
 			focusCameraEvents = allEvents.filter((event:Dynamic) -> event.e == 'FocusCamera'
 				&& (event.v == 0 || event.v == 1 || event.v.char != null));
-			if (focusCameraEvents.length > 0)
-			{
+			if (focusCameraEvents.length > 0) {
 				var focusEventNum:Int = 0;
 				var lastMustHit:Bool = false;
-				while (time < focusCameraEvents[focusCameraEvents.length - 1].t)
-				{
+				while (time < focusCameraEvents[focusCameraEvents.length - 1].t) {
 					var bpm:Float = songBpm;
 					var sectionTime:Float = 0;
-					if (timeChanges.length > 0)
-					{
-						for (bpmChange in timeChanges)
-						{
+					if (timeChanges.length > 0) {
+						for (bpmChange in timeChanges) {
 							if (time < bpmChange.t)
 								break;
 							bpm = bpmChange.bpm;
 						}
 					}
 
-					for (i in focusEventNum...focusCameraEvents.length)
-					{
+					for (i in focusEventNum...focusCameraEvents.length) {
 						var focusEvent:VSliceEvent = focusCameraEvents[i];
-						if (time + 1 < focusEvent.t)
-						{
+						if (time + 1 < focusEvent.t) {
 							focusEventNum = i;
 							break;
 						}
@@ -193,13 +173,10 @@ class VSlice
 		var bpm:Float = songBpm;
 		var lastBpm:Float = songBpm;
 		var time:Float = 0;
-		while (time < lastNoteTime)
-		{
+		while (time < lastNoteTime) {
 			var sectionTime:Float = 0;
-			if (timeChanges.length > 0)
-			{
-				for (bpmChange in timeChanges)
-				{
+			if (timeChanges.length > 0) {
+				for (bpmChange in timeChanges) {
 					if (time < bpmChange.t)
 						break;
 					bpm = bpmChange.bpm;
@@ -213,8 +190,7 @@ class VSlice
 			sec.mustHitSection = sectionMustHits[
 				baseSections.length >= sectionMustHits.length ? sectionMustHits.length - 1 : baseSections.length
 			];
-			if (lastBpm != bpm)
-			{
+			if (lastBpm != bpm) {
 				sec.changeBPM = true;
 				sec.bpm = bpm;
 				lastBpm = bpm;
@@ -224,8 +200,7 @@ class VSlice
 		// trace('sections: ${baseSections.length}, max time: $time, note: $lastNoteTime');
 
 		// create sections based on how much time there is until the last note
-		for (diff in metadata.playData.difficulties)
-		{
+		for (diff in metadata.playData.difficulties) {
 			var scrollSpeed:Float = Reflect.hasField(chart.scrollSpeed,
 				diff) ? Reflect.field(chart.scrollSpeed, diff) : Reflect.field(chart.scrollSpeed, 'default');
 			var notes:Array<VSliceNote> = notesMap.get(diff);
@@ -235,8 +210,7 @@ class VSlice
 			{
 				var sec:SwagSection = emptySection();
 				sec.mustHitSection = section.mustHitSection;
-				if (Reflect.hasField(section, 'changeBPM'))
-				{
+				if (Reflect.hasField(section, 'changeBPM')) {
 					sec.changeBPM = section.changeBPM;
 					sec.bpm = section.bpm;
 				}
@@ -245,8 +219,7 @@ class VSlice
 
 			var noteSec:Int = 0;
 			var time:Float = 0;
-			for (note in notes)
-			{
+			for (note in notes) {
 				while (noteSec + 1 < sectionTimes.length && sectionTimes[noteSec + 1] <= note.t)
 					noteSec++;
 
@@ -283,18 +256,13 @@ class VSlice
 
 		var fileEvents:Array<Dynamic> = [];
 		var remainingEvents:Array<Dynamic> = allEvents.filter((event:Dynamic) -> !focusCameraEvents.contains(event));
-		if (remainingEvents.length > 0)
-		{
-			for (num => event in remainingEvents)
-			{
+		if (remainingEvents.length > 0) {
+			for (num => event in remainingEvents) {
 				var fields:Array<Dynamic> = [];
-				if (event.v != null)
-				{
-					switch (Type.typeof(event.v))
-					{
+				if (event.v != null) {
+					switch (Type.typeof(event.v)) {
 						case TObject:
-							for (field in Reflect.fields(event.v))
-							{
+							for (field in Reflect.fields(event.v)) {
 								fields.push(Std.string(Reflect.field(event.v, field)));
 								if (fields.length == 2)
 									break;
@@ -303,10 +271,8 @@ class VSlice
 							fields.push(event.v);
 						case TClass(Array):
 							var arr:Array<Dynamic> = cast event.v;
-							if (arr != null && arr.length > 0)
-							{
-								for (value in arr)
-								{
+							if (arr != null && arr.length > 0) {
+								for (value in arr) {
 									fields.push(Std.string(value));
 
 									if (fields.length == 2)
@@ -329,13 +295,11 @@ class VSlice
 		return pack;
 	}
 
-	public static function export(songData:SwagSong, ?difficultyName:String = null):VSlicePackage
-	{
+	public static function export(songData:SwagSong, ?difficultyName:String = null):VSlicePackage {
 		var events:Array<VSliceEvent> = [];
 		if (songData.events != null && songData.events.length > 0) // Add events
 		{
-			for (event in songData.events)
-			{
+			for (event in songData.events) {
 				var subEvents:Array<Array<Dynamic>> = cast event[1];
 				if (subEvents != null && subEvents.length > 0)
 					for (lilEvent in subEvents)
@@ -351,15 +315,11 @@ class VSlice
 		var bpm:Float = songData.bpm;
 		timeChanges.push({t: 0, bpm: bpm}); // so there was first bpm issue (if the song has multiplier bpm)
 		var lastMustHit:Bool = false;
-		if (songData.notes != null)
-		{
-			for (section in songData.notes)
-			{
+		if (songData.notes != null) {
+			for (section in songData.notes) {
 				// Add notes
-				if (section.sectionNotes != null && section.sectionNotes.length > 0)
-				{
-					for (note in section.sectionNotes)
-					{
+				if (section.sectionNotes != null && section.sectionNotes.length > 0) {
+					for (note in section.sectionNotes) {
 						var vsliceNote:VSliceNote = {t: note[0], d: note[1]};
 						if (note[2] > 0)
 							vsliceNote.l = note[2];
@@ -372,15 +332,13 @@ class VSlice
 
 				// Add camera events to act like the "Must hit section" camera focus
 				var beat:Float = Conductor.calculateCrochet(bpm);
-				if (section.changeBPM)
-				{
+				if (section.changeBPM) {
 					bpm = section.bpm;
 					beat = Conductor.calculateCrochet(bpm);
 					timeChanges.push({t: time, bpm: bpm});
 				}
 
-				if (lastMustHit != section.mustHitSection)
-				{
+				if (lastMustHit != section.mustHitSection) {
 					events.push({t: time, e: 'FocusCamera', v: {char: section.mustHitSection ? 0 : 1}});
 					lastMustHit = section.mustHitSection;
 				}
@@ -411,15 +369,12 @@ class VSlice
 		if (difficultyName == null) // Fill all difficulties to attempt to prevent the song from not showing up on Base Game
 		{
 			var diffs:Array<String> = Difficulty.list.copy();
-			for (num => diff in diffs)
-			{
+			for (num => diff in diffs) {
 				diffs[num] = diff = Paths.formatToSongPath(diff);
 				scrollSpeed.set(diff, songData.speed);
 				notesMap.set(diff, notes);
 			}
-		}
-		else
-		{
+		} else {
 			var diff:String = Difficulty.getString(false);
 			if (diff == null)
 				diff = Difficulty.getDefault();
@@ -476,8 +431,7 @@ class VSlice
 		return {chart: chart, metadata: metadata};
 	}
 
-	static function emptySection():SwagSection
-	{
+	static function emptySection():SwagSection {
 		return {
 			sectionNotes: [],
 			sectionBeats: 4,

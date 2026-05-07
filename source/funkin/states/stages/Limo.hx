@@ -2,8 +2,7 @@ package funkin.states.stages;
 
 import funkin.states.stages.objects.*;
 
-enum HenchmenKillState
-{
+enum HenchmenKillState {
 	WAIT;
 	KILLING;
 	SPEEDING_OFFSCREEN;
@@ -11,8 +10,7 @@ enum HenchmenKillState
 	STOPPING;
 }
 
-class Limo extends BaseStage
-{
+class Limo extends BaseStage {
 	var grpLimoDancers:FlxTypedGroup<BackgroundDancer>;
 	var fastCar:BGSprite;
 	var fastCarCanDrive:Bool = true;
@@ -27,13 +25,11 @@ class Limo extends BaseStage
 	var grpLimoParticles:FlxTypedGroup<BGSprite>;
 	var dancersDiff:Float = 320;
 
-	override function create()
-	{
+	override function create() {
 		var skyBG:BGSprite = new BGSprite('limo/limoSunset', -120, -50, 0.1, 0.1);
 		add(skyBG);
 
-		if (!ClientPrefs.data.lowQuality)
-		{
+		if (!ClientPrefs.data.lowQuality) {
 			limoMetalPole = new BGSprite('gore/metalPole', -500, 220, 0.4, 0.4);
 			add(limoMetalPole);
 
@@ -49,8 +45,7 @@ class Limo extends BaseStage
 			grpLimoDancers = new FlxTypedGroup<BackgroundDancer>();
 			add(grpLimoDancers);
 
-			for (i in 0...5)
-			{
+			for (i in 0...5) {
 				var dancer:BackgroundDancer = new BackgroundDancer((370 * i) + dancersDiff + bgLimo.x, bgLimo.y - 400);
 				dancer.scrollFactor.set(0.4, 0.4);
 				grpLimoDancers.add(dancer);
@@ -77,8 +72,7 @@ class Limo extends BaseStage
 		fastCar.active = true;
 	}
 
-	override function createPost()
-	{
+	override function createPost() {
 		resetFastCar();
 		addBehindGF(fastCar);
 
@@ -88,22 +82,17 @@ class Limo extends BaseStage
 
 	var limoSpeed:Float = 0;
 
-	override function update(elapsed:Float)
-	{
-		if (!ClientPrefs.data.lowQuality)
-		{
-			grpLimoParticles.forEach(function(spr:BGSprite)
-			{
-				if (spr.animation.curAnim.finished)
-				{
+	override function update(elapsed:Float) {
+		if (!ClientPrefs.data.lowQuality) {
+			grpLimoParticles.forEach(function(spr:BGSprite) {
+				if (spr.animation.curAnim.finished) {
 					spr.kill();
 					grpLimoParticles.remove(spr, true);
 					spr.destroy();
 				}
 			});
 
-			switch (limoKillingState)
-			{
+			switch (limoKillingState) {
 				case KILLING:
 					limoMetalPole.x += 5000 * elapsed;
 					limoLight.x = limoMetalPole.x - 180;
@@ -111,12 +100,9 @@ class Limo extends BaseStage
 					limoCorpseTwo.x = limoLight.x + 35;
 
 					var dancers:Array<BackgroundDancer> = grpLimoDancers.members;
-					for (i in 0...dancers.length)
-					{
-						if (dancers[i].x < FlxG.width * 1.5 && limoLight.x > (370 * i) + 170)
-						{
-							switch (i)
-							{
+					for (i in 0...dancers.length) {
+						if (dancers[i].x < FlxG.width * 1.5 && limoLight.x > (370 * i) + 170) {
+							switch (i) {
 								case 0 | 3:
 									if (i == 0)
 										FlxG.sound.play(Paths.sound('dancerdeath'), 0.5);
@@ -145,8 +131,7 @@ class Limo extends BaseStage
 						}
 					}
 
-					if (limoMetalPole.x > FlxG.width * 2)
-					{
+					if (limoMetalPole.x > FlxG.width * 2) {
 						resetLimoKill();
 						limoSpeed = 800;
 						limoKillingState = SPEEDING_OFFSCREEN;
@@ -155,8 +140,7 @@ class Limo extends BaseStage
 				case SPEEDING_OFFSCREEN:
 					limoSpeed -= 4000 * elapsed;
 					bgLimo.x -= limoSpeed * elapsed;
-					if (bgLimo.x > FlxG.width * 1.5)
-					{
+					if (bgLimo.x > FlxG.width * 1.5) {
 						limoSpeed = 3000;
 						limoKillingState = SPEEDING;
 					}
@@ -167,8 +151,7 @@ class Limo extends BaseStage
 						limoSpeed = 1000;
 
 					bgLimo.x -= limoSpeed * elapsed;
-					if (bgLimo.x < -275)
-					{
+					if (bgLimo.x < -275) {
 						limoKillingState = STOPPING;
 						limoSpeed = 800;
 					}
@@ -176,8 +159,7 @@ class Limo extends BaseStage
 
 				case STOPPING:
 					bgLimo.x = FlxMath.lerp(-150, bgLimo.x, Math.exp(-elapsed * 9));
-					if (Math.round(bgLimo.x) == -150)
-					{
+					if (Math.round(bgLimo.x) == -150) {
 						bgLimo.x = -150;
 						limoKillingState = WAIT;
 					}
@@ -188,12 +170,9 @@ class Limo extends BaseStage
 		}
 	}
 
-	override function beatHit()
-	{
-		if (!ClientPrefs.data.lowQuality)
-		{
-			grpLimoDancers.forEach(function(dancer:BackgroundDancer)
-			{
+	override function beatHit() {
+		if (!ClientPrefs.data.lowQuality) {
+			grpLimoDancers.forEach(function(dancer:BackgroundDancer) {
 				dancer.dance();
 			});
 		}
@@ -203,44 +182,35 @@ class Limo extends BaseStage
 	}
 
 	// Substates for pausing/resuming tweens and timers
-	override function closeSubState()
-	{
-		if (paused)
-		{
+	override function closeSubState() {
+		if (paused) {
 			if (carTimer != null)
 				carTimer.active = true;
 		}
 	}
 
-	override function openSubState(SubState:flixel.FlxSubState)
-	{
-		if (paused)
-		{
+	override function openSubState(SubState:flixel.FlxSubState) {
+		if (paused) {
 			if (carTimer != null)
 				carTimer.active = false;
 		}
 	}
 
-	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float)
-	{
-		switch (eventName)
-		{
+	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float) {
+		switch (eventName) {
 			case "Kill Henchmen":
 				killHenchmen();
 		}
 	}
 
-	function dancersParenting()
-	{
+	function dancersParenting() {
 		var dancers:Array<BackgroundDancer> = grpLimoDancers.members;
-		for (i in 0...dancers.length)
-		{
+		for (i in 0...dancers.length) {
 			dancers[i].x = (370 * i) + dancersDiff + bgLimo.x;
 		}
 	}
 
-	function resetLimoKill():Void
-	{
+	function resetLimoKill():Void {
 		limoMetalPole.x = -500;
 		limoMetalPole.visible = false;
 		limoLight.x = -500;
@@ -251,8 +221,7 @@ class Limo extends BaseStage
 		limoCorpseTwo.visible = false;
 	}
 
-	function resetFastCar():Void
-	{
+	function resetFastCar():Void {
 		fastCar.x = -12600;
 		fastCar.y = FlxG.random.int(140, 250);
 		fastCar.velocity.x = 0;
@@ -261,26 +230,21 @@ class Limo extends BaseStage
 
 	var carTimer:FlxTimer;
 
-	function fastCarDrive()
-	{
+	function fastCarDrive() {
 		// trace('Car drive');
 		FlxG.sound.play(Paths.soundRandom('carPass', 0, 1), 0.7);
 
 		fastCar.velocity.x = FlxG.random.int(30600, 39600);
 		fastCarCanDrive = false;
-		carTimer = new FlxTimer().start(2, function(tmr:FlxTimer)
-		{
+		carTimer = new FlxTimer().start(2, function(tmr:FlxTimer) {
 			resetFastCar();
 			carTimer = null;
 		});
 	}
 
-	function killHenchmen():Void
-	{
-		if (!ClientPrefs.data.lowQuality)
-		{
-			if (limoKillingState == WAIT)
-			{
+	function killHenchmen():Void {
+		if (!ClientPrefs.data.lowQuality) {
+			if (limoKillingState == WAIT) {
 				limoMetalPole.x = -400;
 				limoMetalPole.visible = true;
 				limoLight.visible = true;

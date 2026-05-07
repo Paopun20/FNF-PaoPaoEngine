@@ -12,38 +12,35 @@ import funkin.modding.scripts.HScript;
 #if PYTHON_ALLOWED
 import funkin.modding.scripts.Python;
 #end
+#if NXSCRIPT_ALLOWED
+import funkin.modding.scripts.NxScript;
+#end
 import funkin.modding.scripts.utils.LuaUtils;
 #end
 
-enum EditableType
-{
+enum EditableType {
 	State;
 	Substate;
 }
 
-class EditableCore
-{
+class EditableCore {
 	public var stateName:String;
 	public var stateType:EditableType;
 	public var parent:Dynamic;
 	public var scripts:ScriptPack;
 
-	public function new(stateName:String, stateType:EditableType, parent:Dynamic):Void
-	{
+	public function new(stateName:String, stateType:EditableType, parent:Dynamic):Void {
 		this.stateName = stateName;
 		this.stateType = stateType;
 		this.parent = parent;
 		this.scripts = new ScriptPack(stateName);
 	}
 
-	public function presetScript(script:Dynamic):Void
-	{
+	public function presetScript(script:Dynamic):Void {
 		#if MODS_ALLOWED
-		if (script != null && Reflect.hasField(script, 'set'))
-		{
+		if (script != null && Reflect.hasField(script, 'set')) {
 			script.set("stateName", stateName);
-			switch (stateType)
-			{
+			switch (stateType) {
 				case EditableType.State:
 					script.set("stateType", "State");
 					return;
@@ -59,10 +56,8 @@ class EditableCore
 	}
 
 	#if MODS_ALLOWED
-	public function initScript(script:Script):Void
-	{
-		if (script != null)
-		{
+	public function initScript(script:Script):Void {
+		if (script != null) {
 			presetScript(script);
 			scripts.add(script);
 			script.execute();
@@ -71,16 +66,14 @@ class EditableCore
 	}
 
 	#if LUA_ALLOWED
-	public function initLua(file:String):Void
-	{
+	public function initLua(file:String):Void {
 		var script = new LuaScript(file);
 		initScript(script);
 	}
 	#end
 
 	#if HSCRIPT_ALLOWED
-	public function initHScript(file:String):Void
-	{
+	public function initHScript(file:String):Void {
 		var script = new HScript(file);
 		script.parent = this;
 		initScript(script);
@@ -88,29 +81,30 @@ class EditableCore
 	#end
 
 	#if PYTHON_ALLOWED
-	public function initPython(file:String):Void
-	{
+	public function initPython(file:String):Void {
 		var script = new Python(file);
 		initScript(script);
 	}
 	#end
-	#end
 
-	private function getScriptCount():Int
-	{
+	#if NXSCRIPT_ALLOWED
+	public function initNxScript(file:String):Void {
+		var script = new NxScript(file);
+		initScript(script);
+	}
+	#end
+	#end
+	private function getScriptCount():Int {
 		return scripts.length;
 	}
 
-	public function initScriptFromDirectory(directory:String, name:String):Void
-	{
+	public function initScriptFromDirectory(directory:String, name:String):Void {
 		#if MODS_ALLOWED
 		CoolLog.info('Loading scripts for state "$stateName" from ${directory}');
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED)
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED || NXSCRIPT_ALLOWED)
 		for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), directory))
-			for (file in FileSystem.readDirectory(folder))
-			{
-				if (file.toLowerCase().split('.')[0] == name.toLowerCase())
-				{
+			for (file in FileSystem.readDirectory(folder)) {
+				if (file.toLowerCase().split('.')[0] == name.toLowerCase()) {
 					#if LUA_ALLOWED
 					if (file.toLowerCase().endsWith('.lua'))
 						initLua(folder + file);
@@ -123,6 +117,10 @@ class EditableCore
 					if (file.toLowerCase().endsWith('.py'))
 						initPython(folder + file);
 					#end
+					#if NXSCRIPT_ALLOWED
+					if (file.toLowerCase().endsWith('.nx'))
+						initNxScript(folder + file);
+					#end
 				}
 			}
 		#end
@@ -132,8 +130,7 @@ class EditableCore
 	}
 
 	public function callScripts(funcToCall:String, args:Array<Dynamic> = null, ignoreStops:Bool = false, exclusions:Array<Script> = null,
-			excludeValues:Array<Dynamic> = null):Dynamic
-	{
+			excludeValues:Array<Dynamic> = null):Dynamic {
 		if (args == null)
 			args = [];
 		if (excludeValues == null)
@@ -142,13 +139,11 @@ class EditableCore
 		return scripts.call(funcToCall, args, ignoreStops, exclusions, excludeValues);
 	}
 
-	public function setScript(id:String, v:Dynamic):Void
-	{
+	public function setScript(id:String, v:Dynamic):Void {
 		scripts.set(id, v);
 	}
 
-	public function destroy():Void
-	{
+	public function destroy():Void {
 		scripts.destroy();
 	}
 }

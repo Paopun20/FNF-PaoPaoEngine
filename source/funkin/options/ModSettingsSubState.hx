@@ -5,14 +5,12 @@ import flixel.input.gamepad.FlxGamepadInputID;
 import funkin.objects.Character;
 import funkin.options.Option.OptionType;
 
-class ModSettingsSubState extends BaseOptionsMenu
-{
+class ModSettingsSubState extends BaseOptionsMenu {
 	var save:Map<String, Dynamic> = new Map<String, Dynamic>();
 	var folder:String;
 	private var _crashed:Bool = false;
 
-	public function new(options:Array<Dynamic>, folder:String, name:String)
-	{
+	public function new(options:Array<Dynamic>, folder:String, name:String) {
 		this.folder = folder;
 
 		title = '';
@@ -21,23 +19,19 @@ class ModSettingsSubState extends BaseOptionsMenu
 
 		if (FlxG.save.data.modSettings == null)
 			FlxG.save.data.modSettings = new Map<String, Dynamic>();
-		else
-		{
+		else {
 			var saveMap:Map<String, Dynamic> = FlxG.save.data.modSettings;
 			save = saveMap[folder] != null ? saveMap[folder] : [];
 		}
 
 		// save = []; //reset for debug purposes
-		try
-		{
-			for (option in options)
-			{
+		try {
+			for (option in options) {
 				var newOption = new Option(option.name != null ? option.name : option.save,
 					option.description != null ? option.description : 'No description provided.', option.save, convertType(option.type), option.options,
 					option.translation_key);
 
-				switch (newOption.type)
-				{
+				switch (newOption.type) {
 					case KEYBIND:
 						// Defaulting and error checking
 						var keyboardStr:String = option.keyboard;
@@ -49,8 +43,7 @@ class ModSettingsSubState extends BaseOptionsMenu
 
 						newOption.defaultKeys.keyboard = keyboardStr;
 						newOption.defaultKeys.gamepad = gamepadStr;
-						if (save.get(option.save) == null)
-						{
+						if (save.get(option.save) == null) {
 							newOption.keys.keyboard = newOption.defaultKeys.keyboard;
 							newOption.keys.gamepad = newOption.defaultKeys.gamepad;
 							save.set(option.save, newOption.keys);
@@ -63,15 +56,13 @@ class ModSettingsSubState extends BaseOptionsMenu
 
 						@:privateAccess
 						{
-							newOption.getValue = function()
-							{
+							newOption.getValue = function() {
 								var data = save.get(newOption.variable);
 								if (data == null)
 									return 'NONE';
 								return !Controls.instance.controllerMode ? data.keyboard : data.gamepad;
 							};
-							newOption.setValue = function(value:Dynamic)
-							{
+							newOption.setValue = function(value:Dynamic) {
 								var data = save.get(newOption.variable);
 								if (data == null)
 									data = {keyboard: 'NONE', gamepad: 'NONE'};
@@ -95,8 +86,7 @@ class ModSettingsSubState extends BaseOptionsMenu
 						}
 				}
 
-				if (option.type != KEYBIND)
-				{
+				if (option.type != KEYBIND) {
 					if (option.format != null)
 						newOption.displayFormat = option.format;
 					if (option.min != null)
@@ -112,23 +102,19 @@ class ModSettingsSubState extends BaseOptionsMenu
 						newOption.decimals = option.decimals;
 
 					var myValue:Dynamic = null;
-					if (save.get(option.save) != null)
-					{
+					if (save.get(option.save) != null) {
 						myValue = save.get(option.save);
 						if (newOption.type != KEYBIND)
 							newOption.setValue(myValue);
 						else
 							newOption.setValue(!Controls.instance.controllerMode ? myValue.keyboard : myValue.gamepad);
-					}
-					else
-					{
+					} else {
 						myValue = newOption.getValue();
 						if (myValue == null)
 							myValue = newOption.defaultValue;
 					}
 
-					switch (newOption.type)
-					{
+					switch (newOption.type) {
 						case STRING:
 							var num:Int = newOption.options.indexOf(myValue);
 							if (num > -1)
@@ -142,9 +128,7 @@ class ModSettingsSubState extends BaseOptionsMenu
 				addOption(newOption);
 				// updateTextFrom(newOption);
 			}
-		}
-		catch (e:Dynamic)
-		{
+		} catch (e:Dynamic) {
 			var errorTitle = 'Mod name: ' + folder;
 			var errorMsg = 'An error occurred: $e';
 			#if windows
@@ -164,10 +148,8 @@ class ModSettingsSubState extends BaseOptionsMenu
 		reloadCheckboxes();
 	}
 
-	private function convertType(str:String):OptionType
-	{
-		switch (str.toLowerCase().trim())
-		{
+	private function convertType(str:String):OptionType {
+		switch (str.toLowerCase().trim()) {
 			case 'bool':
 				return BOOL;
 			case 'int', 'integer':
@@ -185,18 +167,15 @@ class ModSettingsSubState extends BaseOptionsMenu
 		return BOOL;
 	}
 
-	override public function update(elapsed:Float)
-	{
-		if (_crashed)
-		{
+	override public function update(elapsed:Float) {
+		if (_crashed) {
 			close();
 			return;
 		}
 		super.update(elapsed);
 	}
 
-	override public function close()
-	{
+	override public function close() {
 		FlxG.save.data.modSettings.set(folder, save);
 		FlxG.save.flush();
 		super.close();

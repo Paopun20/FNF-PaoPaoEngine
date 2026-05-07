@@ -3,8 +3,7 @@ package funkin.modding.editors.content;
 import flixel.addons.display.FlxGridOverlay;
 
 // Laggier than a single sprite for the grid, but this is to avoid having to re-create the sprite constantly
-class ChartingGridSprite extends FlxSprite
-{
+class ChartingGridSprite extends FlxSprite {
 	public var rows(default, set):Float = 16;
 	public var columns(default, null):Int = 0;
 	public var spacing(default, set):Int = 0;
@@ -16,8 +15,7 @@ class ChartingGridSprite extends FlxSprite
 	public var vortexLineEnabled:Bool = false;
 	public var vortexLineSpace:Float = 0;
 
-	public function new(columns:Int, ?color1:FlxColor = 0xFFE6E6E6, ?color2:FlxColor = 0xFFD8D8D8)
-	{
+	public function new(columns:Int, ?color1:FlxColor = 0xFFE6E6E6, ?color2:FlxColor = 0xFFD8D8D8) {
 		super();
 		this.columns = columns;
 		scrollFactor.x = 0;
@@ -40,8 +38,7 @@ class ChartingGridSprite extends FlxSprite
 		updateStripes();
 	}
 
-	public function loadGrid(color1:FlxColor, color2:FlxColor)
-	{
+	public function loadGrid(color1:FlxColor, color2:FlxColor) {
 		loadGraphic(FlxGridOverlay.createGrid(1, 1, columns, 2, true, color1, color2), true, columns, 1);
 		animation.add('odd', [0], false);
 		animation.add('even', [1], false);
@@ -50,23 +47,20 @@ class ChartingGridSprite extends FlxSprite
 		recalcHeight();
 	}
 
-	override function draw()
-	{
+	override function draw() {
 		if (!visible || alpha == 0 || y - camera.scroll.y >= FlxG.height)
 			return;
 		scale.y = ChartingState.GRID_SIZE * Math.min(1, rows);
 		offset.y = -0.5 * (scale.y - 1);
 
 		super.draw();
-		if (rows <= 1)
-		{
+		if (rows <= 1) {
 			_drawStripes();
 			return;
 		}
 
 		var initialY:Float = y;
-		for (i in 1...Math.ceil(rows))
-		{
+		for (i in 1...Math.ceil(rows)) {
 			y += ChartingState.GRID_SIZE + spacing;
 			if (y - camera.scroll.y >= FlxG.height)
 				break;
@@ -81,12 +75,10 @@ class ChartingGridSprite extends FlxSprite
 
 		_drawStripes();
 
-		if (vortexLineEnabled)
-		{
+		if (vortexLineEnabled) {
 			vortexLine.x = this.x;
 			vortexLine.y = this.y - 1;
-			while (true)
-			{
+			while (true) {
 				vortexLine.y += vortexLineSpace;
 				if (vortexLine.y >= this.y + this.height)
 					break;
@@ -96,10 +88,8 @@ class ChartingGridSprite extends FlxSprite
 		}
 	}
 
-	function _drawStripes()
-	{
-		for (i => column in stripes)
-		{
+	function _drawStripes() {
+		for (i => column in stripes) {
 			if (column == 0)
 				stripe.x = this.x;
 			else
@@ -108,8 +98,7 @@ class ChartingGridSprite extends FlxSprite
 		}
 	}
 
-	public function updateStripes()
-	{
+	public function updateStripes() {
 		if (stripe == null || !stripe.exists)
 			return;
 		stripe.y = this.y;
@@ -117,22 +106,19 @@ class ChartingGridSprite extends FlxSprite
 		stripe.updateHitbox();
 	}
 
-	function set_rows(v:Float)
-	{
+	function set_rows(v:Float) {
 		rows = v;
 		recalcHeight();
 		return rows;
 	}
 
-	function set_spacing(v:Int)
-	{
+	function set_spacing(v:Int) {
 		spacing = v;
 		recalcHeight();
 		return spacing;
 	}
 
-	function recalcHeight()
-	{
+	function recalcHeight() {
 		height = ((ChartingState.GRID_SIZE + spacing) * rows) - spacing;
 		updateStripes();
 	}

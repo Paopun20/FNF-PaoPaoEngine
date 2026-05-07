@@ -3,8 +3,7 @@ package funkin.options;
 import funkin.states.MainMenuState;
 import funkin.backend.StageData;
 
-class OptionsState extends MusicBeatState
-{
+class OptionsState extends MusicBeatState {
 	var options:Array<String> = [
 		'Note Colors',
 		'Controls',
@@ -20,10 +19,8 @@ class OptionsState extends MusicBeatState
 	public static var menuBG:FlxSprite;
 	public static var onPlayState:Bool = false;
 
-	function openSelectedSubstate(label:String)
-	{
-		switch (label)
-		{
+	function openSelectedSubstate(label:String) {
+		switch (label) {
 			case 'Note Colors':
 				openSubState(new funkin.options.NotesColorSubState());
 			case 'Controls':
@@ -44,8 +41,7 @@ class OptionsState extends MusicBeatState
 	var selectorLeft:Alphabet;
 	var selectorRight:Alphabet;
 
-	override function create()
-	{
+	override function create() {
 		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("Options Menu", null);
 		#end
@@ -61,8 +57,7 @@ class OptionsState extends MusicBeatState
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		add(grpOptions);
 
-		for (num => option in options)
-		{
+		for (num => option in options) {
 			var optionText:Alphabet = new Alphabet(0, 0, Language.getPhrase('options_$option', option), true);
 			optionText.screenCenter();
 			optionText.y += (92 * (num - (options.length / 2))) + 45;
@@ -80,8 +75,7 @@ class OptionsState extends MusicBeatState
 		super.create();
 	}
 
-	override function closeSubState()
-	{
+	override function closeSubState() {
 		super.closeSubState();
 		ClientPrefs.saveSettings();
 		#if DISCORD_ALLOWED
@@ -89,8 +83,7 @@ class OptionsState extends MusicBeatState
 		#end
 	}
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		super.update(elapsed);
 
 		if (controls.UI_UP_P)
@@ -98,33 +91,26 @@ class OptionsState extends MusicBeatState
 		if (controls.UI_DOWN_P)
 			changeSelection(1);
 
-		if (controls.BACK)
-		{
+		if (controls.BACK) {
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			if (onPlayState)
-			{
+			if (onPlayState) {
 				StageData.loadDirectory(PlayState.SONG);
 				LoadingState.prepareToSong(); // fix softlock
 				LoadingState.loadAndSwitchState(new PlayState());
 				FlxG.sound.music.volume = 0;
-			}
-			else
+			} else
 				MusicBeatState.switchState(new MainMenuState());
-		}
-		else if (controls.ACCEPT)
+		} else if (controls.ACCEPT)
 			openSelectedSubstate(options[curSelected]);
 	}
 
-	function changeSelection(change:Int = 0)
-	{
+	function changeSelection(change:Int = 0) {
 		curSelected = FlxMath.wrap(curSelected + change, 0, options.length - 1);
 
-		for (num => item in grpOptions.members)
-		{
+		for (num => item in grpOptions.members) {
 			item.targetY = num - curSelected;
 			item.alpha = 0.6;
-			if (item.targetY == 0)
-			{
+			if (item.targetY == 0) {
 				item.alpha = 1;
 				selectorLeft.x = item.x - 63;
 				selectorLeft.y = item.y;
@@ -135,8 +121,7 @@ class OptionsState extends MusicBeatState
 		FlxG.sound.play(Paths.sound('scrollMenu'));
 	}
 
-	override function destroy()
-	{
+	override function destroy() {
 		ClientPrefs.loadPrefs();
 		super.destroy();
 	}

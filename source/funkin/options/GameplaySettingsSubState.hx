@@ -1,9 +1,7 @@
 package funkin.options;
 
-class GameplaySettingsSubState extends BaseOptionsMenu
-{
-	public function new()
-	{
+class GameplaySettingsSubState extends BaseOptionsMenu {
+	public function new() {
 		title = Language.getPhrase('gameplay_menu', 'Gameplay Settings');
 		rpcTitle = 'Gameplay Settings Menu'; // for Discord Rich Presence
 

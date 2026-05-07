@@ -1,18 +1,15 @@
 package funkin.modding.scripts.components;
 
 #if flxanimate
-class ModchartAnimateSprite extends FlxAnimate
-{
+class ModchartAnimateSprite extends FlxAnimate {
 	public var animOffsets:Map<String, Array<Float>> = new Map<String, Array<Float>>();
 
-	public function new(?x:Float = 0, ?y:Float = 0)
-	{
+	public function new(?x:Float = 0, ?y:Float = 0) {
 		super(x, y);
 		antialiasing = ClientPrefs.data.antialiasing;
 	}
 
-	public function playAnim(name:String, forced:Bool = false, ?reverse:Bool = false, ?startFrame:Int = 0)
-	{
+	public function playAnim(name:String, forced:Bool = false, ?reverse:Bool = false, ?startFrame:Int = 0) {
 		anim.play(name, forced, reverse, startFrame);
 
 		var daOffset = animOffsets.get(name);
@@ -20,8 +17,7 @@ class ModchartAnimateSprite extends FlxAnimate
 			offset.set(daOffset[0], daOffset[1]);
 	}
 
-	public function addOffset(name:String, x:Float, y:Float)
-	{
+	public function addOffset(name:String, x:Float, y:Float) {
 		animOffsets.set(name, [x, y]);
 	}
 }

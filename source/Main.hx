@@ -38,7 +38,6 @@ import sys.io.File;
 // Placeholder for crash debugger UI library
 #end
 import haxe.ds.StringMap;
-import funkin.backend.utils.tools.ThreadTool;
 #if hxhardware
 import hxhardware.CPU;
 import hxhardware.GPU;
@@ -62,13 +61,11 @@ import funkin.backend.utils.HxSignalKill;
  * Error and crash handling system for PaoPaoEngine
  * Handles uncaught errors, critical errors, and provides logging functionality
  */
-final class ErrorHandle
-{
+final class ErrorHandle {
 	#if CRASH_HANDLER
 	private static var _sourceMap:StringMap<String> = SourceMap.build();
 
-	public static function init():Void
-	{
+	public static function init():Void {
 		FunkinGame.onGameCrash.add(onCrash);
 		untyped __global__.__hxcpp_set_critical_error_handler(onCriticalError);
 	}
@@ -79,17 +76,14 @@ final class ErrorHandle
 		onCrash(new Exception(message));
 	}
 
-	private static function onCrash(e:Exception):Void
-	{
+	private static function onCrash(e:Exception):Void {
 		var errMsg:String = "";
 		var path:String;
 		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
 		var dateNow:String = Date.now().toString();
-		var getLine = function(file:String, line:Int):String
-		{
+		var getLine = function(file:String, line:Int):String {
 			var content = getFile(file);
-			if (content != null)
-			{
+			if (content != null) {
 				var lines = content.split("\n");
 				if (line > 0 && line <= lines.length)
 					return lines[line - 1].trim();
@@ -104,10 +98,8 @@ final class ErrorHandle
 
 		// Build stack trace
 		var stackIndex:Int = 0;
-		for (stackItem in callStack)
-		{
-			switch (stackItem)
-			{
+		for (stackItem in callStack) {
+			switch (stackItem) {
 				case FilePos(s, file, line, column):
 					errMsg += file + " (line " + line + ")\n";
 					errMsg += "-> " + getLine(file, line) + "\n";
@@ -121,24 +113,16 @@ final class ErrorHandle
 		// Improved error reporting: always show something useful
 		var errorDetail = "";
 		var errorType = "";
-		if (e != null)
-		{
+		if (e != null) {
 			errorType = Type.getClassName(Type.getClass(e));
-			if (e.message != null && e.message != "")
-			{
+			if (e.message != null && e.message != "") {
 				errorDetail = e.message;
-			}
-			else if (e.toString() != null && e.toString() != "")
-			{
+			} else if (e.toString() != null && e.toString() != "") {
 				errorDetail = e.toString();
-			}
-			else
-			{
+			} else {
 				errorDetail = "<no error details available>";
 			}
-		}
-		else
-		{
+		} else {
 			errorType = "<Unknown Exception Type>";
 			errorDetail = "<Exception object is null>";
 		}
@@ -166,18 +150,14 @@ final class ErrorHandle
 	/**
 	 * Save logs to file
 	 */
-	private static function saveLogs(filename:String, content:String):Void
-	{
-		try
-		{
+	private static function saveLogs(filename:String, content:String):Void {
+		try {
 			if (!FileSystem.exists("./crash/"))
 				FileSystem.createDirectory("./crash/");
 
 			File.saveContent(filename, content + "\n");
 			CoolLog.critical("Crash dump saved in " + Path.normalize(filename));
-		}
-		catch (e:Dynamic)
-		{
+		} catch (e:Dynamic) {
 			trace('Failed to save crash log: $e');
 		}
 	}
@@ -185,14 +165,10 @@ final class ErrorHandle
 	/**
 	 * Show a dialog window with error message
 	 */
-	private static function showDialogWindow(message:String, title:String):Void
-	{
-		try
-		{
+	private static function showDialogWindow(message:String, title:String):Void {
+		try {
 			Application.current.window.alert(message, title);
-		}
-		catch (e:Dynamic)
-		{
+		} catch (e:Dynamic) {
 			trace('Failed to show dialog window: $e');
 		}
 	}
@@ -200,8 +176,7 @@ final class ErrorHandle
 	/**
 	 * Shutdown the application
 	 */
-	private static function shutdown():Void
-	{
+	private static function shutdown():Void {
 		#if DISCORD_ALLOWED
 		DiscordClient.shutdown();
 		#end
@@ -211,8 +186,7 @@ final class ErrorHandle
 		#end
 	}
 
-	private static function getFile(path:String):Null<String>
-	{
+	private static function getFile(path:String):Null<String> {
 		return _sourceMap.get(path.replace("\\", "/"));
 	}
 	#end
@@ -222,8 +196,7 @@ final class ErrorHandle
 @:cppInclude('./external/gamemode_client.h')
 @:cppFileCode('#define GAMEMODE_AUTO')
 #end
-class Main extends Sprite
-{
+class Main extends Sprite {
 	public static final game = {
 		width: 1280, // WINDOW width
 		height: 720, // WINDOW height
@@ -241,10 +214,7 @@ class Main extends Sprite
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
-	public static function main():Void
-	{
-		ThreadTool.defaultThreadCount = 8;
-		ThreadUtil.maxThreads = Std.int(Math.max(1, ThreadTool.getCPUThreadsCount()));
+	public static function main():Void {
 		#if SlWindowsAPI
 		WindowsAPI.reDefineMainWindowTitle(Application.current.window.title);
 		#end
@@ -267,14 +237,10 @@ class Main extends Sprite
 		VLCHandle.init(#if (hxvlc >= "1.8.0") ['--no-lua'] #end);
 
 		// Initialize hxvlc's Handle here so the videos are loading faster.
-		VLCHandle.initAsync(function(success:Bool):Void
-		{
-			if (success)
-			{
+		VLCHandle.initAsync(function(success:Bool):Void {
+			if (success) {
 				CoolLog.info('HXVLC has LibVLC instance initialized!');
-			}
-			else
-			{
+			} else {
 				CoolLog.warning('HXVLC has LibVLC instance failed to initialize!');
 			}
 		});
@@ -283,8 +249,7 @@ class Main extends Sprite
 		#if cpp
 		HxSignalKill.init();
 
-		HxSignalKill.onSIGTERM = HxSignalKill.onSIGINT = function()
-		{
+		HxSignalKill.onSIGTERM = HxSignalKill.onSIGINT = function() {
 			CoolLog.info("Ctrl + C is kill me");
 			ClientPrefs.saveSettings();
 			#if DISCORD_ALLOWED
@@ -297,8 +262,7 @@ class Main extends Sprite
 		};
 
 		#if !windows
-		HxSignalKill.onSIGHUP = function()
-		{
+		HxSignalKill.onSIGHUP = function() {
 			ClientPrefs.loadDefaultKeys();
 		};
 		#end
@@ -307,8 +271,7 @@ class Main extends Sprite
 		Lib.current.addChild(new Main());
 
 		Lib.current.stage.window.onClose.add(onClose.dispatch);
-		onClose.add(function()
-		{
+		onClose.add(function() {
 			#if cpp
 			FlxG.signals.preUpdate.remove(HxSignalKill.updateSignal);
 			FlxG.signals.postUpdate.remove(HxSignalKill.dispatchPending);
@@ -323,8 +286,7 @@ class Main extends Sprite
 		funkin.plugins.ForceCrashPlugin.initialize();
 	}
 
-	public function new()
-	{
+	public function new() {
 		super();
 
 		#if (cpp && windows)
@@ -357,8 +319,7 @@ class Main extends Sprite
 		addChild(fpsVar);
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-		if (fpsVar != null)
-		{
+		if (fpsVar != null) {
 			fpsVar.visible = ClientPrefs.data.showFPS;
 		}
 		#end
@@ -390,8 +351,7 @@ class Main extends Sprite
 		#end
 
 		// shader coords fix
-		FlxG.signals.gameResized.add(function(w, h)
-		{
+		FlxG.signals.gameResized.add(function(w, h) {
 			if (FlxG.cameras != null)
 				for (cam in FlxG.cameras.list)
 					if (cam != null && cam.filters != null)
@@ -402,8 +362,7 @@ class Main extends Sprite
 		});
 	}
 
-	static function resetSpriteCache(sprite:Sprite):Void
-	{
+	static function resetSpriteCache(sprite:Sprite):Void {
 		@:privateAccess {
 			sprite.__cacheBitmap = null;
 			sprite.__cacheBitmapData = null;

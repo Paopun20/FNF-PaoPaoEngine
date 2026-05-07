@@ -9,8 +9,7 @@ package funkin.vis.dsp;
 abstract OffsetArray<T>({
 	final array:Array<T>;
 	final offset:Int;
-})
-{
+}) {
 	public inline function new(array:Array<T>, offset:Int)
 		this = {array: array, offset: offset};
 
@@ -46,8 +45,7 @@ abstract OffsetArray<T>({
 		same order but shifted by `n` positions (to the right if positive and to
 		the left if negative) in **circular** fashion (no elements discarded).
 	**/
-	public static function circShift<T>(array:Array<T>, n:Int):Array<T>
-	{
+	public static function circShift<T>(array:Array<T>, n:Int):Array<T> {
 		if (n < 0)
 			return circShift(array, array.length + n);
 
@@ -63,21 +61,18 @@ abstract OffsetArray<T>({
 	}
 }
 
-private class OffsetArrayIterator<T>
-{
+private class OffsetArrayIterator<T> {
 	private final array:Array<T>;
 	private final offset:Int;
 	private var enumeration:Int;
 
-	public inline function new(array:Array<T>, offset:Int)
-	{
+	public inline function new(array:Array<T>, offset:Int) {
 		this.array = array;
 		this.offset = offset;
 		this.enumeration = 0;
 	}
 
-	public inline function next():{key:Int, value:T}
-	{
+	public inline function next():{key:Int, value:T} {
 		final i = this.enumeration++;
 		return {key: i + this.offset, value: this.array[i]};
 	}

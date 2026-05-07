@@ -9,43 +9,31 @@ import sys.io.File;
 
 using StringTools;
 
-class VersionMacro
-{
-	public static macro function build(version:String = 'gitVersion.txt'):Array<Field>
-	{
+class VersionMacro {
+	public static macro function build(version:String = 'gitVersion.txt'):Array<Field> {
 		var pos = Context.currentPos();
 		var fields = Context.getBuildFields();
 		var versionValue = "unknown";
 
-		try
-		{
-			if (FileSystem.exists(version))
-			{
+		try {
+			if (FileSystem.exists(version)) {
 				versionValue = File.getContent(version).trim();
 				if (versionValue == "")
 					versionValue = "unknown";
 			}
-		}
-		catch (e)
-		{
-		}
+		} catch (e) {}
 
-		for (field in fields)
-		{
-			if (field.meta != null)
-			{
+		for (field in fields) {
+			if (field.meta != null) {
 				var hasInjectVar = false;
-				for (meta in field.meta)
-				{
-					if (meta.name == ":injectvar")
-					{
+				for (meta in field.meta) {
+					if (meta.name == ":injectvar") {
 						hasInjectVar = true;
 						break;
 					}
 				}
 
-				if (hasInjectVar)
-				{
+				if (hasInjectVar) {
 					field.kind = FVar(macro :String, macro $v{versionValue});
 				}
 			}

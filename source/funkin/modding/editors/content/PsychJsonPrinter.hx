@@ -2,12 +2,10 @@ package funkin.modding.editors.content;
 
 import haxe.format.JsonPrinter;
 
-class PsychJsonPrinter extends JsonPrinter
-{
+class PsychJsonPrinter extends JsonPrinter {
 	var ignoreTab:Array<String> = [];
 
-	public static function print(o:Dynamic, ?ignoreTab:Array<String>):String
-	{
+	public static function print(o:Dynamic, ?ignoreTab:Array<String>):String {
 		var p = new PsychJsonPrinter(null, '\t');
 		if (ignoreTab != null)
 			p.ignoreTab = ignoreTab;
@@ -15,15 +13,12 @@ class PsychJsonPrinter extends JsonPrinter
 		return p.buf.toString();
 	}
 
-	override function fieldsString(v:Dynamic, fields:Array<String>)
-	{
+	override function fieldsString(v:Dynamic, fields:Array<String>) {
 		writeObject(v, fields, false);
 	}
 
-	function isComplex(v:Dynamic):Bool
-	{
-		switch (Type.typeof(v))
-		{
+	function isComplex(v:Dynamic):Bool {
+		switch (Type.typeof(v)) {
 			case TObject:
 				for (f in Reflect.fields(v))
 					if (isComplex(Reflect.field(v, f)))
@@ -44,14 +39,12 @@ class PsychJsonPrinter extends JsonPrinter
 		}
 	}
 
-	function writeObject(v:Dynamic, fields:Array<String>, forceMultiline:Bool)
-	{
+	function writeObject(v:Dynamic, fields:Array<String>, forceMultiline:Bool) {
 		addChar('{'.code);
 		nind++;
 
 		var first = true;
-		for (f in fields)
-		{
+		for (f in fields) {
 			var value = Reflect.field(v, f);
 			if (Reflect.isFunction(value))
 				continue;
@@ -62,12 +55,10 @@ class PsychJsonPrinter extends JsonPrinter
 				addChar(','.code);
 			first = false;
 
-			if (!singleLine)
-			{
+			if (!singleLine) {
 				newl();
 				ipad();
-			}
-			else if (!pretty)
+			} else if (!pretty)
 				addChar(' '.code);
 
 			quote(f);
@@ -84,10 +75,8 @@ class PsychJsonPrinter extends JsonPrinter
 		addChar('}'.code);
 	}
 
-	function writeValue(v:Dynamic, singleLine:Bool)
-	{
-		switch (Type.typeof(v))
-		{
+	function writeValue(v:Dynamic, singleLine:Bool) {
+		switch (Type.typeof(v)) {
 			case TObject:
 				writeObject(v, Reflect.fields(v), !singleLine);
 
@@ -106,20 +95,17 @@ class PsychJsonPrinter extends JsonPrinter
 		}
 	}
 
-	function writeArray(a:Array<Dynamic>, forceMultiline:Bool)
-	{
+	function writeArray(a:Array<Dynamic>, forceMultiline:Bool) {
 		addChar('['.code);
 		nind++;
 
 		var first = true;
-		for (v in a)
-		{
+		for (v in a) {
 			if (!first)
 				addChar(','.code);
 			first = false;
 
-			if (forceMultiline)
-			{
+			if (forceMultiline) {
 				newl();
 				ipad();
 			}
@@ -127,8 +113,7 @@ class PsychJsonPrinter extends JsonPrinter
 		}
 
 		nind--;
-		if (forceMultiline)
-		{
+		if (forceMultiline) {
 			newl();
 			ipad();
 		}

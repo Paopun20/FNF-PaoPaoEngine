@@ -5,8 +5,7 @@ import flixel.tweens.FlxEase;
 import funkin.states.MainMenuState;
 import funkin.states.TitleState;
 
-class OutdatedSubState extends EditableSubstate
-{
+class OutdatedSubState extends EditableSubstate {
 	public static var updateVersion:String = CoolUtil.checkForUpdates();
 
 	var leftState:Bool = false;
@@ -14,8 +13,7 @@ class OutdatedSubState extends EditableSubstate
 	var bg:FlxSprite;
 	var warnText:FlxText;
 
-	override function create()
-	{
+	override function create() {
 		super.create();
 
 		bg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
@@ -42,27 +40,20 @@ class OutdatedSubState extends EditableSubstate
 		FlxTween.tween(warnText, {alpha: 1.0}, 0.6, {ease: FlxEase.sineIn});
 	}
 
-	override function update(elapsed:Float)
-	{
-		if (!leftState)
-		{
-			if (controls.ACCEPT)
-			{
+	override function update(elapsed:Float) {
+		if (!leftState) {
+			if (controls.ACCEPT) {
 				leftState = true;
 				CoolUtil.browserLoad("https://github.com/ShadowMario/FNF-PsychEngine/releases");
-			}
-			else if (controls.BACK)
-			{
+			} else if (controls.BACK) {
 				leftState = true;
 			}
-			if (leftState)
-			{
+			if (leftState) {
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				FlxTween.tween(bg, {alpha: 0.0}, 0.9, {ease: FlxEase.sineOut});
 				FlxTween.tween(warnText, {alpha: 0}, 1, {
 					ease: FlxEase.sineOut,
-					onComplete: function(twn:FlxTween)
-					{
+					onComplete: function(twn:FlxTween) {
 						FlxG.state.persistentUpdate = true;
 						close();
 					}

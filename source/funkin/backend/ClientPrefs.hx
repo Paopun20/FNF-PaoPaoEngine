@@ -6,8 +6,7 @@ import flixel.input.gamepad.FlxGamepadInputID;
 import funkin.states.TitleState;
 
 // Add a variable here and it will get automatically saved
-@:structInit class SaveVariables
-{
+@:structInit class SaveVariables {
 	public var downScroll:Bool = false;
 	public var middleScroll:Bool = false;
 	public var opponentStrums:Bool = true;
@@ -81,8 +80,7 @@ import funkin.states.TitleState;
 	public var language:String = 'en-US';
 }
 
-class ClientPrefs
-{
+class ClientPrefs {
 	public static var data:SaveVariables = {};
 	public static var defaultData:SaveVariables = {};
 
@@ -138,8 +136,7 @@ class ClientPrefs
 					gamepadBinds.set(button, defaultButtons.get(button).copy());
 	}
 
-	public static function clearInvalidKeys(key:String)
-	{
+	public static function clearInvalidKeys(key:String) {
 		var keyBind:Array<FlxKey> = keyBinds.get(key);
 		var gamepadBind:Array<FlxGamepadInputID> = gamepadBinds.get(key);
 		while (keyBind != null && keyBind.contains(NONE))
@@ -148,14 +145,12 @@ class ClientPrefs
 			gamepadBind.remove(NONE);
 	}
 
-	public static function loadDefaultKeys()
-	{
+	public static function loadDefaultKeys() {
 		defaultKeys = keyBinds.copy();
 		defaultButtons = gamepadBinds.copy();
 	}
 
-	public static function saveSettings()
-	{
+	public static function saveSettings() {
 		for (key in Reflect.fields(data))
 			Reflect.setField(FlxG.save.data, key, Reflect.field(data, key));
 
@@ -171,8 +166,7 @@ class ClientPrefs
 		FlxG.log.add("Settings saved!");
 	}
 
-	public static function loadPrefs()
-	{
+	public static function loadPrefs() {
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
 
 		for (key in Reflect.fields(data))
@@ -185,26 +179,21 @@ class ClientPrefs
 		#if (!html5 && !switch)
 		FlxG.autoPause = ClientPrefs.data.autoPause;
 
-		if (FlxG.save.data.framerate == null)
-		{
+		if (FlxG.save.data.framerate == null) {
 			final refreshRate:Int = FlxG.stage.application.window.displayMode.refreshRate;
 			data.framerate = Std.int(FlxMath.bound(refreshRate, 60, 240));
 		}
 		#end
 
-		if (data.framerate > FlxG.drawFramerate)
-		{
+		if (data.framerate > FlxG.drawFramerate) {
 			FlxG.updateFramerate = data.framerate;
 			FlxG.drawFramerate = data.framerate;
-		}
-		else
-		{
+		} else {
 			FlxG.drawFramerate = data.framerate;
 			FlxG.updateFramerate = data.framerate;
 		}
 
-		if (FlxG.save.data.gameplaySettings != null)
-		{
+		if (FlxG.save.data.gameplaySettings != null) {
 			var savedMap:Map<String, Dynamic> = FlxG.save.data.gameplaySettings;
 			for (name => value in savedMap)
 				data.gameplaySettings.set(name, value);
@@ -221,17 +210,14 @@ class ClientPrefs
 		// controls on a separate save file
 		var save:FlxSave = new FlxSave();
 		save.bind('controls_v3', CoolUtil.getSavePath());
-		if (save != null)
-		{
-			if (save.data.keyboard != null)
-			{
+		if (save != null) {
+			if (save.data.keyboard != null) {
 				var loadedControls:Map<String, Array<FlxKey>> = save.data.keyboard;
 				for (control => keys in loadedControls)
 					if (keyBinds.exists(control))
 						keyBinds.set(control, keys);
 			}
-			if (save.data.gamepad != null)
-			{
+			if (save.data.gamepad != null) {
 				var loadedControls:Map<String, Array<FlxGamepadInputID>> = save.data.gamepad;
 				for (control => keys in loadedControls)
 					if (gamepadBinds.exists(control))
@@ -241,23 +227,20 @@ class ClientPrefs
 		}
 	}
 
-	inline public static function getGameplaySetting(name:String, defaultValue:Dynamic = null, ?customDefaultValue:Bool = false):Dynamic
-	{
+	inline public static function getGameplaySetting(name:String, defaultValue:Dynamic = null, ?customDefaultValue:Bool = false):Dynamic {
 		if (!customDefaultValue)
 			defaultValue = defaultData.gameplaySettings.get(name);
 		return /*PlayState.isStoryMode ? defaultValue : */ (data.gameplaySettings.exists(name) ? data.gameplaySettings.get(name) : defaultValue);
 	}
 
-	public static function reloadVolumeKeys()
-	{
+	public static function reloadVolumeKeys() {
 		TitleState.muteKeys = keyBinds.get('volume_mute').copy();
 		TitleState.volumeDownKeys = keyBinds.get('volume_down').copy();
 		TitleState.volumeUpKeys = keyBinds.get('volume_up').copy();
 		toggleVolumeKeys(true);
 	}
 
-	public static function toggleVolumeKeys(?turnOn:Bool = true)
-	{
+	public static function toggleVolumeKeys(?turnOn:Bool = true) {
 		final emptyArray = [];
 		FlxG.sound.muteKeys = turnOn ? TitleState.muteKeys : emptyArray;
 		FlxG.sound.volumeDownKeys = turnOn ? TitleState.volumeDownKeys : emptyArray;

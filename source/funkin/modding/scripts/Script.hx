@@ -1,5 +1,6 @@
 package funkin.modding.scripts;
 
+import haxe.exceptions.NotImplementedException;
 import flixel.FlxG;
 import flixel.math.FlxMath;
 import flixel.text.FlxText;
@@ -47,10 +48,9 @@ import sys.FileSystem;
 
 using StringTools;
 using Lambda;
-using PPQolTools;
+using funkin.backend.utils.tools.PPQolTools;
 
-class Script implements IFlxDestroyable
-{
+class Script implements IFlxDestroyable {
 	public var scriptCode:String;
 	public var scriptName:String;
 	public var scriptPath:String;
@@ -60,13 +60,12 @@ class Script implements IFlxDestroyable
 
 	public var fileName:String;
 	public var folderName:String;
+	public var origin:Null<String>;
 
-	public function new(pathOrCode:String, isCode:Bool = false)
-	{
+	public function new(pathOrCode:String, isCode:Bool = false) {
 		var code:String = !isCode ? getFileContent(pathOrCode) : pathOrCode;
 		scriptPath = !isCode ? pathOrCode : "UnknownWhere";
-		if (!isCode)
-		{
+		if (!isCode) {
 			var filePath = pathOrCode.split("/");
 			this.fileName = filePath.pop();
 			if (filePath.first() == "mods")
@@ -77,8 +76,7 @@ class Script implements IFlxDestroyable
 		this.scriptCode = code;
 	}
 
-	public static function preset(?script:Script):Void
-	{
+	public static function preset(?script:Script):Void {
 		if (script == null)
 			return;
 		var defaults = getDefaultVariables(script);
@@ -86,8 +84,7 @@ class Script implements IFlxDestroyable
 			script.set(key, value);
 	}
 
-	public static function getDefaultVariables(?script:Script):Map<String, Dynamic>
-	{
+	public static function getDefaultVariables(?script:Script):Map<String, Dynamic> {
 		var defaults:Map<String, Dynamic> = [];
 		var isGame = (Type.getClass(FlxG.state) is PlayState);
 
@@ -95,6 +92,8 @@ class Script implements IFlxDestroyable
 		defaults.set('Function_StopLua', LuaUtils.Function_StopLua);
 		defaults.set('Function_StopHScript', LuaUtils.Function_StopHScript);
 		defaults.set('Function_StopPython', LuaUtils.Function_StopPython);
+		defaults.set('Function_StopPython', LuaUtils.Function_StopPython);
+		defaults.set('Function_StopNxScript', LuaUtils.Function_StopNxScript);
 		defaults.set('Function_StopAll', LuaUtils.Function_StopAll);
 		defaults.set('Function_Stop', LuaUtils.Function_Stop);
 		defaults.set('Function_Continue', LuaUtils.Function_Continue);
@@ -115,8 +114,7 @@ class Script implements IFlxDestroyable
 		defaults.set('PsychCamera', PsychCamera);
 		defaults.set('FlxTimer', FlxTimer);
 		defaults.set('FlxTween', {
-			tween: function(obj:Dynamic, props:Dynamic, duration:Float, ?options:Dynamic)
-			{
+			tween: function(obj:Dynamic, props:Dynamic, duration:Float, ?options:Dynamic) {
 				if (obj == null)
 					return null;
 				for (field in Reflect.fields(props))
@@ -168,8 +166,7 @@ class Script implements IFlxDestroyable
 		defaults.set('currentModDirectory', Mods.currentModDirectory);
 		defaults.set('buildTarget', LuaUtils.getBuildTarget());
 
-		if (isGame)
-		{
+		if (isGame) {
 			// Song/Week data
 			defaults.set('curBpm', Conductor.bpm);
 			defaults.set('bpm', PlayState.SONG.bpm);
@@ -214,43 +211,37 @@ class Script implements IFlxDestroyable
 	public var parent(get, set):Dynamic;
 
 	function set_parent(value:Dynamic):Dynamic
-		return null;
+		throw new NotImplementedException("override this function");
 
 	function get_parent():Dynamic
-		return null;
+		throw new NotImplementedException("override this function");
 
-	inline public static function getFileContent(path:String):String
-	{
+	inline public static function getFileContent(path:String):String {
 		// trace(path);
 		var data:String;
-		try
-		{
+		try {
 			data = #if mobile openfl.utils.Assets.exists(path) ? openfl.utils.Assets.getText(path) : #end
 			sys.io.File.getContent(path);
-		}
-		catch (e)
-		{
+		} catch (e) {
 			data = "";
 		}
 		return data;
 	}
 
 	public function call(funcName:String, ?args:Array<Dynamic>):Dynamic
-		return null;
+		throw new NotImplementedException("override this function");
 
 	public function execute():Void
-	{
-	}
+		throw new NotImplementedException("override this function");
 
 	public function set(variable:String, value:Dynamic)
-	{
-	}
+		throw new NotImplementedException("override this function");
 
 	public function get(variable:String):Dynamic
-		return null;
+		throw new NotImplementedException("override this function");
 
 	public function hasFunction(funcName:String):Bool
-		return false;
+		throw new NotImplementedException("override this function");
 
 	public function stop():Void
 		closed = true;

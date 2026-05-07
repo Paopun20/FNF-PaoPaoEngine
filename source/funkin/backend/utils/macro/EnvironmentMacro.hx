@@ -11,8 +11,7 @@ import haxe.ds.StringMap;
 using StringTools;
 using Lambda;
 
-private typedef EnvConfig =
-{
+private typedef EnvConfig = {
 	final key:String;
 	final required:Bool;
 	final defaultValue:Null<String>;
@@ -20,14 +19,11 @@ private typedef EnvConfig =
 
 private typedef FieldArray = Array<Field>;
 
-class EnvironmentMacro
-{
-	public static macro function build(dotfile:String = '.env'):FieldArray
-	{
+class EnvironmentMacro {
+	public static macro function build(dotfile:String = '.env'):FieldArray {
 		final env = parseEnv(dotfile);
 		final fields = Context.getBuildFields();
-		for (field in fields)
-		{
+		for (field in fields) {
 			if (!field.access.contains(AStatic))
 				continue;
 			final meta = field.meta.find(m -> m.name == ':env');
@@ -56,22 +52,17 @@ class EnvironmentMacro
 	}
 
 	// Meta parsing
-	private static function parseEnvMeta(fieldName:String, meta:MetadataEntry):EnvConfig
-	{
+	private static function parseEnvMeta(fieldName:String, meta:MetadataEntry):EnvConfig {
 		var key = fieldName;
 		var required = false;
 		var def:Null<String> = null;
-		for (p in meta.params)
-		{
-			switch (p.expr)
-			{
+		for (p in meta.params) {
+			switch (p.expr) {
 				case EConst(CString(s, _)):
 					key = s;
 				case EObjectDecl(fields):
-					for (f in fields)
-					{
-						switch (f.field)
-						{
+					for (f in fields) {
+						switch (f.field) {
 							case 'required':
 								required = constBool(f.expr);
 							case 'fallback':
@@ -92,10 +83,8 @@ class EnvironmentMacro
 	}
 
 	// Const extraction helpers
-	private static function constBool(e:Expr):Bool
-	{
-		return switch (e.expr)
-		{
+	private static function constBool(e:Expr):Bool {
+		return switch (e.expr) {
 			case EConst(CIdent('true')):
 				true;
 			case EConst(CIdent('false')):
@@ -106,10 +95,8 @@ class EnvironmentMacro
 		}
 	}
 
-	private static function constString(e:Expr):String
-	{
-		return switch (e.expr)
-		{
+	private static function constString(e:Expr):String {
+		return switch (e.expr) {
 			case EConst(CString(s, _)):
 				s;
 			default:
@@ -119,10 +106,8 @@ class EnvironmentMacro
 	}
 
 	// Type helpers
-	private static function isNullString(kind:FieldType):Bool
-	{
-		return switch (kind)
-		{
+	private static function isNullString(kind:FieldType):Bool {
+		return switch (kind) {
 			case FVar(TPath({name: 'Null', params: [TPType(TPath({name: 'String'}))]}), _):
 				true;
 			default:
@@ -130,10 +115,8 @@ class EnvironmentMacro
 		}
 	}
 
-	private static function getVarType(kind:FieldType):ComplexType
-	{
-		return switch (kind)
-		{
+	private static function getVarType(kind:FieldType):ComplexType {
+		return switch (kind) {
 			case FVar(t, _):
 				t;
 			default:
@@ -142,8 +125,7 @@ class EnvironmentMacro
 	}
 
 	// Env file parsing
-	private static function parseEnv(path:String):StringMap<String>
-	{
+	private static function parseEnv(path:String):StringMap<String> {
 		final map:StringMap<String> = new StringMap<String>();
 		if (!FileSystem.exists(path))
 			return map;
@@ -151,8 +133,7 @@ class EnvironmentMacro
 		if (content == null)
 			return map;
 		content = content.replace("\r\n", "\n");
-		for (line in content.split("\n"))
-		{
+		for (line in content.split("\n")) {
 			line = line.trim();
 			if (line == "" || line.startsWith("#"))
 				continue;
@@ -169,18 +150,15 @@ class EnvironmentMacro
 		return map;
 	}
 
-	private static function stripQuotes(v:String):String
-	{
-		if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'")))
-		{
+	private static function stripQuotes(v:String):String {
+		if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
 			return v.substr(1, v.length - 2);
 		}
 		return v;
 	}
 
 	// Target logic
-	private static function shouldExcludeKey(key:String):Bool
-	{
+	private static function shouldExcludeKey(key:String):Bool {
 		final isAndroid = key.startsWith("ANDROID_");
 		final isIos = key.startsWith("IOS_");
 		final isWeb = key.startsWith("WEB_");
@@ -198,15 +176,13 @@ class EnvironmentMacro
 		return false;
 	}
 
-	private static function stripTargetPrefix(key:String):String
-	{
+	private static function stripTargetPrefix(key:String):String {
 		final i = key.indexOf("_");
 		if (i == -1)
 			return key;
 		final prefix = key.substr(0, i);
 		final rest = key.substr(i + 1);
-		return switch (prefix)
-		{
+		return switch (prefix) {
 			#if android
 			case "ANDROID", "MOBILE": rest;
 			#elseif ios

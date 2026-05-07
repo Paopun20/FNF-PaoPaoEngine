@@ -2,8 +2,7 @@ package funkin.states;
 
 import funkin.objects.AttachedSprite;
 
-class CreditsState extends EditableState
-{
+class CreditsState extends EditableState {
 	var curSelected:Int = -1;
 
 	private var grpOptions:FlxTypedGroup<Alphabet>;
@@ -17,8 +16,7 @@ class CreditsState extends EditableState
 
 	var offsetThing:Float = -75;
 
-	override function create()
-	{
+	override function create() {
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
@@ -181,8 +179,7 @@ class CreditsState extends EditableState
 		for (i in defaultList)
 			creditsStuff.push(i);
 
-		for (i => credit in creditsStuff)
-		{
+		for (i => credit in creditsStuff) {
 			var isSelectable:Bool = !unselectableCheck(i);
 			var optionText:Alphabet = new Alphabet(FlxG.width / 2, 300, credit[0], !isSelectable);
 			optionText.isMenuItem = true;
@@ -191,14 +188,12 @@ class CreditsState extends EditableState
 			optionText.snapToPosition();
 			grpOptions.add(optionText);
 
-			if (isSelectable)
-			{
+			if (isSelectable) {
 				if (credit[5] != null)
 					Mods.currentModDirectory = credit[5];
 
 				var str:String = 'credits/missing_icon';
-				if (credit[1] != null && credit[1].length > 0)
-				{
+				if (credit[1] != null && credit[1].length > 0) {
 					var fileName = 'credits/' + credit[1];
 					if (Paths.fileExists('images/$fileName.png', IMAGE))
 						str = fileName;
@@ -219,8 +214,7 @@ class CreditsState extends EditableState
 
 				if (curSelected == -1)
 					curSelected = i;
-			}
-			else
+			} else
 				optionText.alignment = CENTERED;
 		}
 
@@ -248,17 +242,13 @@ class CreditsState extends EditableState
 	var quitting:Bool = false;
 	var holdTime:Float = 0;
 
-	override function update(elapsed:Float)
-	{
-		if (FlxG.sound.music.volume < 0.7)
-		{
+	override function update(elapsed:Float) {
+		if (FlxG.sound.music.volume < 0.7) {
 			FlxG.sound.music.volume += 0.5 * elapsed;
 		}
 
-		if (!quitting)
-		{
-			if (creditsStuff.length > 1)
-			{
+		if (!quitting) {
+			if (creditsStuff.length > 1) {
 				var shiftMult:Int = 1;
 				if (FlxG.keys.pressed.SHIFT)
 					shiftMult = 3;
@@ -266,55 +256,44 @@ class CreditsState extends EditableState
 				var upP = controls.UI_UP_P;
 				var downP = controls.UI_DOWN_P;
 
-				if (upP)
-				{
+				if (upP) {
 					changeSelection(-shiftMult);
 					holdTime = 0;
 				}
-				if (downP)
-				{
+				if (downP) {
 					changeSelection(shiftMult);
 					holdTime = 0;
 				}
 
-				if (controls.UI_DOWN || controls.UI_UP)
-				{
+				if (controls.UI_DOWN || controls.UI_UP) {
 					var checkLastHold:Int = Math.floor((holdTime - 0.5) * 10);
 					holdTime += elapsed;
 					var checkNewHold:Int = Math.floor((holdTime - 0.5) * 10);
 
-					if (holdTime > 0.5 && checkNewHold - checkLastHold > 0)
-					{
+					if (holdTime > 0.5 && checkNewHold - checkLastHold > 0) {
 						changeSelection((checkNewHold - checkLastHold) * (controls.UI_UP ? -shiftMult : shiftMult));
 					}
 				}
 			}
 
-			if (controls.ACCEPT && (creditsStuff[curSelected][3] == null || creditsStuff[curSelected][3].length > 4))
-			{
+			if (controls.ACCEPT && (creditsStuff[curSelected][3] == null || creditsStuff[curSelected][3].length > 4)) {
 				CoolUtil.browserLoad(creditsStuff[curSelected][3]);
 			}
-			if (controls.BACK)
-			{
+			if (controls.BACK) {
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				MusicBeatState.switchState(new MainMenuState());
 				quitting = true;
 			}
 		}
 
-		for (item in grpOptions.members)
-		{
-			if (!item.bold)
-			{
+		for (item in grpOptions.members) {
+			if (!item.bold) {
 				var lerpVal:Float = Math.exp(-elapsed * 12);
-				if (item.targetY == 0)
-				{
+				if (item.targetY == 0) {
 					var lastX:Float = item.x;
 					item.screenCenter(X);
 					item.x = FlxMath.lerp(item.x - 70, lastX, lerpVal);
-				}
-				else
-				{
+				} else {
 					item.x = FlxMath.lerp(200 + -40 * Math.abs(item.targetY), item.x, lerpVal);
 				}
 			}
@@ -324,40 +303,32 @@ class CreditsState extends EditableState
 
 	var moveTween:FlxTween = null;
 
-	function changeSelection(change:Int = 0)
-	{
+	function changeSelection(change:Int = 0) {
 		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
-		do
-		{
+		do {
 			curSelected = FlxMath.wrap(curSelected + change, 0, creditsStuff.length - 1);
-		}
-		while (unselectableCheck(curSelected));
+		} while (unselectableCheck(curSelected));
 
 		var newColor:FlxColor = CoolUtil.colorFromString(creditsStuff[curSelected][4]);
 		// trace('The BG color is: $newColor');
-		if (newColor != intendedColor)
-		{
+		if (newColor != intendedColor) {
 			intendedColor = newColor;
 			FlxTween.cancelTweensOf(bg);
 			FlxTween.color(bg, 1, bg.color, intendedColor);
 		}
 
-		for (num => item in grpOptions.members)
-		{
+		for (num => item in grpOptions.members) {
 			item.targetY = num - curSelected;
-			if (!unselectableCheck(num))
-			{
+			if (!unselectableCheck(num)) {
 				item.alpha = 0.6;
-				if (item.targetY == 0)
-				{
+				if (item.targetY == 0) {
 					item.alpha = 1;
 				}
 			}
 		}
 
 		descText.text = creditsStuff[curSelected][2];
-		if (descText.text.trim().length > 0)
-		{
+		if (descText.text.trim().length > 0) {
 			descText.visible = descBox.visible = true;
 			descText.y = FlxG.height - descText.height + offsetThing - 60;
 
@@ -367,14 +338,12 @@ class CreditsState extends EditableState
 
 			descBox.setGraphicSize(Std.int(descText.width + 20), Std.int(descText.height + 25));
 			descBox.updateHitbox();
-		}
-		else
+		} else
 			descText.visible = descBox.visible = false;
 	}
 
 	#if MODS_ALLOWED
-	function pushModCreditsToList(folder:String)
-	{
+	function pushModCreditsToList(folder:String) {
 		var creditsFile:String = Paths.mods(folder + '/data/credits.txt');
 
 		#if TRANSLATIONS_ALLOWED
@@ -383,11 +352,9 @@ class CreditsState extends EditableState
 		#end
 
 		if (#if TRANSLATIONS_ALLOWED (FileSystem.exists(translatedCredits) && (creditsFile = translatedCredits) == translatedCredits)
-			|| #end FileSystem.exists(creditsFile))
-		{
+			|| #end FileSystem.exists(creditsFile)) {
 			var firstarray:Array<String> = File.getContent(creditsFile).split('\n');
-			for (i in firstarray)
-			{
+			for (i in firstarray) {
 				var arr:Array<String> = i.replace('\\n', '\n').split("::");
 				if (arr.length >= 5)
 					arr.push(folder);
@@ -398,8 +365,7 @@ class CreditsState extends EditableState
 	}
 	#end
 
-	private function unselectableCheck(num:Int):Bool
-	{
+	private function unselectableCheck(num:Int):Bool {
 		return creditsStuff[num].length <= 1;
 	}
 }

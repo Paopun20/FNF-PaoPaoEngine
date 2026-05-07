@@ -7,8 +7,7 @@ import flixel.group.FlxGroup;
 import funkin.objects.Note;
 import funkin.objects.Character;
 
-enum Countdown
-{
+enum Countdown {
 	THREE;
 	TWO;
 	ONE;
@@ -16,8 +15,7 @@ enum Countdown
 	START;
 }
 
-class BaseStage extends FlxBasic
-{
+class BaseStage extends FlxBasic {
 	private var game(get, never):Dynamic;
 
 	public var onPlayState(get, never):Bool;
@@ -47,15 +45,11 @@ class BaseStage extends FlxBasic
 	public var defaultCamZoom(get, set):Float;
 	public var camFollow(get, never):FlxObject;
 
-	public function new()
-	{
-		if (game == null)
-		{
+	public function new() {
+		if (game == null) {
 			FlxG.log.error('Invalid state for the stage added!');
 			destroy();
-		}
-		else
-		{
+		} else {
 			game.stages.push(this);
 			super();
 			create();
@@ -63,22 +57,14 @@ class BaseStage extends FlxBasic
 	}
 
 	// main callbacks
-	public function create()
-	{
-	}
+	public function create() {}
 
-	public function createPost()
-	{
-	}
+	public function createPost() {}
 
 	// public function update(elapsed:Float) {}
-	public function countdownTick(count:Countdown, num:Int)
-	{
-	}
+	public function countdownTick(count:Countdown, num:Int) {}
 
-	public function startSong()
-	{
-	}
+	public function startSong() {}
 
 	// FNF steps, beats and sections
 	public var curBeat:Int = 0;
@@ -87,56 +73,32 @@ class BaseStage extends FlxBasic
 	public var curDecStep:Float = 0;
 	public var curSection:Int = 0;
 
-	public function beatHit()
-	{
-	}
+	public function beatHit() {}
 
-	public function stepHit()
-	{
-	}
+	public function stepHit() {}
 
-	public function sectionHit()
-	{
-	}
+	public function sectionHit() {}
 
 	// Substate close/open, for pausing Tweens/Timers
-	public function closeSubState()
-	{
-	}
+	public function closeSubState() {}
 
-	public function openSubState(SubState:FlxSubState)
-	{
-	}
+	public function openSubState(SubState:FlxSubState) {}
 
 	// Events
-	public function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float)
-	{
-	}
+	public function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float) {}
 
-	public function eventPushed(event:EventNote)
-	{
-	}
+	public function eventPushed(event:EventNote) {}
 
-	public function eventPushedUnique(event:EventNote)
-	{
-	}
+	public function eventPushedUnique(event:EventNote) {}
 
 	// Note Hit/Miss
-	public function goodNoteHit(note:Note)
-	{
-	}
+	public function goodNoteHit(note:Note) {}
 
-	public function opponentNoteHit(note:Note)
-	{
-	}
+	public function opponentNoteHit(note:Note) {}
 
-	public function noteMiss(note:Note)
-	{
-	}
+	public function noteMiss(note:Note) {}
 
-	public function noteMissPress(direction:Int)
-	{
-	}
+	public function noteMissPress(direction:Int) {}
 
 	// Things to replace FlxGroup stuff and inject sprites directly into the state
 	function add(object:FlxBasic)
@@ -160,8 +122,7 @@ class BaseStage extends FlxBasic
 	public function setDefaultGF(name:String) // Fix for the Chart Editor on Base Game stages
 	{
 		var gfVersion:String = PlayState.SONG.gfVersion;
-		if (gfVersion == null || gfVersion.length < 1)
-		{
+		if (gfVersion == null || gfVersion.length < 1) {
 			gfVersion = name;
 			PlayState.SONG.gfVersion = gfVersion;
 		}
@@ -171,15 +132,13 @@ class BaseStage extends FlxBasic
 		return game.variables.get(name);
 
 	// start/end callback functions
-	public function setStartCallback(myfn:Void->Void)
-	{
+	public function setStartCallback(myfn:Void->Void) {
 		if (!onPlayState)
 			return;
 		PlayState.instance.startCallback = myfn;
 	}
 
-	public function setEndCallback(myfn:Void->Void)
-	{
+	public function setEndCallback(myfn:Void->Void) {
 		if (!onPlayState)
 			return;
 		PlayState.instance.endCallback = myfn;
@@ -221,8 +180,7 @@ class BaseStage extends FlxBasic
 	inline private function get_inCutscene()
 		return game.inCutscene;
 
-	inline private function set_inCutscene(value:Bool)
-	{
+	inline private function set_inCutscene(value:Bool) {
 		game.inCutscene = value;
 		return value;
 	}
@@ -230,8 +188,7 @@ class BaseStage extends FlxBasic
 	inline private function get_canPause()
 		return game.canPause;
 
-	inline private function set_canPause(value:Bool)
-	{
+	inline private function set_canPause(value:Bool) {
 		game.canPause = value;
 		return value;
 	}
@@ -263,8 +220,7 @@ class BaseStage extends FlxBasic
 	inline private function get_gfGroup():FlxSpriteGroup
 		return game.gfGroup;
 
-	inline private function get_unspawnNotes():Array<Note>
-	{
+	inline private function get_unspawnNotes():Array<Note> {
 		return cast game.unspawnNotes;
 	}
 
@@ -280,8 +236,7 @@ class BaseStage extends FlxBasic
 	inline private function get_defaultCamZoom():Float
 		return game.defaultCamZoom;
 
-	inline private function set_defaultCamZoom(value:Float):Float
-	{
+	inline private function set_defaultCamZoom(value:Float):Float {
 		game.defaultCamZoom = value;
 		return game.defaultCamZoom;
 	}

@@ -5,10 +5,8 @@ import lime.graphics.cairo.CairoImageSurface;
 import openfl.display.BitmapData;
 import openfl.geom.Rectangle;
 
-class BetterBitmapData extends BitmapData
-{
-	override function __fromImage(image:#if lime Image #else Dynamic #end):Void
-	{
+class BetterBitmapData extends BitmapData {
+	override function __fromImage(image:#if lime Image #else Dynamic #end):Void {
 		#if lime
 		if (image == null || image.buffer == null)
 			return;
@@ -38,8 +36,7 @@ class BetterBitmapData extends BitmapData
 	 * After this call, `this.image` will be null — GPU texture is the sole owner of the data.
 	 * See: https://github.com/CodenameCrew/CodenameEngine/blob/main/source/funkin/backend/system/OptimizedBitmapData.hx#L9L46
 	 */
-	private function __uploadToGpu():Void
-	{
+	private function __uploadToGpu():Void {
 		lock();
 		getTexture(FlxG.stage.context3D);
 		getSurface();
@@ -48,8 +45,7 @@ class BetterBitmapData extends BitmapData
 		image = null;
 	}
 
-	override function getSurface():CairoImageSurface
-	{
+	override function getSurface():CairoImageSurface {
 		#if lime
 		// See: https://github.com/CodenameCrew/CodenameEngine/blob/main/source/funkin/backend/system/OptimizedBitmapData.hx#L48L61
 		return __surface ??= CairoImageSurface.fromImage(image);
@@ -65,18 +61,14 @@ class BetterBitmapData extends BitmapData
 	 * @param allowGpuCaching  Whether GPU caching is permitted for this bitmap. Defaults to true.
 	 * @return The loaded BitmapData, or null on js/html5 targets (not supported).
 	 */
-	public static function fromFile(path:String, allowGpuCaching:Bool = true):BitmapData
-	{
+	public static function fromFile(path:String, allowGpuCaching:Bool = true):BitmapData {
 		var data:BitmapData;
 		#if (js && html5)
 		data = new BitmapData(0, 0, true, 0);
 		#else
-		if (ClientPrefs.data.cacheOnGPU)
-		{
+		if (ClientPrefs.data.cacheOnGPU) {
 			data = new BetterBitmapData(0, 0, true, 0);
-		}
-		else
-		{
+		} else {
 			data = new BitmapData(0, 0, true, 0);
 		}
 		#end

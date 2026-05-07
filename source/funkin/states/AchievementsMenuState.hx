@@ -5,8 +5,7 @@ import flixel.util.FlxSort;
 import funkin.objects.Bar;
 
 #if ACHIEVEMENTS_ALLOWED
-class AchievementsMenuState extends EditableState
-{
+class AchievementsMenuState extends EditableState {
 	public var curSelected:Int = 0;
 
 	public var options:Array<Dynamic> = [];
@@ -20,8 +19,7 @@ class AchievementsMenuState extends EditableState
 
 	var MAX_PER_ROW:Int = 4;
 
-	override function create()
-	{
+	override function create() {
 		Paths.clearStoredMemory();
 		Paths.clearUnusedMemory();
 
@@ -30,8 +28,7 @@ class AchievementsMenuState extends EditableState
 		#end
 
 		// prepare achievement list
-		for (achievement => data in Achievements.achievements)
-		{
+		for (achievement => data in Achievements.achievements) {
 			var unlocked:Bool = Achievements.isUnlocked(achievement);
 			if (data.hidden != true || unlocked)
 				options.push(makeAchievement(achievement, data, unlocked, data.mod));
@@ -52,26 +49,21 @@ class AchievementsMenuState extends EditableState
 		grpOptions.scrollFactor.x = 0;
 
 		options.sort(sortByID);
-		for (option in options)
-		{
+		for (option in options) {
 			var hasAntialias:Bool = ClientPrefs.data.antialiasing;
 			var graphic = null;
-			if (option.unlocked)
-			{
+			if (option.unlocked) {
 				#if MODS_ALLOWED Mods.currentModDirectory = option.mod; #end
 				var image:String = 'achievements/' + option.name;
-				if (Paths.fileExists('images/$image-pixel.png', IMAGE))
-				{
+				if (Paths.fileExists('images/$image-pixel.png', IMAGE)) {
 					graphic = Paths.image('$image-pixel');
 					hasAntialias = false;
-				}
-				else
+				} else
 					graphic = Paths.image(image);
 
 				if (graphic == null)
 					graphic = Paths.image('unknownMod');
-			}
-			else
+			} else
 				graphic = Paths.image('achievements/lockedachievement');
 
 			var spr:FlxSprite = new FlxSprite(0, Math.floor(grpOptions.members.length / MAX_PER_ROW) * 180).loadGraphic(graphic);
@@ -130,8 +122,7 @@ class AchievementsMenuState extends EditableState
 		FlxG.camera.scroll.y = -FlxG.height;
 	}
 
-	function makeAchievement(achievement:String, data:Achievement, unlocked:Bool, mod:String = null)
-	{
+	function makeAchievement(achievement:String, data:Achievement, unlocked:Bool, mod:String = null) {
 		return {
 			name: achievement,
 			displayName: unlocked ? Language.getPhrase('achievement_$achievement', data.name) : '???',
@@ -150,18 +141,15 @@ class AchievementsMenuState extends EditableState
 
 	var goingBack:Bool = false;
 
-	override function update(elapsed:Float)
-	{
-		if (!goingBack && options.length > 1)
-		{
+	override function update(elapsed:Float) {
+		if (!goingBack && options.length > 1) {
 			var add:Int = 0;
 			if (controls.UI_LEFT_P)
 				add = -1;
 			else if (controls.UI_RIGHT_P)
 				add = 1;
 
-			if (add != 0)
-			{
+			if (add != 0) {
 				var oldRow:Int = Math.floor(curSelected / MAX_PER_ROW);
 				var rowSize:Int = Std.int(Math.min(MAX_PER_ROW, options.length - oldRow * MAX_PER_ROW));
 
@@ -170,8 +158,7 @@ class AchievementsMenuState extends EditableState
 				if (curSelected >= options.length)
 					curRow++;
 
-				if (curRow != oldRow)
-				{
+				if (curRow != oldRow) {
 					if (curRow < oldRow)
 						curSelected += rowSize;
 					else
@@ -180,28 +167,24 @@ class AchievementsMenuState extends EditableState
 				_changeSelection();
 			}
 
-			if (options.length > MAX_PER_ROW)
-			{
+			if (options.length > MAX_PER_ROW) {
 				var add:Int = 0;
 				if (controls.UI_UP_P)
 					add = -1;
 				else if (controls.UI_DOWN_P)
 					add = 1;
 
-				if (add != 0)
-				{
+				if (add != 0) {
 					var diff:Int = curSelected - (Math.floor(curSelected / MAX_PER_ROW) * MAX_PER_ROW);
 					curSelected += add * MAX_PER_ROW;
 					// trace('Before correction: $curSelected');
-					if (curSelected < 0)
-					{
+					if (curSelected < 0) {
 						curSelected += Math.ceil(options.length / MAX_PER_ROW) * MAX_PER_ROW;
 						if (curSelected >= options.length)
 							curSelected -= MAX_PER_ROW;
 						// trace('Pass 1: $curSelected');
 					}
-					if (curSelected >= options.length)
-					{
+					if (curSelected >= options.length) {
 						curSelected = diff;
 						// trace('Pass 2: $curSelected');
 					}
@@ -210,14 +193,12 @@ class AchievementsMenuState extends EditableState
 				}
 			}
 
-			if (controls.RESET && (options[curSelected].unlocked || options[curSelected].curProgress > 0))
-			{
+			if (controls.RESET && (options[curSelected].unlocked || options[curSelected].curProgress > 0)) {
 				openSubState(new ResetAchievementSubstate());
 			}
 		}
 
-		if (controls.BACK)
-		{
+		if (controls.BACK) {
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			MusicBeatState.switchState(new MainMenuState());
 			goingBack = true;
@@ -227,8 +208,7 @@ class AchievementsMenuState extends EditableState
 
 	public var barTween:FlxTween = null;
 
-	function _changeSelection()
-	{
+	function _changeSelection() {
 		FlxG.sound.play(Paths.sound('scrollMenu'));
 		var hasProgress = options[curSelected].maxProgress > 0;
 		nameText.text = options[curSelected].displayName;
@@ -238,8 +218,7 @@ class AchievementsMenuState extends EditableState
 		if (barTween != null)
 			barTween.cancel();
 
-		if (hasProgress)
-		{
+		if (hasProgress) {
 			var val1:Float = options[curSelected].curProgress;
 			var val2:Float = options[curSelected].maxProgress;
 			progressTxt.text = CoolUtil.floorDecimal(val1, options[curSelected].decProgress)
@@ -251,21 +230,17 @@ class AchievementsMenuState extends EditableState
 				onComplete: function(twn:FlxTween) progressBar.updateBar(),
 				onUpdate: function(twn:FlxTween) progressBar.updateBar()
 			});
-		}
-		else
+		} else
 			progressBar.percent = 0;
 
 		var maxRows = Math.floor(grpOptions.members.length / MAX_PER_ROW);
-		if (maxRows > 0)
-		{
+		if (maxRows > 0) {
 			var camY:Float = FlxG.height / 2 + (Math.floor(curSelected / MAX_PER_ROW) / maxRows) * Math.max(0, grpOptions.height - FlxG.height / 2 - 50) - 100;
 			camFollow.setPosition(0, camY);
-		}
-		else
+		} else
 			camFollow.setPosition(0, grpOptions.members[curSelected].getGraphicMidpoint().y - 100);
 
-		grpOptions.forEach(function(spr:FlxSprite)
-		{
+		grpOptions.forEach(function(spr:FlxSprite) {
 			spr.alpha = 0.6;
 			if (spr.ID == curSelected)
 				spr.alpha = 1;
@@ -273,14 +248,12 @@ class AchievementsMenuState extends EditableState
 	}
 }
 
-class ResetAchievementSubstate extends MusicBeatSubstate
-{
+class ResetAchievementSubstate extends MusicBeatSubstate {
 	var onYes:Bool = false;
 	var yesText:Alphabet;
 	var noText:Alphabet;
 
-	public function new()
-	{
+	public function new() {
 		super();
 
 		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
@@ -316,10 +289,8 @@ class ResetAchievementSubstate extends MusicBeatSubstate
 		updateOptions();
 	}
 
-	override function update(elapsed:Float)
-	{
-		if (controls.BACK)
-		{
+	override function update(elapsed:Float) {
+		if (controls.BACK) {
 			close();
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			return;
@@ -327,16 +298,13 @@ class ResetAchievementSubstate extends MusicBeatSubstate
 
 		super.update(elapsed);
 
-		if (controls.UI_LEFT_P || controls.UI_RIGHT_P)
-		{
+		if (controls.UI_LEFT_P || controls.UI_RIGHT_P) {
 			onYes = !onYes;
 			updateOptions();
 		}
 
-		if (controls.ACCEPT)
-		{
-			if (onYes)
-			{
+		if (controls.ACCEPT) {
+			if (onYes) {
 				var state:AchievementsMenuState = cast FlxG.state;
 				var option:Dynamic = state.options[state.curSelected];
 
@@ -350,8 +318,7 @@ class ResetAchievementSubstate extends MusicBeatSubstate
 				state.grpOptions.members[state.curSelected].loadGraphic(Paths.image('achievements/lockedachievement'));
 				state.grpOptions.members[state.curSelected].antialiasing = ClientPrefs.data.antialiasing;
 
-				if (state.progressBar.visible)
-				{
+				if (state.progressBar.visible) {
 					if (state.barTween != null)
 						state.barTween.cancel();
 					state.barTween = FlxTween.tween(state.progressBar, {percent: 0}, 0.5, {
@@ -370,8 +337,7 @@ class ResetAchievementSubstate extends MusicBeatSubstate
 		}
 	}
 
-	function updateOptions()
-	{
+	function updateOptions() {
 		var scales:Array<Float> = [0.75, 1];
 		var alphas:Array<Float> = [0.6, 1.25];
 		var confirmInt:Int = onYes ? 1 : 0;

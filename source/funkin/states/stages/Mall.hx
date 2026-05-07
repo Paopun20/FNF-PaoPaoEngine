@@ -2,21 +2,18 @@ package funkin.states.stages;
 
 import funkin.states.stages.objects.*;
 
-class Mall extends BaseStage
-{
+class Mall extends BaseStage {
 	var upperBoppers:BGSprite;
 	var bottomBoppers:MallCrowd;
 	var santa:BGSprite;
 
-	override function create()
-	{
+	override function create() {
 		var bg:BGSprite = new BGSprite('christmas/bgWalls', -1000, -500, 0.2, 0.2);
 		bg.setGraphicSize(Std.int(bg.width * 0.8));
 		bg.updateHitbox();
 		add(bg);
 
-		if (!ClientPrefs.data.lowQuality)
-		{
+		if (!ClientPrefs.data.lowQuality) {
 			upperBoppers = new BGSprite('christmas/upperBop', -240, -90, 0.33, 0.33, ['Upper Crowd Bob']);
 			upperBoppers.setGraphicSize(Std.int(upperBoppers.width * 0.85));
 			upperBoppers.updateHitbox();
@@ -52,13 +49,10 @@ class Mall extends BaseStage
 	override function beatHit()
 		everyoneDance();
 
-	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float)
-	{
-		switch (eventName)
-		{
+	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float) {
+		switch (eventName) {
 			case "Hey!":
-				switch (value1.toLowerCase().trim())
-				{
+				switch (value1.toLowerCase().trim()) {
 					case 'bf' | 'boyfriend' | '0':
 						return;
 				}
@@ -67,8 +61,7 @@ class Mall extends BaseStage
 		}
 	}
 
-	function everyoneDance()
-	{
+	function everyoneDance() {
 		if (!ClientPrefs.data.lowQuality)
 			upperBoppers.dance(true);
 
@@ -76,17 +69,14 @@ class Mall extends BaseStage
 		santa.dance(true);
 	}
 
-	function eggnogEndCutscene()
-	{
-		if (PlayState.storyPlaylist[1] == null)
-		{
+	function eggnogEndCutscene() {
+		if (PlayState.storyPlaylist[1] == null) {
 			endSong();
 			return;
 		}
 
 		var nextSong:String = Paths.formatToSongPath(PlayState.storyPlaylist[1]);
-		if (nextSong == 'winter-horrorland')
-		{
+		if (nextSong == 'winter-horrorland') {
 			FlxG.sound.play(Paths.sound('Lights_Shut_off'));
 
 			var blackShit:FlxSprite = new FlxSprite(-FlxG.width * FlxG.camera.zoom,
@@ -98,12 +88,10 @@ class Mall extends BaseStage
 			inCutscene = true;
 			canPause = false;
 
-			new FlxTimer().start(1.5, function(tmr:FlxTimer)
-			{
+			new FlxTimer().start(1.5, function(tmr:FlxTimer) {
 				endSong();
 			});
-		}
-		else
+		} else
 			endSong();
 	}
 }

@@ -2,15 +2,13 @@ package funkin.modding.scripts.compatibility;
 
 import haxe.ds.StringMap;
 
-class StructureCompatibility
-{
+class StructureCompatibility {
 	/**
 	 * Compatibility map for Psych Engine 0.6.3 and 0.7.3 - 1.0.4 -> FNF PaoPao Engine
 	 * This allows old mods to work without modification by redirecting old class paths to new ones
 	 */
 	public static final classAliasMap:StringMap<String> = [
 		// Psych 0.7.3 - 1.0.4
-		
 		// backend
 		'backend.Conductor' => 'funkin.backend.Conductor',
 		'backend.ClientPrefs' => 'funkin.backend.ClientPrefs',
@@ -30,7 +28,6 @@ class StructureCompatibility
 		'backend.Controls' => 'funkin.backend.Controls',
 		'backend.Discord' => 'funkin.api.Discord',
 		'backend.DiscordClient' => 'funkin.api.Discord',
-		
 		// psychlua
 		'psychlua.LuaUtils' => 'funkin.modding.scripts.utils.LuaUtils',
 		'psychlua.CallbackHandler' => 'funkin.modding.scripts.components.CallbackHandler',
@@ -42,7 +39,6 @@ class StructureCompatibility
 		'psychlua.ShaderFunctions' => 'funkin.modding.scripts.components.ShaderFunctions',
 		'psychlua.TextFunctions' => 'funkin.modding.scripts.components.TextFunctions',
 		'psychlua.ModchartAnimateSprite' => 'funkin.modding.scripts.components.ModchartAnimateSprite',
-		
 		// States
 		'states.PlayState' => 'funkin.states.PlayState',
 		'states.MainMenuState' => 'funkin.states.MainMenuState',
@@ -59,7 +55,6 @@ class StructureCompatibility
 		'states.editors.StageEditorState' => 'funkin.modding.editors.StageEditorState',
 		'states.editors.WeekEditorState' => 'funkin.modding.editors.WeekEditorState',
 		'states.editors.MenuCharacterEditorState' => 'funkin.modding.editors.MenuCharacterEditorState',
-		
 		// Objects
 		'objects.Alphabet' => 'funkin.objects.Alphabet',
 		'objects.Character' => 'funkin.objects.Character',
@@ -71,13 +66,11 @@ class StructureCompatibility
 		'objects.AttachedSprite' => 'funkin.objects.AttachedSprite',
 		'objects.AttachedText' => 'funkin.objects.AttachedText',
 		'objects.MenuCharacter' => 'funkin.objects.MenuCharacter',
-		
 		// Substates
 		'substates.GameOverSubstate' => 'funkin.substates.GameOverSubstate',
 		'substates.PauseSubState' => 'funkin.substates.PauseSubState',
 		'substates.CustomSubstate' => 'funkin.modding.scripts.components.CustomSubstate',
 		'substates.GameplayChangersSubstate' => 'funkin.options.GameplayChangersSubstate',
-		
 		// Options
 		'options.OptionsState' => 'funkin.options.OptionsState',
 		'options.GameplayChangersSubstate' => 'funkin.options.GameplayChangersSubstate',
@@ -86,7 +79,6 @@ class StructureCompatibility
 		'options.VisualsSettingsSubState' => 'funkin.options.VisualsSettingsSubState',
 		'options.GraphicsSettingsSubState' => 'funkin.options.GraphicsSettingsSubState',
 		'options.GameplaySettingsSubState' => 'funkin.options.GameplaySettingsSubState',
-		
 		// Psych 0.6.3 (no namespace)
 		'Conductor' => 'funkin.backend.Conductor',
 		'ClientPrefs' => 'funkin.backend.ClientPrefs',
@@ -143,27 +135,20 @@ class StructureCompatibility
 		'GameplaySettingsSubState' => 'funkin.options.GameplaySettingsSubState',
 	];
 
-	public static function resolveClass(className:String):Class<Dynamic>
-	{
+	public static function resolveClass(className:String):Class<Dynamic> {
 		var myClass:Dynamic = Type.resolveClass(className);
-		if (myClass == null && classAliasMap.exists(className))
-		{
+		if (myClass == null && classAliasMap.exists(className)) {
 			var newClassName = classAliasMap.get(className);
 			myClass = Type.resolveClass(newClassName);
 
-			if (myClass != null)
-			{
+			if (myClass != null) {
 				#if debug
 				CoolLog.info('[Compatibility] Redirecting "$className" to "$newClassName"');
 				#end
-			}
-			else
-			{
+			} else {
 				CoolLog.info('[Compatibility] WARNING: Alias "$className" → "$newClassName" exists, but target class not found!');
 			}
-		}
-		else if (myClass == null)
-		{
+		} else if (myClass == null) {
 			CoolLog.info('[Compatibility] WARNING: Class "$className" not found and no alias exists. This may break old mods.');
 			CoolLog.info('[Compatibility] If this is a common class, consider adding it to StructureCompatibility.classAliasMap');
 		}

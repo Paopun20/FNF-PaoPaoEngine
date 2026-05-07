@@ -1,17 +1,16 @@
 package funkin.backend;
+
 #if LUA_ALLOWED
 import funkin.modding.scripts.LuaScript;
 #end
 
-class Language
-{
+class Language {
 	public static var defaultLangName:String = 'English (US)'; // en-US
 	#if TRANSLATIONS_ALLOWED
 	private static var phrases:Map<String, String> = [];
 	#end
 
-	public static function reloadPhrases()
-	{
+	public static function reloadPhrases() {
 		#if TRANSLATIONS_ALLOWED
 		var langFile:String = ClientPrefs.data.language;
 		var loadedText:Array<String> = Mods.mergeAllTextsNamed('data/$langFile.lang');
@@ -19,11 +18,9 @@ class Language
 
 		phrases.clear();
 		var hasPhrases:Bool = false;
-		for (num => phrase in loadedText)
-		{
+		for (num => phrase in loadedText) {
 			phrase = phrase.trim();
-			if (num < 1 && !phrase.contains(':'))
-			{
+			if (num < 1 && !phrase.contains(':')) {
 				// First line ignores formatting and shit if the line doesn't have ":" because its language_name
 				phrases.set('language_name', phrase.trim());
 				continue;
@@ -63,8 +60,7 @@ class Language
 		#end
 	}
 
-	inline public static function getPhrase(key:String, ?defaultPhrase:String, values:Array<Dynamic> = null):String
-	{
+	inline public static function getPhrase(key:String, ?defaultPhrase:String, values:Array<Dynamic> = null):String {
 		#if TRANSLATIONS_ALLOWED
 		// trace(formatKey(key));
 		var str:String = phrases.get(formatKey(key));
@@ -85,8 +81,7 @@ class Language
 	}
 
 	// More optimized for file loading
-	inline public static function getFileTranslation(key:String)
-	{
+	inline public static function getFileTranslation(key:String) {
 		#if TRANSLATIONS_ALLOWED
 		var str:String = phrases.get(key.trim().toLowerCase());
 		if (str != null)
@@ -96,23 +91,19 @@ class Language
 	}
 
 	#if TRANSLATIONS_ALLOWED
-	inline static private function formatKey(key:String)
-	{
+	inline static private function formatKey(key:String) {
 		final hideChars = ~/[~&\\\/;:<>#.,'"%?!]/g;
 		return hideChars.replace(key.replace(' ', '_'), '').toLowerCase().trim();
 	}
 	#end
 
 	#if LUA_ALLOWED
-	public static function addLuaCallbacks(lua:LuaScript)
-	{
-		lua.set("getTranslationPhrase", function(key:String, ?defaultPhrase:String, ?values:Array<Dynamic> = null)
-		{
+	public static function addLuaCallbacks(lua:LuaScript) {
+		lua.set("getTranslationPhrase", function(key:String, ?defaultPhrase:String, ?values:Array<Dynamic> = null) {
 			return getPhrase(key, defaultPhrase, values);
 		});
 
-		lua.set("getFileTranslation", function(key:String)
-		{
+		lua.set("getFileTranslation", function(key:String) {
 			return getFileTranslation(key);
 		});
 	}

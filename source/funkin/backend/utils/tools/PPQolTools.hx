@@ -1,4 +1,4 @@
-package;
+package funkin.backend.utils.tools;
 
 import flixel.FlxG;
 import flixel.FlxObject;
@@ -8,11 +8,8 @@ import flixel.util.FlxColor;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 
-class PPQolTools
-{
-	public function new()
-	{
-	}
+class PPQolTools {
+	public function new() {}
 
 	// Float extensions
 	// myFloat.clamp(0, 1)
@@ -45,15 +42,13 @@ class PPQolTools
 	public static inline function toInt(v:Float):Int
 		return Std.int(v);
 
-	public static inline function roundTo(v:Float, decimals:Int):Float
-	{
+	public static inline function roundTo(v:Float, decimals:Int):Float {
 		var f = Math.pow(10, decimals);
 		return Math.round(v * f) / f;
 	}
 
 	// Ping-pong: great for oscillating effects
-	public static inline function pingPong(v:Float, length:Float):Float
-	{
+	public static inline function pingPong(v:Float, length:Float):Float {
 		v = v % (length * 2);
 		return v > length ? length * 2 - v : v;
 	}
@@ -66,8 +61,7 @@ class PPQolTools
 		return Math.random() * 100 < percent;
 
 	// Int wrap
-	public static inline function wrap(v:Int, min:Int, max:Int):Int
-	{
+	public static inline function wrap(v:Int, min:Int, max:Int):Int {
 		var range = max - min + 1;
 		return ((v - min) % range + range) % range + min;
 	}
@@ -103,15 +97,13 @@ class PPQolTools
 	public static inline function trimTo(s:String, max:Int, ellipsis:String = "..."):String
 		return s.length > max ? s.substr(0, max - ellipsis.length) + ellipsis : s;
 
-	public static function padLeft(s:String, len:Int, char:String = "0"):String
-	{
+	public static function padLeft(s:String, len:Int, char:String = "0"):String {
 		while (s.length < len)
 			s = char + s;
 		return s;
 	}
 
-	public static function padRight(s:String, len:Int, char:String = " "):String
-	{
+	public static function padRight(s:String, len:Int, char:String = " "):String {
 		while (s.length < len)
 			s = s + char;
 		return s;
@@ -126,11 +118,9 @@ class PPQolTools
 	// Array extensions
 	// myArray.shuffle()
 
-	public static function shuffle<T>(arr:Array<T>):Array<T>
-	{
+	public static function shuffle<T>(arr:Array<T>):Array<T> {
 		var i = arr.length;
-		while (i > 1)
-		{
+		while (i > 1) {
 			var j = Std.int(Math.random() * i--);
 			var tmp = arr[i];
 			arr[i] = arr[j];
@@ -148,19 +138,16 @@ class PPQolTools
 	public static inline function last<T>(arr:Array<T>):Null<T>
 		return arr.length > 0 ? arr[arr.length - 1] : null;
 
-	public static function flatten<T>(arr:Array<Array<T>>):Array<T>
-	{
+	public static function flatten<T>(arr:Array<Array<T>>):Array<T> {
 		var out:Array<T> = [];
 		for (a in arr)
 			out = out.concat(a);
 		return out;
 	}
 
-	public static function removeDuplicates<T>(arr:Array<T>):Array<T>
-	{
+	public static function removeDuplicates<T>(arr:Array<T>):Array<T> {
 		var seen = new Map<String, Bool>();
-		return arr.filter(v ->
-		{
+		return arr.filter(v -> {
 			var k = Std.string(v);
 			var fresh = !seen.exists(k);
 			seen.set(k, true);
@@ -171,8 +158,7 @@ class PPQolTools
 	public static inline function isEmpty<T>(arr:Array<T>):Bool
 		return arr.length == 0;
 
-	public static inline function clear<T>(arr:Array<T>):Array<T>
-	{
+	public static inline function clear<T>(arr:Array<T>):Array<T> {
 		arr.splice(0, arr.length);
 		return arr;
 	}
@@ -184,8 +170,7 @@ class PPQolTools
 		return FlxColor.fromRGBFloat(lerp(a.redFloat, b.redFloat, t), lerp(a.greenFloat, b.greenFloat, t), lerp(a.blueFloat, b.blueFloat, t),
 			lerp(a.alphaFloat, b.alphaFloat, t));
 
-	public static inline function withAlpha(color:FlxColor, alpha:Float):FlxColor
-	{
+	public static inline function withAlpha(color:FlxColor, alpha:Float):FlxColor {
 		color.alphaFloat = clamp(alpha, 0, 1);
 		return color;
 	}
@@ -197,34 +182,29 @@ class PPQolTools
 	// FlxObject extensions
 	// mySprite.centerOnScreen()
 
-	public static inline function centerOnScreen(obj:FlxObject):FlxObject
-	{
+	public static inline function centerOnScreen(obj:FlxObject):FlxObject {
 		obj.x = (FlxG.width - obj.width) * 0.5;
 		obj.y = (FlxG.height - obj.height) * 0.5;
 		return obj;
 	}
 
-	public static inline function centerX(obj:FlxObject):FlxObject
-	{
+	public static inline function centerX(obj:FlxObject):FlxObject {
 		obj.x = (FlxG.width - obj.width) * 0.5;
 		return obj;
 	}
 
-	public static inline function centerY(obj:FlxObject):FlxObject
-	{
+	public static inline function centerY(obj:FlxObject):FlxObject {
 		obj.y = (FlxG.height - obj.height) * 0.5;
 		return obj;
 	}
 
-	public static inline function setPos(obj:FlxObject, x:Float, y:Float):FlxObject
-	{
+	public static inline function setPos(obj:FlxObject, x:Float, y:Float):FlxObject {
 		obj.x = x;
 		obj.y = y;
 		return obj;
 	}
 
-	public static inline function nudge(obj:FlxObject, dx:Float, dy:Float):FlxObject
-	{
+	public static inline function nudge(obj:FlxObject, dx:Float, dy:Float):FlxObject {
 		obj.x += dx;
 		obj.y += dy;
 		return obj;
@@ -233,8 +213,7 @@ class PPQolTools
 	// FlxSprite extensions
 	// mySprite.fadeIn(0.3)
 
-	public static inline function fadeIn(spr:FlxSprite, dur:Float, ?ease:Float->Float):FlxTween
-	{
+	public static inline function fadeIn(spr:FlxSprite, dur:Float, ?ease:Float->Float):FlxTween {
 		spr.alpha = 0;
 		return FlxTween.tween(spr, {alpha: 1}, dur, {ease: ease ?? FlxEase.quartOut});
 	}
@@ -242,14 +221,12 @@ class PPQolTools
 	public static inline function fadeOut(spr:FlxSprite, dur:Float, ?ease:Float->Float):FlxTween
 		return FlxTween.tween(spr, {alpha: 0}, dur, {ease: ease ?? FlxEase.quartOut});
 
-	public static inline function popIn(spr:FlxSprite, dur:Float = 0.25):FlxTween
-	{
+	public static inline function popIn(spr:FlxSprite, dur:Float = 0.25):FlxTween {
 		spr.scale.set(0, 0);
 		return FlxTween.tween(spr.scale, {x: 1, y: 1}, dur, {ease: FlxEase.backOut});
 	}
 
-	public static inline function setAlpha(spr:FlxSprite, a:Float):FlxSprite
-	{
+	public static inline function setAlpha(spr:FlxSprite, a:Float):FlxSprite {
 		spr.alpha = clamp(a, 0, 1);
 		return spr;
 	}
@@ -262,8 +239,7 @@ class PPQolTools
 		});
 
 	// Color flash — hit flash, pickups, etc.
-	public static function flash(spr:FlxSprite, color:FlxColor = FlxColor.WHITE, dur:Float = 0.1):Void
-	{
+	public static function flash(spr:FlxSprite, color:FlxColor = FlxColor.WHITE, dur:Float = 0.1):Void {
 		spr.color = color;
 		FlxTween.color(spr, dur, color, FlxColor.WHITE, {
 			onComplete: _ -> spr.color = FlxColor.WHITE
@@ -273,8 +249,7 @@ class PPQolTools
 	// FlxPoint extensions
 	// myPoint.distanceTo(other)
 
-	public static inline function distanceTo(a:FlxPoint, b:FlxPoint):Float
-	{
+	public static inline function distanceTo(a:FlxPoint, b:FlxPoint):Float {
 		var dx = a.x - b.x, dy = a.y - b.y;
 		return Math.sqrt(dx * dx + dy * dy);
 	}
@@ -285,8 +260,7 @@ class PPQolTools
 	public static inline function angleTo(a:FlxPoint, b:FlxPoint):Float
 		return Math.atan2(b.y - a.y, b.x - a.x) * (180 / Math.PI);
 
-	public static inline function normalize(p:FlxPoint):FlxPoint
-	{
+	public static inline function normalize(p:FlxPoint):FlxPoint {
 		var len = Math.sqrt(p.x * p.x + p.y * p.y);
 		return len > 0 ? FlxPoint.get(p.x / len, p.y / len) : FlxPoint.get(0, 0);
 	}

@@ -5,8 +5,7 @@ import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.input.gamepad.mappings.FlxGamepadMapping;
 import flixel.input.keyboard.FlxKey;
 
-class Controls
-{
+class Controls {
 	// Keeping same use cases on stuff for it to be easier to understand/use
 	// I'd have removed it but this makes it a lot less annoying to use in my opinion
 	// You do NOT have to create these variables/getters for adding new keys,
@@ -138,8 +137,7 @@ class Controls
 	public var keyboardBinds:Map<String, Array<FlxKey>>;
 	public var gamepadBinds:Map<String, Array<FlxGamepadInputID>>;
 
-	public function justPressed(key:String)
-	{
+	public function justPressed(key:String) {
 		var result:Bool = (FlxG.keys.anyJustPressed(keyboardBinds[key]) == true);
 		if (result)
 			controllerMode = false;
@@ -147,8 +145,7 @@ class Controls
 		return result || _myGamepadJustPressed(gamepadBinds[key]) == true;
 	}
 
-	public function pressed(key:String)
-	{
+	public function pressed(key:String) {
 		var result:Bool = (FlxG.keys.anyPressed(keyboardBinds[key]) == true);
 		if (result)
 			controllerMode = false;
@@ -156,8 +153,7 @@ class Controls
 		return result || _myGamepadPressed(gamepadBinds[key]) == true;
 	}
 
-	public function justReleased(key:String)
-	{
+	public function justReleased(key:String) {
 		var result:Bool = (FlxG.keys.anyJustReleased(keyboardBinds[key]) == true);
 		if (result)
 			controllerMode = false;
@@ -165,20 +161,16 @@ class Controls
 		return result || _myGamepadJustReleased(gamepadBinds[key]) == true;
 	}
 
-	public function allPressed(keys:Array<String>):Bool
-	{
-		for (key in keys)
-		{
+	public function allPressed(keys:Array<String>):Bool {
+		for (key in keys) {
 			if (!pressed(key))
 				return false;
 		}
 		return true;
 	}
 
-	public function allReleased(keys:Array<String>):Bool
-	{
-		for (key in keys)
-		{
+	public function allReleased(keys:Array<String>):Bool {
+		for (key in keys) {
 			if (!justReleased(key))
 				return false;
 		}
@@ -187,14 +179,10 @@ class Controls
 
 	public var controllerMode:Bool = false;
 
-	private function _myGamepadJustPressed(keys:Array<FlxGamepadInputID>):Bool
-	{
-		if (keys != null)
-		{
-			for (key in keys)
-			{
-				if (FlxG.gamepads.anyJustPressed(key) == true)
-				{
+	private function _myGamepadJustPressed(keys:Array<FlxGamepadInputID>):Bool {
+		if (keys != null) {
+			for (key in keys) {
+				if (FlxG.gamepads.anyJustPressed(key) == true) {
 					controllerMode = true;
 					return true;
 				}
@@ -203,14 +191,10 @@ class Controls
 		return false;
 	}
 
-	private function _myGamepadPressed(keys:Array<FlxGamepadInputID>):Bool
-	{
-		if (keys != null)
-		{
-			for (key in keys)
-			{
-				if (FlxG.gamepads.anyPressed(key) == true)
-				{
+	private function _myGamepadPressed(keys:Array<FlxGamepadInputID>):Bool {
+		if (keys != null) {
+			for (key in keys) {
+				if (FlxG.gamepads.anyPressed(key) == true) {
 					controllerMode = true;
 					return true;
 				}
@@ -219,14 +203,10 @@ class Controls
 		return false;
 	}
 
-	private function _myGamepadJustReleased(keys:Array<FlxGamepadInputID>):Bool
-	{
-		if (keys != null)
-		{
-			for (key in keys)
-			{
-				if (FlxG.gamepads.anyJustReleased(key) == true)
-				{
+	private function _myGamepadJustReleased(keys:Array<FlxGamepadInputID>):Bool {
+		if (keys != null) {
+			for (key in keys) {
+				if (FlxG.gamepads.anyJustReleased(key) == true) {
 					controllerMode = true;
 					return true;
 				}
@@ -238,8 +218,7 @@ class Controls
 	// IGNORE THESE
 	public static var instance:Controls;
 
-	public function new()
-	{
+	public function new() {
 		keyboardBinds = ClientPrefs.keyBinds;
 		gamepadBinds = ClientPrefs.gamepadBinds;
 	}

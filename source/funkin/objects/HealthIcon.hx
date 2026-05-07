@@ -1,22 +1,19 @@
 package funkin.objects;
 
-class HealthIcon extends FlxSprite
-{
+class HealthIcon extends FlxSprite {
 	public var sprTracker:FlxSprite;
 
 	private var isPlayer:Bool = false;
 	private var char:String = '';
 
-	public function new(char:String = 'face', isPlayer:Bool = false, ?allowGPU:Bool = true)
-	{
+	public function new(char:String = 'face', isPlayer:Bool = false, ?allowGPU:Bool = true) {
 		super();
 		this.isPlayer = isPlayer;
 		changeIcon(char, allowGPU);
 		scrollFactor.set();
 	}
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		super.update(elapsed);
 
 		if (sprTracker != null)
@@ -25,10 +22,8 @@ class HealthIcon extends FlxSprite
 
 	private var iconOffsets:Array<Float> = [0, 0];
 
-	public function changeIcon(char:String, ?allowGPU:Bool = true)
-	{
-		if (this.char != char)
-		{
+	public function changeIcon(char:String, ?allowGPU:Bool = true) {
+		if (this.char != char) {
 			var name:String = 'icons/' + char;
 			if (!Paths.fileExists('images/' + name + '.png', IMAGE))
 				name = 'icons/icon-' + char; // Older versions of psych engine's support
@@ -55,18 +50,15 @@ class HealthIcon extends FlxSprite
 
 	public var autoAdjustOffset:Bool = true;
 
-	override function updateHitbox()
-	{
+	override function updateHitbox() {
 		super.updateHitbox();
-		if (autoAdjustOffset)
-		{
+		if (autoAdjustOffset) {
 			offset.x = iconOffsets[0];
 			offset.y = iconOffsets[1];
 		}
 	}
 
-	public function getCharacter():String
-	{
+	public function getCharacter():String {
 		return char;
 	}
 }

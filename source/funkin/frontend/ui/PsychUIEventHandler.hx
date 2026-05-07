@@ -1,9 +1,7 @@
 package funkin.frontend.ui;
 
-class PsychUIEventHandler
-{
-	public static function event(id:String, sender:Dynamic)
-	{
+class PsychUIEventHandler {
+	public static function event(id:String, sender:Dynamic) {
 		var state:Dynamic = cast FlxG.state;
 		if (state == null)
 			return;
@@ -16,7 +14,6 @@ class PsychUIEventHandler
 	}
 }
 
-interface PsychUIEvent
-{
+interface PsychUIEvent {
 	public function UIEvent(id:String, sender:Dynamic):Void;
 }

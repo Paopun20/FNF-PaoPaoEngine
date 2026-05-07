@@ -1,7 +1,6 @@
 package hscript;
 
-class Config
-{
+class Config {
 	public static final ALLOWED_CUSTOM_CLASSES = [
 		"flixel",
 		"funkin.backend",

@@ -15,14 +15,12 @@ import lime.media.AudioSource;
  * https://github.com/openfl/openfl/commit/eec48a
  *
  */
-class LimeAudioClip implements funkin.vis.AudioClip
-{
+class LimeAudioClip implements funkin.vis.AudioClip {
 	public var audioBuffer(default, null):AudioBuffer;
 	public var currentFrame(get, never):Int;
 	public var source:Dynamic;
 
-	public function new(audioSource:AudioSource)
-	{
+	public function new(audioSource:AudioSource) {
 		var data:lime.utils.UInt16Array = cast audioSource.buffer.data;
 
 		#if web
@@ -35,8 +33,7 @@ class LimeAudioClip implements funkin.vis.AudioClip
 		this.source = audioSource.buffer.src;
 	}
 
-	private function get_currentFrame():Int
-	{
+	private function get_currentFrame():Int {
 		var dataLength:Int = 0;
 
 		#if web

@@ -8,8 +8,7 @@ import funkin.shaders.ColorSwap;
 import funkin.states.StoryMenuState;
 import funkin.states.MainMenuState;
 
-typedef TitleData =
-{
+typedef TitleData = {
 	var titlex:Float;
 	var titley:Float;
 	var startx:Float;
@@ -25,8 +24,7 @@ typedef TitleData =
 	@:optional var idle:Bool;
 }
 
-class TitleState extends EditableState
-{
+class TitleState extends EditableState {
 	public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
 	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
 	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
@@ -46,24 +44,20 @@ class TitleState extends EditableState
 
 	var wackyImage:FlxSprite;
 
-	override public function create():Void
-	{
+	override public function create():Void {
 		Paths.clearStoredMemory();
 		super.create();
 		Paths.clearUnusedMemory();
 
-		if (!initialized)
-		{
+		if (!initialized) {
 			ClientPrefs.loadPrefs();
 			Language.reloadPhrases();
 		}
 
 		curWacky = FlxG.random.getObject(getIntroTextShit());
 
-		if (!initialized)
-		{
-			if (FlxG.save.data != null && FlxG.save.data.fullscreen)
-			{
+		if (!initialized) {
+			if (FlxG.save.data != null && FlxG.save.data.fullscreen) {
 				FlxG.fullscreen = FlxG.save.data.fullscreen;
 				// trace('LOADED FULLSCREEN SETTING!!');
 			}
@@ -71,8 +65,7 @@ class TitleState extends EditableState
 			persistentDraw = true;
 		}
 
-		if (FlxG.save.data.weekCompleted != null)
-		{
+		if (FlxG.save.data.weekCompleted != null) {
 			StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
 		}
 
@@ -82,13 +75,11 @@ class TitleState extends EditableState
 		#elseif CHARTING
 		MusicBeatState.switchState(new ChartingState());
 		#else
-		if (((FlxG.save.data.flashing == null || FlxG.save.data.shaders == null) && !WarningState.leftState))
-		{
+		if (((FlxG.save.data.flashing == null || FlxG.save.data.shaders == null) && !WarningState.leftState)) {
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
 			MusicBeatState.switchState(new WarningState());
-		}
-		else
+		} else
 			startIntro();
 		#end
 	}
@@ -99,8 +90,7 @@ class TitleState extends EditableState
 	var titleText:FlxSprite;
 	var swagShader:ColorSwap = null;
 
-	function startIntro()
-	{
+	function startIntro() {
 		persistentUpdate = true;
 		if (!initialized && FlxG.sound.music == null)
 			FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
@@ -119,22 +109,18 @@ class TitleState extends EditableState
 		gfDance = new FlxSprite(gfPosition.x, gfPosition.y);
 		gfDance.antialiasing = ClientPrefs.data.antialiasing;
 
-		if (ClientPrefs.data.shaders)
-		{
+		if (ClientPrefs.data.shaders) {
 			swagShader = new ColorSwap();
 			gfDance.shader = swagShader.shader;
 			logoBl.shader = swagShader.shader;
 		}
 
 		gfDance.frames = Paths.getSparrowAtlas(characterImage);
-		if (!useIdle)
-		{
+		if (!useIdle) {
 			gfDance.animation.addByIndices('danceLeft', animationName, danceLeftFrames, "", 24, false);
 			gfDance.animation.addByIndices('danceRight', animationName, danceRightFrames, "", 24, false);
 			gfDance.animation.play('danceRight');
-		}
-		else
-		{
+		} else {
 			gfDance.animation.addByPrefix('idle', animationName, 24, false);
 			gfDance.animation.play('idle');
 		}
@@ -148,13 +134,10 @@ class TitleState extends EditableState
 			titleText.animation.findByPrefix(animFrames, "ENTER FREEZE");
 		}
 
-		if (newTitle = animFrames.length > 0)
-		{
+		if (newTitle = animFrames.length > 0) {
 			titleText.animation.addByPrefix('idle', "ENTER IDLE", 24);
 			titleText.animation.addByPrefix('press', ClientPrefs.data.flashing ? "ENTER PRESSED" : "ENTER FREEZE", 24);
-		}
-		else
-		{
+		} else {
 			titleText.animation.addByPrefix('idle', "Press Enter to Begin", 24);
 			titleText.animation.addByPrefix('press', "ENTER PRESSED", 24);
 		}
@@ -204,15 +187,11 @@ class TitleState extends EditableState
 	var danceLeftFrames:Array<Int> = [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29];
 	var danceRightFrames:Array<Int> = [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 
-	function loadJsonData()
-	{
-		if (Paths.fileExists('images/gfDanceTitle.json', TEXT))
-		{
+	function loadJsonData() {
+		if (Paths.fileExists('images/gfDanceTitle.json', TEXT)) {
 			var titleRaw:String = Paths.getTextFromFile('images/gfDanceTitle.json');
-			if (titleRaw != null && titleRaw.length > 0)
-			{
-				try
-				{
+			if (titleRaw != null && titleRaw.length > 0) {
+				try {
 					var titleJSON:TitleData = tjson.TJSON.parse(titleRaw);
 					gfPosition.set(titleJSON.gfx, titleJSON.gfy);
 					logoPosition.set(titleJSON.titlex, titleJSON.titley);
@@ -227,25 +206,20 @@ class TitleState extends EditableState
 						danceRightFrames = titleJSON.dance_right;
 					useIdle = (titleJSON.idle == true);
 
-					if (titleJSON.backgroundSprite != null && titleJSON.backgroundSprite.trim().length > 0)
-					{
+					if (titleJSON.backgroundSprite != null && titleJSON.backgroundSprite.trim().length > 0) {
 						var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image(titleJSON.backgroundSprite));
 						bg.antialiasing = ClientPrefs.data.antialiasing;
 						add(bg);
 					}
-				}
-				catch (e:haxe.Exception)
-				{
+				} catch (e:haxe.Exception) {
 					CoolLog.info('[WARN] Title JSON might broken, ignoring issue...\n${e.details()}');
 				}
-			}
-			else
+			} else
 				CoolLog.info('[WARN] No Title JSON detected, using default values.');
 		}
 	}
 
-	function getIntroTextShit():Array<Array<String>>
-	{
+	function getIntroTextShit():Array<Array<String>> {
 		#if MODS_ALLOWED
 		var firstArray:Array<String> = Mods.mergeAllTextsNamed('data/introText.txt');
 		#else
@@ -254,8 +228,7 @@ class TitleState extends EditableState
 		#end
 		var swagGoodArray:Array<Array<String>> = [];
 
-		for (i in firstArray)
-		{
+		for (i in firstArray) {
 			swagGoodArray.push(i.split('--'));
 		}
 
@@ -269,8 +242,7 @@ class TitleState extends EditableState
 	var newTitle:Bool = false;
 	var titleTimer:Float = 0;
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		if (FlxG.sound.music != null)
 			Conductor.songPosition = FlxG.sound.music.time;
 		// FlxG.watch.addQuick('amp', FlxG.sound.music.amplitude);
@@ -278,10 +250,8 @@ class TitleState extends EditableState
 		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER || controls.ACCEPT;
 
 		#if mobile
-		for (touch in FlxG.touches.list)
-		{
-			if (touch.justPressed)
-			{
+		for (touch in FlxG.touches.list) {
+			if (touch.justPressed) {
 				pressedEnter = true;
 			}
 		}
@@ -289,8 +259,7 @@ class TitleState extends EditableState
 
 		var gamepad:FlxGamepad = FlxG.gamepads.lastActive;
 
-		if (gamepad != null)
-		{
+		if (gamepad != null) {
 			if (gamepad.justPressed.START)
 				pressedEnter = true;
 
@@ -300,8 +269,7 @@ class TitleState extends EditableState
 			#end
 		}
 
-		if (newTitle)
-		{
+		if (newTitle) {
 			titleTimer += FlxMath.bound(elapsed, 0, 1);
 			if (titleTimer > 2)
 				titleTimer -= 2;
@@ -309,10 +277,8 @@ class TitleState extends EditableState
 
 		// EASTER EGG
 
-		if (initialized && !transitioning && skippedIntro)
-		{
-			if (newTitle && !pressedEnter)
-			{
+		if (initialized && !transitioning && skippedIntro) {
+			if (newTitle && !pressedEnter) {
 				var timer:Float = titleTimer;
 				if (timer >= 1)
 					timer = (-timer) + 2;
@@ -323,8 +289,7 @@ class TitleState extends EditableState
 				titleText.alpha = FlxMath.lerp(titleTextAlphas[0], titleTextAlphas[1], timer);
 			}
 
-			if (pressedEnter)
-			{
+			if (pressedEnter) {
 				titleText.color = FlxColor.WHITE;
 				titleText.alpha = 1;
 
@@ -337,8 +302,7 @@ class TitleState extends EditableState
 				transitioning = true;
 				// FlxG.sound.music.stop();
 
-				new FlxTimer().start(1, function(tmr:FlxTimer)
-				{
+				new FlxTimer().start(1, function(tmr:FlxTimer) {
 					MusicBeatState.switchState(new MainMenuState());
 					closedState = true;
 				});
@@ -346,13 +310,11 @@ class TitleState extends EditableState
 			}
 		}
 
-		if (initialized && pressedEnter && !skippedIntro)
-		{
+		if (initialized && pressedEnter && !skippedIntro) {
 			skipIntro();
 		}
 
-		if (swagShader != null)
-		{
+		if (swagShader != null) {
 			if (controls.UI_LEFT)
 				swagShader.hue -= elapsed * 0.1;
 			if (controls.UI_RIGHT)
@@ -362,25 +324,20 @@ class TitleState extends EditableState
 		super.update(elapsed);
 	}
 
-	function createCoolText(textArray:Array<String>, ?offset:Float = 0)
-	{
-		for (i in 0...textArray.length)
-		{
+	function createCoolText(textArray:Array<String>, ?offset:Float = 0) {
+		for (i in 0...textArray.length) {
 			var money:Alphabet = new Alphabet(0, 0, textArray[i], true);
 			money.screenCenter(X);
 			money.y += (i * 60) + 200 + offset;
-			if (credGroup != null && textGroup != null)
-			{
+			if (credGroup != null && textGroup != null) {
 				credGroup.add(money);
 				textGroup.add(money);
 			}
 		}
 	}
 
-	function addMoreText(text:String, ?offset:Float = 0)
-	{
-		if (textGroup != null && credGroup != null)
-		{
+	function addMoreText(text:String, ?offset:Float = 0) {
+		if (textGroup != null && credGroup != null) {
 			var coolText:Alphabet = new Alphabet(0, 0, text, true);
 			coolText.screenCenter(X);
 			coolText.y += (textGroup.length * 60) + 200 + offset;
@@ -389,10 +346,8 @@ class TitleState extends EditableState
 		}
 	}
 
-	function deleteCoolText()
-	{
-		while (textGroup.members.length > 0)
-		{
+	function deleteCoolText() {
+		while (textGroup.members.length > 0) {
 			credGroup.remove(textGroup.members[0], true);
 			textGroup.remove(textGroup.members[0], true);
 		}
@@ -402,32 +357,26 @@ class TitleState extends EditableState
 
 	public static var closedState:Bool = false;
 
-	override function beatHit()
-	{
+	override function beatHit() {
 		super.beatHit();
 
 		if (logoBl != null)
 			logoBl.animation.play('bump', true);
 
-		if (gfDance != null)
-		{
+		if (gfDance != null) {
 			danceLeft = !danceLeft;
-			if (!useIdle)
-			{
+			if (!useIdle) {
 				if (danceLeft)
 					gfDance.animation.play('danceRight');
 				else
 					gfDance.animation.play('danceLeft');
-			}
-			else if (curBeat % 2 == 0)
+			} else if (curBeat % 2 == 0)
 				gfDance.animation.play('idle', true);
 		}
 
-		if (!closedState)
-		{
+		if (!closedState) {
 			sickBeats++;
-			switch (sickBeats)
-			{
+			switch (sickBeats) {
 				case 1:
 					// FlxG.sound.music.stop();
 					FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
@@ -469,10 +418,8 @@ class TitleState extends EditableState
 	var skippedIntro:Bool = false;
 	var increaseVolume:Bool = false;
 
-	function skipIntro():Void
-	{
-		if (!skippedIntro)
-		{
+	function skipIntro():Void {
+		if (!skippedIntro) {
 			remove(ngSpr);
 			remove(credGroup);
 			FlxG.camera.flash(FlxColor.WHITE, 4);

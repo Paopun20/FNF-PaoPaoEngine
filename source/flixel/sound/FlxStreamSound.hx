@@ -15,8 +15,7 @@ import openfl.utils.AssetType;
  * Abstracts the streaming-specific `loadEmbedded` override so that
  * consumers can depend on the interface rather than the concrete class.
  */
-interface IFlxStreamSound
-{
+interface IFlxStreamSound {
 	/**
 	 * Loads an embedded sound asset for streaming playback.
 	 *
@@ -38,13 +37,11 @@ interface IFlxStreamSound
  * large audio files.
  */
 @:nullSafety
-class FlxStreamSound extends FlxSound implements IFlxStreamSound
-{
+class FlxStreamSound extends FlxSound implements IFlxStreamSound {
 	/**
 	 * Creates a new FlxStreamSound instance.
 	 */
-	public function new()
-	{
+	public function new() {
 		super();
 	}
 
@@ -66,34 +63,27 @@ class FlxStreamSound extends FlxSound implements IFlxStreamSound
 	 * @note ID3 metadata cannot be extracted from embedded sounds with this method
 	 * @note Asset strings are checked against both SOUND and MUSIC asset types
 	 */
-	override public function loadEmbedded(EmbeddedSound:Null<FlxSoundAsset>, Looped:Bool = false, AutoDestroy:Bool = false, ?OnComplete:Void->Void):FlxSound
-	{
+	override public function loadEmbedded(EmbeddedSound:Null<FlxSoundAsset>, Looped:Bool = false, AutoDestroy:Bool = false, ?OnComplete:Void->Void):FlxSound {
 		if (EmbeddedSound == null)
 			return this;
 
 		cleanup(true);
 
 		// Handle direct Sound object
-		if ((EmbeddedSound is Sound))
-		{
+		if ((EmbeddedSound is Sound)) {
 			_sound = EmbeddedSound;
 		}
 		// Handle Sound class reference
-		else if ((EmbeddedSound is Class))
-		{
+		else if ((EmbeddedSound is Class)) {
 			_sound = Type.createInstance(EmbeddedSound, []);
 		}
 		// Handle asset path string
-		else if ((EmbeddedSound is String))
-		{
+		else if ((EmbeddedSound is String)) {
 			// Check if asset exists in either SOUND or MUSIC categories
-			if (Assets.exists(EmbeddedSound, AssetType.SOUND) || Assets.exists(EmbeddedSound, AssetType.MUSIC))
-			{
+			if (Assets.exists(EmbeddedSound, AssetType.SOUND) || Assets.exists(EmbeddedSound, AssetType.MUSIC)) {
 				// Use getMusic() for streaming instead of getSound() for full loading
 				_sound = Assets.getMusic(EmbeddedSound);
-			}
-			else
-			{
+			} else {
 				FlxG.log.error('Could not find a Sound asset with an ID of \'$EmbeddedSound\'.');
 			}
 		}

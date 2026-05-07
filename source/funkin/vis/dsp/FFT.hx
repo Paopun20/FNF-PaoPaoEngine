@@ -10,8 +10,7 @@ using funkin.vis.dsp.Signal;
 /**
 	Fast/Finite Fourier Transforms.
 **/
-class FFT
-{
+class FFT {
 	/**
 		Computes the Discrete Fourier Transform (DFT) of a `Complex` sequence.
 
@@ -29,8 +28,7 @@ class FFT
 		Since the input time signal is real, its frequency representation is
 		Hermitian-symmetric so we only return the positive frequencies.
 	**/
-	public static function rfft(input:Array<Float>):Array<Complex>
-	{
+	public static function rfft(input:Array<Float>):Array<Complex> {
 		// checkAndComputeTwiddles(input.length);
 		final s = fft(input.map(Complex.fromReal));
 		return s.slice(0, Std.int(s.length / 2) + 1);
@@ -47,8 +45,7 @@ class FFT
 		return do_fft(input, true);
 
 	// Handles padding and scaling for forwards and inverse FFTs.
-	private static function do_fft(input:Array<Complex>, inverse:Bool):Array<Complex>
-	{
+	private static function do_fft(input:Array<Complex>, inverse:Bool):Array<Complex> {
 		final n = nextPow2(input.length);
 		var ts = [for (i in 0...n) if (i < input.length) input[i] else Complex.zero];
 		var fs = [for (_ in 0...n) Complex.zero];
@@ -63,19 +60,14 @@ class FFT
 	}
 
 	// Radix-2 Decimation-In-Time variant of Cooley–Tukey's FFT, recursive.
-	private static function ditfft2(time:Array<Complex>, t:Int, freq:Array<Complex>, f:Int, n:Int, step:Int, inverse:Bool):Void
-	{
-		if (n == 1)
-		{
+	private static function ditfft2(time:Array<Complex>, t:Int, freq:Array<Complex>, f:Int, n:Int, step:Int, inverse:Bool):Void {
+		if (n == 1) {
 			freq[f] = time[t].copy();
-		}
-		else
-		{
+		} else {
 			final halfLen = Std.int(n / 2);
 			ditfft2(time, t, freq, f, halfLen, step * 2, inverse);
 			ditfft2(time, t + step, freq, f + halfLen, halfLen, step * 2, inverse);
-			for (k in 0...halfLen)
-			{
+			for (k in 0...halfLen) {
 				final twiddle = inverse ? twiddleFactorsInversed[k] : twiddleFactors[k];
 				final even = freq[f + k].copy();
 				final odd = freq[f + k + halfLen].copy();
@@ -85,32 +77,25 @@ class FFT
 		}
 	}
 
-	private static function ditfft4(time:Array<Complex>, t:Int, freq:Array<Complex>, f:Int, n:Int, step:Int, inverse:Bool):Void
-	{
-		if (n == 4)
-		{
+	private static function ditfft4(time:Array<Complex>, t:Int, freq:Array<Complex>, f:Int, n:Int, step:Int, inverse:Bool):Void {
+		if (n == 4) {
 			// Base case: Compute the 4-point DFT directly
-			for (k in 0...n)
-			{
+			for (k in 0...n) {
 				var sum = Complex.zero;
-				for (j in 0...4)
-				{
+				for (j in 0...4) {
 					var twiddle = Complex.exp((inverse ? 1 : -1) * 2 * Math.PI * k / n);
 					sum += time[t + j * step] * twiddle;
 				}
 				freq[f + k] = sum;
 			}
-		}
-		else
-		{
+		} else {
 			final quarterLen = Std.int(n / 4);
 			ditfft4(time, t, freq, f, quarterLen, step * 4, inverse);
 			ditfft4(time, t + step, freq, f + quarterLen, quarterLen, step * 4, inverse);
 			ditfft4(time, t + 2 * step, freq, f + 2 * quarterLen, quarterLen, step * 4, inverse);
 			ditfft4(time, t + 3 * step, freq, f + 3 * quarterLen, quarterLen, step * 4, inverse);
 
-			for (k in 0...quarterLen)
-			{
+			for (k in 0...quarterLen) {
 				final twiddle0 = Complex.exp((inverse ? 1 : -1) * 2 * Math.PI * k / n);
 				final twiddle1 = Complex.exp((inverse ? 1 : -1) * 2 * Math.PI * k / n);
 				final twiddle2 = Complex.exp((inverse ? 1 : -1) * 2 * Math.PI * k * 2 / n);
@@ -130,18 +115,15 @@ class FFT
 	}
 
 	// Naive O(n^2) DFT, used for testing purposes.
-	private static function dft(ts:Array<Complex>, ?inverse:Bool):Array<Complex>
-	{
+	private static function dft(ts:Array<Complex>, ?inverse:Bool):Array<Complex> {
 		if (inverse == null)
 			inverse = false;
 		final n = ts.length;
 		var fs = new Array<Complex>();
 		fs.resize(n);
-		for (f in 0...n)
-		{
+		for (f in 0...n) {
 			var sum = Complex.zero;
-			for (t in 0...n)
-			{
+			for (t in 0...n) {
 				sum += ts[t] * Complex.exp((inverse ? 1 : -1) * 2 * Math.PI * f * t / n);
 			}
 			fs[f] = inverse ? sum.scale(1 / n) : sum;
@@ -153,8 +135,7 @@ class FFT
 
 	private static var twiddleFactors:Array<Complex>;
 
-	private static function precomputeTwiddleFactors(maxN:Int, inverse:Bool):Void
-	{
+	private static function precomputeTwiddleFactors(maxN:Int, inverse:Bool):Void {
 		var n:Int = maxN;
 		var base_len = maxN;
 		var len = base_len * (1 << 2);
@@ -165,8 +146,7 @@ class FFT
 		// }
 
 		// radix2 twiddles
-		for (k in 0...Std.int(n / 2))
-		{ // n/4 because of symmetry in Radix-4
+		for (k in 0...Std.int(n / 2)) { // n/4 because of symmetry in Radix-4
 			var twiddle:Complex = computeTwiddle(k, n, inverse);
 			twiddles.push(twiddle);
 		}
@@ -177,8 +157,7 @@ class FFT
 			twiddleFactors = twiddles;
 	}
 
-	private static function computeTwiddle(index, fft_len, inverse:Bool = false)
-	{
+	private static function computeTwiddle(index, fft_len, inverse:Bool = false) {
 		var constant = -2 * Math.PI / fft_len;
 		var angle = constant * index;
 
@@ -190,8 +169,7 @@ class FFT
 			return result;
 	}
 
-	private static function useTwiddleFactor(n:Int, k:Int, inverse:Bool = false):Complex
-	{
+	private static function useTwiddleFactor(n:Int, k:Int, inverse:Bool = false):Complex {
 		// Compute the index adjustment based on the FFT size n
 		// var indexAdjustment:Int = Std.int(twiddleFactors.length / (n / 4));
 		var twiddlesToUse = inverse ? twiddleFactorsInversed : twiddleFactors;
@@ -201,8 +179,7 @@ class FFT
 	/**
 		Finds the power of 2 that is equal to or greater than the given natural.
 	**/
-	public static function nextPow2(x:Int):Int
-	{
+	public static function nextPow2(x:Int):Int {
 		if (x < 2)
 			return 1;
 		else if ((x & (x - 1)) == 0)
@@ -215,8 +192,7 @@ class FFT
 	}
 
 	// testing, but also acts like an example
-	static function main()
-	{
+	static function main() {
 		// sampling and buffer parameters
 		final Fs = 44100.0;
 		final N = 512;
@@ -242,12 +218,9 @@ class FFT
 			.findPeaks()
 			.map(k -> (k - (halfN - 1)) * Fs / N)
 			.filter(f -> f >= 0);
-		if (freqis.length != freqs.length)
-		{
+		if (freqis.length != freqs.length) {
 			trace('Found frequencies: ${freqis}');
-		}
-		else
-		{
+		} else {
 			final freqs_err = [for (i in 0...freqs.length) freqis[i] - freqs[i]];
 			final max_freqs_err = freqs_err.map(Math.abs).max();
 			if (max_freqs_err > Fs / N)

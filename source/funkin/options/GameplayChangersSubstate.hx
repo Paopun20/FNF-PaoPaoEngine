@@ -4,8 +4,7 @@ import funkin.objects.AttachedText;
 import funkin.objects.CheckboxThingie;
 import funkin.options.Option.OptionType;
 
-class GameplayChangersSubstate extends MusicBeatSubstate
-{
+class GameplayChangersSubstate extends MusicBeatSubstate {
 	private var curSelected:Int = 0;
 	private var optionsArray:Array<GameplayOption> = [];
 
@@ -22,8 +21,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 	var holdTime:Float = 0;
 	var holdValue:Float = 0;
 
-	public function new()
-	{
+	public function new() {
 		super();
 
 		var bg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
@@ -40,8 +38,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 		getOptions();
 
-		for (i in 0...optionsArray.length)
-		{
+		for (i in 0...optionsArray.length) {
 			var opt = optionsArray[i];
 
 			var optionText = new Alphabet(150, 360, opt.name, true);
@@ -50,8 +47,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 			optionText.targetY = i;
 			grpOptions.add(optionText);
 
-			if (opt.type == BOOL)
-			{
+			if (opt.type == BOOL) {
 				optionText.x += 60;
 				optionText.startPosition.x += 60;
 				optionText.snapToPosition();
@@ -62,9 +58,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 				checkbox.offsetY = -52;
 				checkbox.ID = i;
 				checkboxGroup.add(checkbox);
-			}
-			else
-			{
+			} else {
 				optionText.snapToPosition();
 
 				var valueText = new AttachedText(Std.string(opt.getValue()), optionText.width + 40, 0, true, 0.8);
@@ -83,8 +77,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		reloadCheckboxes();
 	}
 
-	function getOptions()
-	{
+	function getOptions() {
 		optionsArray.push(new GameplayOption('Scroll Type', 'scrolltype', STRING, 'multiplicative', ['multiplicative', 'constant']));
 
 		var scrollSpeed = new GameplayOption('Scroll Speed', 'scrollspeed', FLOAT, 1);
@@ -125,34 +118,27 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		optionsArray.push(new GameplayOption('Botplay', 'botplay', BOOL, false));
 	}
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		if (controls.UI_UP_P)
 			changeSelection(-1);
 		if (controls.UI_DOWN_P)
 			changeSelection(1);
 
-		if (controls.BACK)
-		{
+		if (controls.BACK) {
 			ClientPrefs.saveSettings();
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			close();
 		}
 
-		if (nextAccept <= 0)
-		{
-			if (curOption.type == BOOL)
-			{
-				if (controls.ACCEPT)
-				{
+		if (nextAccept <= 0) {
+			if (curOption.type == BOOL) {
+				if (controls.ACCEPT) {
 					curOption.setValue(!curOption.getValue());
 					curOption.change();
 					reloadCheckboxes();
 					FlxG.sound.play(Paths.sound('scrollMenu'));
 				}
-			}
-			else
-			{
+			} else {
 				handleValueInput(elapsed);
 			}
 
@@ -165,10 +151,8 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		super.update(elapsed);
 	}
 
-	function handleValueInput(elapsed:Float)
-	{
-		if (!(controls.UI_LEFT || controls.UI_RIGHT))
-		{
+	function handleValueInput(elapsed:Float) {
+		if (!(controls.UI_LEFT || controls.UI_RIGHT)) {
 			clearHold();
 			return;
 		}
@@ -179,18 +163,15 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		if (pressed)
 			holdValue = curOption.getValue();
 
-		if (pressed || holdTime > 0.5)
-		{
-			switch (curOption.type)
-			{
+		if (pressed || holdTime > 0.5) {
+			switch (curOption.type) {
 				case INT, FLOAT, PERCENT:
 					holdValue += (pressed ? curOption.changeValue : curOption.scrollSpeed * elapsed) * dir;
 					holdValue = FlxMath.bound(holdValue, curOption.minValue, curOption.maxValue);
 					curOption.setValue(curOption.type == INT ? Math.round(holdValue) : FlxMath.roundDecimal(holdValue, curOption.decimals));
 
 				case STRING:
-					if (pressed)
-					{
+					if (pressed) {
 						curOption.curOption = FlxMath.wrap(curOption.curOption + dir, 0, curOption.options.length - 1);
 						curOption.setValue(curOption.options[curOption.curOption]);
 					}
@@ -207,10 +188,8 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		holdTime += elapsed;
 	}
 
-	function resetAll()
-	{
-		for (opt in optionsArray)
-		{
+	function resetAll() {
+		for (opt in optionsArray) {
 			opt.setValue(opt.defaultValue);
 			if (opt.type == STRING)
 				opt.curOption = opt.options.indexOf(opt.defaultValue);
@@ -221,27 +200,23 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		FlxG.sound.play(Paths.sound('cancelMenu'));
 	}
 
-	function updateTextFrom(option:GameplayOption)
-	{
+	function updateTextFrom(option:GameplayOption) {
 		var val:Dynamic = option.getValue();
 		if (option.type == PERCENT)
 			val *= 100;
 		option.text = option.displayFormat.replace('%v', Std.string(val));
 	}
 
-	function clearHold()
-	{
+	function clearHold() {
 		holdTime = 0;
 		holdValue = curOption.getValue();
 	}
 
-	function changeSelection(change:Int = 0)
-	{
+	function changeSelection(change:Int = 0) {
 		clearHold();
 		curSelected = FlxMath.wrap(curSelected + change, 0, optionsArray.length - 1);
 
-		for (i => item in grpOptions.members)
-		{
+		for (i => item in grpOptions.members) {
 			item.targetY = i - curSelected;
 			item.alpha = item.targetY == 0 ? 1 : 0.6;
 		}
@@ -252,15 +227,13 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		FlxG.sound.play(Paths.sound('scrollMenu'));
 	}
 
-	function reloadCheckboxes()
-	{
+	function reloadCheckboxes() {
 		for (checkbox in checkboxGroup)
 			checkbox.daValue = optionsArray[checkbox.ID].getValue();
 	}
 }
 
-class GameplayOption
-{
+class GameplayOption {
 	private var child:Alphabet;
 
 	public var text(get, set):String;
@@ -284,8 +257,7 @@ class GameplayOption
 	public var displayFormat:String = '%v'; // How String/Float/Percent/Int values are shown, %v = Current value, %d = Default value
 	public var name:String = 'Unknown';
 
-	public function new(name:String, variable:String, type:OptionType, defaultValue:Dynamic = 'null variable value', ?options:Array<String> = null)
-	{
+	public function new(name:String, variable:String, type:OptionType, defaultValue:Dynamic = 'null variable value', ?options:Array<String> = null) {
 		_name = name;
 		this.name = Language.getPhrase('setting_$name', name);
 		this.variable = variable;
@@ -293,10 +265,8 @@ class GameplayOption
 		this.defaultValue = defaultValue;
 		this.options = options;
 
-		if (defaultValue == 'null variable value')
-		{
-			switch (type)
-			{
+		if (defaultValue == 'null variable value') {
+			switch (type) {
 				case BOOL:
 					defaultValue = false;
 				case INT, FLOAT:
@@ -315,8 +285,7 @@ class GameplayOption
 		if (getValue() == null)
 			setValue(defaultValue);
 
-		switch (type)
-		{
+		switch (type) {
 			case STRING:
 				var num:Int = options.indexOf(getValue());
 				if (num > -1)
@@ -334,8 +303,7 @@ class GameplayOption
 		}
 	}
 
-	public function change()
-	{
+	public function change() {
 		// nothing lol
 		if (onChange != null)
 			onChange();
@@ -356,10 +324,8 @@ class GameplayOption
 	private function get_text()
 		return _text;
 
-	private function set_text(newValue:String = '')
-	{
-		if (child != null)
-		{
+	private function set_text(newValue:String = '') {
+		if (child != null) {
 			_text = newValue;
 			child.text = Language.getPhrase('setting_$_name-$_text', _text);
 			return _text;

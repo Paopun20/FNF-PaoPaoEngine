@@ -7,8 +7,7 @@ package funkin.vis.dsp;
 abstract Complex({
 	final real:Float;
 	final imag:Float;
-})
-{
+}) {
 	public inline function new(real:Float, imag:Float)
 		this = {real: real, imag: imag};
 

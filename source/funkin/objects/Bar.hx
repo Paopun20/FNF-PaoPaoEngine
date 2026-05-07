@@ -2,8 +2,7 @@ package funkin.objects;
 
 import flixel.math.FlxRect;
 
-class Bar extends FlxSpriteGroup
-{
+class Bar extends FlxSpriteGroup {
 	public var leftBar:FlxSprite;
 	public var rightBar:FlxSprite;
 	public var bg:FlxSprite;
@@ -18,8 +17,7 @@ class Bar extends FlxSpriteGroup
 	public var barHeight(default, set):Int = 1;
 	public var barOffset:FlxPoint = new FlxPoint(3, 3);
 
-	public function new(x:Float, y:Float, image:String = 'healthBar', valueFunction:Void->Float = null, boundX:Float = 0, boundY:Float = 1)
-	{
+	public function new(x:Float, y:Float, image:String = 'healthBar', valueFunction:Void->Float = null, boundX:Float = 0, boundY:Float = 1) {
 		super(x, y);
 
 		this.valueFunction = valueFunction;
@@ -46,40 +44,33 @@ class Bar extends FlxSpriteGroup
 
 	public var enabled:Bool = true;
 
-	override function update(elapsed:Float)
-	{
-		if (!enabled)
-		{
+	override function update(elapsed:Float) {
+		if (!enabled) {
 			super.update(elapsed);
 			return;
 		}
 
-		if (valueFunction != null)
-		{
+		if (valueFunction != null) {
 			var value:Null<Float> = FlxMath.remapToRange(FlxMath.bound(valueFunction(), bounds.min, bounds.max), bounds.min, bounds.max, 0, 100);
 			percent = (value != null ? value : 0);
-		}
-		else
+		} else
 			percent = 0;
 		super.update(elapsed);
 	}
 
-	public function setBounds(min:Float, max:Float)
-	{
+	public function setBounds(min:Float, max:Float) {
 		bounds.min = min;
 		bounds.max = max;
 	}
 
-	public function setColors(left:FlxColor = null, right:FlxColor = null)
-	{
+	public function setColors(left:FlxColor = null, right:FlxColor = null) {
 		if (left != null)
 			leftBar.color = left;
 		if (right != null)
 			rightBar.color = right;
 	}
 
-	public function updateBar()
-	{
+	public function updateBar() {
 		if (leftBar == null || rightBar == null)
 			return;
 
@@ -109,16 +100,13 @@ class Bar extends FlxSpriteGroup
 		rightBar.clipRect = rightBar.clipRect;
 	}
 
-	public function regenerateClips()
-	{
-		if (leftBar != null)
-		{
+	public function regenerateClips() {
+		if (leftBar != null) {
 			leftBar.setGraphicSize(Std.int(bg.width), Std.int(bg.height));
 			leftBar.updateHitbox();
 			leftBar.clipRect = new FlxRect(0, 0, Std.int(bg.width), Std.int(bg.height));
 		}
-		if (rightBar != null)
-		{
+		if (rightBar != null) {
 			rightBar.setGraphicSize(Std.int(bg.width), Std.int(bg.height));
 			rightBar.updateHitbox();
 			rightBar.clipRect = new FlxRect(0, 0, Std.int(bg.width), Std.int(bg.height));
@@ -126,8 +114,7 @@ class Bar extends FlxSpriteGroup
 		updateBar();
 	}
 
-	private function set_percent(value:Float)
-	{
+	private function set_percent(value:Float) {
 		var doUpdate:Bool = false;
 		if (value != percent)
 			doUpdate = true;
@@ -138,22 +125,19 @@ class Bar extends FlxSpriteGroup
 		return value;
 	}
 
-	private function set_leftToRight(value:Bool)
-	{
+	private function set_leftToRight(value:Bool) {
 		leftToRight = value;
 		updateBar();
 		return value;
 	}
 
-	private function set_barWidth(value:Int)
-	{
+	private function set_barWidth(value:Int) {
 		barWidth = value;
 		regenerateClips();
 		return value;
 	}
 
-	private function set_barHeight(value:Int)
-	{
+	private function set_barHeight(value:Int) {
 		barHeight = value;
 		regenerateClips();
 		return value;

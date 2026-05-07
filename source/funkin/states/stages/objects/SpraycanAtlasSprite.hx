@@ -1,22 +1,19 @@
 package funkin.states.stages.objects;
 
-enum SpraycanState
-{
+enum SpraycanState {
 	WAITING;
 	ARCING; // In the air.
 	SHOT; // Hit by the player.
 	IMPACTED; // Impacted the player.
 }
 
-class SpraycanAtlasSprite extends FlxSpriteGroup
-{
+class SpraycanAtlasSprite extends FlxSpriteGroup {
 	public var currentState:SpraycanState = WAITING;
 
 	public var canAtlas:FlxAnimate;
 	public var explosion:FlxSprite;
 
-	public function new(x:Float = 0, y:Float = 0)
-	{
+	public function new(x:Float = 0, y:Float = 0) {
 		super();
 
 		canAtlas = new FlxAnimate(x, y);
@@ -40,10 +37,8 @@ class SpraycanAtlasSprite extends FlxSpriteGroup
 
 	public var cutscene:Bool = false;
 
-	public function finishCanAnimation()
-	{
-		switch (playingAnim)
-		{
+	public function finishCanAnimation() {
+		switch (playingAnim) {
 			case 'Can Start':
 				playHitPico();
 			case 'Can Shot':
@@ -57,35 +52,30 @@ class SpraycanAtlasSprite extends FlxSpriteGroup
 		}
 	}
 
-	public function playHitExplosion():Void
-	{
+	public function playHitExplosion():Void {
 		explosion.visible = explosion.active = true;
 		explosion.animation.play('idle', true);
 	}
 
-	public function playCanStart():Void
-	{
+	public function playCanStart():Void {
 		playAnimation('Can Start');
 		canAtlas.visible = canAtlas.active = true;
 		currentState = ARCING;
 	}
 
-	public function playCanShot():Void
-	{
+	public function playCanShot():Void {
 		playAnimation('Can Shot');
 		currentState = SHOT;
 	}
 
-	public function playHitPico():Void
-	{
+	public function playHitPico():Void {
 		playAnimation('Hit Pico');
 		currentState = IMPACTED;
 	}
 
 	var playingAnim:String;
 
-	public function playAnimation(name:String)
-	{
+	public function playAnimation(name:String) {
 		canAtlas.anim.play(name, true);
 		playingAnim = name;
 	}

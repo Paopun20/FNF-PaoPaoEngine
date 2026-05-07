@@ -45,6 +45,7 @@
 	<define name="MODS_ALLOWED" />
 	<define name="HSCRIPT_ALLOWED" if="MODS_ALLOWED" />
 	<define name="PYTHON_ALLOWED" if="MODS_ALLOWED" />
+	<define name="NXSCRIPT_ALLOWED" if="MODS_ALLOWED" />
 	<define name="LUA_ALLOWED" if="MODS_ALLOWED cpp" unless="hl || html5" />
 	<define name="ACHIEVEMENTS_ALLOWED" />
 	<define name="DISCORD_ALLOWED" if="cpp desktop" unless="hl || html5" />
@@ -215,6 +216,7 @@
 	<haxelib name="hython" if="PYTHON_ALLOWED" />
 	<haxelib name="hscript-improved" if="HSCRIPT_ALLOWED" />
 	<define name="hscript" if="HSCRIPT_ALLOWED debug" />
+	<haxelib name="nxscript" if="NXSCRIPT_ALLOWED" />
 
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED" version="git" />
 	<haxelib name="hxdiscord_rpc" version="git" if="DISCORD_ALLOWED" />
@@ -293,6 +295,7 @@
 		<haxedef name="HXCPP_STACK_LINE" if="CRASH_HANDLER" />
 		<haxedef name="HXCPP_STACK_TRACE" if="CRASH_HANDLER" />
 		<haxedef name="HXCPP_OPTIMIZE_LINK" unless="debug" />
+		<haxedef name="HXCPP_OPTIMIZE_LEVEL" value="3" unless="debug" />
 		<haxedef name="HXCPP_GC_BIG_BLOCKS" />
 		<haxedef name="HXCPP_GC_DYNAMIC_SIZE" />
 		<haxedef name="HXCPP_GC_GENERATIONAL" />

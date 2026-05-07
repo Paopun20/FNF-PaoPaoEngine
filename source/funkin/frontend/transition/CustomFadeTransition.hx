@@ -9,18 +9,15 @@ import flixel.util.FlxGradient;
  * Gradient fade transition effect
  * Creates a smooth fade using a gradient overlay
  */
-class CustomFadeTransition extends BaseTransition
-{
+class CustomFadeTransition extends BaseTransition {
 	private var transBlack:FlxSprite;
 	private var transGradient:FlxSprite;
 
-	public function new(duration:Float, isTransIn:Bool)
-	{
+	public function new(duration:Float, isTransIn:Bool) {
 		super(duration, isTransIn);
 	}
 
-	override function create()
-	{
+	override function create() {
 		super.create();
 
 		var width:Int = getScreenWidth();
@@ -49,8 +46,7 @@ class CustomFadeTransition extends BaseTransition
 			transGradient.y = -transGradient.height;
 	}
 
-	override private function updateTransition(elapsed:Float):Void
-	{
+	override private function updateTransition(elapsed:Float):Void {
 		final height:Float = FlxG.height * Math.max(camera.zoom, 0.001);
 		final targetPos:Float = transGradient.height + 50 * Math.max(camera.zoom, 0.001);
 
@@ -67,8 +63,7 @@ class CustomFadeTransition extends BaseTransition
 			transBlack.y = transGradient.y - transBlack.height;
 	}
 
-	override private function shouldComplete():Bool
-	{
+	override private function shouldComplete():Bool {
 		final targetPos:Float = transGradient.height + 50 * Math.max(camera.zoom, 0.001);
 		return transGradient.y >= targetPos;
 	}
