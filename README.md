@@ -60,6 +60,8 @@ PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
 
 I'm not really into mobile support right now, but you should definitely check out this “mobile build.” It's a fun surprise: [Mobile Support](https://youtu.be/cSQTZoZPJzs)!
 
+I have a discord server for anyone who wants chating or live updates on the engine: https://discord.gg/XQDpcrk74Q
+
 ## Origin
 
 PaoPao Engine was fork based on [**Psych Engine 1.0.4**](https://github.com/ShadowMario/FNF-PsychEngine)

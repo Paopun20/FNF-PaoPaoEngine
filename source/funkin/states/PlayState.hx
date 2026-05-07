@@ -644,7 +644,7 @@ class PlayState extends MusicBeatState {
 
 		var splash:NoteSplash = new NoteSplash();
 		grpNoteSplashes.add(splash);
-		splash.alpha = 0.000001; // cant make it invisible or it won't allow precaching
+		splash.alpha = 5e-15; // cant make it invisible or it won't allow precaching
 
 		super.create();
 		Paths.clearUnusedMemory();
