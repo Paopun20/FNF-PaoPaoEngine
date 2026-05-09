@@ -3056,7 +3056,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 			PlayState.SONG.needsVoices = allowVocalsCheckBox.checked;
 			loadMusic();
 		});
-		var reloadAudioButton:PsychUIButton = new PsychUIButton(objX + 120, objY, 'Reload Audio', function() loadMusic(true), 80);
+		var reloadAudioButton:PsychUIButton = new PsychUIButton(objX + 120, objY, 'Reload Audio', function() {
+			loadMusic(true);
+			updateWaveform();
+		}, 80);
 
 		#if mac
 		var reloadJsonButton:PsychUIButton = new PsychUIButton(objX + 205, objY, 'Reload JSON', function() {

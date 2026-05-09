@@ -12,6 +12,8 @@ import flixel.input.keyboard.FlxKey;
 import openfl.events.KeyboardEvent;
 
 class EditorPlayState extends MusicBeatSubstate {
+	static inline final NOTE_SPLASH_PRECACHE_ALPHA:Float = 0.000001;
+
 	// Borrowed from original PlayState
 	var finishTimer:FlxTimer = null;
 	var noteKillOffset:Float = 350;
@@ -103,7 +105,7 @@ class EditorPlayState extends MusicBeatSubstate {
 
 		var splash:NoteSplash = new NoteSplash();
 		grpNoteSplashes.add(splash);
-		splash.alpha = 0.000001; // cant make it invisible or it won't allow precaching
+		splash.alpha = NOTE_SPLASH_PRECACHE_ALPHA; // Keep non-zero so note splashes render once for precaching.
 
 		opponentStrums = new FlxTypedGroup<StrumNote>();
 		playerStrums = new FlxTypedGroup<StrumNote>();

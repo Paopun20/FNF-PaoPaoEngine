@@ -47,6 +47,7 @@ using funkin.backend.utils.tools.PPQolTools;
 class PlayState extends MusicBeatState {
 	public static var STRUM_X = 42;
 	public static var STRUM_X_MIDDLESCROLL = -278;
+	public static inline final NOTE_SPLASH_PRECACHE_ALPHA:Float = 0.000001;
 
 	public static var ratingStuff:Array<Dynamic> = [
 		['You Suck!', 0.2], // From 0% to 19%
@@ -644,7 +645,7 @@ class PlayState extends MusicBeatState {
 
 		var splash:NoteSplash = new NoteSplash();
 		grpNoteSplashes.add(splash);
-		splash.alpha = 5e-15; // cant make it invisible or it won't allow precaching
+		splash.alpha = NOTE_SPLASH_PRECACHE_ALPHA; // Keep non-zero so note splashes render once for precaching.
 
 		super.create();
 		Paths.clearUnusedMemory();
@@ -2058,23 +2059,16 @@ class PlayState extends MusicBeatState {
 		return false;
 	}
 
+	private var nextEventNoteIndex:Int = 0;
+
 	public function checkEventNote() {
-		while (eventNotes.length > 0) {
-			var leStrumTime:Float = eventNotes[0].strumTime;
-			if (Conductor.songPosition < leStrumTime) {
+		while (nextEventNoteIndex < eventNotes.length) {
+			var event = eventNotes[nextEventNoteIndex];
+			if (Conductor.songPosition < event.strumTime)
 				return;
-			}
 
-			var value1:String = '';
-			if (eventNotes[0].value1 != null)
-				value1 = eventNotes[0].value1;
-
-			var value2:String = '';
-			if (eventNotes[0].value2 != null)
-				value2 = eventNotes[0].value2;
-
-			triggerEvent(eventNotes[0].event, value1, value2, leStrumTime);
-			eventNotes.shift();
+			triggerEvent(event.event, event.value1 ?? '', event.value2 ?? '', event.strumTime);
+			nextEventNoteIndex++;
 		}
 	}
 

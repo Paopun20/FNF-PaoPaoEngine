@@ -75,160 +75,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4.1.7
-      - uses: xom9ikk/dotenv@v2.3.0
+
+      - name: Setup build environment
+        uses: ./.github/workflows/buildYmls/setup-build
         with:
-          path: .env
-          load-mode: skip # sets whether the program should fail when the .env file is not present (strict) or continue (skip)
-      - uses: HaxeFoundation/setup-haxe@v2.0.3
+          target: ${{ matrix.target }}
+          lib-path: ${{ matrix.lib-path }}
+          setup-file: ${{ matrix.setup-file }}
+
+      - name: Compile target
+        uses: ./.github/workflows/buildYmls/compile-target
         with:
-          haxe-version: 4.3.7
-
-      - name: Setup Android SDK
-        if: matrix.target == 'android'
-        uses: android-actions/setup-android@v4
-
-      - name: Install Android packages
-        if: matrix.target == 'android'
-        shell: powershell
-        run: |
-          sdkmanager "platform-tools" `
-                     "platforms;android-33" `
-                     "build-tools;33.0.2" `
-                     "ndk;21.4.7075529" `
-                     "cmake;3.22.1"
-
-      - name: Set up Java 11
-        if: matrix.target == 'android'
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: 11
-
-      - name: Install Linux dependencies
-        if: matrix.target == 'linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install libvlc-dev libvlccore-dev
-          sudo apt install libgl1-mesa-dev libglu1-mesa-dev g++ g++-multilib gcc-multilib libasound2-dev libx11-dev libxext-dev libxi-dev libxrandr-dev libxinerama-dev libpulse-dev
-
-      - name: Cache Dependencies
-        uses: actions/cache@v5
-        with:
-          fail-on-cache-miss: true
-          enableCrossOsArchive: true
-          path: ${{ matrix.lib-path }}
-          key: ${{ runner.os }}-haxelib-${{ hashFiles(matrix.setup-file) }}
-          restore-keys: |
-            ${{ runner.os }}-haxelib-
-
-      - name: Setup Haxelib
-        run: |
-          haxelib setup ${{ matrix.lib-path }}
-          haxelib --global update haxelib
-          haxelib fixrepo
-
-      - name: Install Haxelib (Unix)
-        if: runner.os != 'Windows'
-        run: |
-          chmod +x ${{ matrix.setup-file }}
-          sh ${{ matrix.setup-file }}
-
-      - name: Install Haxelib (Windows)
-        if: runner.os == 'Windows'
-        shell: powershell
-        run: |
-          . ${{ matrix.setup-file }}
-
-      - name: Skip SScript setup mode (Unix)
-        if: runner.os != 'Windows'
-        run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> ~/settings.cocoa
-
-      - name: Skip SScript setup mode (Windows)
-        if: runner.os == 'Windows'
-        run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> %USERPROFILE%/settings.cocoa
-        shell: cmd
-
-      - name: Select Xcode
-        if: contains(fromJSON('["ios","tvos"]'), matrix.target)
-        run: sudo xcode-select -s /Applications/Xcode_16.2.app
-
-      - name: Create Version Tag
-        run: echo "${{github.run_id}}" > VERSION
-
-      - name: Compile (Apple IOS)
-        if: matrix.target == 'ios'
-        run: |
-          set +e
-          haxelib remove lime
-          set -e
-          git clone --recursive https://github.com/openfl/lime
-          haxelib dev lime lime
-          haxelib run lime rebuild ${{ matrix.target }}
-          haxelib run lime build ios --app-version="4.0.0-${{ github.run_id }}" -D officialBuild -nosign
-
-      - name: Configure Windows for Android build
-        if: matrix.target == 'android'
-        shell: powershell
-        run: |
-          # Disable Windows Defender real-time protection — it intercepts NDK compiler
-          # executables mid-run and causes them to write error text into .obj files
-          # instead of valid ELF objects, producing the "not an object or archive" linker error.
-          Set-MpPreference -DisableRealtimeMonitoring $true
-
-          # Enable long path support — the NDK toolchain path is deep enough to hit
-          # the 260-char MAX_PATH limit for intermediate files on Windows.
-          Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name LongPathsEnabled -Value 1 -Force
-          git config --system core.longpaths true
-
-      - name: Configure Lime Android Environment
-        if: matrix.target == 'android'
-        shell: powershell
-        run: |
-          $androidNdk = Join-Path $env:ANDROID_HOME "ndk\21.4.7075529"
-          $env:ANDROID_SDK = $env:ANDROID_HOME
-          $env:ANDROID_NDK_ROOT = $androidNdk
-          $env:ANDROID_NDK_HOME = $androidNdk
-          $env:JAVA_HOME = $env:JAVA_HOME_11_X64
-
-          Write-Output "ANDROID_SDK=$env:ANDROID_SDK" >> $env:GITHUB_ENV
-          Write-Output "ANDROID_NDK_ROOT=$env:ANDROID_NDK_ROOT" >> $env:GITHUB_ENV
-          Write-Output "ANDROID_NDK_HOME=$env:ANDROID_NDK_HOME" >> $env:GITHUB_ENV
-          Write-Output "JAVA_HOME=$env:JAVA_HOME" >> $env:GITHUB_ENV
-          # Do NOT set HXCPP_COMPILE_CACHE — when individual clang compilations
-          # fail, hxcpp writes the error text to the .obj file and continues.
-          # With a cache, those corrupt text files get reused on the link step,
-          # producing "not an object or archive". Without a cache, hxcpp at least
-          # retries and the link step refuses to run at all, surfacing the real error.
-
-          # Serialize compilation so per-file clang errors are printed instead of
-          # being silently swallowed across parallel threads.
-          Write-Output "HXCPP_COMPILE_THREADS=1" >> $env:GITHUB_ENV
-          Write-Output "HXCPP_VERBOSE=1" >> $env:GITHUB_ENV
-          haxelib run lime setup android
-
-      - name: Compile (Android)
-        if: matrix.target == 'android'
-        run: |
-          haxelib run lime build android --app-version="4.0.0-${{ github.run_id }}" -D officialBuild -release -verbose -final
-
-      - name: Compile (Apple TV)
-        if: matrix.target == 'tvos'
-        run: |
-          haxelib install format 3.8.0
-          haxelib install hxp 1.3.1
-          haxelib remove lime
-          git clone --recursive https://github.com/openfl/lime
-          haxelib dev lime lime
-          haxelib remove hxcpp
-          git clone --recursive https://github.com/HaxeFoundation/hxcpp.git
-          haxelib dev hxcpp hxcpp
-          haxelib run lime rebuild tvos
-          haxelib run lime build ${{ matrix.target }} --app-version="4.0.0-${{ github.run_id }}" -D officialBuild -nosign -final
-
-      - name: Compile (Anyelse)
-        if: matrix.target != 'ios' && matrix.target != 'tvos' && matrix.target != 'android'
-        run: |
-          haxelib run lime build ${{ matrix.target }} --app-version="4.0.0-${{ github.run_id }}" -D officialBuild -final
+          target: ${{ matrix.target }}
+          app-version: 4.0.0-${{ github.run_id }}
 
       - name: Publish Artifact
         uses: actions/upload-artifact@v4.3.4
@@ -243,36 +102,9 @@ jobs:
     if: ${{ (inputs.nightly || github.event_name == 'push') && !cancelled() }}
 
     steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4.1.7
+
+      - name: Update nightly release
+        uses: ./.github/workflows/buildYmls/nightly-release
         with:
-          path: ./artifacts
-
-      - name: Create archives
-        continue-on-error: true
-        run: |
-          cd artifacts
-          zip -r ../paopao.nightly.linux.zip linuxBuild/
-          zip -r ../paopao.nightly.windows.zip windowsBuild/
-          zip -r ../paopao.nightly.mac.zip macBuild/
-          find androidBuild/ -name "*.apk" -exec zip ../paopao.nightly.android.zip {} \;
-
-      - name: Update Nightly Release
-        uses: andelf/nightly-release@main
-        if: always()
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: nightly
-          name: "Development Release"
-          body: |
-            This is a nightly build of **PaoPao Engine** for commit ${{ github.sha }} from ${{ github.ref_name }}.
-
-            This is a development release of **PaoPao Engine**. It is not recommended for production use.
-
-            Please use this version only for testing and development purposes.
-          files: |
-            paopao.nightly.linux.zip
-            paopao.nightly.windows.zip
-            paopao.nightly.mac.zip
-            paopao.nightly.android.zip
+          github-token: ${{ secrets.GITHUB_TOKEN }}
