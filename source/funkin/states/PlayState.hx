@@ -1156,7 +1156,7 @@ class PlayState extends MusicBeatState {
 			return;
 
 		updateScoreText();
-		if (!miss && !cpuControlled && scoreBop)
+		if (!miss && scoreBop)
 			doScoreBop();
 
 		callOnScripts('onUpdateScore', [miss]);
@@ -1858,7 +1858,7 @@ class PlayState extends MusicBeatState {
 
 							// Kill extremely late notes and cause misses
 							if (Conductor.songPosition - daNote.strumTime > noteKillOffset) {
-								if (daNote.mustPress && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
+								if (daNote.mustPress && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
 									noteMiss(daNote);
 
 								daNote.active = daNote.visible = false;
@@ -3264,11 +3264,7 @@ class PlayState extends MusicBeatState {
 			resetSubState();
 		}
 
-		#if LUA_ALLOWED
 		scriptPack.destroy();
-		#else
-		scriptPack.destroy();
-		#end
 
 		stagesFunc(function(stage:BaseStage) stage.destroy());
 

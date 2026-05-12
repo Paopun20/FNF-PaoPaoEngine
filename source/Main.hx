@@ -19,6 +19,9 @@ import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
 import openfl.events.Event;
+
+import funkin.ds.BytesMap;
+
 #if (linux || mac)
 import lime.graphics.Image;
 #end
@@ -63,7 +66,7 @@ import funkin.backend.utils.HxSignalKill;
  */
 final class ErrorHandle {
 	#if CRASH_HANDLER
-	private static var _sourceMap:StringMap<String> = SourceMap.build();
+	private static var _sourceMap:BytesMap<String> = SourceMap.build();
 
 	public static function init():Void {
 		FunkinGame.onGameCrash.add(onCrash);
@@ -294,7 +297,7 @@ class Main extends Sprite {
 		#if android
 		Sys.setCwd(Path.addTrailingSlash(System.applicationStorageDirectory));
 		#elseif ios
-		Sys.setCwd(System.applicationStorageDirectory);
+		Sys.setCwd(System.documentsDirectory);
 		#end
 
 		#if LUA_ALLOWED

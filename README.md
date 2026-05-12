@@ -58,9 +58,12 @@ PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
 
 ## About
 
-I'm not really into mobile support right now, but you should definitely check out this “mobile build.” It's a fun surprise: [Mobile Support](https://youtu.be/cSQTZoZPJzs)!
-
 I have a discord server for anyone who wants chating or live updates on the engine: https://discord.gg/XQDpcrk74Q
+
+## Planing
+
+- [mobile support](https://youtu.be/cSQTZoZPJzs)
+- switch support
 
 ## Origin
 

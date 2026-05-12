@@ -1,6 +1,8 @@
 package funkin.backend.utils.macro;
 
-import haxe.ds.StringMap;
+import haxe.io.Bytes;
+import funkin.ds.BytesMap;
+
 import sys.FileSystem;
 #if macro
 import haxe.macro.Context;
@@ -10,12 +12,11 @@ import sys.io.Process;
 
 using StringTools;
 #end
-
 /*
 	Simple macro to build a source map of all .hx files in the project at compile time, based on the paths defined in Project.xml. This allows us to include source code in error logs without needing to read files at runtime, which is especially useful for platforms with limited file access or for packaging everything into a single binary.
  */
 final class SourceMap {
-	macro public static function build():ExprOf<StringMap<String>> {
+	macro public static function build():ExprOf<BytesMap<String>> {
 		var setExprs:Array<Expr> = [];
 
 		for (path in getSourcePaths())
@@ -23,9 +24,9 @@ final class SourceMap {
 				collectFiles(path, path, setExprs);
 
 		return macro {
-			var __sourceMap = new StringMap<String>();
+			var __map = new BytesMap<String>(new haxe.ds.StringMap());
 			$b{setExprs};
-			__sourceMap;
+			__map;
 		};
 	}
 
@@ -156,7 +157,9 @@ final class SourceMap {
 			} else if (file.endsWith(".hx")) {
 				var key = full.substr(base.length + 1).replace("\\", "/");
 				var content = try File.getContent(full) catch (e:Dynamic) continue;
-				exprs.push(macro __sourceMap.set($v{key}, ${splitString(content)}));
+
+				// _init bypasses the read-only guard; base64 decode happens once at startup
+				exprs.push(macro __map.set($v{key}, (${splitString(content)})));
 			}
 		}
 	}

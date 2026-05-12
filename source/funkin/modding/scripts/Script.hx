@@ -243,9 +243,8 @@ class Script implements IFlxDestroyable {
 	public function hasFunction(funcName:String):Bool
 		throw new NotImplementedException("override this function");
 
-	public function stop():Void
+	public function destroy() {
 		closed = true;
-
-	public function destroy()
-		closed = true;
+		call("onDestroy");
+	}
 }

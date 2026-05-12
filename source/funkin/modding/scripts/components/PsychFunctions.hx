@@ -388,7 +388,7 @@ class PsychFunctions {
 					if (Std.isOfType(script, LuaScript)) {
 						var luaInstance:LuaScript = cast script;
 						if (luaInstance.scriptName == luaPath) {
-							luaInstance.stop();
+							luaInstance.destroy();
 							pack.remove(luaInstance);
 							foundAny = true;
 						}
@@ -1763,17 +1763,11 @@ class PsychFunctions {
 			if (tag != null) {
 				var originalTag:String = tag;
 				tag = LuaUtils.formatVariable('tween_$tag');
-				var localPack = pack;
 				variables.set(tag, FlxTween.tween(target, tweenValue, duration, {
 					ease: LuaUtils.getTweenEaseByString(ease),
 					onComplete: function(twn:FlxTween) {
-						try {
-							variables.remove(tag);
-							if (pack != null)
-								pack.callOnly(ScriptType.LUA, 'onTweenCompleted', [originalTag, vars]);
-						} catch (e:Dynamic) {
-							CoolLog.error('Timer callback error: ' + e);
-						}
+						variables.remove(tag);
+						pack.callOnly(ScriptType.LUA, 'onTweenCompleted', [originalTag, vars]);
 					}
 				}));
 			}

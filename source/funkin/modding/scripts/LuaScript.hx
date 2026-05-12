@@ -53,7 +53,10 @@ class LuaScript extends Script {
 			CoolLog.info(s, info);
 		}
 		Script.preset(this);
-		PsychFunctions.implement(this, scriptPack);
+	}
+
+	public function implementPackCallbacks(pack:ScriptPack):Void {
+		PsychFunctions.implement(this, pack);
 	}
 
 	public override function execute() {

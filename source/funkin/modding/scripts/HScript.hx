@@ -482,18 +482,12 @@ class HScript extends Script {
 	}
 
 	// Lifecycle
-
-	public override function stop():Void {
+	public override function destroy():Void {
 		if (closed)
 			return;
 		closed = true;
 		interp = null;
 		origin = null;
-		super.stop();
-	}
-
-	public override function destroy():Void {
-		stop();
 		super.destroy();
 	}
 }

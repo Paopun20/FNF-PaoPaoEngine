@@ -100,14 +100,14 @@ class FPSCounter extends TextField {
 	}
 
 	public dynamic function updateText():Void { // so people can override it in hscript
-		text = 'FPS: ${currentFPS}\n';
+		text = 'FPS: ${currentFPS}';
 
 		#if hxhardware
-		text += '\nCPU: ' + format2(cpuUsage) + '%';
-		text += '\nRAM: ' + format2(ramUsage / (1024 * 1024)) + ' MB';
-		text += '\nGPU: ' + format2(gpuUsage) + '%';
+		text += ' - CPU: ' + format2(cpuUsage) + '%';
+		text += ' - GPU: ' + format2(gpuUsage) + '%';
+		text += ' - RAM: ' + format2(ramUsage / (1024 * 1024)) + ' MB';
 		#else
-		text += '\nMemory: ${FlxStringUtil.formatBytes(memoryMegas)}';
+		text += ' - Memory: ${FlxStringUtil.formatBytes(memoryMegas)}';
 		#end
 
 		textColor = this._color;

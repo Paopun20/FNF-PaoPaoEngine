@@ -142,6 +142,10 @@ class ScriptPack {
 		if (script != null && !scripts.contains(script)) {
 			scripts.push(script);
 			script.scriptPack = this;
+			#if LUA_ALLOWED
+			if (Std.isOfType(script, LuaScript))
+				(cast script : LuaScript).implementPackCallbacks(this);
+			#end
 		}
 	}
 
@@ -243,10 +247,6 @@ class ScriptPack {
 				return true;
 
 		return false;
-	}
-
-	public function stop():Void {
-		forEachScript(null, [], s -> s.stop());
 	}
 
 	public function destroy():Void {

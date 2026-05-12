@@ -186,8 +186,6 @@ class Python extends Script {
 				var result = interp.callDef(func, args);
 				if (result == null)
 					result = LuaUtils.Function_Continue;
-				if (closed)
-					stop();
 				return result;
 			}
 		} catch (e:Dynamic) {
@@ -1197,16 +1195,12 @@ class Python extends Script {
 		CoolLog.debug('[Python] $text');
 	}
 
-	public override function stop() {
+	public override function destroy() {
 		closed = true;
 		if (interp != null) {
 			interp.stop();
 			interp = null;
 		}
-	}
-
-	public override function destroy() {
-		stop();
 		parser = null;
 		interp = null;
 		returnValue = null;

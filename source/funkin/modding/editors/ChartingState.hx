@@ -2581,13 +2581,12 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		susLengthStepper.onValueChange = function() {
 			var halfStep:Float = (Conductor.stepCrochet / 2);
 			CoolLog.info(halfStep + " " + susLengthStepper.value);
-			// trace(halfStep, susLengthStepper.value);
 			var val:Float = Math.round(susLengthStepper.value / halfStep) * halfStep;
 			susLengthStepper.value = val;
 			if (susLengthLastVal != susLengthStepper.value) {
 				if (selectedNotes.length > 1) {
 					for (note in selectedNotes) {
-						if (note == null && !note.isEvent)
+						if (note == null || note.isEvent) // was: note == null && !note.isEvent
 							continue;
 						note.setSustainLength(note.sustainLength + (susLengthStepper.value - susLengthLastVal), Conductor.stepCrochet, curZoom);
 					}
