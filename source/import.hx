@@ -58,8 +58,8 @@ import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.addons.transition.FlxTransitionableState;
 
-using StringTools;
-
-import funkin.backend.utils.CoolLog;
+import funkin.backend.console.CoolLog;
 import funkin.vis.*;
+
+using StringTools;
 #end

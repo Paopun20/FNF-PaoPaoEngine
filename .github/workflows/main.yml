@@ -6,6 +6,9 @@ on:
   push:
     branches: [main, dev]
 
+  release:
+    types: [published, created]
+
   pull_request:
     branches: [main, dev]
     types: [opened, synchronize, reopened]

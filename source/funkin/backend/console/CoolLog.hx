@@ -1,4 +1,4 @@
-package funkin.backend.utils;
+package funkin.backend.console;
 
 import haxe.Log;
 import haxe.PosInfos;

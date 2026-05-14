@@ -111,10 +111,8 @@ class CutsceneHandler extends FlxBasic {
 
 	public function timer(time:Float, func:Void->Void) {
 		timedEvents.push({time: time, func: func});
-		timedEvents.sort(sortByTime);
-	}
-
-	function sortByTime(Obj1:CutsceneEvent, Obj2:CutsceneEvent):Int {
-		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.time, Obj2.time);
+		timedEvents.sort(function(Obj1:CutsceneEvent, Obj2:CutsceneEvent):Int {
+			return FlxSort.byValues(FlxSort.ASCENDING, Obj1.time, Obj2.time);
+		});
 	}
 }

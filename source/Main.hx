@@ -26,7 +26,7 @@ import funkin.ds.BytesMap;
 import lime.graphics.Image;
 #end
 #if desktop
-import funkin.backend.ALSoftConfig; // Just to make sure DCE doesn't remove this, since it's not directly referenced anywhere else.
+import funkin.backend.modules.ALSoftConfig; // Just to make sure DCE doesn't remove this, since it's not directly referenced anywhere else.
 #end
 #if CRASH_HANDLER
 import funkin.backend.utils.macro.SourceMap;

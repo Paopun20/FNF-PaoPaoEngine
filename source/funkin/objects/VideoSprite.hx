@@ -41,8 +41,8 @@ typedef VideoSubtitle = {
 	var subtitle:String;
 }
 
+@:analyzer(optimize, local_dce, fusion, user_var_fusion)
 class VideoSprite extends FlxSpriteGroup {
-	// ─── Public API ───────────────────────────────────────────────────────────
 	public var finishCallback:Void->Void;
 	public var onSkip:Void->Void;
 
@@ -58,49 +58,26 @@ class VideoSprite extends FlxSpriteGroup {
 	public function resume()
 		videoSprite?.resume();
 
-	// ─── Config ───────────────────────────────────────────────────────────────
 	static final SKIP_HOLD_DURATION:Float = 1.0;
 
-	// ─── State ────────────────────────────────────────────────────────────────
 	var state:VideoState = Idle;
 	var holdingTime:Float = 0;
-
-	/**
-	 * Protects `alreadyDestroyed` and `state` from concurrent writes.
-	 * All cross-thread reads of these fields must be performed under this lock.
-	 */
 	#if sys
 	final _lock = new Mutex();
 	#end
-
-	/**
-	 * Latched to `true` by `cleanupAndDestroy` under `_lock`.
-	 * Once set it is never cleared — it is a one-way destroy gate.
-	 */
 	var alreadyDestroyed:Bool = false;
 
-	// ─── Visuals ──────────────────────────────────────────────────────────────
 	public var videoSprite:FlxVideoSprite;
 
 	var skipSprite:FlxPieDial;
 	var cover:FlxSprite;
-
-	// ─── Loading UI ───────────────────────────────────────────────────────────
-	var loadingBackdrop:FlxBackdrop;
-	var loadingText:FlxText;
-
-	// ─── Subtitles ────────────────────────────────────────────────────────────
 	var subtitleBg:FlxSprite;
 	var subtitleText:FlxText;
 
 	public var subtitles:Array<VideoSubtitle> = [];
 
 	var curSubtitle:Int = 0;
-
-	// ─── Internal ─────────────────────────────────────────────────────────────
 	var videoName:String;
-
-	// ─────────────────────────────────────────────────────────────────────────
 
 	public function new(videoName:String, isWaiting:Bool, allowSkip:Bool = false, shouldLoop:Bool = false) {
 		super();
@@ -114,7 +91,6 @@ class VideoSprite extends FlxSpriteGroup {
 		if (!waiting)
 			createCover();
 
-		createLoadingUI();
 		parseSubtitles();
 		createSubtitleUI();
 		createVideo(shouldLoop);
@@ -142,12 +118,6 @@ class VideoSprite extends FlxSpriteGroup {
 		cleanupAndDestroy();
 	}
 
-	// ─── Lock helpers ─────────────────────────────────────────────────────────
-
-	/**
-	 * Returns `true` if the sprite has been destroyed.
-	 * Safe to call from any thread.
-	 */
 	inline function isDestroyed():Bool {
 		#if sys
 		_lock.acquire();
@@ -159,11 +129,6 @@ class VideoSprite extends FlxSpriteGroup {
 		#end
 	}
 
-	/**
-	 * Atomically transitions to the destroyed state.
-	 * Returns `true` if *this* call won the race (caller must do the cleanup).
-	 * Returns `false` if another thread already destroyed — caller must bail.
-	 */
 	inline function acquireDestroyLock():Bool {
 		#if sys
 		_lock.acquire();
@@ -182,8 +147,6 @@ class VideoSprite extends FlxSpriteGroup {
 		return true;
 		#end
 	}
-
-	// ─── Video lifecycle ──────────────────────────────────────────────────────
 
 	function createVideo(shouldLoop:Bool) {
 		videoSprite = new FlxVideoSprite();
@@ -228,19 +191,6 @@ class VideoSprite extends FlxSpriteGroup {
 	function onVideoReady() {
 		if (isDestroyed())
 			return;
-
-		if (loadingBackdrop != null) {
-			FlxTween.cancelTweensOf(loadingBackdrop);
-			FlxTween.tween(loadingBackdrop, {alpha: 0}, 0.7, {
-				ease: FlxEase.sineInOut,
-				onComplete: function(_) {
-					loadingBackdrop?.destroy();
-					loadingText?.destroy();
-					loadingBackdrop = null;
-					loadingText = null;
-				}
-			});
-		}
 
 		#if sys
 		_lock.acquire();
@@ -299,28 +249,6 @@ class VideoSprite extends FlxSpriteGroup {
 
 		cleanupAndDestroy();
 	}
-
-	// ─── Loading UI ───────────────────────────────────────────────────────────
-
-	function createLoadingUI() {
-		loadingText = new FlxText(10, 10, Std.int(FlxG.width / 2), "Loading video...", 16);
-		loadingText.scrollFactor.set();
-		loadingText.visible = false;
-		@:privateAccess
-		loadingText.regenGraphic();
-		add(loadingText);
-
-		loadingBackdrop = new FlxBackdrop(loadingText.graphic, X);
-		loadingBackdrop.y = FlxG.height - 20 - loadingBackdrop.height;
-		loadingBackdrop.velocity.x = 70;
-		loadingBackdrop.scrollFactor.set();
-		loadingBackdrop.alpha = 0;
-		add(loadingBackdrop);
-
-		FlxTween.tween(loadingBackdrop, {alpha: 1}, 0.5, {ease: FlxEase.sineInOut});
-	}
-
-	// ─── Subtitle logic ───────────────────────────────────────────────────────
 
 	function parseSubtitles() {
 		#if sys
@@ -440,8 +368,6 @@ class VideoSprite extends FlxSpriteGroup {
 		}
 	}
 
-	// ─── Skip logic ───────────────────────────────────────────────────────────
-
 	function updateSkip(elapsed:Float) {
 		if (Controls.instance.pressed('accept'))
 			increaseHold(elapsed);
@@ -506,8 +432,6 @@ class VideoSprite extends FlxSpriteGroup {
 		skipSprite = null;
 	}
 
-	// ─── Cleanup ──────────────────────────────────────────────────────────────
-
 	function createCover() {
 		cover = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
 		cover.scale.set(FlxG.width + 100, FlxG.height + 100);
@@ -550,19 +474,6 @@ class VideoSprite extends FlxSpriteGroup {
 			cover = null;
 		}
 
-		if (loadingBackdrop != null) {
-			FlxTween.cancelTweensOf(loadingBackdrop);
-			remove(loadingBackdrop);
-			loadingBackdrop.destroy();
-			loadingBackdrop = null;
-		}
-
-		if (loadingText != null) {
-			remove(loadingText);
-			loadingText.destroy();
-			loadingText = null;
-		}
-
 		if (subtitleBg != null) {
 			remove(subtitleBg);
 			subtitleBg.destroy();
@@ -578,12 +489,6 @@ class VideoSprite extends FlxSpriteGroup {
 		destroySkipUI();
 	}
 
-	// ─── Utilities ────────────────────────────────────────────────────────────
-
-	/**
-	 * Posts `fn` to execute on the main thread via a zero-duration FlxTimer.
-	 * Use this when a native LibVLC callback needs to touch Flixel objects.
-	 */
 	static inline function scheduleOnMainThread(fn:Void->Void) {
 		new flixel.util.FlxTimer().start(0.001, _ -> fn());
 	}

@@ -50,3 +50,6 @@ haxelib git funkin.vis https://github.com/FunkinCrew/funkVis.git 22b1ce089dd924f
 haxelib git hxvlc https://github.com/MAJigsaw77/hxvlc.git --always
 haxelib git hscript-improved https://github.com/CodenameCrew/hscript-improved.git codename-dev --always
 haxelib git grig.audio https://github.com/FunkinCrew/grig.audio.git 57f5d47f2533fd0c3dcd025a86cb86c0dfa0b6d2 --always
+
+
+haxelib install hxWindowColorMode 0.2.1 

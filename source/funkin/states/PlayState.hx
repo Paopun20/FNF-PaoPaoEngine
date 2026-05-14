@@ -895,10 +895,10 @@ class PlayState extends MusicBeatState {
 			addTextToDebug("Video not found: " + fileName, FlxColor.RED);
 		#else
 		else
-			FlxG.log.error("Video not found: " + fileName);
+			CoolLog.error("Video not found: " + fileName);
 		#end
 		#else
-		FlxG.log.warn('Platform not supported!');
+		CoolLog.warning('Platform not supported!');
 		startAndEnd();
 		#end
 		return null;
@@ -942,7 +942,7 @@ class PlayState extends MusicBeatState {
 			psychDialogue.cameras = [camHUD];
 			add(psychDialogue);
 		} else {
-			FlxG.log.warn('Your dialogue file is badly formatted!');
+			CoolLog.warning('Your dialogue file is badly formatted!');
 			startAndEnd();
 		}
 	}
@@ -1296,7 +1296,7 @@ class PlayState extends MusicBeatState {
 	private var totalColumns:Int = 4;
 
 	private function generateSong():Void {
-		// FlxG.log.add(ChartParser.parse());
+		// CoolLog.add(ChartParser.parse());
 		songSpeed = PlayState.SONG.speed;
 		songSpeedType = ClientPrefs.getGameplaySetting('scrolltype');
 		switch (songSpeedType) {
@@ -1546,7 +1546,7 @@ class PlayState extends MusicBeatState {
 		var strumLineX:Float = ClientPrefs.data.middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X;
 		var strumLineY:Float = ClientPrefs.data.downScroll ? (FlxG.height - 150) : 50;
 		for (i in 0...4) {
-			// FlxG.log.add(i);
+			// CoolLog.add(i);
 			var targetAlpha:Float = 1;
 			if (player < 1) {
 				if (!ClientPrefs.data.opponentStrums)
@@ -2314,7 +2314,7 @@ class PlayState extends MusicBeatState {
 					#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED || NXSCRIPT_ALLOWED)
 					addTextToDebug('ERROR ("Set Property" Event) - ' + e.message.substr(0, len), FlxColor.RED);
 					#else
-					FlxG.log.warn('ERROR ("Set Property" Event) - ' + e.message.substr(0, len));
+					CoolLog.warning('ERROR ("Set Property" Event) - ' + e.message.substr(0, len));
 					#end
 				}
 
@@ -3699,14 +3699,14 @@ class PlayState extends MusicBeatState {
 			return new ErrorHandledRuntimeShader(shaderName);
 
 		if (!ShaderMod.runtimeShaders.exists(shaderName) && !ShaderMod.initLuaShader(shaderName)) {
-			FlxG.log.warn('Shader $shaderName is missing!');
+			CoolLog.warning('Shader $shaderName is missing!');
 			return new ErrorHandledRuntimeShader(shaderName);
 		}
 
 		var arr:Array<String> = ShaderMod.runtimeShaders.get(shaderName);
 		return new ErrorHandledRuntimeShader(shaderName, arr[0], arr[1]);
 		#else
-		FlxG.log.warn("Platform unsupported for Runtime Shaders!");
+		CoolLog.warning("Platform unsupported for Runtime Shaders!");
 		return null;
 		#end
 	}

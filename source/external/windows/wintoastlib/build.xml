@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xml>
+	<pragma once="true" />
+
+	<set name="WintoastlibFolder" value="./source/external/wintoastlib/backend/src" />
+
+	<files id="common">
+		<!-- WinToast headers are needed by both wintoastlib.cpp and WinToastWrapper.cpp -->
+		<compilerflag value="-I${WintoastlibFolder}" />
+		<!-- Required for Windows Runtime / toast APIs -->
+		<compilerflag value="-DUNICODE" if="windows" />
+		<compilerflag value="-D_UNICODE" if="windows" />
+	</files>
+
+	<!-- The upstream WinToast implementation (note: .cpp, not .c) -->
+	<files id="wintoastlib_impl">
+		<file name="${WintoastlibFolder}/wintoastlib.cpp" />
+	</files>
+
+	<target id="haxe">
+		<files id="common" />
+		<files id="wintoastlib_impl" />
+		<files id="wintoastlib_wrapper" />
+
+		<!-- WinToast dependencies -->
+		<lib name="dwmapi.lib"   if="windows" />
+		<lib name="shlwapi.lib"  if="windows" />
+		<lib name="user32.lib"   if="windows" />
+	</target>
+</xml>

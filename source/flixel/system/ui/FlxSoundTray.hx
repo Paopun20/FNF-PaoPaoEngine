@@ -67,7 +67,7 @@ class FlxSoundTray extends Sprite {
 		visible = false;
 		scaleX = _defaultScale;
 		scaleY = _defaultScale;
-		tmp = new Bitmap(new BitmapData(_width, 30, true, 0x7F004779));
+		tmp = new Bitmap(new BitmapData(_width, 30, true, 0x7F000000));
 		screenCenter();
 		addChild(tmp);
 

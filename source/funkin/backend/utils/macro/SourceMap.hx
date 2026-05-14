@@ -1,8 +1,9 @@
 package funkin.backend.utils.macro;
 
 import haxe.io.Bytes;
+import haxe.io.Encoding;
 import funkin.ds.BytesMap;
-
+import Sys;
 import sys.FileSystem;
 #if macro
 import haxe.macro.Context;
@@ -12,16 +13,58 @@ import sys.io.Process;
 
 using StringTools;
 #end
+
 /*
 	Simple macro to build a source map of all .hx files in the project at compile time, based on the paths defined in Project.xml. This allows us to include source code in error logs without needing to read files at runtime, which is especially useful for platforms with limited file access or for packaging everything into a single binary.
+	for lime Project.xml only
  */
 final class SourceMap {
+	private static function print(input:String, ?newLine:Bool=true):Void {
+		Sys.stdout().writeString(input);
+		if (newLine)
+			Sys.stdout().writeString("\n");
+	}
+
+	private static inline function rgb(r:Int, g:Int, b:Int):String {
+		return '\x1b[38;2;${r};${g};${b}m';
+	}
+
+	private static inline function reset():String {
+		return '\x1b[0m';
+	}
+
+	private static function printRGB(r:Int, g:Int, b:Int, text:String, ?newLine:Bool=true):Void {
+		print(rgb(r, g, b) + text + reset(), newLine);
+	}
+
+	private static function flush():Void {
+		Sys.stdout().flush();
+	}
+
+	static function __init__():Void {
+		print("███████╗ ██████╗ ██╗   ██╗██████╗  ██████╗███████╗███╗   ███╗ █████╗ ██████╗");
+		print("██╔════╝██╔═══██╗██║   ██║██╔══██╗██╔════╝██╔════╝████╗ ████║██╔══██╗██╔══██╗");
+		print("███████╗██║   ██║██║   ██║██████╔╝██║     █████╗  ██╔████╔██║███████║██████╔╝");
+		print("╚════██║██║   ██║██║   ██║██╔══██╗██║     ██╔══╝  ██║╚██╔╝██║██╔══██║██╔═══╝");
+		print("███████║╚██████╔╝╚██████╔╝██║  ██║╚██████╗███████╗██║ ╚═╝ ██║██║  ██║██║");
+		print("╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝");
+		flush();
+		print("By PaoPao");
+		flush();
+	}
+
 	macro public static function build():ExprOf<BytesMap<String>> {
 		var setExprs:Array<Expr> = [];
+		
+		print("[Start Generating]");
+		flush();
 
-		for (path in getSourcePaths())
+		for (path in (getSourcePaths()))
 			if (FileSystem.exists(path) && FileSystem.isDirectory(path))
 				collectFiles(path, path, setExprs);
+
+		print("[Done Generating]");
+		flush();
 
 		return macro {
 			var __map = new BytesMap<String>(new haxe.ds.StringMap());
@@ -46,13 +89,13 @@ final class SourceMap {
 
 		var xmlPath = "./Project.xml";
 		if (!FileSystem.exists(xmlPath)) {
-			Context.warning("SourceMap: Project.xml not found", Context.currentPos());
+			printRGB(255, 165, 0, "Project.xml not found");
 			return [FileSystem.absolutePath("./source")];
 		}
 
 		var content = File.getContent(xmlPath);
 		var xml = try Xml.parse(content) catch (e:Dynamic) {
-			Context.warning('SourceMap: Failed to parse Project.xml: $e', Context.currentPos());
+			printRGB(255, 165, 0, 'Failed to parse Project.xml: $e');
 			return [FileSystem.absolutePath("./source")];
 		};
 
@@ -67,7 +110,7 @@ final class SourceMap {
 					if (path != null && path != "")
 						paths.push(FileSystem.absolutePath(path));
 					else
-						Context.warning('SourceMap: Invalid <source> path in Project.xml', Context.currentPos());
+						printRGB(255, 165, 0, 'Invalid <source> path in Project.xml');
 
 				case "haxelib":
 					// <haxelib name="flixel"/>
@@ -79,7 +122,7 @@ final class SourceMap {
 						if (libPath != null)
 							paths.push(libPath);
 						else
-							Context.warning('SourceMap: Could not resolve haxelib $name:$version', Context.currentPos());
+							printRGB(255, 165, 0, 'Could not resolve haxelib $name:$version');
 					}
 
 				default:
@@ -88,7 +131,7 @@ final class SourceMap {
 		}
 
 		if (paths.length == 0) {
-			Context.warning("SourceMap: No paths found in Project.xml, falling back to ./source", Context.currentPos());
+			printRGB(255, 165, 0, "No paths found in Project.xml, falling back to ./source");
 			paths.push(FileSystem.absolutePath("./source"));
 		}
 
@@ -106,7 +149,7 @@ final class SourceMap {
 			proc.close();
 
 			if (exitCode != 0) {
-				Context.warning('SourceMap: haxelib path $libArg failed (exit $exitCode)', Context.currentPos());
+				printRGB(255, 0, 0, 'haxelib path $libArg failed (exit $exitCode)');
 				return null;
 			}
 
@@ -116,15 +159,15 @@ final class SourceMap {
 				if (line == "" || line.startsWith("-"))
 					continue;
 				if (FileSystem.exists(line) && FileSystem.isDirectory(line)) {
-					Context.info('SourceMap: Resolved $libArg -> $line', Context.currentPos());
+					printRGB(255, 255, 255, 'Resolved $libArg -> $line');
 					return line;
 				}
 			}
 
-			Context.warning('SourceMap: Could not resolve source path for haxelib $libArg', Context.currentPos());
+			printRGB(254, 215, 0, 'Could not resolve source path for haxelib $libArg');
 			return null;
 		} catch (e:Dynamic) {
-			Context.warning('SourceMap: Exception resolving haxelib $libArg: $e', Context.currentPos());
+			printRGB(254, 215, 0, 'Exception resolving haxelib $libArg: $e');
 			return null;
 		}
 	}
