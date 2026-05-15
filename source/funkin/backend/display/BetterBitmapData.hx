@@ -1,5 +1,6 @@
 package funkin.backend.display;
 
+import flixel.FlxG;
 import lime.graphics.Image;
 import lime.graphics.cairo.CairoImageSurface;
 import openfl.display.BitmapData;
@@ -40,6 +41,7 @@ class BetterBitmapData extends BitmapData {
 		lock();
 		getTexture(FlxG.stage.context3D);
 		getSurface();
+		unlock();
 		readable = true;
 		// Intentionally release CPU-side image data after GPU upload to free memory.
 		image = null;

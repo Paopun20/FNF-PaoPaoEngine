@@ -15,6 +15,7 @@ import openfl.geom.Rectangle;
 import lime.utils.Assets;
 import openfl.media.Sound;
 import haxe.Json;
+import funkin.ds.FunkinCache;
 #if MODS_ALLOWED
 import funkin.backend.Mods;
 #end
@@ -24,108 +25,62 @@ class Paths {
 	inline public static var SOUND_EXT:String = #if web "mp3" #else "ogg" #end;
 	inline public static var VIDEO_EXT:String = "mp4";
 
-	public static function excludeAsset(key:String) {
-		if (!dumpExclusions.contains(key))
-			dumpExclusions.push(key);
-	}
+	/** @see FunkinCache.dumpExclusions */
+	public static var dumpExclusions(get, never):Array<String>;
 
-	public static var dumpExclusions:Array<String> = ['assets/shared/music/freakyMenu.$SOUND_EXT'];
+	@:deprecated("Use `FunkinCache.dumpExclusions` instead.")
+	static inline function get_dumpExclusions()
+		return FunkinCache.dumpExclusions;
 
-	public static function clearMemoryByName(name:String) {
-		if (!localTrackedAssets.contains(name) && !dumpExclusions.contains(name)) {
-			destroyGraphic(currentTrackedAssets.get(name)); // get rid of the graphic
-			currentTrackedAssets.remove(name); // and remove the key from local cache map
-		}
+	/** @see FunkinCache.localTrackedAssets */
+	@:deprecated("Use `FunkinCache.localTrackedAssets` instead.")
+	public static var localTrackedAssets(get, never):Array<String>;
 
-		// run the garbage collector for good measure lmfao
-		System.gc();
-	}
+	static inline function get_localTrackedAssets()
+		return FunkinCache.localTrackedAssets;
 
-	// haya I love you for the base cache dump I took to the max
-	public static function clearUnusedMemory() {
-		// clear non local assets in the tracked assets list
-		for (key in currentTrackedAssets.keys()) {
-			Paths.clearMemoryByName(key);
-		}
+	/** @see FunkinCache.currentTrackedAssets */
+	public static var currentTrackedAssets(get, never):Map<String, FlxGraphic>;
+	
+	@:deprecated("Use `FunkinCache.currentTrackedAssets` instead.")
+	static inline function get_currentTrackedAssets()
+		return FunkinCache.currentTrackedAssets;
 
-		#if cpp
-		cpp.vm.Gc.run(true);
-		#end
-	}
+	/** @see FunkinCache.currentTrackedSounds */
+	@:deprecated("Use `FunkinCache.currentTrackedSounds` instead.")
+	public static var currentTrackedSounds(get, never):Map<String, Sound>;
 
-	// define the locally tracked assets
-	public static var localTrackedAssets:Array<String> = [];
+	static inline function get_currentTrackedSounds()
+		return FunkinCache.currentTrackedSounds;
 
-	@:access(flixel.system.frontEnds.BitmapFrontEnd._cache)
-	public static function clearStoredMemory() {
-		// clear anything not in the tracked assets list
-		for (key in FlxG.bitmap._cache.keys()) {
-			if (!currentTrackedAssets.exists(key))
-				destroyGraphic(FlxG.bitmap.get(key));
-		}
+	/** @see FunkinCache.clearMemoryByName */
+	@:deprecated("Use `FunkinCache.clearMemoryByName` instead.")
+	public static inline function clearMemoryByName(name:String):Void
+		FunkinCache.clearMemoryByName(name);
 
-		// clear all sounds that are cached
-		for (key => asset in currentTrackedSounds) {
-			if (!localTrackedAssets.contains(key) && !dumpExclusions.contains(key) && asset != null) {
-				Assets.cache.clear(key);
-				currentTrackedSounds.remove(key);
-			}
-		}
-		// flags everything to be cleared out next unused memory clear
-		localTrackedAssets = [];
-		#if !html5 openfl.Assets.cache.clear("songs"); #end
-	}
+	/** @see FunkinCache.clearUnusedMemory */
+	@:deprecated("Use `FunkinCache.clearUnusedMemory` instead.")
+	public static inline function clearUnusedMemory():Void
+		FunkinCache.clearUnusedMemory();
 
-	public static function freeGraphicsFromMemory() {
-		var protectedGfx:Array<FlxGraphic> = [];
-		function checkForGraphics(spr:Dynamic) {
-			try {
-				var grp:Array<Dynamic> = Reflect.getProperty(spr, 'members');
-				if (grp != null) {
-					// trace('is actually a group');
-					for (member in grp) {
-						checkForGraphics(member);
-					}
-					return;
-				}
-			}
+	/** @see FunkinCache.clearStoredMemory */
+	@:deprecated("Use `FunkinCache.clearStoredMemory` instead.")
+	public static inline function clearStoredMemory():Void
+		FunkinCache.clearStoredMemory();
 
-			// trace('check...');
-			try {
-				var gfx:FlxGraphic = Reflect.getProperty(spr, 'graphic');
-				if (gfx != null) {
-					protectedGfx.push(gfx);
-					// trace('gfx added to the list successfully!');
-				}
-			}
-			// catch(haxe.Exception) {}
-		}
+	/** @see FunkinCache.freeGraphicsFromMemory */
+	@:deprecated("Use `FunkinCache.freeGraphicsFromMemory` instead.")
+	public static inline function freeGraphicsFromMemory():Void
+		FunkinCache.freeGraphicsFromMemory();
 
-		for (member in FlxG.state.members)
-			checkForGraphics(member);
+	/** @see FunkinCache.cacheBitmap */
+	@:deprecated("Use `FunkinCache.cacheBitmap` instead.")
+	public static inline function cacheBitmap(key:String, ?parentFolder:String = null, ?bitmap:BitmapData, ?allowGPU:Bool = true):FlxGraphic
+		return FunkinCache.cacheBitmap(key, parentFolder, bitmap, allowGPU);
 
-		if (FlxG.state.subState != null)
-			for (member in FlxG.state.subState.members)
-				checkForGraphics(member);
-
-		for (key in currentTrackedAssets.keys()) {
-			// if it is not currently contained within the used local assets
-			if (!dumpExclusions.contains(key)) {
-				var graphic:FlxGraphic = currentTrackedAssets.get(key);
-				if (!protectedGfx.contains(graphic)) {
-					destroyGraphic(graphic); // get rid of the graphic
-					currentTrackedAssets.remove(key); // and remove the key from local cache map
-					// trace('deleted $key');
-				}
-			}
-		}
-	}
-
+	@:deprecated("Use `FunkinCache.destroyGraphic` instead.")
 	inline static function destroyGraphic(graphic:FlxGraphic) {
-		// free some gpu memory
-		if (graphic != null && graphic.bitmap != null && graphic.bitmap.__texture != null)
-			graphic.bitmap.__texture.dispose();
-		FlxG.bitmap.remove(graphic);
+		@:privateAccess FunkinCache.destroyGraphic(graphic);
 	}
 
 	static public var currentLevel:String;
@@ -225,62 +180,19 @@ class Paths {
 	inline static public function soundRandom(key:String, min:Int, max:Int, ?modsAllowed:Bool = true)
 		return sound(key + FlxG.random.int(min, max), modsAllowed);
 
-	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
-
 	static public function image(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true):FlxGraphic {
 		key = Language.getFileTranslation('images/$key') + '.png';
 		var bitmap:BitmapData = null;
-		if (currentTrackedAssets.exists(key)) {
-			localTrackedAssets.push(key);
-			return currentTrackedAssets.get(key);
+		if (FunkinCache.currentTrackedAssets.exists(key)) {
+			FunkinCache.localTrackedAssets.push(key);
+			return FunkinCache.currentTrackedAssets.get(key);
 		}
-		return cacheBitmap(key, parentFolder, bitmap, allowGPU);
+		return FunkinCache.cacheBitmap(key, parentFolder, bitmap, allowGPU);
 	}
 
 	static public function onlyImageFile(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true):String {
 		key = Language.getFileTranslation('images/$key') + '.png';
 		return getPath(key, IMAGE, parentFolder, true);
-	}
-
-	public static function cacheBitmap(key:String, ?parentFolder:String = null, ?bitmap:BitmapData, ?allowGPU:Bool = true):FlxGraphic {
-		if (key == null || key == '' || key.length == 0) {
-			CoolLog.error('Invalid key "$key"');
-			return null;
-		}
-		if (bitmap == null) {
-			var file:String = getPath(key, IMAGE, parentFolder, true);
-			#if MODS_ALLOWED if (FileSystem.exists(file))
-				bitmap = BetterBitmapData.fromFile(file);
-			else #end if (OpenFlAssets.exists(file, IMAGE))
-				bitmap = OpenFlAssets.getBitmapData(file);
-
-			if (bitmap == null) {
-				// trace('Bitmap not found: $file | key: $key');
-				CoolLog.error('Bitmap not found: $file | key: $key');
-				return null;
-			}
-		}
-
-		if (allowGPU && ClientPrefs.data.cacheOnGPU && bitmap.image != null) {
-			bitmap.lock();
-			if (bitmap.__texture == null) {
-				bitmap.image.premultiplied = true;
-				bitmap.getTexture(FlxG.stage.context3D);
-			}
-			bitmap.getSurface();
-			bitmap.disposeImage();
-			bitmap.image.data = null;
-			bitmap.image = null;
-			bitmap.readable = true;
-		}
-
-		var graph:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, key);
-		graph.persist = true;
-		graph.destroyOnNoUse = false;
-
-		currentTrackedAssets.set(key, graph);
-		localTrackedAssets.push(key);
-		return graph;
 	}
 
 	inline static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String {
@@ -417,27 +329,25 @@ class Paths {
 		return hideChars.replace(invalidChars.replace(path, '-'), '').trim().toLowerCase();
 	}
 
-	public static var currentTrackedSounds:Map<String, Sound> = [];
-
 	public static function returnSound(key:String, ?path:String, ?modsAllowed:Bool = true, ?beepOnNull:Bool = true) {
 		var file:String = getPath(Language.getFileTranslation(key) + '.$SOUND_EXT', SOUND, path, modsAllowed);
 
 		// trace('precaching sound: $file');
-		if (!currentTrackedSounds.exists(file)) {
+		if (!FunkinCache.currentTrackedSounds.exists(file)) {
 			#if sys
 			if (FileSystem.exists(file))
-				currentTrackedSounds.set(file, Sound.fromFile(file));
+				FunkinCache.currentTrackedSounds.set(file, Sound.fromFile(file));
 			#else
 			if (OpenFlAssets.exists(file, SOUND))
-				currentTrackedSounds.set(file, OpenFlAssets.getSound(file));
+				FunkinCache.currentTrackedSounds.set(file, OpenFlAssets.getSound(file));
 			#end
 		else if (beepOnNull) {
 			CoolLog.error('SOUND NOT FOUND: $key, PATH: $path');
 			return FlxAssets.getSoundAddExtension('flixel/sounds/beep', true);
 		}
 		}
-		localTrackedAssets.push(file);
-		return currentTrackedSounds.get(file);
+		FunkinCache.localTrackedAssets.push(file);
+		return FunkinCache.currentTrackedSounds.get(file);
 	}
 
 	#if MODS_ALLOWED

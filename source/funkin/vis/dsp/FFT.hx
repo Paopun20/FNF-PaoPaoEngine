@@ -1,7 +1,6 @@
 package funkin.vis.dsp;
 
 import funkin.vis.dsp.Complex;
-import haxe.ds.Vector;
 
 // these are only used for testing, down in FFT.main()
 using funkin.vis.dsp.OffsetArray;
@@ -10,6 +9,7 @@ using funkin.vis.dsp.Signal;
 /**
 	Fast/Finite Fourier Transforms.
 **/
+@:analyzer(optimize, local_dce, fusion, user_var_fusion)
 class FFT {
 	/**
 		Computes the Discrete Fourier Transform (DFT) of a `Complex` sequence.

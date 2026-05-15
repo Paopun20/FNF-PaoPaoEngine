@@ -53,7 +53,7 @@ class LoadingState extends EditableState {
 		#end
 
 		for (key => bitmap in localRequestedBitmaps) {
-			if (bitmap != null && Paths.cacheBitmap(localOriginalBitmapKeys.get(key), bitmap) != null) {
+			if (bitmap != null && FunkinCache.cacheBitmap(localOriginalBitmapKeys.get(key), bitmap) != null) {
 				// CoolLog.info('finished preloading image $key');
 			} else if (bitmap != null)
 				CoolLog.error('failed to cache image $key');
@@ -974,14 +974,14 @@ class LoadingState extends EditableState {
 	static function preloadSound(key:String, ?path:String, ?modsAllowed:Bool = true, ?beepOnNull:Bool = true):Null<Sound> {
 		var file:String = Paths.getPath(Language.getFileTranslation(key) + '.${Paths.SOUND_EXT}', SOUND, path, modsAllowed);
 
-		if (!Paths.currentTrackedSounds.exists(file)) {
+		if (!FunkinCache.currentTrackedSounds.exists(file)) {
 			if (#if (sys || MULTITHREADED_LOADING) FileSystem.exists(file) || #end OpenFlAssets.exists(file, SOUND)) {
 				var sound:Sound = #if (sys || MULTITHREADED_LOADING) Sound.fromFile(file) #else OpenFlAssets.getSound(file, false) #end;
 				#if (sys || MULTITHREADED_LOADING)
 				if (mutex != null)
 					mutex.acquire();
 				#end
-				Paths.currentTrackedSounds.set(file, sound);
+				FunkinCache.currentTrackedSounds.set(file, sound);
 				#if (sys || MULTITHREADED_LOADING)
 				if (mutex != null)
 					mutex.release();
@@ -996,13 +996,13 @@ class LoadingState extends EditableState {
 		if (mutex != null)
 			mutex.acquire();
 		#end
-		Paths.localTrackedAssets.push(file);
+		FunkinCache.localTrackedAssets.push(file);
 		#if (sys || MULTITHREADED_LOADING)
 		if (mutex != null)
 			mutex.release();
 		#end
 
-		return Paths.currentTrackedSounds.get(file);
+		return FunkinCache.currentTrackedSounds.get(file);
 	}
 
 	static function preloadGraphic(key:String):Null<BitmapData> {
@@ -1012,7 +1012,7 @@ class LoadingState extends EditableState {
 			if (requestKey.lastIndexOf('.') < 0)
 				requestKey += '.png';
 
-			if (!Paths.currentTrackedAssets.exists(requestKey)) {
+			if (!FunkinCache.currentTrackedAssets.exists(requestKey)) {
 				var file:String = Paths.getPath(requestKey, IMAGE);
 				if (#if (sys || MULTITHREADED_LOADING) FileSystem.exists(file) || #end OpenFlAssets.exists(file, IMAGE)) {
 					#if (sys || MULTITHREADED_LOADING)
@@ -1037,7 +1037,7 @@ class LoadingState extends EditableState {
 					CoolLog.error('no such image $key exists');
 			}
 
-			return Paths.currentTrackedAssets.get(requestKey).bitmap;
+				return FunkinCache.currentTrackedAssets.get(requestKey).bitmap;
 		} catch (e:haxe.Exception) {
 			CoolLog.error('ERROR! fail on preloading image $key');
 		}

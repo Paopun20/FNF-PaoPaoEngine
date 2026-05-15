@@ -829,12 +829,12 @@ class PsychFunctions {
 
 		lua.set("getMouseX", function(?camera:String = 'game'):Float {
 			var cam:FlxCamera = LuaUtils.cameraFromString(camera);
-			return FlxG.mouse.getScreenPosition(cam).x;
+			return FlxG.mouse.getViewPosition(cam).x;
 		});
 
 		lua.set("getMouseY", function(?camera:String = 'game'):Float {
 			var cam:FlxCamera = LuaUtils.cameraFromString(camera);
-			return FlxG.mouse.getScreenPosition(cam).y;
+			return FlxG.mouse.getViewPosition(cam).y;
 		});
 
 		lua.set("getMidpointX", function(variable:String):Float {

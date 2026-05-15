@@ -11,6 +11,7 @@ import funkin.objects.HealthIcon;
 import funkin.objects.MusicPlayer;
 import funkin.options.GameplayChangersSubstate;
 import funkin.substates.ResetScoreSubState;
+import funkin.ds.Geodify;
 import haxe.Json;
 import openfl.utils.Assets;
 
@@ -41,7 +42,8 @@ class FreeplayState extends EditableState {
 
 	private var iconArray:Array<HealthIcon> = [];
 
-	var bg:FlxSprite;
+	var bg:Geodify;
+	var colorTween:FlxTween = null;
 	var intendedColor:Int;
 
 	var missingTextBG:FlxSprite;
@@ -54,6 +56,8 @@ class FreeplayState extends EditableState {
 	var albumArt:FlxSprite;
 
 	var player:MusicPlayer;
+
+	var currentGeoColor:FlxColor = FlxColor.WHITE;
 
 	override function create() {
 		// Paths.clearStoredMemory();
@@ -102,10 +106,12 @@ class FreeplayState extends EditableState {
 
 		Mods.loadTopMod();
 
-		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
-		bg.antialiasing = ClientPrefs.data.antialiasing;
+		// bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+		// bg.antialiasing = ClientPrefs.data.antialiasing;
+		// add(bg);
+		// bg.screenCenter();
+		bg = new Geodify(0, 0, FlxG.width, FlxG.height);
 		add(bg);
-		bg.screenCenter();
 
 		backdrop = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0x33FFFFFF, 0x0));
 		backdrop.velocity.set(40, 40);
@@ -193,6 +199,8 @@ class FreeplayState extends EditableState {
 
 		player = new MusicPlayer(this);
 		add(player);
+
+		currentGeoColor = FlxColor.fromInt(songs[curSelected].color);
 
 		changeSelection();
 		updateTexts();
@@ -386,6 +394,7 @@ class FreeplayState extends EditableState {
 			var songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);
 			var poop:String = Highscore.formatSong(songLowercase, curDifficulty);
 
+			Mods.currentModDirectory = songs[curSelected].folder;
 			try {
 				Song.loadFromJson(poop, songLowercase);
 				PlayState.isStoryMode = false;
@@ -414,7 +423,7 @@ class FreeplayState extends EditableState {
 			@:privateAccess
 			if (PlayState._lastLoadedModDirectory != Mods.currentModDirectory) {
 				CoolLog.info('CHANGED MOD DIRECTORY, RELOADING STUFF');
-				Paths.freeGraphicsFromMemory();
+				FunkinCache.freeGraphicsFromMemory();
 			}
 			LoadingState.prepareToSong();
 			LoadingState.loadAndSwitchState(new PlayState());
@@ -505,8 +514,25 @@ class FreeplayState extends EditableState {
 		var newColor:Int = songs[curSelected].color;
 		if (newColor != intendedColor) {
 			intendedColor = newColor;
-			FlxTween.cancelTweensOf(bg);
-			FlxTween.color(bg, 1, bg.color, intendedColor);
+			if (colorTween != null)
+				colorTween.cancel();
+
+			var startColor:FlxColor = currentGeoColor;
+
+			colorTween = FlxTween.num(0, 1, 1.2, {ease: FlxEase.linear}, function(t:Float) {
+				var base = FlxColor.interpolate(startColor, newColor, t);
+				currentGeoColor = base;
+
+				var arr:Array<FlxColor> = [];
+
+				for (i in 0...Geodify.DEFAULT_LAYER_COLORS.length) {
+					var strength = (i + 1) / Geodify.DEFAULT_LAYER_COLORS.length;
+
+					arr.push(FlxColor.fromRGBFloat(base.redFloat * strength, base.greenFloat * strength, base.blueFloat * strength, 1.0));
+				}
+
+				bg.recolor(arr);
+			});
 		}
 
 		for (num => item in grpSongs.members) {

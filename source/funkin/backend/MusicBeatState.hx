@@ -141,7 +141,7 @@ class MusicBeatState extends FlxState {
 		}
 
 		if (FlxTransitionableState.skipNextTransIn)
-			FlxG.switchState(nextState);
+			FlxG.switchState(() -> nextState);
 		else
 			startTransition(nextState);
 		FlxTransitionableState.skipNextTransIn = false;
@@ -165,7 +165,7 @@ class MusicBeatState extends FlxState {
 		if (nextState == FlxG.state)
 			BaseTransition.finishCallback = function() FlxG.resetState();
 		else
-			BaseTransition.finishCallback = function() FlxG.switchState(nextState);
+			BaseTransition.finishCallback = function() FlxG.switchState(() -> nextState);
 	}
 
 	public static function getState():MusicBeatState {

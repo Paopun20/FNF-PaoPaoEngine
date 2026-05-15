@@ -3,6 +3,9 @@ package funkin.backend.utils.macro;
 import haxe.io.Bytes;
 import haxe.io.Encoding;
 import funkin.ds.BytesMap;
+import haxe.Timer;
+
+
 import Sys;
 import sys.FileSystem;
 #if macro
@@ -18,6 +21,7 @@ using StringTools;
 	Simple macro to build a source map of all .hx files in the project at compile time, based on the paths defined in Project.xml. This allows us to include source code in error logs without needing to read files at runtime, which is especially useful for platforms with limited file access or for packaging everything into a single binary.
 	for lime Project.xml only
  */
+@:analyzer(optimize, local_dce, fusion, user_var_fusion)
 final class SourceMap {
 	private static function print(input:String, ?newLine:Bool = true):Void {
 		Sys.stdout().writeString(input);
@@ -42,6 +46,7 @@ final class SourceMap {
 	}
 
 	static function __init__():Void {
+		#if macro
 		print("███████╗ ██████╗ ██╗   ██╗██████╗  ██████╗███████╗███╗   ███╗ █████╗ ██████╗");
 		print("██╔════╝██╔═══██╗██║   ██║██╔══██╗██╔════╝██╔════╝████╗ ████║██╔══██╗██╔══██╗");
 		print("███████╗██║   ██║██║   ██║██████╔╝██║     █████╗  ██╔████╔██║███████║██████╔╝");
@@ -51,19 +56,22 @@ final class SourceMap {
 		flush();
 		print("By PaoPao");
 		flush();
+		#end
 	}
 
 	macro public static function build():ExprOf<BytesMap<String>> {
 		var setExprs:Array<Expr> = [];
+		var startTime = Timer.stamp();
 
-		print("[Start Generating]");
+		print("[Start Generating] Building source map from .hx files...");
 		flush();
 
 		for (path in (getSourcePaths()))
 			if (FileSystem.exists(path) && FileSystem.isDirectory(path))
 				collectFiles(path, path, setExprs);
 
-		print("[Done Generating]");
+		var endTime = Timer.stamp();
+		print("[Done Generating] Time taken: " + (endTime - startTime) + " seconds");
 		flush();
 
 		return macro {

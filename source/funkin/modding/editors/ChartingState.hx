@@ -1163,9 +1163,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 				addUndoAction(SELECT_NOTE, {old: sel, current: selectedNotes.copy()});
 			} else if (FlxG.mouse.justMoved)
 				updateSelectionBox();
-		} else if (FlxG.mouse.pressedRight && (FlxG.mouse.deltaScreenX != 0 || FlxG.mouse.deltaScreenY != 0)) {
-			selectionBox.setPosition(FlxG.mouse.screenX, FlxG.mouse.screenY);
-			selectionStart.set(FlxG.mouse.screenX, FlxG.mouse.screenY);
+		} else if (FlxG.mouse.pressedRight && (FlxG.mouse.deltaViewX != 0 || FlxG.mouse.deltaViewY != 0)) {
+			selectionBox.setPosition(FlxG.mouse.viewX, FlxG.mouse.viewY);
+			selectionStart.set(FlxG.mouse.viewX, FlxG.mouse.viewY);
 			selectionBox.visible = true;
 			updateSelectionBox();
 		}
@@ -1574,8 +1574,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 	}
 
 	function updateSelectionBox() {
-		var diffX:Float = FlxG.mouse.screenX - selectionStart.x;
-		var diffY:Float = FlxG.mouse.screenY - selectionStart.y;
+		var diffX:Float = FlxG.mouse.viewX - selectionStart.x;
+		var diffY:Float = FlxG.mouse.viewY - selectionStart.y;
 		selectionBox.setPosition(selectionStart.x, selectionStart.y);
 
 		if (diffX < 0) // Fixes negative X scale
@@ -1727,7 +1727,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 		if (killAudio) {
 			var sndsToKill:Array<String> = [];
-			for (key => snd in Paths.currentTrackedSounds) {
+			for (key => snd in FunkinCache.currentTrackedSounds) {
 				// trace(key, snd);
 				if (key.contains('/songs/${Paths.formatToSongPath(PlayState.SONG.song)}/') && snd != null) {
 					sndsToKill.push(key);
@@ -1737,8 +1737,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
 			for (key in sndsToKill) {
 				Assets.cache.clear(key);
-				Paths.currentTrackedSounds.remove(key);
-				Paths.localTrackedAssets.remove(key);
+				FunkinCache.currentTrackedSounds.remove(key);
+				FunkinCache.localTrackedAssets.remove(key);
 			}
 		}
 
@@ -2778,7 +2778,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 		};
 
 		objY += 40;
-		var copyButton:PsychUIButton = new PsychUIButton(objX, objY, 'Copy Section', () -> {copyNotesOnSection.bind();});
+		var copyButton:PsychUIButton = new PsychUIButton(objX, objY, 'Copy Section', function() {
+			copyNotesOnSection(0, true);
+		});
 		var pasteButton:PsychUIButton = new PsychUIButton(objX + 100, objY, 'Paste Section', function() {
 			pasteCopiedNotesToSection(affectNotes.checked, affectEvents.checked);
 		});

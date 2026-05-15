@@ -51,8 +51,8 @@ class ModsMenuState extends MusicBeatState {
 	}
 
 	override function create() {
-		Paths.clearStoredMemory();
-		Paths.clearUnusedMemory();
+		FunkinCache.clearStoredMemory();
+		FunkinCache.clearUnusedMemory();
 		persistentUpdate = false;
 
 		modsList = Mods.parseList();
@@ -798,7 +798,7 @@ class ModItem extends FlxSpriteGroup {
 		if (FileSystem.exists(path)) {
 			try {
 				// trace('trying to load settings: $folder');
-				settings = tjson.TJSON.parse(File.getContent(path));
+				settings = JsonTools.parse(File.getContent(path));
 			} catch (e:Dynamic) {
 				var errorTitle = 'Mod name: ' + Mods.currentModDirectory;
 				var errorMsg = 'An error occurred: $e';
@@ -839,7 +839,7 @@ class ModItem extends FlxSpriteGroup {
 			isPixel = false;
 
 		if (FileSystem.exists(file)) {
-			icon.loadGraphic(Paths.cacheBitmap(file, bmp), true, 150, 150);
+			icon.loadGraphic(FunkinCache.cacheBitmap(file, bmp), true, 150, 150);
 			if (isPixel)
 				icon.antialiasing = false;
 		} else

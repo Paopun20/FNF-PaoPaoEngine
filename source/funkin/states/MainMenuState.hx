@@ -164,7 +164,7 @@ class MainMenuState extends EditableState {
 
 			var allowMouse:Bool = allowMouse;
 			if (allowMouse
-				&& ((FlxG.mouse.deltaScreenX != 0 && FlxG.mouse.deltaScreenY != 0)
+				&& ((FlxG.mouse.deltaViewX != 0 && FlxG.mouse.deltaViewY != 0)
 					|| FlxG.mouse.justPressed)) // FlxG.mouse.deltaScreenX/Y checks is more accurate than FlxG.mouse.justMoved
 			{
 				allowMouse = false;
@@ -199,8 +199,8 @@ class MainMenuState extends EditableState {
 					for (i in 0...optionShit.length) {
 						var memb:FlxSprite = menuItems.members[i];
 						if (FlxG.mouse.overlaps(memb)) {
-							var distance:Float = Math.sqrt(Math.pow(memb.getGraphicMidpoint().x - FlxG.mouse.screenX, 2)
-								+ Math.pow(memb.getGraphicMidpoint().y - FlxG.mouse.screenY, 2));
+							var distance:Float = Math.sqrt(Math.pow(memb.getGraphicMidpoint().x - FlxG.mouse.viewX, 2)
+								+ Math.pow(memb.getGraphicMidpoint().y - FlxG.mouse.viewY, 2));
 							if (dist < 0 || distance < dist) {
 								dist = distance;
 								distItem = i;

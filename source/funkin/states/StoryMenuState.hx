@@ -40,8 +40,8 @@ class StoryMenuState extends EditableState {
 	var loadedWeeks:Array<WeekData> = [];
 
 	override function create() {
-		Paths.clearStoredMemory();
-		Paths.clearUnusedMemory();
+		FunkinCache.clearStoredMemory();
+		FunkinCache.clearUnusedMemory();
 
 		persistentUpdate = persistentDraw = true;
 		PlayState.isStoryMode = true;
@@ -323,7 +323,7 @@ class StoryMenuState extends EditableState {
 			if (PlayState._lastLoadedModDirectory != Mods.currentModDirectory) {
 				CoolLog.info('CHANGED MOD DIRECTORY, RELOADING STUFF');
 				// trace('CHANGED MOD DIRECTORY, RELOADING STUFF');
-				Paths.freeGraphicsFromMemory();
+				FunkinCache.freeGraphicsFromMemory();
 			}
 			LoadingState.prepareToSong();
 			new FlxTimer().start(1, function(tmr:FlxTimer) {

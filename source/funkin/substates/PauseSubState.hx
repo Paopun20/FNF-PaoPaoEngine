@@ -1,5 +1,6 @@
 package funkin.substates;
 
+import funkin.modding.scripts.utils.CacheScript;
 import funkin.backend.WeekData;
 import funkin.backend.Highscore;
 import funkin.backend.Song;
@@ -263,6 +264,7 @@ class PauseSubState extends EditableSubstate {
 				case "Restart Song":
 					#if HSCRIPT_ALLOWED
 					HScript.reset();
+					CacheScript.clearCache();
 					#end
 					#if PYTHON_ALLOWED
 					Python.reset();

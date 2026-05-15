@@ -139,7 +139,7 @@ class Mods {
 				var rawJson:String = Assets.getText(path);
 				#end
 				if (rawJson != null && rawJson.length > 0)
-					return tjson.TJSON.parse(rawJson);
+					return JsonTools.parse(rawJson);
 			} catch (e:Dynamic) {
 				// trace(e);
 				CoolLog.error(e);

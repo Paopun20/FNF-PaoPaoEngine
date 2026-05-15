@@ -45,9 +45,9 @@ class TitleState extends EditableState {
 	var wackyImage:FlxSprite;
 
 	override public function create():Void {
-		Paths.clearStoredMemory();
+		FunkinCache.clearStoredMemory();
 		super.create();
-		Paths.clearUnusedMemory();
+		FunkinCache.clearUnusedMemory();
 
 		if (!initialized) {
 			ClientPrefs.loadPrefs();
@@ -192,7 +192,7 @@ class TitleState extends EditableState {
 			var titleRaw:String = Paths.getTextFromFile('images/gfDanceTitle.json');
 			if (titleRaw != null && titleRaw.length > 0) {
 				try {
-					var titleJSON:TitleData = tjson.TJSON.parse(titleRaw);
+					var titleJSON:TitleData = JsonTools.parse(titleRaw);
 					gfPosition.set(titleJSON.gfx, titleJSON.gfy);
 					logoPosition.set(titleJSON.titlex, titleJSON.titley);
 					enterPosition.set(titleJSON.startx, titleJSON.starty);

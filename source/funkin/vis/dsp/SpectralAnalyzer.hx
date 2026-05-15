@@ -31,6 +31,7 @@ enum MathType {
 	Cast;
 }
 
+@:analyzer(optimize, local_dce, fusion, user_var_fusion)
 class SpectralAnalyzer {
 	public var minDb(default, set):Float = -70;
 	public var maxDb(default, set):Float = -20;

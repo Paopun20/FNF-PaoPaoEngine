@@ -181,7 +181,7 @@ class PhillyStreets extends BaseStage {
 		darkenable.push(spraycanPile);
 
 		if (gf != null) {
-			gf.animation.callback = function(name:String, frameNumber:Int, frameIndex:Int) {
+			gf.animation.onFrameChange.add(function(name:String, frameNumber:Int, frameIndex:Int) {
 				switch (currentNeneState) {
 					case STATE_PRE_RAISE:
 						if (name == 'danceLeft' && frameNumber >= 14) {
@@ -191,7 +191,7 @@ class PhillyStreets extends BaseStage {
 					default:
 						// Ignore.
 				}
-			}
+			});
 		}
 	}
 
@@ -249,20 +249,20 @@ class PhillyStreets extends BaseStage {
 		FlxG.sound.list.add(neneLaugh);
 
 		camHUD.alpha = 0;
-		gf.animation.finishCallback = function(name:String) {
+		gf.animation.onFinish.add(function(name:String) {
 			switch (name) {
 				case 'danceLeft', 'danceRight':
 					gf.dance();
 			}
-		}
+		});
 		gf.dance();
 
-		dad.animation.finishCallback = function(name:String) {
+		dad.animation.onFinish.add(function(name:String) {
 			switch (name) {
 				case 'idle':
 					dad.dance();
 			}
-		}
+		});
 		dad.dance();
 
 		final cutsceneDelay = 2.0;
@@ -317,14 +317,14 @@ class PhillyStreets extends BaseStage {
 		});
 		// darnell laughs
 		cutsceneHandler.timer(cutsceneDelay + 5.9, function() {
-			dad.animation.finishCallback = null;
+			dad.animation.onFinish.removeAll();
 			dad.playAnim('laughCutscene', true);
 			darnellLaugh.play(true);
 		});
 
 		// nene spits and laughs
 		cutsceneHandler.timer(cutsceneDelay + 6.2, function() {
-			gf.animation.finishCallback = null;
+			gf.animation.onFinish.removeAll();
 			gf.playAnim('laughCutscene', true);
 			neneLaugh.play(true);
 		});
@@ -349,8 +349,8 @@ class PhillyStreets extends BaseStage {
 			dad.dance();
 			gf.dance();
 			boyfriend.dance();
-			dad.animation.finishCallback = null;
-			gf.animation.finishCallback = null;
+			dad.animation.onFinish.removeAll();
+			gf.animation.onFinish.removeAll();
 
 			game.moveCameraSection();
 			game.cameraSpeed = 1;
@@ -374,7 +374,7 @@ class PhillyStreets extends BaseStage {
 
 	override function startSong() {
 		abot.snd = FlxG.sound.music;
-		gf.animation.finishCallback = onNeneAnimationFinished;
+		gf.animation.onFinish.add(onNeneAnimationFinished);
 	}
 
 	function onNeneAnimationFinished(name:String) {
@@ -755,17 +755,17 @@ class PhillyStreets extends BaseStage {
 				boyfriend.specialAnim = true;
 				gunPrepSnd.play();
 
-				boyfriend.animation.callback = function(name:String, frameNumber:Int, frameIndex:Int) {
+boyfriend.animation.onFrameChange.add(function(name:String, frameNumber:Int, frameIndex:Int) {
 					switch (name) {
 						case 'cock':
 							if (frameNumber == 3) {
-								boyfriend.animation.callback = null;
+								boyfriend.animation.onFrameChange.removeAll();
 								createCasing();
 							}
 						default:
-							boyfriend.animation.callback = null;
+							boyfriend.animation.onFrameChange.removeAll();
 					}
-				}
+				});
 
 				game.notes.forEachAlive(function(note:Note) {
 					if (note.noteType == 'weekend-1-firegun')
@@ -796,7 +796,7 @@ class PhillyStreets extends BaseStage {
 		casing.animation.addByPrefix('idle', 'Bullet0', 24, true);
 		casing.animation.play('pop', true);
 
-		casing.animation.callback = function(name:String, frameNumber:Int, frameIndex:Int) {
+		casing.animation.onFrameChange.add(function(name:String, frameNumber:Int, frameIndex:Int) {
 			if (name == 'pop' && frameNumber == 40) {
 				// Get the end position of the bullet dynamically.
 				casing.x = casing.x + casing.frame.offset.x - 1;
@@ -815,10 +815,10 @@ class PhillyStreets extends BaseStage {
 				casing.angularDrag = (casing.drag.x / casing.velocity.x) * 100;
 
 				casing.animation.play('idle');
-				casing.animation.callback = null; // Save performance.
-			}
-		};
-		casingGroup.add(casing);
+				casing.animation.onFrameChange.removeAll(); // Save performance.
+				}
+			});
+			casingGroup.add(casing);
 	}
 
 	override function opponentNoteHit(note:Note) {
@@ -873,7 +873,7 @@ class PhillyStreets extends BaseStage {
 				}
 				picoFlicker = null;
 
-				boyfriend.animation.finishCallback = function(name:String) {
+				boyfriend.animation.onFinish.add(function(name:String) {
 					if (name == 'shootMISS' && game.health > 0.0 && !game.practiceMode && game.gameOverTimer == null) {
 						// FlxFlicker was crashing so fuck it, FlxTimer all the way
 						picoFlicker = new FlxTimer().start(1 / 30, function(tmr:FlxTimer) {
@@ -891,8 +891,8 @@ class PhillyStreets extends BaseStage {
 						}, 30);
 						// trace('test');
 					}
-					boyfriend.animation.finishCallback = null;
-				}
+					boyfriend.animation.onFinish.removeAll();
+				});
 
 				game.health -= 0.4;
 				if (game.health <= 0.0 && !game.practiceMode) {

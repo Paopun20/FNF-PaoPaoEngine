@@ -174,7 +174,7 @@ class WeekData {
 		#end
 
 		if (rawJson != null && rawJson.length > 0) {
-			return cast tjson.TJSON.parse(rawJson);
+			return cast JsonTools.parse(rawJson);
 		}
 		return null;
 	}

@@ -61,5 +61,8 @@ import flixel.addons.transition.FlxTransitionableState;
 import funkin.backend.console.CoolLog;
 import funkin.vis.*;
 
+import funkin.backend.utils.tools.JsonTools;
+import funkin.ds.FunkinCache;
+
 using StringTools;
 #end

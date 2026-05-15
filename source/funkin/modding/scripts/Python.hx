@@ -672,10 +672,10 @@ class Python extends Script {
 
 		// Mouse
 		set('getMouseX', function(?camera:String = 'game') {
-			return FlxG.mouse.getScreenPosition(LuaUtils.cameraFromString(camera)).x;
+			return FlxG.mouse.getViewPosition(LuaUtils.cameraFromString(camera)).x;
 		});
 		set('getMouseY', function(?camera:String = 'game') {
-			return FlxG.mouse.getScreenPosition(LuaUtils.cameraFromString(camera)).y;
+			return FlxG.mouse.getViewPosition(LuaUtils.cameraFromString(camera)).y;
 		});
 		set('mouseClicked', function(?button:String = 'left') {
 			var click:Bool = FlxG.mouse.justPressed;

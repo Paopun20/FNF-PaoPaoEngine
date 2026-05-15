@@ -132,7 +132,7 @@ class LuaUtils {
 				var data:String = File.getContent(path);
 				try {
 					ImplementUtils.addTextToDebug('getModSetting: Trying to find default value for "$saveTag" in Mod: "$modName"', FlxColor.RED);
-					var parsedJson:Dynamic = tjson.TJSON.parse(data);
+					var parsedJson:Dynamic = JsonTools.parse(data);
 					for (i in 0...parsedJson.length) {
 						var sub:Dynamic = parsedJson[i];
 						if (sub != null && sub.save != null && !settings.exists(sub.save)) {

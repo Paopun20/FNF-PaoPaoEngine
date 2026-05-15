@@ -53,8 +53,10 @@
 	<!-- __________________________ Game Assets & Etc. __________________________ -->
 	<!-- Turn on Crash Handler -->
 	<define name="CRASH_HANDLER" if="desktop release" />
-	<!-- <define name="CRASH_DEBUGGER" if="CRASH_HANDLER desktop" /> -->
-	<!-- <haxelib name="" if="CRASH_DEBUGGER"/> -->
+	<define name="CRASH_DEBUGGER" if="CRASH_HANDLER desktop" />
+	<!-- <define name="CRASH_EXPERIMENTAL" if="CRASH_DEBUGGER" /> -->
+	<!-- <haxelib name="" if="CRASH_EXPERIMENTAL"/> -->
+
 	<!-- Assets -->
 	<assets path="assets/fonts" />
 	<assets path="assets/shared" exclude="*.ogg" if="web" />
@@ -181,9 +183,9 @@
 		<config:switch ip="192.168.x.x"/>
 	</section>
 
-	<haxedef name='enable-parallelism' />
+	<haxedef name='enable-parallelism' if="haxe5" />
 	<!--Disable deprecated warnings-->
-	<haxedef name='no-deprecation-warnings' />
+	<!-- <haxedef name='no-deprecation-warnings' /> -->
 	<!-- Haxe 4.3.0+: Enable pretty syntax errors and stuff. -->
 	<!-- pretty (haxeflixel default), indent, classic (haxe compiler default) -->
 	<haxedef name="message.reporting" value="pretty" />

@@ -220,21 +220,21 @@ class Achievements {
 
 		var modLoaded:String = Mods.currentModDirectory;
 		Mods.currentModDirectory = null;
-		loadAchievementJson(Paths.mods('data/achievements.json'));
+		readAchievementsJson(Paths.mods('data/achievements.json'));
 		for (i => mod in Mods.parseList().enabled) {
 			Mods.currentModDirectory = mod;
-			loadAchievementJson(Paths.mods('$mod/data/achievements.json'));
+			readAchievementsJson(Paths.mods('$mod/data/achievements.json'));
 		}
 		Mods.currentModDirectory = modLoaded;
 	}
 
-	inline static function loadAchievementJson(path:String, addMods:Bool = true) {
+	inline static function readAchievementsJson(path:String, addMods:Bool = true) {
 		var retVal:Array<Dynamic> = null;
 		if (FileSystem.exists(path)) {
 			try {
 				var rawJson:String = File.getContent(path).trim();
 				if (rawJson != null && rawJson.length > 0)
-					retVal = tjson.TJSON.parse(rawJson); // Json.parse('{"achievements": $rawJson}').achievements;
+					retVal = JsonTools.parse('{"achievements": $rawJson}').achievements;
 
 				if (addMods && retVal != null) {
 					for (i in 0...retVal.length) {

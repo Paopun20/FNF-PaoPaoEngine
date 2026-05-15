@@ -98,28 +98,33 @@ class GameOverSubstate extends EditableSubstate {
 			overlay.visible = false;
 			add(overlay);
 
-			boyfriend.animation.callback = function(name:String, frameNumber:Int, frameIndex:Int) {
+			var deathFrameChange:Dynamic = null;
+			deathFrameChange = function(name:String, frameNumber:Int, frameIndex:Int) {
 				switch (name) {
 					case 'firstDeath':
 						if (frameNumber >= 36 - 1) {
 							overlay.visible = true;
 							overlay.animation.play('deathLoop');
-							boyfriend.animation.callback = null;
+							boyfriend.animation.onFrameChange.remove(deathFrameChange);
 						}
 					default:
-						boyfriend.animation.callback = null;
+						boyfriend.animation.onFrameChange.remove(deathFrameChange);
 				}
-			}
+			};
+			boyfriend.animation.onFrameChange.add(deathFrameChange);
 
 			if (PlayState.instance.gf != null && PlayState.instance.gf.curCharacter == 'nene') {
 				var neneKnife:FlxSprite = new FlxSprite(boyfriend.x - 450, boyfriend.y - 250);
 				neneKnife.frames = Paths.getSparrowAtlas('NeneKnifeToss');
 				neneKnife.animation.addByPrefix('anim', 'knife toss', 24, false);
 				neneKnife.antialiasing = ClientPrefs.data.antialiasing;
-				neneKnife.animation.finishCallback = function(_) {
+				var neneKnifeFinish:Dynamic = null;
+				neneKnifeFinish = function(_) {
 					remove(neneKnife);
 					neneKnife.destroy();
-				}
+					neneKnife.animation.onFinish.remove(neneKnifeFinish);
+				};
+				neneKnife.animation.onFinish.add(neneKnifeFinish);
 				insert(0, neneKnife);
 				neneKnife.animation.play('anim', true);
 			}

@@ -1,10 +1,14 @@
 package funkin.modding.scripts.utils;
 
 import haxe.ds.StringMap;
+#if HSCRIPT_ALLOWED
 import hscript.Expr;
 import hscript.Parser;
+#end
+#if PYTHON_ALLOWED
 import paopao.hython.Expr as PyExpr;
 import paopao.hython.Parser as PyParser;
+#end
 import haxe.crypto.Sha256;
 import haxe.io.Bytes;
 
@@ -54,6 +58,11 @@ class CacheScript {
 			case PYTHON:
 				pythonCache.clear();
 		}
+	}
+
+	public static function clearCache():Void {
+		hscriptCache.clear();
+		pythonCache.clear();
 	}
 
 	public static function hashCode(string:String):String {

@@ -279,10 +279,10 @@ class PlayState extends MusicBeatState {
 	override public function create() {
 		// trace('Playback Rate: ' + playbackRate);
 		_lastLoadedModDirectory = Mods.currentModDirectory;
-		Paths.clearStoredMemory();
+		FunkinCache.clearStoredMemory();
 		if (nextReloadAll) {
 			HScript.reset();
-			Paths.clearUnusedMemory();
+			FunkinCache.clearUnusedMemory();
 			Language.reloadPhrases();
 		}
 		nextReloadAll = false;
@@ -648,7 +648,7 @@ class PlayState extends MusicBeatState {
 		splash.alpha = NOTE_SPLASH_PRECACHE_ALPHA; // Keep non-zero so note splashes render once for precaching.
 
 		super.create();
-		Paths.clearUnusedMemory();
+		FunkinCache.clearUnusedMemory();
 
 		cacheCountdown();
 		cachePopUpScore();
@@ -1255,7 +1255,9 @@ class PlayState extends MusicBeatState {
 		@:privateAccess
 		FlxG.sound.playMusic(inst._sound, 1, false);
 		#if FLX_PITCH FlxG.sound.music.pitch = playbackRate; #end
-		FlxG.sound.music.onComplete = () -> {finishSong.bind();}
+		FlxG.sound.music.onComplete = function() {
+			finishSong();
+		};
 		vocals.play();
 		opponentVocals.play();
 

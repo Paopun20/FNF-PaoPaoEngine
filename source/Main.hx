@@ -19,9 +19,8 @@ import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
 import openfl.events.Event;
-
+import sys.thread.Thread;
 import funkin.ds.BytesMap;
-
 #if (linux || mac)
 import lime.graphics.Image;
 #end
@@ -222,6 +221,8 @@ class Main extends Sprite {
 
 	public static var onClose(default, null):FlxSignal = new FlxSignal();
 
+	static var threadList:Array<Thread> = [];
+
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
 	public static function main():Void {
@@ -258,7 +259,32 @@ class Main extends Sprite {
 		HxSignalKill.init();
 
 		HxSignalKill.onSIGTERM = HxSignalKill.onSIGINT = function() {
-			CoolLog.info("Ctrl + C is kill me");
+			// kill message, but why?
+			var messages = [
+				"Ctrl + C is kill me",
+				"oops i died",
+				"welp",
+				"The engine has left the chat",
+				"Task failed successfully",
+				"User used violence",
+				"SIGINT jumpscare",
+				"guess i'll die",
+				"brb crashing",
+				"Windows moment",
+				"Sending myself to the shadow realm",
+				"The bugs won",
+				"Forced to stop existing",
+				"Runtime has chosen death",
+				"keyboard interrupt but emotionally",
+				"i have become null",
+				"Exiting before things get worse",
+				"Too much gaming detected",
+				"Engine exploded respectfully",
+				"Achievement unlocked: Segmentation Fault",
+				"Unhandled emotional exception"
+			];
+
+			CoolLog.info(messages[FlxG.random.int(0, messages.length - 1)]);
 			ClientPrefs.saveSettings();
 			#if DISCORD_ALLOWED
 			DiscordClient.shutdown();
@@ -281,8 +307,9 @@ class Main extends Sprite {
 		Lib.current.stage.window.onClose.add(onClose.dispatch);
 		onClose.add(function() {
 			#if cpp
-			FlxG.signals.preUpdate.remove(HxSignalKill.updateSignal);
-			FlxG.signals.postUpdate.remove(HxSignalKill.dispatchPending);
+			for (thread in threadList) {
+				thread.sendMessage("kill");
+			}
 			#end
 			#if hxvlc
 			VLCHandle.dispose();
@@ -346,8 +373,21 @@ class Main extends Sprite {
 		FlxG.mouse.useSystemCursor = true;
 
 		#if cpp
-		FlxG.signals.preUpdate.add(HxSignalKill.updateSignal);
-		FlxG.signals.postUpdate.add(HxSignalKill.dispatchPending);
+		threadList.push(Thread.create(function():Void {
+			while (true) {
+				var msg = Thread.readMessage(false);
+
+				if (msg == "kill") {
+					CoolLog.info("Thread killed");
+					return;
+				}
+
+				HxSignalKill.updateSignal();
+				HxSignalKill.dispatchPending();
+
+				Sys.sleep(0.1);
+			}
+		}));
 		#end
 
 		#if DISCORD_ALLOWED

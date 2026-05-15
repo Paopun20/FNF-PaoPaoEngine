@@ -20,8 +20,8 @@ class AchievementsMenuState extends EditableState {
 	var MAX_PER_ROW:Int = 4;
 
 	override function create() {
-		Paths.clearStoredMemory();
-		Paths.clearUnusedMemory();
+		FunkinCache.clearStoredMemory();
+		FunkinCache.clearUnusedMemory();
 
 		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("Achievements Menu", null);
