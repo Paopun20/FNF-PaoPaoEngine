@@ -137,13 +137,6 @@ class FreeplayState extends EditableState {
 			Mods.currentModDirectory = songs[i].folder;
 			var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);
 
-			var card:FlxSprite = new FlxSprite(songText.x + songText.width + 10, songText.y - 10);
-			card.makeGraphic(100, 100, FlxColor.fromRGB(0, 0, 0));
-			card.scale.set(0.5, 0.5);
-			card.origin.set(0.5, 0.5);
-			card.angle = 10;
-			card.alpha = 0.8;
-
 			songText.visible = songText.active = icon.visible = icon.active = false;
 
 			iconArray.push(icon);
@@ -178,8 +171,7 @@ class FreeplayState extends EditableState {
 
 		if (curSelected >= songs.length)
 			curSelected = 0;
-		bg.color = songs[curSelected].color;
-		intendedColor = bg.color;
+		intendedColor = currentGeoColor;
 		lerpSelected = curSelected;
 
 		curDifficulty = Math.round(Math.max(0, Difficulty.defaultList.indexOf(lastDifficultyName)));
@@ -201,8 +193,7 @@ class FreeplayState extends EditableState {
 		add(player);
 
 		currentGeoColor = FlxColor.fromInt(songs[curSelected].color);
-
-		changeSelection();
+		changeSelection(null, null, true);
 		updateTexts();
 		super.create();
 	}
@@ -240,8 +231,8 @@ class FreeplayState extends EditableState {
 		if (FlxG.sound.music.volume < 0.7)
 			FlxG.sound.music.volume += 0.5 * elapsed;
 
-		lerpScore = Math.floor(FlxMath.lerp(intendedScore, lerpScore, Math.exp(-elapsed * 24)));
-		lerpRating = FlxMath.lerp(intendedRating, lerpRating, Math.exp(-elapsed * 12));
+		lerpScore  = Math.floor(FlxMath.lerp(lerpScore,  intendedScore,  Math.exp(-elapsed * 24)));
+		lerpRating = FlxMath.lerp(lerpRating, intendedRating, Math.exp(-elapsed * 12));
 
 		if (Math.abs(lerpScore - intendedScore) <= 10)
 			lerpScore = intendedScore;
@@ -500,7 +491,11 @@ class FreeplayState extends EditableState {
 		albumArt.y = (FlxG.height / 2) - (albumArt.height / 2);
 	}
 
-	function changeSelection(change:Int = 0, playSound:Bool = true) {
+	function changeSelection(change:Null<Int> = 0, playSound:Null<Bool> = true, forceToChangeBGColor:Null<Bool> = false) {
+		change ??= 0;
+		playSound ??= true;
+		forceToChangeBGColor ??= false;
+
 		if (player.playingMusic)
 			return;
 
@@ -512,7 +507,7 @@ class FreeplayState extends EditableState {
 		updateAlbumArt();
 
 		var newColor:Int = songs[curSelected].color;
-		if (newColor != intendedColor) {
+		if (newColor != intendedColor || forceToChangeBGColor) {
 			intendedColor = newColor;
 			if (colorTween != null)
 				colorTween.cancel();
@@ -551,7 +546,7 @@ class FreeplayState extends EditableState {
 
 		var savedDiff:String = songs[curSelected].lastDifficulty;
 		var lastDiff:Int = Difficulty.list.indexOf(lastDifficultyName);
-		if (savedDiff != null && !Difficulty.list.contains(savedDiff) && Difficulty.list.contains(savedDiff))
+		if (savedDiff != null && Difficulty.list.contains(savedDiff))
 			curDifficulty = Math.round(Math.max(0, Difficulty.list.indexOf(savedDiff)));
 		else if (lastDiff > -1)
 			curDifficulty = lastDiff;

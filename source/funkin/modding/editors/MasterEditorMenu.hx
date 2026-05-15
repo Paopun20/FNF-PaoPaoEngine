@@ -1,9 +1,11 @@
 package funkin.modding.editors;
 
+import flixel.util.FlxColor;
 import funkin.backend.WeekData;
 import funkin.objects.Character;
 import funkin.states.MainMenuState;
 import funkin.states.FreeplayState;
+import funkin.ds.Geodify;
 
 class MasterEditorMenu extends MusicBeatState {
 	var options:Array<String> = [
@@ -30,9 +32,7 @@ class MasterEditorMenu extends MusicBeatState {
 		DiscordClient.changePresence("Editors Main Menu", null);
 		#end
 
-		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
-		bg.scrollFactor.set();
-		bg.color = 0xFF353535;
+		var bg:Geodify = new Geodify();
 		add(bg);
 
 		grpTexts = new FlxTypedGroup<Alphabet>();

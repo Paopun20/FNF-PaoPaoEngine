@@ -17,21 +17,21 @@ class GeoShader extends FlxShader
         uniform float areaWidth;
         uniform float areaHeight;
 
-        uniform float uTime0;
+        uniform float uTime0; // be dummy variable
         uniform float uTime1;
         uniform float uTime2;
         uniform float uTime3;
         uniform float uTime4;
         uniform float uTime5;
 
-        uniform float uOffsetY0;
+        uniform float uOffsetY0; // be dummy variable
         uniform float uOffsetY1;
         uniform float uOffsetY2;
         uniform float uOffsetY3;
         uniform float uOffsetY4;
         uniform float uOffsetY5;
 
-        uniform float uFreq0;
+        uniform float uFreq0; // be dummy variable
         uniform float uFreq1;
         uniform float uFreq2;
         uniform float uFreq3;
@@ -45,74 +45,26 @@ class GeoShader extends FlxShader
         uniform vec4 uColor4;
         uniform vec4 uColor5;
 
+        float waveY(float px, float freq, float t, float offsetY)
+        {
+            return offsetY
+                + sin(px * freq + t) * AMP_A
+                + sin(px * freq * 2.0 + t * 1.5) * AMP_B
+                + sin(px * freq * 0.5 + t * 0.7) * AMP_C;
+        }
+
         void main()
         {
             float px = openfl_TextureCoordv.x * areaWidth;
             float py = openfl_TextureCoordv.y * areaHeight;
 
-            vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
+            vec4 color = uColor0;
 
-            for (int i = 0; i < 6; i++)
-            {
-                float t = 0.0;
-                float oy = 0.0;
-                float freq = 0.0;
-                vec4 col = vec4(1.0);
-
-                if (i == 0)
-                {
-                    t = uTime0;
-                    oy = uOffsetY0;
-                    freq = uFreq0;
-                    col = uColor0;
-                }
-                else if (i == 1)
-                {
-                    t = uTime1;
-                    oy = uOffsetY1;
-                    freq = uFreq1;
-                    col = uColor1;
-                }
-                else if (i == 2)
-                {
-                    t = uTime2;
-                    oy = uOffsetY2;
-                    freq = uFreq2;
-                    col = uColor2;
-                }
-                else if (i == 3)
-                {
-                    t = uTime3;
-                    oy = uOffsetY3;
-                    freq = uFreq3;
-                    col = uColor3;
-                }
-                else if (i == 4)
-                {
-                    t = uTime4;
-                    oy = uOffsetY4;
-                    freq = uFreq4;
-                    col = uColor4;
-                }
-                else
-                {
-                    t = uTime5;
-                    oy = uOffsetY5;
-                    freq = uFreq5;
-                    col = uColor5;
-                }
-
-                float waveY =
-                      oy
-                    + sin(px * freq + t) * AMP_A
-                    + sin(px * freq * 2.0 + t * 1.5) * AMP_B
-                    + sin(px * freq * 0.5 + t * 0.7) * AMP_C;
-
-                if (py >= waveY)
-                {
-                    color = col;
-                }
-            }
+            if (py >= waveY(px, uFreq1, uTime1, uOffsetY1)) color = uColor1;
+            if (py >= waveY(px, uFreq2, uTime2, uOffsetY2)) color = uColor2;
+            if (py >= waveY(px, uFreq3, uTime3, uOffsetY3)) color = uColor3;
+            if (py >= waveY(px, uFreq4, uTime4, uOffsetY4)) color = uColor4;
+            if (py >= waveY(px, uFreq5, uTime5, uOffsetY5)) color = uColor5;
 
             gl_FragColor = color;
         }

@@ -7,12 +7,12 @@ import funkin.shaders.GeoShader;
 
 class Geodify extends FlxSprite {
 	public static final DEFAULT_LAYER_COLORS:Array<FlxColor> = [
-		FlxColor.fromRGB(26, 26, 26),
-		FlxColor.fromRGB(42, 42, 42),
-		FlxColor.fromRGB(58, 58, 58),
-		FlxColor.fromRGB(74, 74, 74),
-		FlxColor.fromRGB(106, 106, 106),
-		FlxColor.fromRGB(255, 255, 255),
+		0x714A9A,
+		0xAD5492,
+		0xD56985,
+		0xEC897C,
+		0xF5AE7D,
+		0xF4D48E
 	];
 
 	var geo:GeoShader;
@@ -24,11 +24,11 @@ class Geodify extends FlxSprite {
 			maxSpeed:Float = 0.9, ?colors:Array<FlxColor>) {
 		super(x, y);
 
-		makeGraphic(width, height, FlxColor.WHITE);
+		makeGraphic(width, height, FlxColor.TRANSPARENT);
 
 		var layerColors = colors ?? DEFAULT_LAYER_COLORS;
 
-		geo = new GeoShader();
+		geo = new GeoShader(); // Initialize shader
 
 		geo.areaWidth.value = [width];
 		geo.areaHeight.value = [height];
@@ -37,7 +37,11 @@ class Geodify extends FlxSprite {
 		var step = height / n;
 
 		for (i in 0...n) {
-			var speed = FlxG.random.float(minSpeed, maxSpeed);
+			var c = layerColors[i]; // Get color for this layer
+
+			setVec4('uColor$i', [c.redFloat, c.greenFloat, c.blueFloat, 1.0]); // Set color uniform for this layer
+
+			var speed:Float = FlxG.random.float(minSpeed, maxSpeed);
 
 			if (FlxG.random.bool())
 				speed = -speed;
@@ -51,10 +55,6 @@ class Geodify extends FlxSprite {
 			setFloat('uOffsetY$i', offsetY);
 			setFloat('uFreq$i', freq);
 			setFloat('uTime$i', 0.0);
-
-			var c = layerColors[i];
-
-			setVec4('uColor$i', [c.redFloat, c.greenFloat, c.blueFloat, 1.0]);
 		}
 
 		shader = geo;
@@ -73,7 +73,7 @@ class Geodify extends FlxSprite {
 		for (i in 0...speeds.length) {
 			timers[i] += elapsed * speeds[i];
 
-			setFloat('uTime$i', timers[i]);
+			setFloat('uTime${i}', timers[i]);
 		}
 	}
 

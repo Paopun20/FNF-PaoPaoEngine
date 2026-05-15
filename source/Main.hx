@@ -378,7 +378,6 @@ class Main extends Sprite {
 				var msg = Thread.readMessage(false);
 
 				if (msg == "kill") {
-					CoolLog.info("Thread killed");
 					return;
 				}
 

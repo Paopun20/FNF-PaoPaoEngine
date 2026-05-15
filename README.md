@@ -58,7 +58,15 @@ PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
 
 ## About
 
-I have a discord server for anyone who wants chating or live updates on the engine: https://discord.gg/XQDpcrk74Q
+I am a solo developer, and I am doing this for fun, so please be patient with the development process or just made pull request if you want to help, I will review it as soon as possible.
+
+I have a discord server for anyone who wants chating or live updates or bot spam on the engine:
+https://discord.gg/XQDpcrk74Q
+
+## Credits
+
+Icon made by me
+> inspired by Geodify's icon, Geode background and Psych Engine's Icon
 
 ## Planing
 

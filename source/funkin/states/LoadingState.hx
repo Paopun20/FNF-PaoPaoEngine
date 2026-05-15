@@ -1,5 +1,6 @@
 package funkin.states;
 
+import tjson.TJSON.FancyStyle;
 import lime.app.Future;
 #if (sys || MULTITHREADED_LOADING)
 import sys.thread.Mutex;
@@ -20,6 +21,7 @@ import funkin.objects.Note;
 import funkin.objects.NoteSplash;
 import funkin.backend.utils.ThreadUtil;
 import haxe.ds.ObjectMap;
+import funkin.ds.Geodify;
 import Random;
 #if (js && nodejs)
 import js.node.Os;
@@ -218,7 +220,6 @@ class LoadingState extends EditableState {
 	var dontUpdate:Bool = false;
 
 	var barGroup:FlxSpriteGroup;
-	var backdrop:FlxBackdrop;
 	var bar:FlxSprite;
 	var barWidth:Int = 0;
 	var intendedPercent:Float = 0;
@@ -231,6 +232,8 @@ class LoadingState extends EditableState {
 	var ftextData:Array<Map<String, String>>;
 
 	var timePassed:Float = 0;
+
+	var logo:FlxSprite;
 
 	override function create() {
 		persistentUpdate = true;
@@ -250,16 +253,8 @@ class LoadingState extends EditableState {
 		barGroup.add(bar);
 		barWidth = Std.int(barBack.width - 10);
 
-		var bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
-		bg.antialiasing = ClientPrefs.data.antialiasing;
-		bg.setGraphicSize(Std.int(FlxG.width));
-		bg.color = 0xFFD16FFF;
-		bg.updateHitbox();
+		var bg = new Geodify(0, 0, FlxG.width, FlxG.height);
 		addBehindBar(bg);
-
-		backdrop = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0x33FFFFFF, 0x0));
-		backdrop.velocity.set(Random.int(-40, 40), Random.int(-40, 40));
-		addBehindBar(backdrop);
 
 		loadingText = new FlxText(0, 550, FlxG.width, Language.getPhrase('now_loading', 'Now Loading', ['...']), 32);
 		loadingText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
@@ -275,6 +270,15 @@ class LoadingState extends EditableState {
 		assetText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
 		assetText.borderSize = 2;
 		addBehindBar(assetText);
+
+		logo = new FlxSprite(0, 0).loadGraphic(Paths.image('loading/icon'));
+		logo.antialiasing = ClientPrefs.data.antialiasing;
+		logo.scale.set(0.3, 0.3);
+		logo.updateHitbox();
+		logo.screenCenter();
+		logo.x -= 50;
+		logo.y -= 40;
+		addBehindBar(logo);
 
 		#if MODS_ALLOWED
 		var tipArray:Array<String> = Mods.mergeAllTextsNamed('data/loadingTipText.txt');
@@ -306,6 +310,13 @@ class LoadingState extends EditableState {
 
 	override function update(elapsed:Float) {
 		super.update(elapsed);
+
+		// Space Bar
+		if (FlxG.keys.justPressed.SPACE) {
+			logo.angle = FlxG.random.float(-25, 25);
+			FlxTween.cancelTweensOf(logo);
+			FlxTween.tween(logo, {angle: 0}, 0.5, {ease: FlxEase.elasticOut});
+		}
 
 		// Build tip text using pre-baked segments
 		var rendered:String;
