@@ -7,10 +7,14 @@ package funkin.modding.scripts;
 
 	Built for games. Works for anything.
  */
+#if NXSCRIPT_ALLOWED
 import nx.script.Interpreter;
+#end
 
 class NxScript extends Script {
+	#if NXSCRIPT_ALLOWED
 	public var interp:Interpreter;
+	#end
 
 	override function set_parent(value:Dynamic):Dynamic {
 		return null;
@@ -23,33 +27,53 @@ class NxScript extends Script {
 	public function new(path:String) {
 		super(path);
 
+		#if NXSCRIPT_ALLOWED
 		interp = new Interpreter();
 		this.origin = path;
+		#end
 		Script.preset(this);
 	}
 
 	override function execute() {
+		#if NXSCRIPT_ALLOWED
 		interp.run(scriptCode);
+		#end
 		call('onCreate', []);
 	}
 
 	override function call(funcName:String, ?args:Array<Dynamic>):Dynamic {
+		#if NXSCRIPT_ALLOWED
 		var nxArgs = [];
 		var arr = args ?? [];
 		for (i in 0...arr.length)
 			nxArgs[i] = interp.vm.haxeToValue(arr[i]);
 		return interp.vm.valueToHaxe(interp.safeCall(funcName, nxArgs));
+		#else
+		return null;
+		#end
 	}
 
 	override function set(variable:String, value:Dynamic) {
+		#if NXSCRIPT_ALLOWED
 		interp.globals.set(variable, interp.vm.haxeToValue(value));
+		#else
+		return null;
+		#end
 	}
 
 	override function get(variable:String):Dynamic {
+		#if NXSCRIPT_ALLOWED
 		return interp.vm.valueToHaxe(interp.globals.get(variable));
+		#else
+		return null;
+		#end
 	}
 
 	override function hasFunction(funcName:String):Bool {
+		#if NXSCRIPT_ALLOWED
 		return interp.vm.resolveCallable(funcName) != null;
+		#else
+		return false;
+		#end
 	}
 }

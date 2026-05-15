@@ -1255,7 +1255,7 @@ class PlayState extends MusicBeatState {
 		@:privateAccess
 		FlxG.sound.playMusic(inst._sound, 1, false);
 		#if FLX_PITCH FlxG.sound.music.pitch = playbackRate; #end
-		FlxG.sound.music.onComplete = finishSong.bind();
+		FlxG.sound.music.onComplete = () -> {finishSong.bind();}
 		vocals.play();
 		opponentVocals.play();
 
@@ -3513,33 +3513,41 @@ class PlayState extends MusicBeatState {
 		return scriptPack.call(funcToCall, args, ignoreStops, null, excludeValues);
 	}
 
-	#if LUA_ALLOWED
 	public function callOnLuas(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null,
-			excludeValues:Array<Dynamic> = null):Dynamic {
+		excludeValues:Array<Dynamic> = null):Dynamic {
+	#if LUA_ALLOWED
 		return scriptPack.callOnly(ScriptType.LUA, funcToCall, args, ignoreStops, null, excludeValues);
-	}
+	#else
+		return null;
 	#end
+	}
 
-	#if HSCRIPT_ALLOWED
 	public function callOnHScript(funcToCall:String, args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null,
 			excludeValues:Array<Dynamic> = null):Dynamic {
+	#if HSCRIPT_ALLOWED
 		return scriptPack.callOnly(ScriptType.HSCRIPT, funcToCall, args, ignoreStops, null, excludeValues);
-	}
+	#else
+		return null;
 	#end
+	}
 
-	#if PYTHON_ALLOWED
 	public function callOnPython(funcToCall:String, args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null,
 			excludeValues:Array<Dynamic> = null):Dynamic {
+	#if PYTHON_ALLOWED
 		return scriptPack.callOnly(ScriptType.PYTHON, funcToCall, args, ignoreStops, null, excludeValues);
-	}
+	#else
+		return null;
 	#end
+	}
 
-	#if NXSCRIPT_ALLOWED
 	public function callOnNxScript(funcToCall:String, args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null,
 			excludeValues:Array<Dynamic> = null):Dynamic {
+	#if NXSCRIPT_ALLOWED
 		return scriptPack.callOnly(ScriptType.NXSCRIPT, funcToCall, args, ignoreStops, null, excludeValues);
-	}
+	#else
+		return null;
 	#end
+	}
 
 	public function setOnScripts(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
 		if (exclusions == null)

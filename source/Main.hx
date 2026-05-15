@@ -29,7 +29,6 @@ import lime.graphics.Image;
 import funkin.backend.modules.ALSoftConfig; // Just to make sure DCE doesn't remove this, since it's not directly referenced anywhere else.
 #end
 #if CRASH_HANDLER
-import funkin.backend.utils.macro.SourceMap;
 import haxe.CallStack;
 import haxe.Exception;
 import haxe.io.Path;
@@ -38,7 +37,7 @@ import sys.FileSystem;
 import sys.io.File;
 #end
 #if CRASH_DEBUGGER
-// Placeholder for crash debugger UI library
+import funkin.backend.utils.macro.SourceMap;
 #end
 import haxe.ds.StringMap;
 #if hxhardware
@@ -66,7 +65,9 @@ import funkin.backend.utils.HxSignalKill;
  */
 final class ErrorHandle {
 	#if CRASH_HANDLER
+	#if CRASH_DEBUGGER
 	private static var _sourceMap:BytesMap<String> = SourceMap.build();
+	#end
 
 	public static function init():Void {
 		FunkinGame.onGameCrash.add(onCrash);
@@ -84,6 +85,7 @@ final class ErrorHandle {
 		var path:String;
 		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
 		var dateNow:String = Date.now().toString();
+		#if CRASH_DEBUGGER
 		var getLine = function(file:String, line:Int):String {
 			var content = getFile(file);
 			if (content != null) {
@@ -93,6 +95,7 @@ final class ErrorHandle {
 			}
 			return "Could not retrieve source code line.";
 		};
+		#end
 
 		CoolLog.critical("Crash detected!");
 
@@ -105,10 +108,12 @@ final class ErrorHandle {
 			switch (stackItem) {
 				case FilePos(s, file, line, column):
 					errMsg += file + " (line " + line + ")\n";
+					#if CRASH_DEBUGGER
 					errMsg += "-> " + getLine(file, line) + "\n";
+					#end
 					stackIndex++;
 				default:
-					errMsg += "#" + stackIndex + " " + Std.string(stackItem) + "\n";
+					errMsg += stackIndex + " " + Std.string(stackItem) + "\n";
 					stackIndex++;
 			}
 		}
@@ -189,9 +194,11 @@ final class ErrorHandle {
 		#end
 	}
 
+	#if CRASH_DEBUGGER
 	private static function getFile(path:String):Null<String> {
 		return _sourceMap.get(path.replace("\\", "/"));
 	}
+	#end
 	#end
 }
 

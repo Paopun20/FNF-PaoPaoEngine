@@ -19,7 +19,7 @@ using StringTools;
 	for lime Project.xml only
  */
 final class SourceMap {
-	private static function print(input:String, ?newLine:Bool=true):Void {
+	private static function print(input:String, ?newLine:Bool = true):Void {
 		Sys.stdout().writeString(input);
 		if (newLine)
 			Sys.stdout().writeString("\n");
@@ -33,7 +33,7 @@ final class SourceMap {
 		return '\x1b[0m';
 	}
 
-	private static function printRGB(r:Int, g:Int, b:Int, text:String, ?newLine:Bool=true):Void {
+	private static function printRGB(r:Int, g:Int, b:Int, text:String, ?newLine:Bool = true):Void {
 		print(rgb(r, g, b) + text + reset(), newLine);
 	}
 
@@ -55,7 +55,7 @@ final class SourceMap {
 
 	macro public static function build():ExprOf<BytesMap<String>> {
 		var setExprs:Array<Expr> = [];
-		
+
 		print("[Start Generating]");
 		flush();
 
@@ -176,19 +176,15 @@ final class SourceMap {
 		if (s.length <= CHUNK_SIZE)
 			return macro $v{s};
 
+		// Use array join instead of nested + chains
 		var chunks:Array<Expr> = [];
 		var i = 0;
 		while (i < s.length) {
-			var chunk = s.substr(i, CHUNK_SIZE);
-			chunks.push(macro $v{chunk});
+			chunks.push(macro $v{s.substr(i, CHUNK_SIZE)});
 			i += CHUNK_SIZE;
 		}
-		// Fold chunks into a single string concatenation expression
-		var result = chunks[0];
-		for (i in 1...chunks.length)
-			result = macro $result + $e{chunks[i]};
-
-		return result;
+		// Flat: [a, b, c].join("") instead of ((a + b) + c)
+		return macro $a{chunks}.join("");
 	}
 
 	private static function collectFiles(base:String, dir:String, exprs:Array<Expr>):Void {

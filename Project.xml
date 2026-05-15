@@ -21,7 +21,7 @@
 	<define name="MODS_ALLOWED" />
 	<define name="HSCRIPT_ALLOWED" if="MODS_ALLOWED" />
 	<define name="PYTHON_ALLOWED" if="MODS_ALLOWED" />
-	<define name="NXSCRIPT_ALLOWED" if="MODS_ALLOWED" />
+	<define name="NXSCRIPT_ALLOWED" if="MODS_ALLOWED" unless="haxe5" />
 	<define name="LUA_ALLOWED" if="MODS_ALLOWED cpp" unless="hl || html5" />
 	<define name="ACHIEVEMENTS_ALLOWED" />
 	<define name="DISCORD_ALLOWED" if="cpp desktop" unless="hl || html5" />
@@ -53,7 +53,7 @@
 	<!-- __________________________ Game Assets & Etc. __________________________ -->
 	<!-- Turn on Crash Handler -->
 	<define name="CRASH_HANDLER" if="desktop release" />
-	<define name="CRASH_DEBUGGER" if="CRASH_HANDLER desktop cpp" />
+	<!-- <define name="CRASH_DEBUGGER" if="CRASH_HANDLER desktop" /> -->
 	<!-- <haxelib name="" if="CRASH_DEBUGGER"/> -->
 	<!-- Assets -->
 	<assets path="assets/fonts" />
@@ -74,7 +74,7 @@
 		<assets path="assets/base_game" rename="assets" exclude="*.ogg" if="web" />
 		<assets path="assets/base_game" rename="assets" exclude="*.mp3" unless="web" />
 	</section>
-	<haxelib name="grig.audio" />
+	<haxelib name="grig.audio" version="git" />
 	<haxelib name="funkin.vis" version="git" />
 	<define name="CHECK_FOR_UPDATES" if="desktop officialBuild" />
 	<section if="MODS_ALLOWED">
@@ -89,10 +89,11 @@
 		<assets path="alsoft.txt" rename="plugins/alsoft.conf" type="text" unless="windows" />
 	</section>
 	<!-- _______________________________ Libraries ______________________________ -->
-	<haxelib name="flixel" version="6.1.2" />
+	<haxelib name="flixel" version="git" />
 	<haxelib name="flixel-addons" version="4.0.1" />
 	<haxelib name="random" />
 	<haxelib name="thx.semver" />
+	<haxelib name="hxcpp" version="4.3.2" />
 	<haxelib name="hxhardware" if="desktop cpp" />
 	<define name="SlWindowsAPI" if="windows desktop cpp" />
 	<haxelib name="sl-windows-api" if="SlWindowsAPI" />
@@ -106,7 +107,7 @@
 	<haxelib name="hscript-improved" if="HSCRIPT_ALLOWED" />
 	<define name="hscript" if="HSCRIPT_ALLOWED debug" />
 	<haxelib name="nxscript" if="NXSCRIPT_ALLOWED" />
-	<haxelib name="hxvlc" if="VIDEOS_ALLOWED" version="git" />
+	<haxelib name="hxvlc" if="VIDEOS_ALLOWED" />
 	<haxelib name="hxdiscord_rpc" version="git" if="DISCORD_ALLOWED" />
 	<haxelib name="flxanimate" version="git" />
 	<!-- Disable Discord IO Thread -->
@@ -119,11 +120,9 @@
 	<define name="x86_BUILD" if="32bits" />
 	<!-- hscript config define -->
 	<haxedef name="hscriptPos" if="HSCRIPT_ALLOWED" />
-	<define name="CUSTOM_CLASSES" if="HSCRIPT_ALLOWED" />
+	<!-- <define name="CUSTOM_CLASSES" if="HSCRIPT_ALLOWED" /> -->
 	<haxedef name="HSCRIPT_ABSTRACT_SUPPORT" if="HSCRIPT_ALLOWED" />
 	<define name="COMPILE_ALL_CLASSES" if="HSCRIPT_ALLOWED" />
-	<haxedef name="analyzer-module" />
-	<haxedef name="analyzer-optimize" />
 	<!-- ______________________________ Haxedefines _____________________________ -->
 	<!--Enable the Flixel core recording system-->
 	<!--<haxedef name="FLX_RECORD" />-->
@@ -181,6 +180,8 @@
 		<set name="LIME_OPENGL" value="1" />
 		<config:switch ip="192.168.x.x"/>
 	</section>
+
+	<haxedef name='enable-parallelism' />
 	<!--Disable deprecated warnings-->
 	<haxedef name='no-deprecation-warnings' />
 	<!-- Haxe 4.3.0+: Enable pretty syntax errors and stuff. -->

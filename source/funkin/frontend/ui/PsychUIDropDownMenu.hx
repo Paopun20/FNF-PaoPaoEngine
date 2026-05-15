@@ -168,7 +168,7 @@ class PsychUIDropDownMenu extends PsychUIInputText {
 	}
 
 	function addOption(option:String) {
-		@:bypassAccessor list.push(option);
+		list.push(option);
 		var curID:Int = list.length - 1;
 		var item:PsychUIDropDownItem = cast recycle(PsychUIDropDownItem, () -> new PsychUIDropDownItem(1, 1, this._itemWidth), true);
 		item.cameras = cameras;
