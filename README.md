@@ -1,3 +1,5 @@
+<img src="./art/icons/BaseIcon.png" width="125" height="125" align="right" />
+
 # Friday Night Funkin' - PaoPao Engine
 
 > [!WARNING]
@@ -11,7 +13,7 @@ PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
   > Work in progress, because some Python feature contracts are yet to be completed.\
   > Want to help? Submit a pull request on the [Hython GitHub repository](https://github.com/Paopun20/Hython).
 - NxScript [**Experimental**]
-  > https://github.com/Kitsumizy/NxScript/
+  > <https://github.com/Kitsumizy/NxScript/>
 - Hscript (Improved)
   > Use Own's Codename's HScript library
 - Optimize by Cache AST (HScript/Python only)
@@ -61,7 +63,7 @@ PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
 I am a solo developer, and I am doing this for fun, so please be patient with the development process or just made pull request if you want to help, I will review it as soon as possible.
 
 I have a discord server for anyone who wants chating or live updates or bot spam on the engine:
-https://discord.gg/XQDpcrk74Q
+<https://discord.gg/XQDpcrk74Q>
 
 ## Credits
 
