@@ -93,6 +93,7 @@
 	<!-- _______________________________ Libraries ______________________________ -->
 	<haxelib name="flixel" />
 	<haxelib name="flixel-addons" version="4.0.1" />
+	<haxelib name="flxanimate" version="4.0.0" />
 	<haxelib name="random" />
 	<haxelib name="thx.semver" />
 	<haxelib name="hxcpp" version="4.3.2" />
@@ -110,7 +111,6 @@
 	<haxelib name="nxscript" if="NXSCRIPT_ALLOWED" />
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED" />
 	<haxelib name="hxdiscord_rpc" version="git" if="DISCORD_ALLOWED" />
-	<haxelib name="flxanimate" version="git" />
 	<!-- Disable Discord IO Thread -->
 	<haxedef name="DISCORD_DISABLE_IO_THREAD" if="hxdiscord_rpc" />
 	<haxedef name="NO_PRECOMPILED_HEADERS" if="linux" />

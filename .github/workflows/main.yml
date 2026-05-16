@@ -123,7 +123,7 @@ jobs:
       - name: Install switch dependencies
         if: matrix.target == 'switch'
         run: |
-          pacman -S --needed switch-liblua51 switch-bzip2 switch-cmake switch-curl switch-flac switch-freetype switch-glad switch-glm switch-harfbuzz switch-libdrm_nouveau switch-libjpeg-turbo switch-libmodplug switch-libogg switch-libopus switch-libpng switch-libvorbis switch-libvorbisidec switch-libwebp switch-mesa switch-mpg123 switch-openal-soft switch-opusfile switch-pkg-config switch-sdl2 switch-sdl2_gfx switch-sdl2_image switch-sdl2_mixer switch-sdl2_net switch-sdl2_ttf switch-tools switch-zlib
+          sudo pacman -S --needed switch-liblua51 switch-bzip2 switch-cmake switch-curl switch-flac switch-freetype switch-glad switch-glm switch-harfbuzz switch-libdrm_nouveau switch-libjpeg-turbo switch-libmodplug switch-libogg switch-libopus switch-libpng switch-libvorbis switch-libvorbisidec switch-libwebp switch-mesa switch-mpg123 switch-openal-soft switch-opusfile switch-pkg-config switch-sdl2 switch-sdl2_gfx switch-sdl2_image switch-sdl2_mixer switch-sdl2_net switch-sdl2_ttf switch-tools switch-zlib
 
       - name: Cache Dependencies
         uses: actions/cache@v5

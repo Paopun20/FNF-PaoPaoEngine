@@ -20,6 +20,7 @@ haxelib install openfl 9.5.1 --always
 haxelib install flixel 6.1.2
 haxelib install flixel-addons 4.0.1 
 haxelib install flixel-tools 1.5.1
+haxelib install flxanimate 4.0.0
 haxelib install hxcpp 4.3.2
 haxelib install tink_core 2.1.1
 haxelib install moonchart 0.5.1
@@ -35,7 +36,6 @@ haxelib git compiletime https://github.com/Paopun20/compiletime.git --always
 # Git Lib
 haxelib git hxdiscord_rpc https://github.com/MAJigsaw77/hxdiscord_rpc.git --always
 haxelib git linc_luajit https://github.com/superpowers04/linc_luajit.git --always
-haxelib git flxanimate https://github.com/Dot-Stuff/flxanimate.git 0188d47c982913eb10fad7bd75f062ddfc680f4b --always
 haxelib git hxhardware https://github.com/Vortex2Oblivion/hxhardware.git --always
 haxelib git lscript https://github.com/SrtHero278/lscript.git --always
 haxelib git lemonui https://github.com/NebulaStellaNova/LemonUI.git --always
@@ -46,9 +46,10 @@ haxelib git funkin.vis https://github.com/FunkinCrew/funkVis.git 22b1ce089dd924f
 
 
 # Codename Fork Lib
-haxelib git hxvlc https://github.com/MAJigsaw77/hxvlc.git --always
+haxelib git hxvlc https://github.com/CodenameCrew/cne-hxvlc.git --always
 haxelib git hscript-improved https://github.com/CodenameCrew/hscript-improved.git codename-dev --always
 haxelib git grig.audio https://github.com/FunkinCrew/grig.audio.git 57f5d47f2533fd0c3dcd025a86cb86c0dfa0b6d2 --always
 
 
+# For Windows only
 haxelib install hxWindowColorMode 0.2.1 
