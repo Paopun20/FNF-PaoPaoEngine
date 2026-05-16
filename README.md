@@ -62,7 +62,7 @@ PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
 
 I am a solo developer, and I am doing this for fun, so please be patient with the development process or just made pull request if you want to help, I will review it as soon as possible.
 
-I have a discord server for anyone who wants chating or live updates or bot spam on the engine:
+I have a discord server for anyone who wants chating or "bot spam and get ban", you can join it here:
 <https://discord.gg/XQDpcrk74Q>
 
 ## Credits
