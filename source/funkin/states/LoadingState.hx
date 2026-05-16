@@ -1,6 +1,5 @@
 package funkin.states;
 
-import tjson.TJSON.FancyStyle;
 import lime.app.Future;
 #if (sys || MULTITHREADED_LOADING)
 import sys.thread.Mutex;
@@ -27,7 +26,7 @@ import Random;
 import js.node.Os;
 #end
 
-using funkin.backend.utils.tools.PPQolTools;
+using funkin.backend.utils.tools.QolTools;
 
 class LoadingState extends EditableState {
 	private static var loaded:Int = 0;
@@ -233,7 +232,9 @@ class LoadingState extends EditableState {
 
 	var timePassed:Float = 0;
 
-	var logo:FlxSprite;
+	var myCoooooollogo:FlxSprite;
+	var IoX: Float = 0;
+	var IoY: Float = 0;
 
 	override function create() {
 		persistentUpdate = true;
@@ -271,14 +272,20 @@ class LoadingState extends EditableState {
 		assetText.borderSize = 2;
 		addBehindBar(assetText);
 
-		logo = new FlxSprite(0, 0).loadGraphic(Paths.image('loading/icon'));
-		logo.antialiasing = ClientPrefs.data.antialiasing;
-		logo.scale.set(0.3, 0.3);
-		logo.updateHitbox();
-		logo.screenCenter();
-		logo.x -= 50;
-		logo.y -= 40;
-		addBehindBar(logo);
+		myCoooooollogo = new FlxSprite(0, 0).loadGraphic(Paths.image('loading/icon'));
+		myCoooooollogo.antialiasing = ClientPrefs.data.antialiasing;
+		myCoooooollogo.scale.set(0.3, 0.3);
+		myCoooooollogo.origin.set(0.5, 0.5);
+		myCoooooollogo.x = FlxG.width / 2;
+		myCoooooollogo.y = FlxG.height / 2 - 40;
+		myCoooooollogo.updateHitbox();
+		myCoooooollogo.screenCenter();
+		IoX = myCoooooollogo.x;
+		IoY = myCoooooollogo.y;
+		
+		// logo.x -= 50;
+		// logo.y -= 40;
+		addBehindBar(myCoooooollogo);
 
 		#if MODS_ALLOWED
 		var tipArray:Array<String> = Mods.mergeAllTextsNamed('data/loadingTipText.txt');
@@ -308,14 +315,26 @@ class LoadingState extends EditableState {
 
 	var transitioning:Bool = false;
 
+	function onIogoScreenClick() {
+		myCoooooollogo.angle = FlxG.random.float(-25, 25);
+		myCoooooollogo.x += FlxG.random.float(-25, 25);
+		myCoooooollogo.y += FlxG.random.float(-25, 25);
+		FlxTween.cancelTweensOf(myCoooooollogo);
+		FlxTween.tween(myCoooooollogo, {angle: 0, x: IoX, y: IoY}, 0.5, {ease: FlxEase.elasticOut});
+	}
+
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		// Space Bar
-		if (FlxG.keys.justPressed.SPACE) {
-			logo.angle = FlxG.random.float(-25, 25);
-			FlxTween.cancelTweensOf(logo);
-			FlxTween.tween(logo, {angle: 0}, 0.5, {ease: FlxEase.elasticOut});
+		// Space Bar or m1
+		if (!FlxG.onMobile) {
+			if (FlxG.keys.justPressed.SPACE || FlxG.mouse.justPressed) {
+				onIogoScreenClick();
+			}
+		} else {
+			if (FlxG.touches.list.length > 0 && FlxG.touches.list[0].justPressed) {
+				onIogoScreenClick();
+			}
 		}
 
 		// Build tip text using pre-baked segments

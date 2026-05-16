@@ -41,7 +41,7 @@ import funkin.modding.scripts.NxScript;
 #end
 import funkin.modding.ShaderMod;
 
-using funkin.backend.utils.tools.PPQolTools;
+using funkin.backend.utils.tools.QolTools;
 
 @:analyzer(optimize)
 class PlayState extends MusicBeatState {

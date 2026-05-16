@@ -2,22 +2,25 @@ package funkin.backend.console;
 
 import haxe.Log;
 import haxe.PosInfos;
+import funkin.ds.Int8;
+import haxe.io.Bytes;
 import haxe.format.JsonPrinter;
 import funkin.backend.utils.AnsiUtil;
 import funkin.backend.utils.AnsiUtil.AnsiCode;
 
 using StringTools;
-using funkin.backend.utils.tools.PPQolTools;
+using funkin.backend.utils.tools.QolTools;
 
-private enum Level {
-	DEBUG;
-	INFO;
-	WARNING;
-	ERROR;
-	CRITICAL;
-	TRACE;
+private enum abstract Level(Int8) {
+	var INFO;
+	var DEBUG;
+	var WARNING;
+	var ERROR;
+	var CRITICAL;
+	var TRACE;
 }
 
+@:analyzer(optimize, local_dce, fusion, user_var_fusion)
 class CoolLog {
 	private static final COLORS:Map<Level, Array<AnsiCode>> = [
 		DEBUG => [AnsiCode.CYAN],
@@ -155,7 +158,9 @@ class CoolLog {
 
 		var msg = Std.isOfType(v, String) ? AnsiUtil.apply(v, [cast MSG_COLOR]) : AnsiUtil.apply(pretty(v), [cast OBJ_COLOR]);
 
-		Sys.println('$time $tag $location: $msg');
+		Sys.stdout().write(Bytes.ofString('$time $tag $location: $msg'));
+		Sys.stdout().write(Bytes.ofString('\x1b[0m\n')); // Reset colors
+		Sys.stdout().flush();
 	}
 
 	public static inline function debug(v:Dynamic, ?i)

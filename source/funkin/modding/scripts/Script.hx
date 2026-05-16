@@ -48,7 +48,7 @@ import sys.FileSystem;
 
 using StringTools;
 using Lambda;
-using funkin.backend.utils.tools.PPQolTools;
+using funkin.backend.utils.tools.QolTools;
 
 class Script implements IFlxDestroyable {
 	public var scriptCode:String;

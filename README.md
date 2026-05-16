@@ -41,7 +41,7 @@ PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
   > /J SL WINDOWS API library
 - Video Cutscene Subtitles Is Support
   - Subtitles: subtitles/video/videoName.srt
-  > (I facking hate it everytime it crash without error output)
+    > (I facking hate it everytime it crash without error output)
 
 - New events:
   - Offset Timer
@@ -60,15 +60,22 @@ PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
 
 ## About
 
-I am a solo developer, and I am doing this for fun, so please be patient with the development process or just made pull request if you want to help, I will review it as soon as possible.
+I am a solo developer, and I am doing this for fun, so please be patient with the development process, or just make a pull request if you want to help. I will review it as soon as possible.
 
-I have a discord server for anyone who wants chating or "bot spam and get ban", you can join it here:
+I am working on this engine, so please don't expect a stable release or a release date. I will release it when it's ready.
+
+I have a Discord server for anyone who wants to chat or "bot spam and get banned." You can join it here:
 <https://discord.gg/XQDpcrk74Q>
 
 ## Credits
 
-Icon made by me
+Icon made by PaoPao (me)
+
 > inspired by Geodify's icon, Geode background and Psych Engine's Icon
+
+Geodify Background made by PaoPao (me)
+
+> inspired by Geodify's background
 
 ## Planing
 

@@ -25,7 +25,7 @@ import hxvlc.flixel.FlxVideoSprite;
 #end
 
 #if VIDEOS_ALLOWED
-using funkin.backend.utils.tools.PPQolTools;
+using funkin.backend.utils.tools.QolTools;
 
 enum VideoState {
 	Idle;

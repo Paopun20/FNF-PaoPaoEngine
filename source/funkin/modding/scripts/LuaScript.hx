@@ -21,7 +21,7 @@ import lscript.LScript;
 #end
 
 using StringTools;
-using funkin.backend.utils.tools.PPQolTools;
+using funkin.backend.utils.tools.QolTools;
 
 class LuaScript extends Script {
 	#if LUA_ALLOWED

@@ -224,8 +224,9 @@ class Main extends Sprite {
 	static var threadList:Array<Thread> = [];
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
-
+	
 	public static function main():Void {
+		FlxG.random.resetInitialSeed(); // Reset the RNG seed to ensure different random values each run
 		#if SlWindowsAPI
 		WindowsAPI.reDefineMainWindowTitle(Application.current.window.title);
 		#end
