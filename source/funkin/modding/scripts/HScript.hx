@@ -32,7 +32,7 @@ using StringTools;
 
 typedef StringMap<T> = Map<String, T>;
 
-class HScript extends Script {
+class HScript extends Script implements IScriptExecutor {
 	public static var printer:Printer = new Printer();
 	public static var staticVariables:StringMap<Dynamic> = new StringMap<Dynamic>();
 	public static var publicVariables:StringMap<Dynamic> = new StringMap<Dynamic>();

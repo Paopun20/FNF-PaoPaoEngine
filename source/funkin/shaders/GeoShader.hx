@@ -73,4 +73,32 @@ class GeoShader extends FlxShader
     {
         super();
     }
+
+    public function setTime(layer:Int, time:Float):Void
+    {
+        if (layer < 0 || layer >= 6) return;
+
+        Reflect.field(this, 'uTime$layer').value = [time];
+    }
+
+    public function setOffsetY(layer:Int, offsetY:Float):Void
+    {
+        if (layer < 0 || layer >= 6) return;
+
+        Reflect.field(this, 'uOffsetY$layer').value = [offsetY];
+    }
+
+    public function setFreq(layer:Int, freq:Float):Void
+    {
+        if (layer < 0 || layer >= 6) return;
+
+        Reflect.field(this, 'uFreq$layer').value = [freq];
+    }
+
+    public function setColor(layer:Int, color:FlxColor):Void
+    {
+        if (layer < 0 || layer >= 6) return;
+
+        Reflect.field(this, 'uColor$layer').value = [color.redFloat, color.greenFloat, color.blueFloat, 1.0];
+    }
 }

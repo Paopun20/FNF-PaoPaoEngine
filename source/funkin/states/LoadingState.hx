@@ -811,8 +811,8 @@ class LoadingState extends EditableState {
 
 	public static function clearInvalids() {
 		clearInvalidFrom(imagesToPrepare, 'images', '.png', IMAGE);
-		clearInvalidFrom(soundsToPrepare, 'sounds', '.${Paths.SOUND_EXT}', SOUND);
-		clearInvalidFrom(musicToPrepare, 'music', ' .${Paths.SOUND_EXT}', SOUND);
+		clearInvalidFrom(soundsToPrepare, 'sounds', '${Paths.SOUND_EXT}', SOUND);
+		clearInvalidFrom(musicToPrepare, 'music', '.${Paths.SOUND_EXT}', SOUND);
 		clearInvalidFrom(songsToPrepare, 'songs', '.${Paths.SOUND_EXT}', SOUND, 'songs');
 
 		for (i in 0...4) {

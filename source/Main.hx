@@ -58,6 +58,7 @@ import funkin.backend.game.FunkinGame;
 import funkin.backend.utils.HxSignalKill;
 #end
 
+
 /**
  * Error and crash handling system for PaoPaoEngine
  * Handles uncaught errors, critical errors, and provides logging functionality

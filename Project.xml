@@ -91,7 +91,7 @@
 		<assets path="alsoft.txt" rename="plugins/alsoft.conf" type="text" unless="windows" />
 	</section>
 	<!-- _______________________________ Libraries ______________________________ -->
-	<haxelib name="flixel" version="git" />
+	<haxelib name="flixel" />
 	<haxelib name="flixel-addons" version="4.0.1" />
 	<haxelib name="random" />
 	<haxelib name="thx.semver" />

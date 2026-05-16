@@ -12,18 +12,17 @@ import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxAxes;
 import flixel.util.FlxColor;
-import flixel.util.FlxStringUtil;
 import flixel.util.FlxTimer;
 import funkin.modding.scripts.components.PsychFunctions;
-import funkin.modding.scripts.components.ReflectionFunctions;
-import funkin.modding.scripts.components.TextFunctions;
 import lscript.LScript;
+
+import llua.LuaJIT as FunkinLuaJIT;
 #end
 
 using StringTools;
 using funkin.backend.utils.tools.QolTools;
 
-class LuaScript extends Script {
+class LuaScript extends Script implements IScriptExecutor {
 	#if LUA_ALLOWED
 	var internalScript:LScript;
 
@@ -62,6 +61,7 @@ class LuaScript extends Script {
 	public override function execute() {
 		try {
 			initVars();
+			FunkinLuaJIT.setmode(internalScript.luaState, internalScript.nextIndex, FunkinLuaJIT.LUAJIT_MODE_ON);
 			internalScript.execute();
 			call('onCreate', []);
 		} catch (e:Dynamic) {

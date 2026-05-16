@@ -88,7 +88,7 @@ class PyInterp extends paopao.hython.Interp {
 	}
 }
 
-class Python extends Script {
+class Python extends Script implements IScriptExecutor {
 	public var parser:PyParser;
 	public var printer:PyPrinter;
 	public var interp:PyInterp;

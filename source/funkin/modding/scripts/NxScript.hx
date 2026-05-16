@@ -10,8 +10,7 @@ package funkin.modding.scripts;
 #if NXSCRIPT_ALLOWED
 import nx.script.Interpreter;
 #end
-
-class NxScript extends Script {
+class NxScript extends Script implements IScriptExecutor {
 	#if NXSCRIPT_ALLOWED
 	public var interp:Interpreter;
 	#end

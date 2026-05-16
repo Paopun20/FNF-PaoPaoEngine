@@ -50,7 +50,7 @@ using StringTools;
 using Lambda;
 using funkin.backend.utils.tools.QolTools;
 
-class Script implements IFlxDestroyable {
+class Script implements IFlxDestroyable implements IScriptExecutor {
 	public var scriptCode:String;
 	public var scriptName:String;
 	public var scriptPath:String;
