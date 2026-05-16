@@ -3,7 +3,7 @@ package funkin.ds;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
-import funkin.shaders.GeoShader;
+import funkin.shaders.GeodifyShader;
 
 class Geodify extends FlxSprite {
 	public static final DEFAULT_LAYER_COLORS:Array<FlxColor> = [
@@ -15,7 +15,7 @@ class Geodify extends FlxSprite {
 		0xF4D48E
 	];
 
-	var geoShader:GeoShader;
+	var geoShader:GeodifyShader;
 
 	var timers:Array<Float> = [];
 	var speeds:Array<Float> = [];
@@ -28,7 +28,7 @@ class Geodify extends FlxSprite {
 
 		var layerColors = colors ?? DEFAULT_LAYER_COLORS;
 
-		geoShader = new GeoShader(); // Initialize shader
+		geoShader = new GeodifyShader(); // Initialize shader
 
 		geoShader.areaWidth.value = [width];
 		geoShader.areaHeight.value = [height];

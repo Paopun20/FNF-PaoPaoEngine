@@ -28,6 +28,13 @@ import js.node.Os;
 
 using funkin.backend.utils.tools.QolTools;
 
+import flixel.util.FlxTypedSignal;
+class FunkinAssetLoader {
+	static var threads = 
+	public static var onComplete:FlxTypedSignal<Void->Void>;
+	public static var onAssetLoaded:FlxTypedSignal<String->Void>;
+}
+
 class LoadingState extends EditableState {
 	private static var loaded:Int = 0;
 	private static var loadMax:Int = 0;
