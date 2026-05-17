@@ -18,8 +18,6 @@ class GeodifyShader extends FlxShader
         uniform float areaWidth;
         uniform float areaHeight;
 
-        uniform bool uFullLay0Color = true; // switch to old behavior for layer 0, which is just a solid color without wave effect
-
         uniform float uTime0; // be dummy variable
         uniform float uTime1;
         uniform float uTime2;
@@ -61,10 +59,7 @@ class GeodifyShader extends FlxShader
             float px = openfl_TextureCoordv.x * areaWidth;
             float py = openfl_TextureCoordv.y * areaHeight;
             vec4 color = vec4(0.0);
-
-            if (uFullLay0Color) {
-                color = uColor0;
-            } else if (py >= waveY(px, uFreq0, uTime0, uOffsetY0)) color = uColor0;
+            color = uColor0;
 
             if (py >= waveY(px, uFreq1, uTime1, uOffsetY1)) color = uColor1;
             if (py >= waveY(px, uFreq2, uTime2, uOffsetY2)) color = uColor2;

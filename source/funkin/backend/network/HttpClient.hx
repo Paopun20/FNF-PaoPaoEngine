@@ -18,9 +18,30 @@ class HttpClient {
 	static final HTTP_REDIRECT_MIN:Int = 300;
 	static final HTTP_CLIENT_ERROR_MIN:Int = 400;
 
-	/** Checks basic internet connectivity by probing a reliable external host. */
-	public static function hasInternet(callback:Bool->Void):Void {
-		getRequest("https://www.google.com", (success, _) -> callback(success));
+	public static var hasInternet(get, null):Bool;
+
+	public static function get_hasInternet() {
+		return runSync(function(cb:(Bool, Dynamic) -> Void) {
+			getRequest("https://www.google.com", (b:Bool, _:Dynamic) -> {
+				cb(b, null);
+			});
+		});
+	}
+
+	private static function runSync(asyncFunc:((Bool, Dynamic) -> Void)->Void):Dynamic {
+		var result:Dynamic = null;
+		var completed = false;
+		var success = false;
+
+		asyncFunc(function(s:Bool, res:Dynamic) {
+			completed = true;
+			success = s;
+			result = res;
+		});
+
+		while (!completed) {}
+
+		return result;
 	}
 
 	/** Sends an HTTP GET request and delivers the raw response string to `callback`. */

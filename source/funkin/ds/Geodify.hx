@@ -6,14 +6,7 @@ import flixel.util.FlxColor;
 import funkin.shaders.GeodifyShader;
 
 class Geodify extends FlxSprite {
-	public static final DEFAULT_LAYER_COLORS:Array<FlxColor> = [
-		0x714A9A,
-		0xAD5492,
-		0xD56985,
-		0xEC897C,
-		0xF5AE7D,
-		0xF4D48E
-	];
+	public static final DEFAULT_LAYER_COLORS:Array<FlxColor> = [0x714A9A, 0xAD5492, 0xD56985, 0xEC897C, 0xF5AE7D, 0xF4D48E];
 
 	var geoShader:GeodifyShader;
 
@@ -76,6 +69,7 @@ class Geodify extends FlxSprite {
 			geoShader.setTime(i, timers[i]);
 		}
 	}
+
 	public function recolor(colors:Array<FlxColor>):Void {
 		for (i in 0...colors.length) {
 			var c = colors[i];

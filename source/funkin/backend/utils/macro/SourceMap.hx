@@ -4,11 +4,11 @@ import haxe.io.Bytes;
 import haxe.io.Encoding;
 import funkin.ds.BytesMap;
 import haxe.Timer;
-
-
 import Sys;
 import sys.FileSystem;
 #if macro
+import haxe.io.Path;
+import haxe.Json;
 import haxe.macro.Context;
 import haxe.macro.Expr;
 import sys.io.File;
@@ -46,7 +46,6 @@ final class SourceMap {
 	}
 
 	static function __init__():Void {
-		#if macro
 		print("███████╗ ██████╗ ██╗   ██╗██████╗  ██████╗███████╗███╗   ███╗ █████╗ ██████╗");
 		print("██╔════╝██╔═══██╗██║   ██║██╔══██╗██╔════╝██╔════╝████╗ ████║██╔══██╗██╔══██╗");
 		print("███████╗██║   ██║██║   ██║██████╔╝██║     █████╗  ██╔████╔██║███████║██████╔╝");
@@ -56,7 +55,6 @@ final class SourceMap {
 		flush();
 		print("By PaoPao");
 		flush();
-		#end
 	}
 
 	macro public static function build():ExprOf<BytesMap<String>> {
@@ -146,36 +144,51 @@ final class SourceMap {
 		return paths;
 	}
 
+	/*
+		haxelib libpath lime:8.3.2 <- libName:version format if version is provided, otherwise just haxelib set version kicks it
+		C:/HaxeToolkit/haxe/lib/lime/8,3,2/ <- output with trailing slash
+		(it work i test it)
+	 */
 	private static function resolveHaxelibPath(name:String, ?version:String):Null<String> {
-		// haxelib path accepts "name:version" format
 		var libArg = (version != null && version != "") ? '$name:$version' : name;
 
 		try {
-			var proc = new Process("haxelib", ["path", libArg]);
-			var output = proc.stdout.readAll().toString();
-			var exitCode = proc.exitCode();
-			proc.close();
+			// Fix: Process has no static run() method and no ProcessOptions — use new Process(cmd, args).
+			// sys.io.Process also has no cwd parameter; haxelib resolves paths globally so this is fine.
+			var process = new Process("haxelib", ["libpath", libArg]);
 
-			if (exitCode != 0) {
-				printRGB(255, 0, 0, 'haxelib path $libArg failed (exit $exitCode)');
+			// Fix: process.wait() does not exist — exitCode() blocks until the process finishes.
+			process.exitCode();
+
+			var output = process.stdout.readAll().toString().trim();
+
+			if (output == "") {
 				return null;
 			}
 
-			// First non-flag line of `haxelib path` output is the source directory
-			for (line in output.split("\n")) {
-				line = line.trim().replace("\\", "/");
-				if (line == "" || line.startsWith("-"))
-					continue;
-				if (FileSystem.exists(line) && FileSystem.isDirectory(line)) {
-					printRGB(255, 255, 255, 'Resolved $libArg -> $line');
-					return line;
-				}
+			var rootPath = FileSystem.absolutePath(output.split("\n")[0].trim());
+
+			// Fix: Path is now imported (haxe.io.Path)
+			var haxelibJson = Path.join([rootPath, "haxelib.json"]);
+
+			if (!FileSystem.exists(haxelibJson)) {
+				return rootPath;
 			}
 
-			printRGB(254, 215, 0, 'Could not resolve source path for haxelib $libArg');
-			return null;
+			// Fix: Json is now imported (haxe.Json)
+			var json:Dynamic = Json.parse(File.getContent(haxelibJson));
+
+			var classPath:String = Reflect.field(json, "classPath");
+			if (classPath == null || classPath.trim() == "") {
+				printRGB(180, 180, 180, 'Resolved $libArg -> [root] $rootPath');
+				return rootPath;
+			}
+
+			var resolved = FileSystem.absolutePath(Path.join([rootPath, classPath]));
+			printRGB(255, 255, 255, 'Resolved $libArg -> $resolved');
+			return resolved;
 		} catch (e:Dynamic) {
-			printRGB(254, 215, 0, 'Exception resolving haxelib $libArg: $e');
+			printRGB(254, 215, 0, 'Failed resolving haxelib source path for $libArg: $e');
 			return null;
 		}
 	}

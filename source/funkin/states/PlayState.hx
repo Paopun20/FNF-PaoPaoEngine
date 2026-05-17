@@ -461,10 +461,7 @@ class PlayState extends MusicBeatState {
 
 		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED || NXSCRIPT_ALLOWED)
 		// STAGE SCRIPTS
-		#if LUA_ALLOWED startLuasNamed('stages/' + curStage + '.lua'); #end
-		#if HSCRIPT_ALLOWED startHScriptsNamed('stages/' + curStage + '.hx'); #end
-		#if PYTHON_ALLOWED startPythonNamed('stages/' + curStage + '.py'); #end
-		#if NXSCRIPT_ALLOWED startNxScriptNamed('stages/' + curStage + '.nx'); #end
+		startNamed('stages', curStage);
 
 		// CHARACTER SCRIPTS
 		if (gf != null)
@@ -573,39 +570,11 @@ class PlayState extends MusicBeatState {
 		startingSong = true;
 
 		for (notetype in noteTypes) {
-			#if LUA_ALLOWED
-			startLuasNamed('custom_notetypes/' + notetype + '.lua');
-			#end
-
-			#if HSCRIPT_ALLOWED
-			startHScriptsNamed('custom_notetypes/' + notetype + '.hx');
-			#end
-
-			#if PYTHON_ALLOWED
-			startPythonNamed('custom_notetypes/' + notetype + '.py');
-			#end
-
-			#if NXSCRIPT_ALLOWED
-			startNxScriptNamed('custom_notetypes/' + notetype + '.nx');
-			#end
+			startNamed("custom_notetypes", notetype);
 		}
 
 		for (event in eventsPushed) {
-			#if LUA_ALLOWED
-			startLuasNamed('custom_events/' + event + '.nx');
-			#end
-
-			#if HSCRIPT_ALLOWED
-			startHScriptsNamed('custom_events/' + event + '.hx');
-			#end
-
-			#if PYTHON_ALLOWED
-			startPythonNamed('custom_events/' + event + '.py');
-			#end
-
-			#if NXSCRIPT_ALLOWED
-			startNxScriptNamed('custom_notetypes/' + event + '.nx');
-			#end
+			startNamed("custom_events", event);
 		}
 
 		noteTypes = null;
@@ -3379,6 +3348,24 @@ class PlayState extends MusicBeatState {
 		callOnScripts('onSectionHit');
 	}
 
+	public function startNamed(path:String, name:String) {
+		#if LUA_ALLOWED
+		startLuasNamed(path + '/' + name + '.lua');
+		#end
+
+		#if HSCRIPT_ALLOWED
+		startHScriptsNamed(path + '/' + name + '.hx');
+		#end
+
+		#if PYTHON_ALLOWED
+		startPythonNamed(path + '/' + name + '.py');
+		#end
+
+		#if NXSCRIPT_ALLOWED
+		startNxScriptNamed(path + '/' + name + '.nx');
+		#end
+	}
+
 	#if HSCRIPT_ALLOWED
 	public function startHScriptsNamed(scriptFile:String) {
 		#if MODS_ALLOWED
@@ -3516,39 +3503,39 @@ class PlayState extends MusicBeatState {
 	}
 
 	public function callOnLuas(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null,
-		excludeValues:Array<Dynamic> = null):Dynamic {
-	#if LUA_ALLOWED
+			excludeValues:Array<Dynamic> = null):Dynamic {
+		#if LUA_ALLOWED
 		return scriptPack.callOnly(ScriptType.LUA, funcToCall, args, ignoreStops, null, excludeValues);
-	#else
+		#else
 		return null;
-	#end
+		#end
 	}
 
 	public function callOnHScript(funcToCall:String, args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null,
 			excludeValues:Array<Dynamic> = null):Dynamic {
-	#if HSCRIPT_ALLOWED
+		#if HSCRIPT_ALLOWED
 		return scriptPack.callOnly(ScriptType.HSCRIPT, funcToCall, args, ignoreStops, null, excludeValues);
-	#else
+		#else
 		return null;
-	#end
+		#end
 	}
 
 	public function callOnPython(funcToCall:String, args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null,
 			excludeValues:Array<Dynamic> = null):Dynamic {
-	#if PYTHON_ALLOWED
+		#if PYTHON_ALLOWED
 		return scriptPack.callOnly(ScriptType.PYTHON, funcToCall, args, ignoreStops, null, excludeValues);
-	#else
+		#else
 		return null;
-	#end
+		#end
 	}
 
 	public function callOnNxScript(funcToCall:String, args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null,
 			excludeValues:Array<Dynamic> = null):Dynamic {
-	#if NXSCRIPT_ALLOWED
+		#if NXSCRIPT_ALLOWED
 		return scriptPack.callOnly(ScriptType.NXSCRIPT, funcToCall, args, ignoreStops, null, excludeValues);
-	#else
+		#else
 		return null;
-	#end
+		#end
 	}
 
 	public function setOnScripts(variable:String, arg:Dynamic, exclusions:Array<String> = null) {

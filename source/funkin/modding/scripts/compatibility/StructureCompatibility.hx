@@ -141,11 +141,7 @@ class StructureCompatibility {
 			var newClassName = classAliasMap.get(className);
 			myClass = Type.resolveClass(newClassName);
 
-			if (myClass != null) {
-				#if debug
-				CoolLog.info('[Compatibility] Redirecting "$className" to "$newClassName"');
-				#end
-			} else {
+			if (myClass == null) {
 				CoolLog.info('[Compatibility] WARNING: Alias "$className" → "$newClassName" exists, but target class not found!');
 			}
 		} else if (myClass == null) {

@@ -25,14 +25,54 @@ import Random;
 #if (js && nodejs)
 import js.node.Os;
 #end
+import funkin.ds.RichTextFormater;
+import flixel.util.FlxSignal.FlxTypedSignal;
 
 using funkin.backend.utils.tools.QolTools;
 
-import flixel.util.FlxTypedSignal;
-class FunkinAssetLoader {
-	static var threads = 
-	public static var onComplete:FlxTypedSignal<Void->Void>;
-	public static var onAssetLoaded:FlxTypedSignal<String->Void>;
+class TipFormater extends RichTextFormater {
+	private static final GLITCH_CHARSET:String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+	override function onFormat(text:String, styles:Array<RichVar>):String {
+		var out = text;
+
+		for (s in styles) {
+			switch (s.name) {
+				case "FX_GTEXT":
+					var target:Null<String> = null;
+
+					if (Reflect.hasField(s.variables, "value"))
+						target = Reflect.field(s.variables, "value");
+
+					var glitched = new StringBuf();
+
+					for (i in 0...out.length) {
+						var ch = out.charAt(i);
+
+						// preserve spaces
+						if (StringTools.isSpace(ch, 0)) {
+							glitched.add(ch);
+							continue;
+						}
+
+						// [FX_GTEXT]
+						if (target == null) {
+							glitched.add(Random.string(1, GLITCH_CHARSET));
+							continue;
+						}
+
+						// [FX_GTEXT="e"]
+						glitched.add(ch == target ? Random.string(1, GLITCH_CHARSET) : ch);
+					}
+
+					out = glitched.toString();
+
+				default:
+			}
+		}
+
+		return out;
+	}
 }
 
 class LoadingState extends EditableState {
@@ -42,6 +82,9 @@ class LoadingState extends EditableState {
 
 	private static var originalBitmapKeys:Map<String, String> = [];
 	private static var requestedBitmaps:Map<String, BitmapData> = [];
+
+	var tipFormatter:TipFormater;
+	var rawTip:String;
 
 	#if (sys || MULTITHREADED_LOADING)
 	private static var mutex:Mutex;
@@ -108,109 +151,6 @@ class LoadingState extends EditableState {
 		#end
 	}
 
-	static private function ftext(text:String):Array<Map<String, String>> {
-		var result:Array<Map<String, String>> = [];
-		var i = 0;
-		var len = text.length;
-
-		while (i < len) {
-			var c = text.charAt(i);
-
-			if (c == '[' && text.charAt(i + 1) != '/') {
-				var tagClose = text.indexOf(']', i);
-				if (tagClose == -1)
-					break;
-
-				var tagInner = text.substring(i + 1, tagClose);
-				var attrs = parseTagAttrs(tagInner);
-
-				var closePos = text.indexOf('[/]', tagClose + 1);
-				if (closePos == -1) {
-					attrs.set("text", text.substring(tagClose + 1));
-					result.push(attrs);
-					break;
-				}
-
-				attrs.set("text", text.substring(tagClose + 1, closePos));
-				result.push(attrs);
-				i = closePos + 3;
-			} else {
-				var nextTag = text.indexOf('[', i);
-				var end = nextTag == -1 ? len : nextTag;
-
-				if (end > i) {
-					var seg = new Map<String, String>();
-					seg.set("text", text.substring(i, end));
-					result.push(seg);
-				}
-				i = nextTag == -1 ? len : nextTag;
-			}
-		}
-
-		return result;
-	}
-
-	static private function parseTagAttrs(inner:String):Map<String, String> {
-		var attrs = new Map<String, String>();
-
-		for (raw in inner.split(',')) {
-			var part = StringTools.trim(raw);
-			if (part.length == 0)
-				continue;
-
-			var eq = part.indexOf('=');
-			if (eq != -1) {
-				var key = StringTools.trim(part.substring(0, eq));
-				var val = StringTools.trim(part.substring(eq + 1));
-				if (val.length >= 2) {
-					var q = val.charAt(0);
-					if ((q == '"' || q == "'") && val.charAt(val.length - 1) == q)
-						val = val.substring(1, val.length - 1);
-				}
-				attrs.set(key, val);
-			} else {
-				attrs.set(part, "true");
-			}
-		}
-
-		return attrs;
-	}
-
-	private var _tipPrefix:String = "";
-	private var _tipSuffix:String = "";
-	private var _tipGlitchText:String = "";
-	private var _tipGlitchKey:String = "";
-	private var _hasGlitch:Bool = false;
-
-	private static final GLITCH_CHARSET:String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-	function _buildTipSegments():Void {
-		var prefix = new StringBuf();
-		var suffix = new StringBuf();
-		var foundGlitch = false;
-
-		for (segment in ftextData) {
-			var text = segment.get("text");
-			var gkey = segment.get("FX_GTEXT");
-
-			if (gkey != null && !foundGlitch) {
-				foundGlitch = true;
-				_hasGlitch = true;
-				_tipGlitchText = text;
-				_tipGlitchKey = gkey;
-			} else if (!foundGlitch) {
-				prefix.add(text);
-			} else {
-				suffix.add(text);
-			}
-		}
-
-		_tipPrefix = prefix.toString();
-		_tipSuffix = suffix.toString();
-		if (!_hasGlitch)
-			_tipPrefix = ftextData.map(s -> s.get("text")).join("");
-	}
-
 	function new(target:FlxState, stopMusic:Bool) {
 		this.target = target;
 		this.stopMusic = stopMusic;
@@ -240,8 +180,8 @@ class LoadingState extends EditableState {
 	var timePassed:Float = 0;
 
 	var myCoooooollogo:FlxSprite;
-	var IoX: Float = 0;
-	var IoY: Float = 0;
+	var IoX:Float = 0;
+	var IoY:Float = 0;
 
 	override function create() {
 		persistentUpdate = true;
@@ -289,7 +229,7 @@ class LoadingState extends EditableState {
 		myCoooooollogo.screenCenter();
 		IoX = myCoooooollogo.x;
 		IoY = myCoooooollogo.y;
-		
+
 		// logo.x -= 50;
 		// logo.y -= 40;
 		addBehindBar(myCoooooollogo);
@@ -305,8 +245,8 @@ class LoadingState extends EditableState {
 
 		var tip:String = tipArray.length > 0 ? tipArray.shuffle().randomItem() : "No tips available.";
 
-		ftextData = ftext(tip);
-		_buildTipSegments(); // pre-bake static segments
+		tipFormatter = new TipFormater();
+		rawTip = tip;
 
 		super.create();
 
@@ -345,19 +285,7 @@ class LoadingState extends EditableState {
 		}
 
 		// Build tip text using pre-baked segments
-		var rendered:String;
-		if (_hasGlitch) {
-			var buf = new StringBuf();
-			buf.add(_tipPrefix);
-			for (i in 0..._tipGlitchText.length) {
-				var ch = _tipGlitchText.charAt(i);
-				buf.add(ch == _tipGlitchKey ? Random.string(1, GLITCH_CHARSET) : ch);
-			}
-			buf.add(_tipSuffix);
-			rendered = buf.toString();
-		} else {
-			rendered = _tipPrefix;
-		}
+		var rendered = tipFormatter.format(rawTip);
 
 		tipText.text = Language.getPhrase('loading_tip', 'Tip: {1}', [rendered]);
 
@@ -1074,7 +1002,7 @@ class LoadingState extends EditableState {
 					CoolLog.error('no such image $key exists');
 			}
 
-				return FunkinCache.currentTrackedAssets.get(requestKey).bitmap;
+			return FunkinCache.currentTrackedAssets.get(requestKey).bitmap;
 		} catch (e:haxe.Exception) {
 			CoolLog.error('ERROR! fail on preloading image $key');
 		}

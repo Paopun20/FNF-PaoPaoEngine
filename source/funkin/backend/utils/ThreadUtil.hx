@@ -1,4 +1,4 @@
-// https://github.com/CodenameCrew/CodenameEngine/blob/main/source/funkin/backend/utils/ThreadUtil.hx
+// OG CODE: https://github.com/CodenameCrew/CodenameEngine/blob/main/source/funkin/backend/utils/ThreadUtil.hx
 package funkin.backend.utils;
 
 #if (target.threaded)

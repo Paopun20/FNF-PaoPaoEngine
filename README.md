@@ -1,4 +1,4 @@
-<img src="./art/icons/BaseIcon.png" width="125" height="125" align="right" />
+<img src="./art/icons/BaseIcon.png" width="125" height="125" align="right" layout="5"/>
 
 # Friday Night Funkin' - PaoPao Engine
 

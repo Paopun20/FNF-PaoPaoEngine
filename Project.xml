@@ -94,6 +94,7 @@
 	<haxelib name="flixel" />
 	<haxelib name="flixel-addons" version="4.0.1" />
 	<haxelib name="flxanimate" version="4.0.0" />
+	<haxelib name="flixel-animate" />
 	<haxelib name="random" />
 	<haxelib name="thx.semver" />
 	<haxelib name="hxcpp" version="4.3.2" />

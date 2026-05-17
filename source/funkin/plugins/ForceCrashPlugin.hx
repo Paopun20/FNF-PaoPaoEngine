@@ -6,7 +6,7 @@ import flixel.FlxG;
 
 class ForceCrashException extends Exception {}
 
-@:nullSafety
+@:nullSafety(Strict)
 class ForceCrashPlugin extends FlxBasic {
 	public function new() {
 		super();
@@ -20,6 +20,7 @@ class ForceCrashPlugin extends FlxBasic {
 		super.update(elapsed);
 
 		if (FlxG.keys.pressed.CONTROL && FlxG.keys.pressed.ALT && FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.L) {
+			trace("Force crash keybind activated, crashing the game...");
 			throw new ForceCrashException("Crashing the game via debug keybind!");
 		}
 	}

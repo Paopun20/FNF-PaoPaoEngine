@@ -14,6 +14,7 @@ class CoolUtil {
 		var url:String = 'https://github.com/Paopun20/FNF-PaoPaoEngine/raw/refs/heads/main/gitVersion.txt';
 		if (ClientPrefs.data.checkForUpdates) {
 			CoolLog.info('checking for updates...');
+			if (Client.hasInternet)
 			Client.getRequest(url, function(suss, data) {
 				if (suss) {
 					if (data != null && data.length > 0) {
