@@ -1,5 +1,3 @@
-
-
 package funkin.backend.mobile.backend;
 
 import lime.system.System as LimeSystem;
@@ -12,22 +10,20 @@ import sys.FileSystem;
  * @author Karim Akra and Lily Ross (mcagabe19)
  * @author Mikolka9144
  */
-class StorageUtil
-{
+class StorageUtil {
 	#if sys
 	// root directory, used for handling the saved storage type and path
 	private static final rootDir:String = LimeSystem.applicationStorageDirectory;
 
-	public static function getStorageDirectory(?force:Bool = false):String
-	{
+	public static function getStorageDirectory(?force:Bool = false):String {
 		var daPath:String = '';
 		#if android
 		if (!FileSystem.exists(rootDir + 'storagetype.txt'))
 			File.saveContent(rootDir + 'storagetype.txt', ClientPrefs.data.storageType);
 		var curStorageType:String = File.getContent(rootDir + 'storagetype.txt');
 
-		//Migrate for people using older ports
-		if(curStorageType == "EXTERNAL_DATA"){
+		// Migrate for people using older ports
+		if (curStorageType == "EXTERNAL_DATA") {
 			curStorageType = "INTERNAL";
 			ClientPrefs.data.storageType = "INTERNAL";
 			File.saveContent(rootDir + 'storagetype.txt', "INTERNAL");
@@ -42,18 +38,15 @@ class StorageUtil
 		return daPath;
 	}
 
-	public static function saveContent(fileName:String, fileData:String, ?alert:Bool = true):Void
-	{
-		try
-		{
+	public static function saveContent(fileName:String, fileData:String, ?alert:Bool = true):Void {
+		try {
 			if (!FileSystem.exists('saves'))
 				FileSystem.createDirectory('saves');
 
 			File.saveContent('saves/$fileName', fileData);
 			if (alert)
 				CoolUtil.showPopUp('$fileName has been saved.', "Success!");
-		}
-		catch (e:Exception)
+		} catch (e:Exception)
 			if (alert)
 				CoolUtil.showPopUp('$fileName couldn\'t be saved.\n(${e.message})', "Error!")
 			else
@@ -61,104 +54,94 @@ class StorageUtil
 	}
 
 	#if android
-	public static function requestPermissions():Void
-	{
+	public static function requestPermissions():Void {
 		var requiresUserPermissions = AndroidVersion.SDK_INT >= AndroidVersionCode.M;
-		if(requiresUserPermissions) checkUserStoragePermissions();
-		else trace("We are on Lolipop?? No need to beg for permissions then");
+		if (requiresUserPermissions)
+			checkUserStoragePermissions();
+		else
+			trace("We are on Lolipop?? No need to beg for permissions then");
 
 		trace("Checking game directory...");
-		try
-		{
+		try {
 			if (!FileSystem.exists(StorageUtil.getStorageDirectory()))
 				FileSystem.createDirectory(StorageUtil.getStorageDirectory());
-		}
-		catch (e:Exception)
-		{
+		} catch (e:Exception) {
 			trace(e);
-			CoolUtil.showPopUp(e.message+'\nPlease create directory to\n' + StorageUtil.getStorageDirectory(true) + '\nPress OK to close the game', 'Error!');
-			//LimeSystem.exit(1);
+			CoolUtil.showPopUp(e.message + '\nPlease create directory to\n' + StorageUtil.getStorageDirectory(true) + '\nPress OK to close the game', 'Error!');
+			// LimeSystem.exit(1);
 		}
 	}
 
 	public static function checkUserStoragePermissions() {
 		var isAPI33 = AndroidVersion.SDK_INT >= AndroidVersionCode.TIRAMISU;
 		trace("Check perms...");
-		if(ClientPrefs.data.storageType == "INTERNAL") return;
-		if (!isAPI33){
+		if (ClientPrefs.data.storageType == "INTERNAL")
+			return;
+		if (!isAPI33) {
 			trace("Requesting EXTERNAL_STORAGE");
 			AndroidPermissions.requestPermissions(['READ_EXTERNAL_STORAGE', 'WRITE_EXTERNAL_STORAGE']);
 		}
 
-		if (!AndroidEnvironment.isExternalStorageManager())
-		{
+		if (!AndroidEnvironment.isExternalStorageManager()) {
 			// if (AndroidVersion.SDK_INT >= AndroidVersionCode.S)
 			// 	AndroidSettings.requestSetting('REQUEST_MANAGE_MEDIA');
 			AndroidSettings.requestSetting('MANAGE_APP_ALL_FILES_ACCESS_PERMISSION');
 		}
 		var has_MANAGE_EXTERNAL_STORAGE = AndroidEnvironment.isExternalStorageManager();
 		var has_READ_EXTERNAL_STORAGE = AndroidPermissions.getGrantedPermissions().contains('android.permission.READ_EXTERNAL_STORAGE');
-		//var has_READ_MEDIA_IMAGES = AndroidPermissions.getGrantedPermissions().contains('android.permission.READ_MEDIA_IMAGES');
-		if ((isAPI33 && !has_MANAGE_EXTERNAL_STORAGE)
-			|| (!isAPI33 && !has_READ_EXTERNAL_STORAGE))
+		// var has_READ_MEDIA_IMAGES = AndroidPermissions.getGrantedPermissions().contains('android.permission.READ_MEDIA_IMAGES');
+		if ((isAPI33 && !has_MANAGE_EXTERNAL_STORAGE) || (!isAPI33 && !has_READ_EXTERNAL_STORAGE))
 			CoolUtil.showPopUp('If you accepted the permissions you are all good!' + '\nIf you didn\'t then expect a crash' + '\nPress OK to see what happens',
 				'Notice!');
 	}
-
 	#end
 	#end
 }
 
 #if android
 @:runtimeValue
-enum abstract StorageType(String) from String to String
-{
+enum abstract StorageType(String) from String to String {
 	final forcedPath = '/storage/emulated/0/';
 	final packageNameLocal = 'com.mikolka9144.pslice';
 	final fileLocal = 'PSliceEngine';
 
 	//* Important note
-	// These hold cached directories from methods 
+	// These hold cached directories from methods
 	// that internally leak the JNI "File objects"
-	static var INTERNAL_PATH = null; 
+	static var INTERNAL_PATH = null;
 	static var EXTERNAL_PATH = null;
 
 	var INTERNAL = "INTERNAL";
 	var EXTERNAL = "EXTERNAL";
 
-	public static function fromStr(str:String):StorageType
-	{
-		try{
-			return switch (str)
-			{
-				case "INTERNAL": 
-					if(INTERNAL_PATH == null)
+	public static function fromStr(str:String):StorageType {
+		try {
+			return switch (str) {
+				case "INTERNAL":
+					if (INTERNAL_PATH == null)
 						INTERNAL_PATH = AndroidContext.getExternalFilesDir();
 					INTERNAL_PATH;
-				case "EXTERNAL": 
-					if(EXTERNAL_PATH == null)
+				case "EXTERNAL":
+					if (EXTERNAL_PATH == null)
 						EXTERNAL_PATH = AndroidEnvironment.getExternalStorageDirectory() + '/.' + fileLocal;
 					EXTERNAL_PATH;
-				default: 
-					if(INTERNAL_PATH == null)
+				default:
+					if (INTERNAL_PATH == null)
 						INTERNAL_PATH = AndroidContext.getExternalFilesDir();
 					INTERNAL_PATH;
 			}
-		}
-		catch(x:Exception){
+		} catch (x:Exception) {
 			trace("Failed to read storage. Forcing paths!");
 			trace(x);
 			return fromStrForce(str);
 		}
 	}
 
-	public static function fromStrForce(str:String):StorageType
-	{
+	public static function fromStrForce(str:String):StorageType {
 		final INTERNAL = forcedPath + 'Android/data/' + packageNameLocal + '/files';
 		final EXTERNAL = forcedPath + '.' + fileLocal;
 
-		return switch (str)
-		{
+		return switch (str) {
 			case "INTERNAL": INTERNAL;
 			case "EXTERNAL": EXTERNAL;
 			default: INTERNAL;

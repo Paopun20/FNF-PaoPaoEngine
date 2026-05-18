@@ -4,8 +4,7 @@ import mikolka.funkin.custom.funkin.backend.mobile.MobileScaleMode;
 import flixel.util.FlxSignal.FlxTypedSignal;
 
 @:access(funkin.backend.mobile.objects.TouchButton)
-class TouchPad extends MobileInputManager
-{
+class TouchPad extends MobileInputManager {
 	public var buttonLeft:TouchButton = new TouchButton(0, 0, [MobileInputID.LEFT]);
 	public var buttonUp:TouchButton = new TouchButton(0, 0, [MobileInputID.UP]);
 	public var buttonRight:TouchButton = new TouchButton(0, 0, [MobileInputID.RIGHT]);
@@ -53,18 +52,15 @@ class TouchPad extends MobileInputManager
 	 * @param   DPadMode     The D-Pad mode. `LEFT_FULL` for example.
 	 * @param   ActionMode   The action buttons mode. `A_B_C` for example.
 	 */
-	public function new(DPad:String, Action:String)
-	{
+	public function new(DPad:String, Action:String) {
 		super();
 		var mobileCutout = MobileScaleMode.gameCutoutSize.x / 3;
-		var widthDiff = FlxG.width-FlxG.initialWidth;
-		if (DPad != "NONE")
-		{
+		var widthDiff = FlxG.width - FlxG.initialWidth;
+		if (DPad != "NONE") {
 			if (!MobileData.dpadModes.exists(DPad))
 				throw Language.getPhrase('touchpad_dpadmode_missing', 'The touchPad dpadMode "{1}" doesn\'t exist.', [DPad]);
 
-			for (buttonData in MobileData.dpadModes.get(DPad).buttons)
-			{
+			for (buttonData in MobileData.dpadModes.get(DPad).buttons) {
 				var newButton = createButton(mobileCutout + buttonData.x, buttonData.y, buttonData.graphic, CoolUtil.colorFromString(buttonData.color),
 					Reflect.getProperty(this, buttonData.button).IDs);
 
@@ -73,13 +69,11 @@ class TouchPad extends MobileInputManager
 			}
 		}
 
-		if (Action != "NONE")
-		{
+		if (Action != "NONE") {
 			if (!MobileData.actionModes.exists(Action))
 				throw Language.getPhrase('touchpad_actionmode_missing', 'The touchPad actionMode "{1}" doesn\'t exist.', [Action]);
 
-			for (buttonData in MobileData.actionModes.get(Action).buttons)
-			{
+			for (buttonData in MobileData.actionModes.get(Action).buttons) {
 				// MobileScaleMode.gameCutoutSize.x
 				var newButton = createButton(widthDiff + buttonData.x - mobileCutout, buttonData.y, buttonData.graphic,
 					CoolUtil.colorFromString(buttonData.color), Reflect.getProperty(this, buttonData.button).IDs);
@@ -96,32 +90,27 @@ class TouchPad extends MobileInputManager
 		instance = this;
 	}
 
-	override public function destroy()
-	{
+	override public function destroy() {
 		super.destroy();
 		onButtonUp.destroy();
 		onButtonDown.destroy();
 
-		for (fieldName in Reflect.fields(this))
-		{
+		for (fieldName in Reflect.fields(this)) {
 			var field = Reflect.field(this, fieldName);
 			if (Std.isOfType(field, TouchButton))
 				Reflect.setField(this, fieldName, FlxDestroyUtil.destroy(field));
 		}
 	}
 
-	public function setExtrasDefaultPos()
-	{
+	public function setExtrasDefaultPos() {
 		var int:Int = 0;
 
 		if (MobileData.save.data.extraData == null)
 			MobileData.save.data.extraData = new Array();
 
-		for (button in Reflect.fields(this))
-		{
+		for (button in Reflect.fields(this)) {
 			var field = Reflect.field(this, button);
-			if (button.toLowerCase().contains('extra') && Std.isOfType(field, TouchButton))
-			{
+			if (button.toLowerCase().contains('extra') && Std.isOfType(field, TouchButton)) {
 				MobileData.save.data.extraData[int] = FlxPoint.get(field.x, field.y);
 				++int;
 			}
@@ -129,17 +118,14 @@ class TouchPad extends MobileInputManager
 		MobileData.save.flush();
 	}
 
-	public function setExtrasPos()
-	{
+	public function setExtrasPos() {
 		var int:Int = 0;
 		if (MobileData.save.data.extraData == null)
 			setExtrasDefaultPos();
 
-		for (button in Reflect.fields(this))
-		{
+		for (button in Reflect.fields(this)) {
 			var field = Reflect.field(this, button);
-			if (button.toLowerCase().contains('extra') && Std.isOfType(field, TouchButton))
-			{
+			if (button.toLowerCase().contains('extra') && Std.isOfType(field, TouchButton)) {
 				if (MobileData.save.data.extraData.length > int)
 					setExtrasDefaultPos();
 				var point = MobileData.save.data.extraData[int];
@@ -150,8 +136,7 @@ class TouchPad extends MobileInputManager
 		}
 	}
 
-	private function createButton(X:Float, Y:Float, Graphic:String, ?Color:FlxColor = 0xFFFFFF, ?IDs:Array<MobileInputID>):TouchButton
-	{
+	private function createButton(X:Float, Y:Float, Graphic:String, ?Color:FlxColor = 0xFFFFFF, ?IDs:Array<MobileInputID>):TouchButton {
 		var button = new TouchButton(X, Y, IDs);
 		button.label = new FlxSprite();
 		button.loadGraphic(Paths.image('touchpad/bg', "mobile"));
@@ -180,8 +165,7 @@ class TouchPad extends MobileInputManager
 		return button;
 	}
 
-	override function set_alpha(Value):Float
-	{
+	override function set_alpha(Value):Float {
 		forEachAlive((button:TouchButton) -> button.parentAlpha = Value);
 		return super.set_alpha(Value);
 	}

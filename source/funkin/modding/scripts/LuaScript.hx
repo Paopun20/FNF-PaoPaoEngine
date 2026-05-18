@@ -15,7 +15,6 @@ import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import funkin.modding.scripts.components.PsychFunctions;
 import lscript.LScript;
-
 import llua.LuaJIT as FunkinLuaJIT;
 #end
 

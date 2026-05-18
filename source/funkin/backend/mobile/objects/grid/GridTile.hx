@@ -3,8 +3,7 @@ package funkin.backend.mobile.objects.grid;
 import mikolka.compatibility.VsliceOptions;
 import flixel.effects.FlxFlicker;
 
-class GridTile extends TouchButton
-{
+class GridTile extends TouchButton {
 	public var gridXPos:Int;
 	public var gridYPos:Int;
 	public var selectedOffset(default, never):FlxPoint = FlxPoint.get();
@@ -12,26 +11,24 @@ class GridTile extends TouchButton
 	final host:GridButtons;
 	final callback:() -> Void;
 
-	private function new(host:GridButtons, callback:() -> Void)
-	{
+	private function new(host:GridButtons, callback:() -> Void) {
 		super();
 		this.host = host;
 		this.callback = callback;
 		antialiasing = VsliceOptions.ANTIALIASING;
-		onDown.callback = () ->
-		{
+		onDown.callback = () -> {
 			host.selectButton(gridXPos, gridYPos);
 		}
 	}
 
-    override function update(elapsed:Float) {
-        if(justReleased && host.selectedItem == this) {
+	override function update(elapsed:Float) {
+		if (justReleased && host.selectedItem == this) {
 			host.confirmCurrentButton();
 		}
-        super.update(elapsed);
-    }
-	public function configureBitmap(imagePath:String, anim_idle:String, anim_select:String)
-	{
+		super.update(elapsed);
+	}
+
+	public function configureBitmap(imagePath:String, anim_idle:String, anim_select:String) {
 		frames = Paths.getSparrowAtlas(imagePath);
 		animation.addByPrefix('idle', anim_idle, 24);
 		animation.addByPrefix('selected', anim_select, 24);
@@ -39,16 +36,15 @@ class GridTile extends TouchButton
 		playIdleAnim();
 	}
 
-	public function playSelectedAnim()
-	{
-        host.hideButtons();
+	public function playSelectedAnim() {
+		host.hideButtons();
 		HapticUtil.vibrate(0, 0.05, 0.5);
-		FlxFlicker.flicker(this, 1, 0.06, false, false, function(flick:FlxFlicker)
-		{
+		FlxFlicker.flicker(this, 1, 0.06, false, false, function(flick:FlxFlicker) {
 			callback();
-            host.selectedSomethin = false;
+			host.selectedSomethin = false;
 		});
 	}
+
 	public function playHoverAnim() {
 		animation.play("selected");
 		HapticUtil.vibrate(0, 0.05, 0.5);
@@ -56,22 +52,24 @@ class GridTile extends TouchButton
 		centerOrigin();
 		offset.copyFrom(selectedOffset);
 	}
+
 	public function playIdleAnim() {
 		animation.play("idle");
 		updateHitbox();
 		centerOrigin();
-		offset.set(0,0);
+		offset.set(0, 0);
 	}
-    public function hideTile() {
-        FlxTween.tween(this, {alpha: 0}, 0.4, {
-		ease: FlxEase.quadOut,
-		onComplete: function(twn:FlxTween)
-		{
-			this.kill();
-		}
-	});
-    }
-		override function destroy() {
+
+	public function hideTile() {
+		FlxTween.tween(this, {alpha: 0}, 0.4, {
+			ease: FlxEase.quadOut,
+			onComplete: function(twn:FlxTween) {
+				this.kill();
+			}
+		});
+	}
+
+	override function destroy() {
 		selectedOffset.put();
 		super.destroy();
 	}

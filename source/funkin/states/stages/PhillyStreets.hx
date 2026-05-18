@@ -755,7 +755,7 @@ class PhillyStreets extends BaseStage {
 				boyfriend.specialAnim = true;
 				gunPrepSnd.play();
 
-boyfriend.animation.onFrameChange.add(function(name:String, frameNumber:Int, frameIndex:Int) {
+				boyfriend.animation.onFrameChange.add(function(name:String, frameNumber:Int, frameIndex:Int) {
 					switch (name) {
 						case 'cock':
 							if (frameNumber == 3) {
@@ -816,9 +816,9 @@ boyfriend.animation.onFrameChange.add(function(name:String, frameNumber:Int, fra
 
 				casing.animation.play('idle');
 				casing.animation.onFrameChange.removeAll(); // Save performance.
-				}
-			});
-			casingGroup.add(casing);
+			}
+		});
+		casingGroup.add(casing);
 	}
 
 	override function opponentNoteHit(note:Note) {

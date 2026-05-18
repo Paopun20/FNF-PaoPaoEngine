@@ -4,11 +4,10 @@ import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxColor;
 
 /*
-Rawdogging Shader lol
-*/
-class GeodifyShader extends FlxShader
-{
-    @:glFragmentSource('
+	Rawdogging Shader lol
+ */
+class GeodifyShader extends FlxShader {
+	@:glFragmentSource('
         #pragma header
 
         const float AMP_A = 40.0;
@@ -70,36 +69,35 @@ class GeodifyShader extends FlxShader
             gl_FragColor = color;
         }
     ')
-    public function new()
-    {
-        super();
-    }
+	public function new() {
+		super();
+	}
 
-    public function setTime(layer:Int, time:Float):Void
-    {
-        if (layer < 0 || layer >= 6) return;
+	public function setTime(layer:Int, time:Float):Void {
+		if (layer < 0 || layer >= 6)
+			return;
 
-        Reflect.field(this, 'uTime$layer').value = [time];
-    }
+		Reflect.field(this, 'uTime$layer').value = [time];
+	}
 
-    public function setOffsetY(layer:Int, offsetY:Float):Void
-    {
-        if (layer < 0 || layer >= 6) return;
+	public function setOffsetY(layer:Int, offsetY:Float):Void {
+		if (layer < 0 || layer >= 6)
+			return;
 
-        Reflect.field(this, 'uOffsetY$layer').value = [offsetY];
-    }
+		Reflect.field(this, 'uOffsetY$layer').value = [offsetY];
+	}
 
-    public function setFreq(layer:Int, freq:Float):Void
-    {
-        if (layer < 0 || layer >= 6) return;
+	public function setFreq(layer:Int, freq:Float):Void {
+		if (layer < 0 || layer >= 6)
+			return;
 
-        Reflect.field(this, 'uFreq$layer').value = [freq];
-    }
+		Reflect.field(this, 'uFreq$layer').value = [freq];
+	}
 
-    public function setColor(layer:Int, color:FlxColor):Void
-    {
-        if (layer < 0 || layer >= 6) return;
+	public function setColor(layer:Int, color:FlxColor):Void {
+		if (layer < 0 || layer >= 6)
+			return;
 
-        Reflect.field(this, 'uColor$layer').value = [color.redFloat, color.greenFloat, color.blueFloat, color.alphaFloat];
-    }
+		Reflect.field(this, 'uColor$layer').value = [color.redFloat, color.greenFloat, color.blueFloat, color.alphaFloat];
+	}
 }

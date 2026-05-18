@@ -1,5 +1,3 @@
-
-
 package funkin.backend.mobile.objects;
 
 import flixel.system.FlxAssets.FlxShader;
@@ -15,8 +13,7 @@ import flixel.input.mouse.FlxMouseButton;
  * A simple button class that calls a function when clicked by the touch.
  * @author: Karim Akra and Lily Ross (mcagabe19)
  */
-class TouchButton extends TypedTouchButton<FlxSprite>
-{
+class TouchButton extends TypedTouchButton<FlxSprite> {
 	/**
 	 * Used with public variable status, means not highlighted or pressed.
 	 */
@@ -55,20 +52,17 @@ class TouchButton extends TypedTouchButton<FlxSprite>
 	 * @param   Y         The y position of the button.
 	 * @param   IDs        The button's IDs(used for input handling so be careful).
 	 */
-	public function new(X:Float = 0, Y:Float = 0, ?IDs:Array<MobileInputID> = null):Void
-	{
+	public function new(X:Float = 0, Y:Float = 0, ?IDs:Array<MobileInputID> = null):Void {
 		super(X, Y);
 
 		this.IDs = IDs == null ? [] : IDs;
 	}
 
-	public inline function centerInBounds()
-	{
+	public inline function centerInBounds() {
 		setPosition(bounds.x + ((bounds.width - frameWidth) / 2), bounds.y + ((bounds.height - frameHeight) / 2));
 	}
 
-	public inline function centerBounds()
-	{
+	public inline function centerBounds() {
 		bounds.setPosition(x + ((frameWidth - bounds.width) / 2), y + ((frameHeight - bounds.height) / 2));
 	}
 }
@@ -79,8 +73,7 @@ class TouchButton extends TypedTouchButton<FlxSprite>
 #if !display
 @:generic
 #end
-class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
-{
+class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput {
 	/**
 	 * The label that appears on the button. Can be any `FlxSprite`.
 	 */
@@ -182,8 +175,7 @@ class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 	 * @param   X         The x position of the button.
 	 * @param   Y         The y position of the button.
 	 */
-	public function new(X:Float = 0, Y:Float = 0):Void
-	{
+	public function new(X:Float = 0, Y:Float = 0):Void {
 		super(X, Y);
 
 		if (statusIndicatorType == BRIGHTNESS)
@@ -205,8 +197,7 @@ class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 	/**
 	 * Called by the game state when state is changed (if this object belongs to the state)
 	 */
-	override public function destroy():Void
-	{
+	override public function destroy():Void {
 		label = FlxDestroyUtil.destroy(label);
 		_spriteLabel = null;
 
@@ -224,12 +215,10 @@ class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 	/**
 	 * Called by the game loop automatically, handles touch over and click detection.
 	 */
-	override public function update(elapsed:Float):Void
-	{
+	override public function update(elapsed:Float):Void {
 		super.update(elapsed);
 
-		if (visible)
-		{
+		if (visible) {
 			// Update the button, but only if at least either touches are enabled
 			#if FLX_POINTER_INPUT
 			updateButton();
@@ -242,12 +231,10 @@ class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 	/**
 	 * Just draws the button graphic and text label to the screen.
 	 */
-	override public function draw():Void
-	{
+	override public function draw():Void {
 		super.draw();
 
-		if (_spriteLabel != null && _spriteLabel.graphic != null && _spriteLabel.pixels != null && _spriteLabel.visible)
-		{
+		if (_spriteLabel != null && _spriteLabel.graphic != null && _spriteLabel.pixels != null && _spriteLabel.visible) {
 			if (_spriteLabel.cameras != cameras)
 				_spriteLabel.cameras = cameras;
 			_spriteLabel.draw();
@@ -258,8 +245,7 @@ class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 	/**
 	 * Helper function to draw the debug graphic for the label as well.
 	 */
-	override public function drawDebug():Void
-	{
+	override public function drawDebug():Void {
 		super.drawDebug();
 
 		if (_spriteLabel != null)
@@ -271,8 +257,7 @@ class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 	 * Basic button update logic - searches for overlaps with touches and
 	 * the touch and calls `updateStatus()`.
 	 */
-	function updateButton():Void
-	{
+	function updateButton():Void {
 		var overlapFound = checkTouchOverlap();
 
 		if (currentInput != null && currentInput.justReleased && overlapFound)
@@ -282,12 +267,10 @@ class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 			onOutHandler();
 	}
 
-	function checkTouchOverlap():Bool
-	{
+	function checkTouchOverlap():Bool {
 		var overlap = false;
 
-		for (camera in cameras)
-		{
+		for (camera in cameras) {
 			#if desktop
 			var button = FlxMouseButton.getByID(FlxMouseButtonID.LEFT);
 			if (checkInput(FlxG.mouse, button, button.justPressedPosition, camera))
@@ -301,16 +284,12 @@ class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 		return overlap;
 	}
 
-	function checkInput(pointer:FlxPointer, input:IFlxInput, justPressedPosition:FlxPoint, camera:FlxCamera):Bool
-	{
+	function checkInput(pointer:FlxPointer, input:IFlxInput, justPressedPosition:FlxPoint, camera:FlxCamera):Bool {
 		if (maxInputMovement != Math.POSITIVE_INFINITY
 			&& justPressedPosition.distanceTo(pointer.getScreenPosition(FlxPoint.weak())) > maxInputMovement
-			&& input == currentInput)
-		{
+			&& input == currentInput) {
 			currentInput = null;
-		}
-		else if (camera.scroll != null && overlapsPoint(pointer.getWorldPosition(camera, _point), true, camera))
-		{
+		} else if (camera.scroll != null && overlapsPoint(pointer.getWorldPosition(camera, _point), true, camera)) {
 			updateStatus(input);
 			return true;
 		}
@@ -321,15 +300,11 @@ class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 	/**
 	 * Updates the button status by calling the respective event handler function.
 	 */
-	function updateStatus(input:IFlxInput):Void
-	{
-		if (input.justPressed)
-		{
+	function updateStatus(input:IFlxInput):Void {
+		if (input.justPressed) {
 			currentInput = input;
 			onDownHandler();
-		}
-		else if (status == TouchButton.NORMAL)
-		{
+		} else if (status == TouchButton.NORMAL) {
 			// Allow 'swiping' to press a button (dragging it over the button while pressed)
 			if (allowSwiping && input.pressed)
 				onDownHandler();
@@ -338,25 +313,20 @@ class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 		}
 	}
 
-	function updateLabelPosition()
-	{
-		if (_spriteLabel != null)
-		{
+	function updateLabelPosition() {
+		if (_spriteLabel != null) {
 			_spriteLabel.x = ((width - _spriteLabel.width) / 2) + (pixelPerfectPosition ? Math.floor(x) : x);
 			_spriteLabel.y = ((height - _spriteLabel.height) / 2) + (pixelPerfectPosition ? Math.floor(y) : y);
 		}
 	}
 
-	function updateLabelScale()
-	{
+	function updateLabelScale() {
 		if (_spriteLabel != null)
 			_spriteLabel.scale.set(scale.x, scale.y);
 	}
 
-	function indicateStatus()
-	{
-		switch (statusIndicatorType)
-		{
+	function indicateStatus() {
+		switch (statusIndicatorType) {
 			case ALPHA:
 				alpha = statusAlphas[status];
 			case BRIGHTNESS:
@@ -368,8 +338,7 @@ class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 	/**
 	 * Internal function that handles the onUp event.
 	 */
-	function onUpHandler():Void
-	{
+	function onUpHandler():Void {
 		status = TouchButton.NORMAL;
 		input.release();
 		currentInput = null;
@@ -379,8 +348,7 @@ class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 	/**
 	 * Internal function that handles the onDown event.
 	 */
-	function onDownHandler():Void
-	{
+	function onDownHandler():Void {
 		status = TouchButton.PRESSED;
 		HapticUtil.vibrate(0, 0.01, 0.5, 0.1);
 		input.press();
@@ -390,8 +358,7 @@ class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 	/**
 	 * Internal function that handles the onOver event.
 	 */
-	function onOverHandler():Void
-	{
+	function onOverHandler():Void {
 		status = TouchButton.HIGHLIGHT;
 		onOver.fire(); // Order matters here, because onOver.fire() could cause a state change and destroy this object.
 	}
@@ -399,17 +366,14 @@ class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 	/**
 	 * Internal function that handles the onOut event.
 	 */
-	function onOutHandler():Void
-	{
+	function onOutHandler():Void {
 		status = TouchButton.NORMAL;
 		input.release();
 		onOut.fire(); // Order matters here, because onOut.fire() could cause a state change and destroy this object.
 	}
 
-	function set_label(Value:T):T
-	{
-		if (Value != null)
-		{
+	function set_label(Value:T):T {
+		if (Value != null) {
 			// use the same FlxPoint object for both
 			Value.scrollFactor.put();
 			Value.scrollFactor = scrollFactor;
@@ -426,45 +390,39 @@ class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 		return Value;
 	}
 
-	function set_status(Value:Int):Int
-	{
+	function set_status(Value:Int):Int {
 		status = Value;
 		indicateStatus();
 		return status;
 	}
 
-	override function set_alpha(Value:Float):Float
-	{
+	override function set_alpha(Value:Float):Float {
 		super.set_alpha(Value);
 		if (_spriteLabel != null && canChangeLabelAlpha)
 			_spriteLabel.alpha = alpha == 0 ? 0 : alpha + labelStatusDiff;
 		return Value;
 	}
 
-	override function set_visible(Value:Bool):Bool
-	{
+	override function set_visible(Value:Bool):Bool {
 		super.set_visible(Value);
 		if (_spriteLabel != null)
 			_spriteLabel.visible = Value;
 		return Value;
 	}
 
-	override function set_x(Value:Float):Float
-	{
+	override function set_x(Value:Float):Float {
 		super.set_x(Value);
 		updateLabelPosition();
 		return x;
 	}
 
-	override function set_y(Value:Float):Float
-	{
+	override function set_y(Value:Float):Float {
 		super.set_y(Value);
 		updateLabelPosition();
 		return y;
 	}
 
-	override function set_color(Value:FlxColor):Int
-	{
+	override function set_color(Value:FlxColor):Int {
 		if (_spriteLabel != null)
 			_spriteLabel.color = Value;
 		brightShader.color = Value;
@@ -472,29 +430,25 @@ class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 		return Value;
 	}
 
-	override private function set_width(Value:Float)
-	{
+	override private function set_width(Value:Float) {
 		super.set_width(Value);
 		updateLabelScale();
 		return Value;
 	}
 
-	override private function set_height(Value:Float)
-	{
+	override private function set_height(Value:Float) {
 		super.set_height(Value);
 		updateLabelScale();
 		return Value;
 	}
 
-	override public function updateHitbox()
-	{
+	override public function updateHitbox() {
 		super.updateHitbox();
 		if (_spriteLabel != null)
 			_spriteLabel.updateHitbox();
 	}
 
-	function set_parentAlpha(Value:Float):Float
-	{
+	function set_parentAlpha(Value:Float):Float {
 		statusAlphas = [
 			Value,
 			Value - 0.05,
@@ -505,16 +459,12 @@ class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 		return parentAlpha = Value;
 	}
 
-	function set_statusIndicatorType(Value:StatusIndicators)
-	{
-		if (Value == BRIGHTNESS)
-		{
+	function set_statusIndicatorType(Value:StatusIndicators) {
+		if (Value == BRIGHTNESS) {
 			shader = brightShader;
 			if (_spriteLabel != null)
 				_spriteLabel.shader = brightShader;
-		}
-		else
-		{
+		} else {
 			shader = null;
 			if (_spriteLabel != null)
 				_spriteLabel.shader = null;
@@ -539,8 +489,7 @@ class TypedTouchButton<T:FlxSprite> extends FlxSprite implements IFlxInput
 /** 
  * Helper function for `TouchButton` which handles its events.
  */
-private class TouchButtonEvent implements IFlxDestroyable
-{
+private class TouchButtonEvent implements IFlxDestroyable {
 	/**
 	 * The callback function to call when this even fires.
 	 */
@@ -557,8 +506,7 @@ private class TouchButtonEvent implements IFlxDestroyable
 	 * @param   Callback   The callback function to call when this even fires.
 	 * @param   sound      The sound to play when this event fires.
 	 */
-	public function new(?Callback:Void->Void, ?sound:FlxSound):Void
-	{
+	public function new(?Callback:Void->Void, ?sound:FlxSound):Void {
 		callback = Callback;
 
 		#if FLX_SOUND_SYSTEM
@@ -569,8 +517,7 @@ private class TouchButtonEvent implements IFlxDestroyable
 	/**
 	 * Cleans up memory.
 	 */
-	public inline function destroy():Void
-	{
+	public inline function destroy():Void {
 		callback = null;
 
 		#if FLX_SOUND_SYSTEM
@@ -581,8 +528,7 @@ private class TouchButtonEvent implements IFlxDestroyable
 	/**
 	 * Fires this event (calls the callback and plays the sound)
 	 */
-	public inline function fire():Void
-	{
+	public inline function fire():Void {
 		if (callback != null)
 			callback();
 
@@ -593,8 +539,7 @@ private class TouchButtonEvent implements IFlxDestroyable
 	}
 }
 
-class ButtonBrightnessShader extends FlxShader
-{
+class ButtonBrightnessShader extends FlxShader {
 	public var color(default, set):Null<FlxColor> = FlxColor.WHITE;
 
 	@:glFragmentSource('
@@ -610,15 +555,12 @@ class ButtonBrightnessShader extends FlxShader
 			gl_FragColor = col;
 		}
 	')
-	public function new()
-	{
+	public function new() {
 		super();
 	}
 
-	private function set_color(?laColor:FlxColor)
-	{
-		if (laColor == null)
-		{
+	private function set_color(?laColor:FlxColor) {
+		if (laColor == null) {
 			colorMultiplier.value = [1, 1, 1, 1];
 			hasColorTransform.value = hasTransform.value = [false];
 			return color = laColor;
@@ -629,8 +571,7 @@ class ButtonBrightnessShader extends FlxShader
 	}
 }
 
-enum StatusIndicators
-{
+enum StatusIndicators {
 	// isn't very good looking
 	ALPHA;
 	// best one in my opinion

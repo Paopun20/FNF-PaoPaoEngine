@@ -14,10 +14,8 @@ class PsychJNI #if (lime >= "8.0.0") implements JNISafety #end
 	public static inline function setOrientation(width:Int, height:Int, resizeable:Bool, hint:String):Dynamic
 		return setOrientation_jni(width, height, resizeable, hint);
 
-	public static inline function getCurrentOrientationAsString():String
-	{
-		return switch (getCurrentOrientation_jni())
-		{
+	public static inline function getCurrentOrientationAsString():String {
+		return switch (getCurrentOrientation_jni()) {
 			case SDL_ORIENTATION_PORTRAIT: "Portrait";
 			case SDL_ORIENTATION_LANDSCAPE: "LandscapeRight";
 			case SDL_ORIENTATION_PORTRAIT_FLIPPED: "PortraitUpsideDown";

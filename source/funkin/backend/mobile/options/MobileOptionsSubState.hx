@@ -1,27 +1,23 @@
-
-
 package funkin.backend.mobile.options;
 
 import options.BaseOptionsMenu;
 import options.Option;
 
-class MobileOptionsSubState extends BaseOptionsMenu
-{
+class MobileOptionsSubState extends BaseOptionsMenu {
 	#if android
 	var storageTypes:Array<String> = ["INTERNAL", "EXTERNAL"];
 	var lastStorageType:String = ClientPrefs.data.storageType;
 	#end
-	final exControlTypes:Array<String> = ["NONE", "SINGLE", "DOUBLE","ARROWS"];
+	final exControlTypes:Array<String> = ["NONE", "SINGLE", "DOUBLE", "ARROWS"];
 	final hintOptions:Array<String> = ["No Gradient", "No Gradient (Old)", "Gradient", "Bars only", "Hidden"];
 	var option:Option;
 
-	public function new()
-	{
+	public function new() {
 		title = 'Mobile Options';
 		rpcTitle = 'Mobile Options Menu'; // for Discord Rich Presence, fuck it
 
-		option = new Option('Hitbox Layout', 'Select the layout for the hitboxes.\nSome contain extra programmable lanes.',
-			'extraHints', STRING, exControlTypes);
+		option = new Option('Hitbox Layout', 'Select the layout for the hitboxes.\nSome contain extra programmable lanes.', 'extraHints', STRING,
+			exControlTypes);
 		addOption(option);
 
 		#if TOUCH_CONTROLS_ALLOWED
@@ -32,8 +28,7 @@ class MobileOptionsSubState extends BaseOptionsMenu
 		option.maxValue = 1;
 		option.changeValue = 0.1;
 		option.decimals = 1;
-		option.onChange = () ->
-		{
+		option.onChange = () -> {
 			touchPad.alpha = curOption.getValue();
 			ClientPrefs.toggleVolumeKeys();
 		};
@@ -45,14 +40,13 @@ class MobileOptionsSubState extends BaseOptionsMenu
 			'If checked, the phone will sleep after going inactive for few seconds.\n(The time depends on your phone\'s options)', 'screensaver', BOOL);
 		option.onChange = () -> lime.system.System.allowScreenTimeout = curOption.getValue();
 		addOption(option);
-
 		#end
 
 		option = new Option('Hitbox Design', 'Choose how your hitbox should look like.', 'hitboxType', STRING, hintOptions);
 		addOption(option);
 
-		option = new Option('Hitbox Position', 'If checked, the hitbox will be put at the bottom of the screen, otherwise will stay at the top.',
-			'hitbox2', BOOL);
+		option = new Option('Hitbox Position', 'If checked, the hitbox will be put at the bottom of the screen, otherwise will stay at the top.', 'hitbox2',
+			BOOL);
 		addOption(option);
 
 		option = new Option('Dynamic Controls Color',
@@ -61,7 +55,7 @@ class MobileOptionsSubState extends BaseOptionsMenu
 		addOption(option);
 
 		#if android
-		option = new Option('Storage Type', 'Which folder Psych Engine should use?', 'storageType', STRING,storageTypes);
+		option = new Option('Storage Type', 'Which folder Psych Engine should use?', 'storageType', STRING, storageTypes);
 		addOption(option);
 		#end
 
@@ -69,18 +63,15 @@ class MobileOptionsSubState extends BaseOptionsMenu
 	}
 
 	#if android
-	function onStorageChange():Void
-	{
+	function onStorageChange():Void {
 		File.saveContent(lime.system.System.applicationStorageDirectory + 'storagetype.txt', ClientPrefs.data.storageType);
 	}
 	#end
 
-	override public function destroy()
-	{
+	override public function destroy() {
 		super.destroy();
 		#if android
-		if (ClientPrefs.data.storageType != lastStorageType)
-		{
+		if (ClientPrefs.data.storageType != lastStorageType) {
 			ClientPrefs.saveSettings();
 			onStorageChange();
 		}

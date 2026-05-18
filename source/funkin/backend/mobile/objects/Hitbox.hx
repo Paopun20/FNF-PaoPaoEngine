@@ -13,8 +13,7 @@ import openfl.geom.Matrix;
  *
  * @author: Karim Akra and Lily Ross (mcagabe19)
  */
-class Hitbox extends MobileInputManager
-{
+class Hitbox extends MobileInputManager {
 	final offsetFir:Int = (ClientPrefs.data.hitbox2 ? Std.int(FlxG.height / 4) * 3 : 0);
 	final offsetSec:Int = (ClientPrefs.data.hitbox2 ? 0 : Std.int(FlxG.height / 4));
 
@@ -35,11 +34,9 @@ class Hitbox extends MobileInputManager
 	/**
 	 * Create the zone.
 	 */
-	public function new(?extraMode:ExtraActions = NONE, colorMap:Array<FlxColor>)
-	{
+	public function new(?extraMode:ExtraActions = NONE, colorMap:Array<FlxColor>) {
 		super();
-		hitboxType = switch (ClientPrefs.data.hitboxType)
-		{
+		hitboxType = switch (ClientPrefs.data.hitboxType) {
 			case "Gradient": GRADIENT;
 			case "No Gradient": NO_GRADIENT;
 			case "No Gradient (Old)": NO_GRADIENT_OLD;
@@ -48,16 +45,14 @@ class Hitbox extends MobileInputManager
 			default: BARS_ONLY;
 		};
 
-		for (button in Reflect.fields(this))
-		{
+		for (button in Reflect.fields(this)) {
 			var field = Reflect.field(this, button);
 			if (Std.isOfType(field, TouchButton))
 				storedButtonsIDs.set(button, Reflect.getProperty(field, 'IDs'));
 		}
 
 		final HITBOX_NOTE_SIZE = FlxG.width / 4;
-		switch (extraMode)
-		{
+		switch (extraMode) {
 			case NONE:
 				add(buttonLeft = createHint(0, 0, HITBOX_NOTE_SIZE, FlxG.height, colorMap[0]));
 				add(buttonDown = createHint(HITBOX_NOTE_SIZE, 0, HITBOX_NOTE_SIZE, FlxG.height, colorMap[1]));
@@ -77,19 +72,22 @@ class Hitbox extends MobileInputManager
 				add(buttonExtra2 = createHint(Std.int(FlxG.width / 2), offsetFir, Std.int(FlxG.width / 2), Std.int(FlxG.height / 4), colorMap[5]));
 				add(buttonExtra = createHint(0, offsetFir, Std.int(FlxG.width / 2), Std.int(FlxG.height / 4), colorMap[4]));
 			case ARROWS: // This is a special case
-				final SCREEN_MIDDLE = FlxG.width/2;
+				final SCREEN_MIDDLE = FlxG.width / 2;
 				final ARROW_HITBOX_SIZE = 270;
 				final ARROW_DISTANCE = 220;
 				final ARROW_SPREAD = 30;
 
-				add(buttonLeft = createHint(SCREEN_MIDDLE-(ARROW_DISTANCE*1.5)-(ARROW_HITBOX_SIZE/2) - ARROW_SPREAD, 0, ARROW_HITBOX_SIZE, FlxG.height, colorMap[0]));
-				add(buttonDown = createHint(SCREEN_MIDDLE-(ARROW_DISTANCE*0.5)-(ARROW_HITBOX_SIZE/2)-ARROW_SPREAD, 0, ARROW_HITBOX_SIZE, FlxG.height, colorMap[1]));
-				add(buttonUp = createHint(SCREEN_MIDDLE+(ARROW_DISTANCE*0.5)-(ARROW_HITBOX_SIZE/2)+ARROW_SPREAD, 0, ARROW_HITBOX_SIZE, FlxG.height, colorMap[2]));
-				add(buttonRight = createHint(SCREEN_MIDDLE+(ARROW_DISTANCE*1.5)-(ARROW_HITBOX_SIZE/2)+ARROW_SPREAD, 0, ARROW_HITBOX_SIZE, FlxG.height, colorMap[3]));
+				add(buttonLeft = createHint(SCREEN_MIDDLE - (ARROW_DISTANCE * 1.5) - (ARROW_HITBOX_SIZE / 2) - ARROW_SPREAD, 0, ARROW_HITBOX_SIZE,
+					FlxG.height, colorMap[0]));
+				add(buttonDown = createHint(SCREEN_MIDDLE - (ARROW_DISTANCE * 0.5) - (ARROW_HITBOX_SIZE / 2) - ARROW_SPREAD, 0, ARROW_HITBOX_SIZE,
+					FlxG.height, colorMap[1]));
+				add(buttonUp = createHint(SCREEN_MIDDLE + (ARROW_DISTANCE * 0.5) - (ARROW_HITBOX_SIZE / 2) + ARROW_SPREAD, 0, ARROW_HITBOX_SIZE, FlxG.height,
+					colorMap[2]));
+				add(buttonRight = createHint(SCREEN_MIDDLE + (ARROW_DISTANCE * 1.5) - (ARROW_HITBOX_SIZE / 2) + ARROW_SPREAD, 0, ARROW_HITBOX_SIZE,
+					FlxG.height, colorMap[3]));
 		}
 
-		for (button in Reflect.fields(this))
-		{
+		for (button in Reflect.fields(this)) {
 			if (Std.isOfType(Reflect.field(this, button), TouchButton))
 				Reflect.setProperty(Reflect.getProperty(this, button), 'IDs', storedButtonsIDs.get(button));
 		}
@@ -104,42 +102,37 @@ class Hitbox extends MobileInputManager
 	/**
 	 * Clean up memory.
 	 */
-	override function destroy()
-	{
+	override function destroy() {
 		super.destroy();
 		onButtonUp.destroy();
 		onButtonDown.destroy();
 
-		for (fieldName in Reflect.fields(this))
-		{
+		for (fieldName in Reflect.fields(this)) {
 			var field = Reflect.field(this, fieldName);
 			if (Std.isOfType(field, TouchButton))
 				Reflect.setField(this, fieldName, FlxDestroyUtil.destroy(field));
 		}
 	}
 
-	private function createHint(X:Float, Y:Float, Width:Float, Height:Float, Color:Int = 0xFFFFFF):TouchButton
-	{
+	private function createHint(X:Float, Y:Float, Width:Float, Height:Float, Color:Int = 0xFFFFFF):TouchButton {
 		var hint = new TouchButton(X, Y);
 		hint.statusAlphas = [];
 		hint.statusIndicatorType = NONE;
-		hint.loadGraphic(createHintGraphic(Width, Height,hitboxType));
+		hint.loadGraphic(createHintGraphic(Width, Height, hitboxType));
 
 		hint.label = new FlxSprite();
 		hint.labelStatusDiff = (ClientPrefs.data.hitboxType != "Hidden") ? ClientPrefs.data.controlsAlpha : 0.00001;
-		hint.label.loadGraphic(createHintGraphic(Width, Math.floor(Height * 0.035),hitboxType, true));
+		hint.label.loadGraphic(createHintGraphic(Width, Math.floor(Height * 0.035), hitboxType, true));
 		if (ClientPrefs.data.hitbox2)
 			hint.label.offset.y -= (hint.height - hint.label.height) / 2;
 		else
 			hint.label.offset.y += (hint.height - hint.label.height) / 2;
 
-		if (ClientPrefs.data.hitboxType != "Hidden")
-		{
+		if (ClientPrefs.data.hitboxType != "Hidden") {
 			var hintTween:FlxTween = null;
 			var hintLaneTween:FlxTween = null;
 
-			hint.onDown.callback = function()
-			{
+			hint.onDown.callback = function() {
 				onButtonDown.dispatch(hint);
 
 				if (hintTween != null)
@@ -159,8 +152,7 @@ class Hitbox extends MobileInputManager
 				});
 			}
 
-			hint.onOut.callback = hint.onUp.callback = function()
-			{
+			hint.onOut.callback = hint.onUp.callback = function() {
 				onButtonUp.dispatch(hint);
 
 				if (hintTween != null)
@@ -179,9 +171,7 @@ class Hitbox extends MobileInputManager
 					onComplete: (twn:FlxTween) -> hintTween = null
 				});
 			}
-		}
-		else
-		{
+		} else {
 			hint.onDown.callback = () -> onButtonDown.dispatch(hint);
 			hint.onOut.callback = hint.onUp.callback = () -> onButtonUp.dispatch(hint);
 		}
@@ -199,12 +189,10 @@ class Hitbox extends MobileInputManager
 		return hint;
 	}
 
-	function createHintGraphic(Width:Float, Height:Float, type:HitboxType, ?isLane:Bool = false):FlxGraphic
-	{
+	function createHintGraphic(Width:Float, Height:Float, type:HitboxType, ?isLane:Bool = false):FlxGraphic {
 		var shape:Shape = new Shape();
 		shape.graphics.beginFill(0xFFFFFF);
-		switch (hitboxType)
-		{
+		switch (hitboxType) {
 			case NO_GRADIENT:
 				var matrix:Matrix = new Matrix();
 				matrix.createGradientBox(Width, Height, 0, 0, 0);
@@ -233,14 +221,12 @@ class Hitbox extends MobileInputManager
 				shape.graphics.drawRect(3, 3, Width - 6, Height - 6);
 				shape.graphics.endFill();
 			case BARS_ONLY:
-				if (isLane)
-				{
+				if (isLane) {
 					shape.graphics.lineStyle(10, 0xFFFFFF, 1);
 					shape.graphics.drawRect(0, 0, Width, Height);
 					shape.graphics.endFill();
 				}
 			default:
-				
 		}
 		var bitmap:BitmapData = new BitmapData(Std.int(Width), Std.int(Height), true, 0);
 		bitmap.draw(shape);
@@ -249,8 +235,7 @@ class Hitbox extends MobileInputManager
 	}
 }
 
-enum HitboxType
-{
+enum HitboxType {
 	SOLID;
 	GRADIENT;
 	NO_GRADIENT;

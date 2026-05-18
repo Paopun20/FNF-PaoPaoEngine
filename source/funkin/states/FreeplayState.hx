@@ -231,7 +231,7 @@ class FreeplayState extends EditableState {
 		if (FlxG.sound.music.volume < 0.7)
 			FlxG.sound.music.volume += 0.5 * elapsed;
 
-		lerpScore  = Math.floor(FlxMath.lerp(lerpScore,  intendedScore,  Math.exp(-elapsed * 24)));
+		lerpScore = Math.floor(FlxMath.lerp(lerpScore, intendedScore, Math.exp(-elapsed * 24)));
 		lerpRating = FlxMath.lerp(lerpRating, intendedRating, Math.exp(-elapsed * 12));
 
 		if (Math.abs(lerpScore - intendedScore) <= 10)

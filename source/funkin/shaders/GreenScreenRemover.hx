@@ -19,11 +19,11 @@ class GreenScreenRemover extends FlxShader {
 		super();
 	}
 
-    public function setGreenColor(color:FlxColor) {
-        Reflect.field(this, 'uGreenColor').value = [color.redFloat, color.greenFloat, color.blueFloat, 1.0];
-    }
+	public function setGreenColor(color:FlxColor) {
+		Reflect.field(this, 'uGreenColor').value = [color.redFloat, color.greenFloat, color.blueFloat, 1.0];
+	}
 
-    public function setThreshold(threshold:Float) {
-        Reflect.field(this, 'uThreshold').value = [threshold];
-    }
+	public function setThreshold(threshold:Float) {
+		Reflect.field(this, 'uThreshold').value = [threshold];
+	}
 }

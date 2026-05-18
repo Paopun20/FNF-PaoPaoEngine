@@ -52,8 +52,8 @@ using funkin.backend.utils.tools.QolTools;
 
 class Script implements IFlxDestroyable implements IScriptExecutor {
 	public var scriptCode:String;
-	public var scriptName:String;
-	public var scriptPath:String;
+	public var scriptName:String = "Unknown";
+	public var scriptPath:String = "Unknown";
 	public var scriptPack:Null<ScriptPack>;
 
 	public var closed:Bool = false;

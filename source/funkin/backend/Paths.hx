@@ -41,7 +41,7 @@ class Paths {
 
 	/** @see FunkinCache.currentTrackedAssets */
 	public static var currentTrackedAssets(get, never):Map<String, FlxGraphic>;
-	
+
 	@:deprecated("Use `FunkinCache.currentTrackedAssets` instead.")
 	static inline function get_currentTrackedAssets()
 		return FunkinCache.currentTrackedAssets;

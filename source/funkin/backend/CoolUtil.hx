@@ -15,22 +15,22 @@ class CoolUtil {
 		if (ClientPrefs.data.checkForUpdates) {
 			CoolLog.info('checking for updates...');
 			if (Client.hasInternet)
-			Client.getRequest(url, function(suss, data) {
-				if (suss) {
-					if (data != null && data.length > 0) {
-						CoolLog.info('received data: ' + data);
-						var check = Version.isOutdated(version, data.split('\n')[0].trim());
-						if (check) {
-							CoolLog.info('versions arent matching! please update');
-							version = data.split('\n')[0].trim();
-							isoutdated = true;
+				Client.getRequest(url, function(suss, data) {
+					if (suss) {
+						if (data != null && data.length > 0) {
+							CoolLog.info('received data: ' + data);
+							var check = Version.isOutdated(version, data.split('\n')[0].trim());
+							if (check) {
+								CoolLog.info('versions arent matching! please update');
+								version = data.split('\n')[0].trim();
+								isoutdated = true;
+							}
 						}
+					} else {
+						if (data != null)
+							CoolLog.error('failed to check for updates (error type: ' + data + ')');
 					}
-				} else {
-					if (data != null)
-						CoolLog.error('failed to check for updates (error type: ' + data + ')');
-				}
-			});
+				});
 		}
 		return version;
 	}
