@@ -72,24 +72,26 @@ class ScriptPack {
 				if (onlyName != null && !file.toLowerCase().startsWith(onlyName.toLowerCase()))
 					continue;
 
+				var path = folder + file;
+
 				#if LUA_ALLOWED
 				if (file.toLowerCase().endsWith('.lua'))
-					add(new LuaScript(folder + file));
+					add(new LuaScript(path));
 				#end
 
 				#if HSCRIPT_ALLOWED
 				if (file.toLowerCase().endsWith('.hx'))
-					add(new HScript(folder + file));
+					add(new HScript(path));
 				#end
 
 				#if PYTHON_ALLOWED
 				if (file.toLowerCase().endsWith('.py'))
-					add(new Python(folder + file));
+					add(new Python(path));
 				#end
 
 				#if NXSCRIPT_ALLOWED
 				if (file.toLowerCase().endsWith('nx'))
-					add(new NxScript(folder + file));
+					add(new NxScript(path));
 				#end
 			}
 		#end

@@ -1,4 +1,4 @@
-package funkin.graphics;
+package funkin.objects;
 
 import animate.internal.RenderTexture;
 import flash.geom.ColorTransform;
@@ -12,7 +12,7 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxShader;
 import funkin.graphics.framebuffer.FixedBitmapData;
-import funkin.shaders.RuntimeCustomBlendShader;
+import funkin.shaders.CustomShader;
 import openfl.display.OpenGLRenderer;
 import openfl.Lib;
 import openfl.display.BitmapData;
@@ -31,17 +31,7 @@ using funkin.graphics.framebuffer.BitmapDataUtil;
  *   - LIGHTEN
  *   - OVERLAY
  *   - DIFFERENCE
- *   - INVERT
- *   - COLORDODGE
- *   - COLORBURN
- *   - SOFTLIGHT
- *   - EXCLUSION
- *   - HUE
- *   - SATURATION
- *   - COLOR
- *   - LUMINOSITY
  * - Elapsed-based `followLerp` to prevent camera snapping at higher framerates
- *   (ported from PsychEngine's PsychCamera).
  */
 @:nullSafety
 @:access(openfl.display.DisplayObject)
@@ -60,12 +50,7 @@ class PaoPaoCamera extends FlxCamera {
 	public static var hasKhronosExtension(get, never):Bool;
 
 	static inline function get_hasKhronosExtension():Bool {
-		#if FORCE_BLEND_SHADER
-		return false;
-		#else
-		@:privateAccess
-		return OpenGLRenderer.__complexBlendsSupported ?? false;
-		#end
+		return true;
 	}
 
 	/**
@@ -81,14 +66,14 @@ class PaoPaoCamera extends FlxCamera {
 		#if !desktop LIGHTEN, #end
 		OVERLAY,
 		DIFFERENCE,
-		COLORDODGE,
-		COLORBURN,
-		SOFTLIGHT,
-		EXCLUSION,
-		HUE,
-		SATURATION,
-		COLOR,
-		LUMINOSITY
+		// COLORDODGE,
+		// COLORBURN,
+		// SOFTLIGHT,
+		// EXCLUSION,
+		// HUE,
+		// SATURATION,
+		// COLOR,
+		// LUMINOSITY
 	];
 
 	/**
@@ -110,7 +95,7 @@ class PaoPaoCamera extends FlxCamera {
 	 */
 	public var crossCameraBlending:Bool;
 
-	var _blendShader:RuntimeCustomBlendShader;
+	var _blendShader:CustomShader;
 	var _backgroundFrame:FlxFrame;
 
 	var _blendRenderTexture:RenderTexture;
@@ -128,7 +113,7 @@ class PaoPaoCamera extends FlxCamera {
 		_backgroundFrame = new FlxFrame(new FlxGraphic('', null));
 		_backgroundFrame.frame = new FlxRect();
 
-		_blendShader = new RuntimeCustomBlendShader();
+		_blendShader = new CustomShader("customBlend");
 
 		_backgroundRenderTexture = new RenderTexture(this.width, this.height);
 		_blendRenderTexture = new RenderTexture(this.width, this.height);
@@ -152,7 +137,7 @@ class PaoPaoCamera extends FlxCamera {
 		updateFlash(elapsed);
 		updateFade(elapsed);
 
-		flashSprite.filters = filtersEnabled ? filters : null;
+		flashSprite.filters = (filtersEnabled && filters != null) ? filters : [];
 
 		updateFlashSpritePosition();
 		updateShake(elapsed);
@@ -164,7 +149,7 @@ class PaoPaoCamera extends FlxCamera {
 	 *
 	 * @param elapsed  Time in seconds since the last frame.
 	 */
-	public function updateFollowDelta(?elapsed:Float = 0):Void {
+	public function updateFollowDelta(elapsed:Float = 0):Void {
 		if (deadzone == null) {
 			target.getMidpoint(_point);
 			_point.addPoint(targetOffset);
@@ -271,10 +256,14 @@ class PaoPaoCamera extends FlxCamera {
 			});
 			_blendRenderTexture.render();
 
-			_blendShader.sourceSwag = _blendRenderTexture.graphic.bitmap;
-			_blendShader.backgroundSwag = _cameraTexture;
-			_blendShader.blendSwag = blend;
-			_blendShader.updateViewInfo(width, height, this);
+			// _blendShader.sourceSwag = _blendRenderTexture.graphic.bitmap;
+			// _blendShader.backgroundSwag = _cameraTexture;
+			// _blendShader.blendSwag = blend;
+			// _blendShader.updateViewInfo(width, height, this);
+			_blendShader.hset("sourceSwag", _blendRenderTexture.graphic.bitmap);
+			_blendShader.hset("blendSwag", blend);
+			_blendShader.hset("uScreenResolution", [width, height]);
+			_blendShader.hset("uFrameBounds", [this.viewLeft, this.viewTop, this.viewRight, this.viewBottom]);
 
 			_backgroundFrame.parent.bitmap = _blendRenderTexture.graphic.bitmap;
 
@@ -301,7 +290,7 @@ class PaoPaoCamera extends FlxCamera {
 
 	override function startQuadBatch(graphic:FlxGraphic, colored:Bool, hasColorOffsets:Bool = false, ?blend:BlendMode, smooth:Bool = false,
 			?shader:FlxShader):FlxDrawQuadsItem {
-		if (hasKhronosExtension && !(OpenGLRenderer.__coherentBlendsSupported ?? false) && KHR_BLEND_MODES.contains(blend)) {
+		if (hasKhronosExtension && KHR_BLEND_MODES.contains(blend)) {
 			var itemToReturn = null;
 
 			if (FlxCamera._storageTilesHead != null) {
@@ -342,7 +331,7 @@ class PaoPaoCamera extends FlxCamera {
 
 	override function startTrianglesBatch(graphic:FlxGraphic, smoothing:Bool = false, isColored:Bool = false, ?blend:BlendMode, ?hasColorOffsets:Bool,
 			?shader:FlxShader):FlxDrawTrianglesItem {
-		if (hasKhronosExtension && !(OpenGLRenderer.__coherentBlendsSupported ?? false) && KHR_BLEND_MODES.contains(blend))
+		if (hasKhronosExtension && KHR_BLEND_MODES.contains(blend))
 			return getNewDrawTrianglesItem(graphic, smoothing, isColored, blend, hasColorOffsets, shader);
 
 		return super.startTrianglesBatch(graphic, smoothing, isColored, blend, hasColorOffsets, shader);

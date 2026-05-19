@@ -979,12 +979,8 @@ class LoadingState extends EditableState {
 
 			if (!FunkinCache.currentTrackedAssets.exists(requestKey)) {
 				var file:String = Paths.getPath(requestKey, IMAGE);
-				if (#if (sys || MULTITHREADED_LOADING) FileSystem.exists(file) || #end OpenFlAssets.exists(file, IMAGE)) {
-					#if (sys || MULTITHREADED_LOADING)
+				if (FileSystem.exists(file) ) {
 					var bitmap:BitmapData = BitmapData.fromFile(file);
-					#else
-					var bitmap:BitmapData = OpenFlAssets.getBitmapData(file, false);
-					#end
 
 					#if (sys || MULTITHREADED_LOADING)
 					if (mutex == null)

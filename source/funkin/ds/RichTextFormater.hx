@@ -29,6 +29,7 @@ interface IRichTextFormater {
 	• Unquoted values stop at the next space.
 	• Boolean attributes (no =) are stored as `true`.
  */
+@:analyzer(optimize, local_dce, fusion, user_var_fusion)
 class RichTextFormater implements IRichTextFormater {
 	var cArguments:Array<RichVar>;
 	var onBString:Bool; // inside a quoted value while scanning the raw text

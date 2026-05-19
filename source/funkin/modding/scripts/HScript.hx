@@ -109,7 +109,10 @@ class HScript extends Script implements IScriptExecutor {
 		addExHScript(this.interp, LuaUtils.isPlayStateScript(activeState));
 
 		this.scriptName = this.fileName;
-		this.scriptName = "HxVM:" + this.scriptName;
+		if (this.scriptName != null && this.scriptName.length > 0)
+			this.scriptName = "HxVM:" + this.scriptName;
+		else
+			this.scriptName = "HxVM:<inline>";
 		this.origin = file;
 
 		#if MODS_ALLOWED
@@ -527,7 +530,7 @@ class HaxeBridge {
 		CoolLog.info('Initializing Haxe interp for: "$scriptPath"');
 		try {
 			hscript = new HScript();
-			hscript.scriptName = 'HxVM:${scriptPath}';
+			hscript.scriptName = (scriptPath != null && scriptPath.length > 0) ? 'HxVM:${scriptPath}' : 'HxVM:<inline>';
 			if (varsToBring != null)
 				for (fieldName in Reflect.fields(varsToBring))
 					hscript.set(fieldName, Reflect.field(varsToBring, fieldName));

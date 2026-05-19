@@ -73,7 +73,7 @@ final class SourceMap {
 		flush();
 
 		return macro {
-			var __map = new BytesMap<String>(new haxe.ds.StringMap());
+			var __map = new BytesMap<String>();
 			$b{setExprs};
 			__map;
 		};

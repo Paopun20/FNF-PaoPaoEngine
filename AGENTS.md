@@ -203,13 +203,13 @@ lime test windows -debug
 ### Release
 
 ```bash
-lime build windows -final
+lime build windows
 ```
 
-### HTML5
+### Final Release
 
 ```bash
-lime test html5
+lime build windows -final
 ```
 
 ---

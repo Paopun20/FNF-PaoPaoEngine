@@ -63,7 +63,7 @@ class BetterBitmapData extends BitmapData {
 	 * @param allowGpuCaching  Whether GPU caching is permitted for this bitmap. Defaults to true.
 	 * @return The loaded BitmapData, or null on js/html5 targets (not supported).
 	 */
-	public static function fromFile(path:String, allowGpuCaching:Bool = true):BitmapData {
+	public static function fromFile(path:String):BitmapData {
 		var data:BitmapData;
 		#if (js && html5)
 		data = new BitmapData(0, 0, true, 0);

@@ -1,6 +1,11 @@
 package funkin.ds;
 
+import haxe.ds.StringMap;
+import haxe.ds.IntMap;
+import haxe.ds.ObjectMap;
+import haxe.ds.EnumValueMap;
 import haxe.Constraints.IMap;
+
 import haxe.io.Bytes;
 import haxe.zip.Compress;
 import haxe.zip.Uncompress;
@@ -13,32 +18,40 @@ import haxe.zip.Uncompress;
  * always work with plain strings while the underlying map holds only
  * compressed bytes.
  *
- * The backing map type (e.g. `Map<K, Bytes>`, `haxe.ds.StringMap`) is
- * supplied at construction time, keeping the key type fully generic.
- *
  * ```haxe
- * var map = new BytesMap<String>(new Map());
+ * var map = new BytesMap<String>();
  * map.set("dialogue", reallyLongJsonString);
  * trace(map.get("dialogue")); // original string, decompressed on the fly
  * ```
  *
- * @param K The key type, constrained by the backing `IMap` implementation.
+ * @param K The key type
  */
-class BytesMap<K> {
+@:transitive
+@:multiType(@:followWithAbstracts K)
+@:analyzer(optimize, local_dce, fusion, user_var_fusion)
+abstract BytesMap<K>(IMap<K, Bytes>) {
 	private static final COMPRESSION_LEVEL:Int = 9;
-
-	private final _data:IMap<K, Bytes>;
 
 	/**
 	 * Creates a new `BytesMap` backed by the given map instance.
 	 *
 	 * The backing map must be empty or already contain validly compressed
 	 * `Bytes` values — raw strings stored directly will cause `get` to throw.
-	 *
-	 * @param map The underlying `IMap<K, Bytes>` to store compressed values in.
 	 */
-	public function new(map:IMap<K, Bytes>) {
-		_data = map;
+	public function new();
+
+	/**
+	 * Compresses `content` and stores it under `k`, replacing any existing value.
+	 *
+	 * Compression uses zlib at the maximum level (`9`), trading CPU time for
+	 * the smallest possible byte footprint.
+	 *
+	 * @param key     The key to store the value under.
+	 * @param content The plain string to compress and store.
+	 */
+	public inline function set(key:K, value:String):Void {
+		var compressed = Compress.run(Bytes.ofString(value), COMPRESSION_LEVEL);
+		this.set(key, compressed);
 	}
 
 	/**
@@ -47,8 +60,8 @@ class BytesMap<K> {
 	 * @param k The key to look up.
 	 * @return The original string passed to `set`, or `null`.
 	 */
-	public inline function get(k:K):Null<String> {
-		var bytes = _data.get(k);
+	@:arrayAccess public inline function get(k:K):Null<String> {
+		var bytes = this.get(k);
 		return bytes == null ? null : Uncompress.run(bytes).toString();
 	}
 
@@ -58,22 +71,35 @@ class BytesMap<K> {
 	 * @param k The key to test.
 	 */
 	public inline function exists(k:K):Bool
-		return _data.exists(k);
+		return this.exists(k);
 
 	/**
-	 * Returns an iterator over all keys currently in the map.
+	 * Removes the entry for `k` from the map.
+	 *
+	 * @param k The key to remove.
+	 * @return `true` if the key existed and was removed, `false` otherwise.
 	 */
-	public inline function keys():Iterator<K>
-		return _data.keys();
+	public function remove(k:K):Bool
+		return this.remove(k);
 
 	/**
 	 * Returns an iterator over the raw compressed `Bytes` values.
 	 *
-	 * Note: values are **not** decompressed here. Use `get` to retrieve
-	 * the original strings.
+	 * Note: values are **not** decompressed here. To retrieve original strings,
+	 * iterate over `keys()` and call `get(key)` for each one instead.
+	 */
+	public inline function keys():Iterator<K>
+		return this.keys();
+
+	/**
+	 * Returns a key-value iterator over all entries.
+	 *
+	 * Values are the raw compressed `Bytes`. To retrieve the original string
+	 * for a given entry, call `get(key)` rather than decompressing the value
+	 * directly.
 	 */
 	public inline function iterator():Iterator<Bytes>
-		return _data.iterator();
+		return this.iterator();
 
 	/**
 	 * Returns a key-value iterator over all entries.
@@ -81,7 +107,7 @@ class BytesMap<K> {
 	 * Values are the raw compressed `Bytes`, not the original strings.
 	 */
 	public inline function keyValueIterator():KeyValueIterator<K, Bytes>
-		return _data.keyValueIterator();
+		return this.keyValueIterator();
 
 	/**
 	 * Returns a shallow copy of this map, wrapping a copy of the backing store.
@@ -91,8 +117,9 @@ class BytesMap<K> {
 	 *
 	 * @return A new `BytesMap<K>` with the same entries.
 	 */
-	public function copy():BytesMap<K>
-		return new BytesMap<K>(_data.copy());
+	public inline function copy():BytesMap<K> {
+		return cast this.copy();
+	}
 
 	/**
 	 * Returns a human-readable string representation of the backing map.
@@ -100,34 +127,33 @@ class BytesMap<K> {
 	 * Values appear as raw `Bytes`, not decompressed strings.
 	 */
 	public inline function toString():String
-		return _data.toString();
-
-	/**
-	 * Compresses `content` and stores it under `k`, replacing any existing value.
-	 *
-	 * Compression uses zlib at the maximum level (`9`), trading CPU time for
-	 * the smallest possible byte footprint.
-	 *
-	 * @param k       The key to store the value under.
-	 * @param content The plain string to compress and store.
-	 */
-	public function set(k:K, content:String):Void {
-		var compressed = Compress.run(Bytes.ofString(content), COMPRESSION_LEVEL);
-		_data.set(k, compressed);
-	}
-
-	/**
-	 * Removes the entry for `k` from the map.
-	 *
-	 * @param k The key to remove.
-	 * @return `true` if the key existed and was removed, `false` otherwise.
-	 */
-	public function remove(k:K):Bool
-		return _data.remove(k);
+		return this.toString();
 
 	/**
 	 * Removes all entries from the map.
 	 */
 	public function clear():Void
-		_data.clear();
+		this.clear();
+
+	@:arrayAccess @:noCompletion public inline function arrayWrite(k:K, v:Bytes):Bytes {
+		this.set(k, v);
+		return v;
+	}
+
+	@:arrayAccess public inline function arrayRead(k:K):Null<String> {
+		var bytes = this.get(k);
+		return bytes == null ? null : Uncompress.run(bytes).toString();
+	}
+
+	@:to static inline function toStringMap(t:IMap<String, Bytes>):StringMap<Bytes>
+		return cast t;
+
+	@:to static inline function toIntMap(t:IMap<Int, Bytes>):IntMap<Bytes>
+		return cast t;
+
+	@:to static inline function toEnumValueMap<K:EnumValue>(t:IMap<K, Bytes>):EnumValueMap<K, Bytes>
+		return cast t;
+
+	@:to static inline function toObjectMap<K:{}>(t:IMap<K, Bytes>):ObjectMap<K, Bytes>
+		return cast t;
 }

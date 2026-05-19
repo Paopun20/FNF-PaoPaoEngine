@@ -75,7 +75,7 @@ Icon made by PaoPao (me)
 
 Geodify Background made by PaoPao (me)
 
-> inspired by Geodify's background
+> inspired by Geodify's background and Geode background
 
 ## Planing
 
