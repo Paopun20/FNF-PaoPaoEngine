@@ -4,7 +4,6 @@ package funkin.backend;
 import funkin.objects.AchievementPopup;
 import haxe.Exception;
 import haxe.Json;
-import funkin.modding.scripts.utils.ImplementUtils;
 
 typedef Achievement = {
 	var name:String;
@@ -288,43 +287,42 @@ class Achievements {
 
 	#if (LUA_ALLOWED || PYTHON_ALLOWED)
 	public static function addCallbacks(funk:Dynamic) {
-		var impl = ImplementUtils.make(funk);
-		impl("getAchievementScore", function(name:String):Float {
+		funk.set("getAchievementScore", function(name:String):Float {
 			if (!achievements.exists(name)) {
-				ImplementUtils.addTextToDebug('getAchievementScore: Couldnt find achievement: $name', FlxColor.RED);
+				CoolLog.warning('getAchievementScore: Couldnt find achievement: $name');
 				return -1;
 			}
 			return getScore(name);
 		});
-		impl("setAchievementScore", function(name:String, ?value:Float = 0, ?saveIfNotUnlocked:Bool = true):Float {
+		funk.set("setAchievementScore", function(name:String, ?value:Float = 0, ?saveIfNotUnlocked:Bool = true):Float {
 			if (!achievements.exists(name)) {
-				ImplementUtils.addTextToDebug('setAchievementScore: Couldnt find achievement: $name', FlxColor.RED);
+				CoolLog.warning('setAchievementScore: Couldnt find achievement: $name');
 				return -1;
 			}
 			return setScore(name, value, saveIfNotUnlocked);
 		});
-		impl("addAchievementScore", function(name:String, ?value:Float = 1, ?saveIfNotUnlocked:Bool = true):Float {
+		funk.set("addAchievementScore", function(name:String, ?value:Float = 1, ?saveIfNotUnlocked:Bool = true):Float {
 			if (!achievements.exists(name)) {
-				ImplementUtils.addTextToDebug('addAchievementScore: Couldnt find achievement: $name', FlxColor.RED);
+				CoolLog.warning('addAchievementScore: Couldnt find achievement: $name');
 				return -1;
 			}
 			return addScore(name, value, saveIfNotUnlocked);
 		});
-		impl("unlockAchievement", function(name:String):Dynamic {
+		funk.set("unlockAchievement", function(name:String):Dynamic {
 			if (!achievements.exists(name)) {
-				ImplementUtils.addTextToDebug('unlockAchievement: Couldnt find achievement: $name', FlxColor.RED);
+				CoolLog.warning('unlockAchievement: Couldnt find achievement: $name');
 				return null;
 			}
 			return unlock(name);
 		});
-		impl("isAchievementUnlocked", function(name:String):Dynamic {
+		funk.set("isAchievementUnlocked", function(name:String):Dynamic {
 			if (!achievements.exists(name)) {
-				ImplementUtils.addTextToDebug('isAchievementUnlocked: Couldnt find achievement: $name', FlxColor.RED);
+				CoolLog.warning('isAchievementUnlocked: Couldnt find achievement: $name');
 				return null;
 			}
 			return isUnlocked(name);
 		});
-		impl("achievementExists", function(name:String) return achievements.exists(name));
+		funk.set("achievementExists", function(name:String) return achievements.exists(name));
 	}
 	#end
 }

@@ -181,7 +181,7 @@ final class SourceMap {
 				return null;
 			}
 
-			var rootPath = FileSystem.absolutePath(lines[0].trim());
+			var rootPath = FileSystem.absolutePath(Path.normalize(lines[0].trim()));
 
 			// Fix: Path is now imported (haxe.io.Path)
 			var haxelibJson = Path.join([rootPath, "haxelib.json"]);

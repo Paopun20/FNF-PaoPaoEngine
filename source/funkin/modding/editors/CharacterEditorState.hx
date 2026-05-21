@@ -663,6 +663,12 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		});
 
 		var decideIconColor:PsychUIButton = new PsychUIButton(reloadImage.x, reloadImage.y + 30, "Get Icon Color", function() {
+			if (healthIcon == null || healthIcon.graphic == null || healthIcon.graphic.bitmap == null) {
+				FlxG.sound.play(Paths.sound('cancelMenu'));
+				FlxG.log.warn('Could not get icon color: health icon bitmap is null.');
+				return;
+			}
+
 			var coolColor:FlxColor = FlxColor.fromInt(CoolUtil.dominantColor(healthIcon));
 			character.healthColorArray[0] = coolColor.red;
 			character.healthColorArray[1] = coolColor.green;
@@ -1076,215 +1082,215 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 	} // end update()
 
 	function updatePointerPos(?snap:Bool = true) {
-			if (character == null || cameraFollowPointer == null)
-				return;
+		if (character == null || cameraFollowPointer == null)
+			return;
 
-			var offX:Float = 0;
-			var offY:Float = 0;
-			if (!character.isPlayer) {
-				offX = character.getMidpoint().x + 150 + character.cameraPosition[0];
-				offY = character.getMidpoint().y - 100 + character.cameraPosition[1];
-			} else {
-				offX = character.getMidpoint().x - 100 - character.cameraPosition[0];
-				offY = character.getMidpoint().y - 100 + character.cameraPosition[1];
-			}
-			cameraFollowPointer.setPosition(offX, offY);
-
-			if (snap) {
-				FlxG.camera.scroll.x = cameraFollowPointer.getMidpoint().x - FlxG.width / 2;
-				FlxG.camera.scroll.y = cameraFollowPointer.getMidpoint().y - FlxG.height / 2;
-			}
+		var offX:Float = 0;
+		var offY:Float = 0;
+		if (!character.isPlayer) {
+			offX = character.getMidpoint().x + 150 + character.cameraPosition[0];
+			offY = character.getMidpoint().y - 100 + character.cameraPosition[1];
+		} else {
+			offX = character.getMidpoint().x - 100 - character.cameraPosition[0];
+			offY = character.getMidpoint().y - 100 + character.cameraPosition[1];
 		}
+		cameraFollowPointer.setPosition(offX, offY);
 
-		inline function updateHealthBar() {
-			healthColorStepperR.value = character.healthColorArray[0];
-			healthColorStepperG.value = character.healthColorArray[1];
-			healthColorStepperB.value = character.healthColorArray[2];
-			healthBar.leftBar.color = healthBar.rightBar.color = FlxColor.fromRGB(character.healthColorArray[0], character.healthColorArray[1],
-				character.healthColorArray[2]);
-			healthIcon.changeIcon(character.healthIcon, false);
-			updatePresence();
+		if (snap) {
+			FlxG.camera.scroll.x = cameraFollowPointer.getMidpoint().x - FlxG.width / 2;
+			FlxG.camera.scroll.y = cameraFollowPointer.getMidpoint().y - FlxG.height / 2;
 		}
+	}
 
-		inline function updatePresence() {
-			#if DISCORD_ALLOWED
-			// Updating Discord Rich Presence
-			DiscordClient.changePresence("Character Editor", "Character: " + _char, healthIcon.getCharacter());
-			#end
+	inline function updateHealthBar() {
+		healthColorStepperR.value = character.healthColorArray[0];
+		healthColorStepperG.value = character.healthColorArray[1];
+		healthColorStepperB.value = character.healthColorArray[2];
+		healthBar.leftBar.color = healthBar.rightBar.color = FlxColor.fromRGB(character.healthColorArray[0], character.healthColorArray[1],
+			character.healthColorArray[2]);
+		healthIcon.changeIcon(character.healthIcon, false);
+		updatePresence();
+	}
+
+	inline function updatePresence() {
+		#if DISCORD_ALLOWED
+		// Updating Discord Rich Presence
+		DiscordClient.changePresence("Character Editor", "Character: " + _char, healthIcon.getCharacter());
+		#end
+	}
+
+	inline function reloadAnimList() {
+		anims = character.animationsArray;
+		if (anims.length > 0)
+			character.playAnim(anims[0].anim, true);
+		curAnim = 0;
+
+		updateText();
+		if (animationDropDown != null)
+			reloadAnimationDropDown();
+	}
+
+	inline function updateText() {
+		animsTxt.removeFormat(selectedFormat);
+
+		var intendText:String = '';
+		for (num => anim in anims) {
+			if (num > 0)
+				intendText += '\n';
+
+			if (num == curAnim) {
+				var n:Int = intendText.length;
+				intendText += anim.anim + ": " + anim.offsets;
+				animsTxt.addFormat(selectedFormat, n, intendText.length);
+			} else
+				intendText += anim.anim + ": " + anim.offsets;
 		}
+		animsTxt.text = intendText;
+	}
 
-		inline function reloadAnimList() {
-			anims = character.animationsArray;
-			if (anims.length > 0)
-				character.playAnim(anims[0].anim, true);
-			curAnim = 0;
+	inline function updateCharacterPositions() {
+		if ((character != null && !character.isPlayer) || (character == null && predictCharacterIsNotPlayer(_char)))
+			character.setPosition(dadPosition.x, dadPosition.y);
+		else
+			character.setPosition(bfPosition.x, bfPosition.y);
 
-			updateText();
-			if (animationDropDown != null)
-				reloadAnimationDropDown();
-		}
+		character.x += character.positionArray[0];
+		character.y += character.positionArray[1];
+		updatePointerPos(false);
+	}
 
-		inline function updateText() {
-			animsTxt.removeFormat(selectedFormat);
+	inline function predictCharacterIsNotPlayer(name:String) {
+		return (name != 'bf' && !name.startsWith('bf-') && !name.endsWith('-player') && !name.endsWith('-playable') && !name.endsWith('-dead'))
+			|| name.endsWith('-opponent')
+			|| name.startsWith('gf-')
+			|| name.endsWith('-gf')
+			|| name == 'gf';
+	}
 
-			var intendText:String = '';
-			for (num => anim in anims) {
-				if (num > 0)
-					intendText += '\n';
-
-				if (num == curAnim) {
-					var n:Int = intendText.length;
-					intendText += anim.anim + ": " + anim.offsets;
-					animsTxt.addFormat(selectedFormat, n, intendText.length);
-				} else
-					intendText += anim.anim + ": " + anim.offsets;
-			}
-			animsTxt.text = intendText;
-		}
-
-		inline function updateCharacterPositions() {
-			if ((character != null && !character.isPlayer) || (character == null && predictCharacterIsNotPlayer(_char)))
-				character.setPosition(dadPosition.x, dadPosition.y);
+	function addAnimation(anim:String, name:String, fps:Float, loop:Bool, indices:Array<Int>) {
+		if (!character.isAnimateAtlas) {
+			if (indices != null && indices.length > 0)
+				character.animation.addByIndices(anim, name, indices, "", fps, loop);
 			else
-				character.setPosition(bfPosition.x, bfPosition.y);
-
-			character.x += character.positionArray[0];
-			character.y += character.positionArray[1];
-			updatePointerPos(false);
+				character.animation.addByPrefix(anim, name, fps, loop);
+		} else {
+			if (indices != null && indices.length > 0)
+				character.atlas.anim.addBySymbolIndices(anim, name, indices, fps, loop);
+			else
+				character.atlas.anim.addBySymbol(anim, name, fps, loop);
 		}
 
-		inline function predictCharacterIsNotPlayer(name:String) {
-			return (name != 'bf' && !name.startsWith('bf-') && !name.endsWith('-player') && !name.endsWith('-playable') && !name.endsWith('-dead'))
-				|| name.endsWith('-opponent')
-				|| name.startsWith('gf-')
-				|| name.endsWith('-gf')
-				|| name == 'gf';
+		if (!character.hasAnimation(anim))
+			character.addOffset(anim, 0, 0);
+	}
+
+	inline function newAnim(anim:String, name:String):AnimArray {
+		return {
+			offsets: [0, 0],
+			loop: false,
+			fps: 24,
+			anim: anim,
+			indices: [],
+			name: name
+		};
+	}
+
+	var characterList:Array<String> = [];
+
+	function reloadCharacterDropDown() {
+		characterList = Mods.mergeAllTextsNamed('data/characterList.txt');
+		var foldersToCheck:Array<String> = Mods.directoriesWithFile(Paths.getSharedPath(), 'characters/');
+		for (folder in foldersToCheck)
+			for (file in FileSystem.readDirectory(folder))
+				if (file.toLowerCase().endsWith('.json')) {
+					var charToCheck:String = file.substr(0, file.length - 5);
+					if (!characterList.contains(charToCheck))
+						characterList.push(charToCheck);
+				}
+
+		if (characterList.length < 1)
+			characterList.push('');
+		charDropDown.list = characterList;
+		charDropDown.selectedLabel = _char;
+	}
+
+	function reloadAnimationDropDown() {
+		var animList:Array<String> = [];
+		for (anim in anims)
+			animList.push(anim.anim);
+		if (animList.length < 1)
+			animList.push('NO ANIMATIONS'); // Prevents crash
+
+		animationDropDown.list = animList;
+	}
+
+	// save
+	var _file:FileReference;
+
+	function onSaveComplete(_):Void {
+		if (_file == null)
+			return;
+		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+		_file = null;
+		FlxG.log.notice("Successfully saved file.");
+	}
+
+	/**
+	 * Called when the save file dialog is cancelled.
+	 */
+	function onSaveCancel(_):Void {
+		if (_file == null)
+			return;
+		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+		_file = null;
+	}
+
+	/**
+	 * Called if there is an error while saving the gameplay recording.
+	 */
+	function onSaveError(_):Void {
+		if (_file == null)
+			return;
+		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+		_file = null;
+		FlxG.log.error("Problem saving file");
+	}
+
+	function saveCharacter() {
+		if (_file != null)
+			return;
+
+		var json:Dynamic = {
+			"animations": character.animationsArray,
+			"image": character.imageFile,
+			"scale": character.jsonScale,
+			"sing_duration": character.singDuration,
+			"healthicon": character.healthIcon,
+
+			"position": character.positionArray,
+			"camera_position": character.cameraPosition,
+
+			"flip_x": character.originalFlipX,
+			"no_antialiasing": character.noAntialiasing,
+			"healthbar_colors": character.healthColorArray,
+			"vocals_file": character.vocalsFile,
+			"_editor_isPlayer": character.isPlayer
+		};
+
+		var data:String = PsychJsonPrinter.print(json, ['offsets', 'position', 'healthbar_colors', 'camera_position', 'indices']);
+
+		if (data.length > 0) {
+			_file = new FileReference();
+			_file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
+			_file.addEventListener(Event.CANCEL, onSaveCancel);
+			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+			_file.save(data, '$_char.json');
 		}
-
-		function addAnimation(anim:String, name:String, fps:Float, loop:Bool, indices:Array<Int>) {
-			if (!character.isAnimateAtlas) {
-				if (indices != null && indices.length > 0)
-					character.animation.addByIndices(anim, name, indices, "", fps, loop);
-				else
-					character.animation.addByPrefix(anim, name, fps, loop);
-			} else {
-				if (indices != null && indices.length > 0)
-					character.atlas.anim.addBySymbolIndices(anim, name, indices, fps, loop);
-				else
-					character.atlas.anim.addBySymbol(anim, name, fps, loop);
-			}
-
-			if (!character.hasAnimation(anim))
-				character.addOffset(anim, 0, 0);
-		}
-
-		inline function newAnim(anim:String, name:String):AnimArray {
-			return {
-				offsets: [0, 0],
-				loop: false,
-				fps: 24,
-				anim: anim,
-				indices: [],
-				name: name
-			};
-		}
-
-		var characterList:Array<String> = [];
-
-		function reloadCharacterDropDown() {
-			characterList = Mods.mergeAllTextsNamed('data/characterList.txt');
-			var foldersToCheck:Array<String> = Mods.directoriesWithFile(Paths.getSharedPath(), 'characters/');
-			for (folder in foldersToCheck)
-				for (file in FileSystem.readDirectory(folder))
-					if (file.toLowerCase().endsWith('.json')) {
-						var charToCheck:String = file.substr(0, file.length - 5);
-						if (!characterList.contains(charToCheck))
-							characterList.push(charToCheck);
-					}
-
-			if (characterList.length < 1)
-				characterList.push('');
-			charDropDown.list = characterList;
-			charDropDown.selectedLabel = _char;
-		}
-
-		function reloadAnimationDropDown() {
-			var animList:Array<String> = [];
-			for (anim in anims)
-				animList.push(anim.anim);
-			if (animList.length < 1)
-				animList.push('NO ANIMATIONS'); // Prevents crash
-
-			animationDropDown.list = animList;
-		}
-
-		// save
-		var _file:FileReference;
-
-		function onSaveComplete(_):Void {
-			if (_file == null)
-				return;
-			_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-			_file.removeEventListener(Event.CANCEL, onSaveCancel);
-			_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-			_file = null;
-			FlxG.log.notice("Successfully saved file.");
-		}
-
-		/**
-		 * Called when the save file dialog is cancelled.
-		 */
-		function onSaveCancel(_):Void {
-			if (_file == null)
-				return;
-			_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-			_file.removeEventListener(Event.CANCEL, onSaveCancel);
-			_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-			_file = null;
-		}
-
-		/**
-		 * Called if there is an error while saving the gameplay recording.
-		 */
-		function onSaveError(_):Void {
-			if (_file == null)
-				return;
-			_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-			_file.removeEventListener(Event.CANCEL, onSaveCancel);
-			_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-			_file = null;
-			FlxG.log.error("Problem saving file");
-		}
-
-		function saveCharacter() {
-			if (_file != null)
-				return;
-
-			var json:Dynamic = {
-				"animations": character.animationsArray,
-				"image": character.imageFile,
-				"scale": character.jsonScale,
-				"sing_duration": character.singDuration,
-				"healthicon": character.healthIcon,
-
-				"position": character.positionArray,
-				"camera_position": character.cameraPosition,
-
-				"flip_x": character.originalFlipX,
-				"no_antialiasing": character.noAntialiasing,
-				"healthbar_colors": character.healthColorArray,
-				"vocals_file": character.vocalsFile,
-				"_editor_isPlayer": character.isPlayer
-			};
-
-			var data:String = PsychJsonPrinter.print(json, ['offsets', 'position', 'healthbar_colors', 'camera_position', 'indices']);
-
-			if (data.length > 0) {
-				_file = new FileReference();
-				_file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
-				_file.addEventListener(Event.CANCEL, onSaveCancel);
-				_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-				_file.save(data, '$_char.json');
-			}
-		}
+	}
 }

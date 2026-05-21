@@ -1136,14 +1136,8 @@ class Python extends Script implements IScriptExecutor {
 		});
 
 		// Debug
-		set('debugPrint', function(text:Dynamic = '', ?color:FlxColor = null) {
-			if (color == null)
-				color = FlxColor.WHITE;
-			if (PlayState.instance != null) {
-				PlayState.instance.addTextToDebug(text, color);
-				return;
-			}
-			CoolLog.debug('[Python] $text');
+		set('debugPrint', function(text:Dynamic = '', ?_:FlxColor = null) {
+			CoolLog.info(text);
 		});
 
 		// Mod settings
@@ -1188,11 +1182,7 @@ class Python extends Script implements IScriptExecutor {
 	}
 
 	public static function pythonTrace(text:String, ignoreCheck:Bool = false, deprecated:Bool = false, color:FlxColor = FlxColor.WHITE) {
-		if (PlayState.instance != null) {
-			PlayState.instance.addTextToDebug(text, color);
-			return;
-		}
-		CoolLog.debug('[Python] $text');
+		CoolLog.warning('[Python] $text');
 	}
 
 	public override function destroy() {

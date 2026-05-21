@@ -3,7 +3,6 @@ package;
 import funkin.ds.BytesMap;
 import funkin.backend.game.FunkinGame;
 import lime.app.Application;
-
 #if CRASH_HANDLER
 import haxe.CallStack;
 import haxe.Exception;
@@ -57,9 +56,7 @@ class StackFormatter {
 				'LocalFunction($v)';
 
 			case FilePos(inner, file, line, column):
-				var base:String = inner != null
-					? genTextFromStackItem(inner)
-					: "Unknown";
+				var base:String = inner != null ? genTextFromStackItem(inner) : "Unknown";
 
 				var text:String = '$base at $file:$line';
 
@@ -85,20 +82,18 @@ class StackFormatter {
 	/**
 	 * Get source line from file
 	 */
-	static function getLine(file:String, line:Int):String {
+	static function getLine(file:String, line:Int):Null<String> {
 		var content = getFile(file);
-
 		if (content == null)
-			return "Could not retrieve source.";
+			return null;
 
 		var lines = content.split("\n");
-
 		if (line <= 0 || line > lines.length)
-			return "Line out of range.";
+			return null;
 
 		return lines[line - 1].trim();
 	}
-	
+
 	private static function getFile(path:String):Null<String> {
 		return _sourceMap.get(path.replace("\\", "/"));
 	}
@@ -111,10 +106,6 @@ class StackFormatter {
  */
 final class ErrorHandle {
 	#if CRASH_HANDLER
-	#if CRASH_DEBUGGER
-	private static var _sourceMap:BytesMap = SourceMap.build();
-	#end
-
 	public static function init():Void {
 		FunkinGame.onGameCrash.add(onCrash);
 		untyped __global__.__hxcpp_set_critical_error_handler(onCriticalError);
@@ -132,14 +123,12 @@ final class ErrorHandle {
 		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
 		var dateNow:String = Date.now().toString();
 
-        errMsg += StackFormatter.genStack(callStack);
+		errMsg += StackFormatter.genStack(callStack);
 
 		CoolLog.critical("Crash detected!");
 
 		dateNow = dateNow.replace(" ", "_").replace(":", "-");
 		path = "./crash/" + "PaoPaoEngine_" + dateNow + ".log";
-
-
 
 		// Improved error reporting: always show something useful
 		var errorDetail = "";
@@ -188,6 +177,7 @@ final class ErrorHandle {
 
 			File.saveContent(filename, content + "\n");
 			CoolLog.critical("Crash dump saved in " + Path.normalize(filename));
+			Sys.println(content);
 		} catch (e:Dynamic) {
 			trace('Failed to save crash log: $e');
 		}
@@ -216,11 +206,5 @@ final class ErrorHandle {
 		Sys.exit(1);
 		#end
 	}
-
-	#if CRASH_DEBUGGER
-	private static function getFile(path:String):Null<String> {
-		return _sourceMap.get(path.replace("\\", "/"));
-	}
-	#end
 	#end
 }

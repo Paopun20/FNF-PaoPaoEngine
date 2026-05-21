@@ -1,7 +1,6 @@
 package funkin.modding.scripts.components;
 
 import flixel.FlxObject;
-import funkin.modding.scripts.utils.ImplementUtils;
 
 class CustomSubstate extends MusicBeatSubstate {
 	public static var name:String = 'unnamed';
@@ -9,10 +8,9 @@ class CustomSubstate extends MusicBeatSubstate {
 
 	#if (LUA_ALLOWED || PYTHON_ALLOWED)
 	public static function implement(funk:Dynamic) {
-		var impl = ImplementUtils.make(funk);
-		impl("openCustomSubstate", openCustomSubstate);
-		impl("closeCustomSubstate", closeCustomSubstate);
-		impl("insertToCustomSubstate", insertToCustomSubstate);
+		funk.set("openCustomSubstate", openCustomSubstate);
+		funk.set("closeCustomSubstate", closeCustomSubstate);
+		funk.set("insertToCustomSubstate", insertToCustomSubstate);
 	}
 	#end
 

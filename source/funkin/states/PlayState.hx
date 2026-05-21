@@ -410,12 +410,6 @@ class PlayState extends MusicBeatState {
 		if (isPixelStage)
 			introSoundsSuffix = '-pixel';
 
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED || NXSCRIPT_ALLOWED)
-		luaDebugGroup = new FlxTypedGroup<funkin.modding.objects.DebugLuaText>();
-		luaDebugGroup.cameras = [camOther];
-		add(luaDebugGroup);
-		#end
-
 		if (!stageData.hide_girlfriend) {
 			if (SONG.gfVersion == null || SONG.gfVersion.length < 1)
 				SONG.gfVersion = 'gf'; // Fix for the Chart Editor
@@ -671,24 +665,6 @@ class PlayState extends MusicBeatState {
 		return playbackRate;
 	}
 
-	#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED || NXSCRIPT_ALLOWED)
-	public function addTextToDebug(text:String, color:FlxColor) {
-		var newText:funkin.modding.objects.DebugLuaText = luaDebugGroup.recycle(funkin.modding.objects.DebugLuaText);
-		newText.text = text;
-		newText.color = color;
-		newText.disableTime = 6;
-		newText.alpha = 1;
-		newText.setPosition(10, 8 - newText.height);
-
-		luaDebugGroup.forEachAlive(function(spr:funkin.modding.objects.DebugLuaText) {
-			spr.y += newText.height + 2;
-		});
-		luaDebugGroup.add(newText);
-
-		Sys.println(text);
-	}
-	#end
-
 	public function reloadHealthBarColors() {
 		healthBar.setColors(FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]),
 			FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]));
@@ -859,13 +835,7 @@ class PlayState extends MusicBeatState {
 				videoCutscene.play();
 			return videoCutscene;
 		}
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED || NXSCRIPT_ALLOWED)
-		else
-			addTextToDebug("Video not found: " + fileName, FlxColor.RED);
-		#else
-		else
-			CoolLog.error("Video not found: " + fileName);
-		#end
+		CoolLog.error("Video not found: " + fileName);
 		#else
 		CoolLog.warning('Platform not supported!');
 		startAndEnd();
@@ -2282,11 +2252,7 @@ class PlayState extends MusicBeatState {
 					var len:Int = e.message.indexOf('\n') + 1;
 					if (len <= 0)
 						len = e.message.length;
-					#if (LUA_ALLOWED || HSCRIPT_ALLOWED || PYTHON_ALLOWED || NXSCRIPT_ALLOWED)
-					addTextToDebug('ERROR ("Set Property" Event) - ' + e.message.substr(0, len), FlxColor.RED);
-					#else
 					CoolLog.warning('ERROR ("Set Property" Event) - ' + e.message.substr(0, len));
-					#end
 				}
 
 			case "Offset Timer" | "Offset End":
@@ -3424,7 +3390,6 @@ class PlayState extends MusicBeatState {
 			newScript.execute();
 		} catch (e:Dynamic) {
 			CoolLog.info('[Python] Runtime error: "' + e + '" at ' + file);
-			PlayState.instance.addTextToDebug('[Python] Runtime error: "' + e + '" at ' + file, FlxColor.RED);
 		}
 	}
 	#end
@@ -3454,7 +3419,6 @@ class PlayState extends MusicBeatState {
 			newScript.execute();
 		} catch (e:Dynamic) {
 			CoolLog.info('[NxScript] Runtime error: "' + e + '" at ' + file);
-			PlayState.instance.addTextToDebug('[NxScript] Runtime error: "' + e + '" at ' + file, FlxColor.RED);
 		}
 	}
 	#end
@@ -3492,7 +3456,6 @@ class PlayState extends MusicBeatState {
 			newScript.execute();
 		} catch (e:Dynamic) {
 			CoolLog.error('[Lua] Runtime error: "' + e + '" at ' + file);
-			PlayState.instance.addTextToDebug('[Lua] Runtime error: "' + e + '" at ' + file, FlxColor.RED);
 		}
 	}
 	#end

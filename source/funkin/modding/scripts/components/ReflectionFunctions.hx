@@ -3,7 +3,6 @@ package funkin.modding.scripts.components;
 import Type.ValueType;
 import haxe.Constraints;
 import funkin.substates.GameOverSubstate;
-import funkin.modding.scripts.utils.ImplementUtils;
 import funkin.modding.scripts.utils.LuaUtils;
 
 //
@@ -14,14 +13,13 @@ class ReflectionFunctions {
 	static final instanceStr:Dynamic = "##PSYCHLUA_STRINGTOOBJ";
 
 	public static function implement(funk:Dynamic) {
-		var impl = ImplementUtils.make(funk);
-		impl("getProperty", function(variable:String, ?allowMaps:Bool = false) {
+		funk.set("getProperty", function(variable:String, ?allowMaps:Bool = false) {
 			var split:Array<String> = variable.split('.');
 			if (split.length > 1)
 				return LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length - 1], allowMaps);
 			return LuaUtils.getVarInArray(LuaUtils.getTargetInstance(), variable, allowMaps);
 		});
-		impl("setProperty", function(variable:String, value:Dynamic, ?allowMaps:Bool = false, ?allowInstances:Bool = false) {
+		funk.set("setProperty", function(variable:String, value:Dynamic, ?allowMaps:Bool = false, ?allowInstances:Bool = false) {
 			var split:Array<String> = variable.split('.');
 			if (split.length > 1) {
 				LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length - 1],
@@ -31,10 +29,10 @@ class ReflectionFunctions {
 			LuaUtils.setVarInArray(LuaUtils.getTargetInstance(), variable, allowInstances ? parseInstances(value) : value, allowMaps);
 			return value;
 		});
-		impl("getPropertyFromClass", function(classVar:String, variable:String, ?allowMaps:Bool = false) {
+		funk.set("getPropertyFromClass", function(classVar:String, variable:String, ?allowMaps:Bool = false) {
 			var myClass:Dynamic = LuaUtils.resolveClass(classVar);
 			if (myClass == null) {
-				ImplementUtils.addTextToDebug('getPropertyFromClass: Class $classVar not found', FlxColor.RED);
+				CoolLog.warning('getPropertyFromClass: Class $classVar not found');
 				return null;
 			}
 
@@ -48,10 +46,10 @@ class ReflectionFunctions {
 			}
 			return LuaUtils.getVarInArray(myClass, variable, allowMaps);
 		});
-		impl("setPropertyFromClass", function(classVar:String, variable:String, value:Dynamic, ?allowMaps:Bool = false, ?allowInstances:Bool = false) {
+		funk.set("setPropertyFromClass", function(classVar:String, variable:String, value:Dynamic, ?allowMaps:Bool = false, ?allowInstances:Bool = false) {
 			var myClass:Dynamic = LuaUtils.resolveClass(classVar);
 			if (myClass == null) {
-				ImplementUtils.addTextToDebug('setPropertyFromClass: Class $classVar not found', FlxColor.RED);
+				CoolLog.warning('setPropertyFromClass: Class $classVar not found');
 				return null;
 			}
 
@@ -67,7 +65,7 @@ class ReflectionFunctions {
 			LuaUtils.setVarInArray(myClass, variable, allowInstances ? parseInstances(value) : value, allowMaps);
 			return value;
 		});
-		impl("getPropertyFromGroup", function(group:String, index:Int, variable:Dynamic, ?allowMaps:Bool = false) {
+		funk.set("getPropertyFromGroup", function(group:String, index:Int, variable:Dynamic, ?allowMaps:Bool = false) {
 			var split:Array<String> = group.split('.');
 			var realObject:Dynamic = null;
 			if (split.length > 1)
@@ -88,17 +86,17 @@ class ReflectionFunctions {
 								result = LuaUtils.getGroupStuff(leArray, variable, allowMaps);
 							return result;
 						}
-						ImplementUtils.addTextToDebug('getPropertyFromGroup: Object #$index from group: $group doesn\'t exist!', FlxColor.RED);
+						CoolLog.warning('getPropertyFromGroup: Object #$index from group: $group doesn\'t exist!');
 
 					default: // Is Group
 						var result:Dynamic = LuaUtils.getGroupStuff(realObject.members[index], variable, allowMaps);
 						return result;
 				}
 			}
-			ImplementUtils.addTextToDebug('getPropertyFromGroup: Group/Array $group doesn\'t exist!', FlxColor.RED);
+			CoolLog.warning('getPropertyFromGroup: Group/Array $group doesn\'t exist!');
 			return null;
 		});
-		impl("setPropertyFromGroup",
+		funk.set("setPropertyFromGroup",
 			function(group:String, index:Int, variable:Dynamic, value:Dynamic, ?allowMaps:Bool = false, ?allowInstances:Bool = false) {
 				var split:Array<String> = group.split('.');
 				var realObject:Dynamic = null;
@@ -123,19 +121,19 @@ class ReflectionFunctions {
 							LuaUtils.setGroupStuff(realObject.members[index], variable, allowInstances ? parseInstances(value) : value, allowMaps);
 					}
 				} else
-					ImplementUtils.addTextToDebug('setPropertyFromGroup: Group/Array $group doesn\'t exist!', FlxColor.RED);
+					CoolLog.warning('setPropertyFromGroup: Group/Array $group doesn\'t exist!');
 				return value;
 			});
-		impl("addToGroup", function(group:String, tag:String, ?index:Int = -1) {
+		funk.set("addToGroup", function(group:String, tag:String, ?index:Int = -1) {
 			var obj:FlxSprite = LuaUtils.getObjectDirectly(tag);
 			if (obj == null || obj.destroy == null) {
-				ImplementUtils.addTextToDebug('addToGroup: Object $tag is not valid!', FlxColor.RED);
+				CoolLog.warning('addToGroup: Object $tag is not valid!');
 				return;
 			}
 
 			var groupOrArray:Dynamic = Reflect.getProperty(LuaUtils.getTargetInstance(), group);
 			if (groupOrArray == null) {
-				ImplementUtils.addTextToDebug('addToGroup: Group/Array $group is not valid!', FlxColor.RED);
+				CoolLog.warning('addToGroup: Group/Array $group is not valid!');
 				return;
 			}
 
@@ -150,19 +148,19 @@ class ReflectionFunctions {
 			} else
 				groupOrArray.insert(index, obj);
 		});
-		impl("removeFromGroup", function(group:String, ?index:Int = -1, ?tag:String = null, ?destroy:Bool = true) {
+		funk.set("removeFromGroup", function(group:String, ?index:Int = -1, ?tag:String = null, ?destroy:Bool = true) {
 			var obj:FlxSprite = null;
 			if (tag != null) {
 				obj = LuaUtils.getObjectDirectly(tag);
 				if (obj == null || obj.destroy == null) {
-					ImplementUtils.addTextToDebug('removeFromGroup: Object $tag is not valid!', FlxColor.RED);
+					CoolLog.warning('removeFromGroup: Object $tag is not valid!');
 					return;
 				}
 			}
 
 			var groupOrArray:Dynamic = Reflect.getProperty(LuaUtils.getTargetInstance(), group);
 			if (groupOrArray == null) {
-				ImplementUtils.addTextToDebug('removeFromGroup: Group/Array $group is not valid!', FlxColor.RED);
+				CoolLog.warning('removeFromGroup: Group/Array $group is not valid!');
 				return;
 			}
 
@@ -184,7 +182,7 @@ class ReflectionFunctions {
 			}
 		});
 
-		impl("callMethod", function(funcToRun:String, ?args:Array<Dynamic>) {
+		funk.set("callMethod", function(funcToRun:String, ?args:Array<Dynamic>) {
 			var parent:Dynamic = PlayState.instance;
 			var split:Array<String> = funcToRun.split('.');
 			var varParent:Dynamic = MusicBeatState.getVariables().get(split[0].trim());
@@ -199,11 +197,11 @@ class ReflectionFunctions {
 			}
 			return Reflect.callMethod(null, parent, parseInstances(args));
 		});
-		impl("callMethodFromClass", function(className:String, funcToRun:String, ?args:Array<Dynamic>) {
+		funk.set("callMethodFromClass", function(className:String, funcToRun:String, ?args:Array<Dynamic>) {
 			return callMethodFromObject(Type.resolveClass(className), funcToRun, parseInstances(args));
 		});
 
-		impl("createInstance", function(variableToSave:String, className:String, ?args:Array<Dynamic>) {
+		funk.set("createInstance", function(variableToSave:String, className:String, ?args:Array<Dynamic>) {
 			if (!Std.isOfType(args, Array))
 				args = [];
 			variableToSave = variableToSave.trim().replace('.', '');
@@ -213,7 +211,7 @@ class ReflectionFunctions {
 				var myType:Dynamic = Type.resolveClass(className);
 
 				if (myType == null) {
-					ImplementUtils.addTextToDebug('createInstance: Class $className not found', FlxColor.RED);
+					CoolLog.warning('createInstance: Class $className not found');
 					return false;
 				}
 
@@ -221,14 +219,14 @@ class ReflectionFunctions {
 				if (obj != null)
 					MusicBeatState.getVariables().set(variableToSave, obj);
 				else
-					ImplementUtils.addTextToDebug('createInstance: Failed to create $variableToSave, arguments are possibly wrong.', FlxColor.RED);
+					CoolLog.warning('createInstance: Failed to create $variableToSave, arguments are possibly wrong.');
 
 				return (obj != null);
 			} else
-				ImplementUtils.addTextToDebug('createInstance: Variable $variableToSave is already being used and cannot be replaced!', FlxColor.RED);
+				CoolLog.warning('createInstance: Variable $variableToSave is already being used and cannot be replaced!');
 			return false;
 		});
-		impl("addInstance", function(objectName:String, ?inFront:Bool = false) {
+		funk.set("addInstance", function(objectName:String, ?inFront:Bool = false) {
 			var savedObj:Dynamic = MusicBeatState.getVariables().get(objectName);
 			if (savedObj != null) {
 				var obj:Dynamic = savedObj;
@@ -241,9 +239,9 @@ class ReflectionFunctions {
 						GameOverSubstate.instance.insert(GameOverSubstate.instance.members.indexOf(GameOverSubstate.instance.boyfriend), obj);
 				}
 			} else
-				ImplementUtils.addTextToDebug('addInstance: Can\'t add what doesn\'t exist~ ($objectName)', FlxColor.RED);
+				CoolLog.warning('addInstance: Can\'t add what doesn\'t exist~ ($objectName)');
 		});
-		impl("instanceArg", function(instanceName:String, ?className:String = null) {
+		funk.set("instanceArg", function(instanceName:String, ?className:String = null) {
 			var retStr:String = '$instanceStr::$instanceName';
 			if (className != null)
 				retStr += '::$className';

@@ -87,6 +87,10 @@ class CoolUtil {
 	}
 
 	inline public static function dominantColor(sprite:flixel.FlxSprite):Int {
+		// Return white if sprite pixels are not loaded
+		if (sprite == null || sprite.pixels == null || sprite.frameWidth <= 0 || sprite.frameHeight <= 0)
+			return FlxColor.WHITE;
+
 		var countByColor:Map<Int, Int> = [];
 		for (col in 0...sprite.frameWidth) {
 			for (row in 0...sprite.frameHeight) {

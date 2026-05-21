@@ -1,7 +1,6 @@
 package funkin.modding.scripts.components;
 
 import funkin.modding.scripts.LuaScript;
-import funkin.modding.scripts.utils.ImplementUtils;
 import funkin.modding.scripts.utils.LuaUtils;
 import funkin.shaders.CustomShader;
 
@@ -13,7 +12,7 @@ class ShaderFunctions {
 		var fragPath = Paths.shaderFragment(name);
 		var vertPath = Paths.shaderVertex(name);
 		if (!openfl.Assets.exists(fragPath) && !openfl.Assets.exists(vertPath)) {
-			ImplementUtils.addTextToDebug('initLuaShader: Shader "$name" not found!', FlxColor.RED);
+			CoolLog.warning('initLuaShader: Shader "$name" not found!');
 			return false;
 		}
 		return true;
@@ -33,7 +32,7 @@ class ShaderFunctions {
 			return true;
 		}
 
-		ImplementUtils.addTextToDebug('setSpriteShader: Object "$obj" not found!', FlxColor.RED);
+		CoolLog.warning('setSpriteShader: Object "$obj" not found!');
 		return false;
 	}
 
@@ -144,7 +143,7 @@ class ShaderFunctions {
 
 		if (target == null) {
 			#if LUA_ALLOWED
-			ImplementUtils.addTextToDebug('Error on getting shader: Object "$obj" not found', FlxColor.RED);
+			CoolLog.warning('Error on getting shader: Object "$obj" not found');
 			#else
 			CoolLog.error('Error on getting shader: Object "$obj" not found');
 			#end
@@ -153,7 +152,7 @@ class ShaderFunctions {
 
 		var shader = Std.downcast(target.shader, CustomShader);
 		if (shader == null)
-			ImplementUtils.addTextToDebug('Error on getting shader: Shader on "$obj" is not a CustomShader', FlxColor.RED);
+			CoolLog.warning('Error on getting shader: Shader on "$obj" is not a CustomShader');
 		return shader;
 	}
 }

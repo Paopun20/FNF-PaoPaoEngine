@@ -8,7 +8,7 @@ using StringTools;
 
 class HttpClient {
 	/** Seconds before a connection attempt is abandoned. */
-	public static final DEFAULT_TIMEOUT_SECONDS:Int = 10;
+	public static final DEFAULT_TIMEOUT_SECONDS:Float = 10;
 
 	/** Maximum number of retry attempts for transient errors. */
 	public static final MAX_RETRIES:Int = 3;

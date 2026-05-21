@@ -271,19 +271,33 @@ class LoadingState extends EditableState {
 
 	var transitioning:Bool = false;
 
+	var offsetTween: FlxTween;
+
 	function onIogoScreenClick() {
-		if (logoClickCount == 10) {
+		if (logoClickCount == 20) {
 			#if LOADING_EASTER_EGG
 			easterEggActive = true;
 			startEasterEgg();
 			#end
-		} else {
-			myCoooooollogo.angle = FlxG.random.float(-25, 25);
-			myCoooooollogo.x += FlxG.random.float(-25, 25);
-			myCoooooollogo.y += FlxG.random.float(-25, 25);
-			FlxTween.cancelTweensOf(myCoooooollogo);
-			FlxTween.tween(myCoooooollogo, {angle: 0, x: IoX, y: IoY}, 0.5, {ease: FlxEase.elasticOut});
 		}
+
+		if (offsetTween != null) {
+			offsetTween.cancel();
+		}
+
+		// push
+		myCoooooollogo.angle = FlxG.random.float(-25, 25);
+		myCoooooollogo.x += FlxG.random.float(-25, 25);
+		myCoooooollogo.y += FlxG.random.float(-25, 25);
+		offsetTween = FlxTween.tween(myCoooooollogo, {angle: 0, x: IoX, y: IoY}, 0.5, {ease: FlxEase.elasticOut});
+
+		// jelly
+		// set(0.3, 0.3)
+		var sx = FlxG.random.bool(50) ? 0.25 : 0.35;
+		var sy = FlxG.random.bool(50) ? 0.25 : 0.35;
+		myCoooooollogo.scale.set(sx, sy);
+		FlxTween.tween(myCoooooollogo.scale, {x: 0.3, y: 0.3}, 2, {ease: FlxEase.elasticOut});
+
 		logoClickCount++;
 	}
 
@@ -326,7 +340,7 @@ class LoadingState extends EditableState {
 				blackout.visible = false;
 
 				if (Achievements.exists("something_wrong"))
-					Achievements.unlock("something_wrong", true #if debug , true #end);
+					Achievements.unlock("something_wrong", true #if debug, true #end);
 
 				new FlxTimer().start(3, function(tmr) {
 					easterEggActive = false;

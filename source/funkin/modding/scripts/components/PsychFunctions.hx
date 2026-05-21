@@ -30,7 +30,6 @@ import funkin.modding.objects.DebugLuaText;
 import funkin.modding.objects.ModchartSprite;
 import funkin.modding.scripts.utils.LuaUtils.LuaTweenOptions;
 import funkin.modding.scripts.utils.LuaUtils;
-import funkin.modding.scripts.utils.ImplementUtils;
 import funkin.states.FreeplayState;
 import funkin.states.MainMenuState;
 import funkin.states.StoryMenuState;
