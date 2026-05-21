@@ -113,10 +113,17 @@ jobs:
           haxelib setup ${{ matrix.lib-path }}
           haxelib --global update haxelib
 
-      - name: Install Haxelib deps
+      - name: Install Haxelib deps (Unix)
+        if: matrix.target != 'windows'
         run: |
           chmod +x ${{ matrix.setup-file }} || true
-          sh ${{ matrix.setup-file }} || true
+          sh ${{ matrix.setup-file }}
+
+      - name: Install Haxelib deps (Windows)
+        if: matrix.target == 'windows'
+        shell: pwsh
+        run: |
+          pwsh -ExecutionPolicy Bypass -File ${{ matrix.setup-file }}
 
       - name: Build project
         run: |
