@@ -1,13 +1,14 @@
 package funkin.backend;
 
-import lime.system.System;
+import lime.system.System as LimeSystem;
 import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
 import funkin.backend.network.HttpClient as Client;
 import funkin.backend.utils.Version;
 
+@:analyzer(optimize, local_dce, fusion, user_var_fusion)
 class CoolUtil {
-	public static var version:String = funkin.states.MainMenuState.psychEngineVersion.trim();
+	public static var version:String = funkin.states.MainMenuState.paopaoEngineVersion.trim();
 	public static var isoutdated:Bool = false;
 
 	public static function checkForUpdates():String {
@@ -47,13 +48,8 @@ class CoolUtil {
 
 	inline public static function coolTextFile(path:String):Array<String> {
 		var daList:String = null;
-		#if (sys && MODS_ALLOWED)
 		if (FileSystem.exists(path))
 			daList = File.getContent(path);
-		#else
-		if (Assets.exists(path))
-			daList = Assets.getText(path);
-		#end
 		return daList != null ? listFromString(daList) : [];
 	}
 
@@ -125,12 +121,7 @@ class CoolUtil {
 	}
 
 	inline public static function browserLoad(site:String) {
-		System.openURL(site);
-		// #if linux
-		// Sys.command('/usr/bin/xdg-open', [site]);
-		// #else
-		// FlxG.openURL(site);
-		// #end
+		LimeSystem.openURL(site);
 	}
 
 	inline public static function openFolder(folder:String, absolute:Bool = false) {

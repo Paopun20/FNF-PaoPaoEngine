@@ -84,7 +84,8 @@ class AchievementPopup extends Sprite {
 		FlxG.stage.addEventListener(Event.RESIZE, onResize);
 		addEventListener(Event.ENTER_FRAME, update);
 
-		FlxG.game.addChild(this); // Don't add it below mouse, or it will disappear once the game changes states
+		var overlay = Main.achLay;
+		overlay.showPopup(this);
 
 		// fix scale
 		lastScale = (FlxG.stage.stageHeight / FlxG.height);

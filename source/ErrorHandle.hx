@@ -118,6 +118,9 @@ final class ErrorHandle {
 	}
 
 	private static function onCrash(e:Exception):Void {
+		#if debug
+		cpp.vm.Debugger.breakNow();
+		#end
 		var errMsg:String = "";
 		var path:String;
 		var callStack:Array<StackItem> = CallStack.exceptionStack(true);

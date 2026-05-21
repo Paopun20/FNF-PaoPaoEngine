@@ -26,7 +26,6 @@ art/build_html-debug.bat
 example_mods/*
 !example_mods/modTemplate.zip
 mods/*
-modsList.txt
 
 # Environment Variables
 .env

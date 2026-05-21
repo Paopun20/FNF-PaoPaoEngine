@@ -6,12 +6,12 @@ import lime.system.System;
 import flixel.FlxG;
 import funkin.backend.Highscore;
 import funkin.frontend.huds.FPSCounter;
+import funkin.frontend.huds.AchievementsOverlay;
 import funkin.states.TitleState;
 import flixel.util.FlxSignal;
 import lime.app.Application;
 import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
-import openfl.events.Event;
 import sys.thread.Thread;
 #if (linux || mac)
 import lime.graphics.Image;
@@ -53,6 +53,7 @@ class Main extends Sprite {
 	};
 
 	public static var fpsVar:FPSCounter; // for showing FPS on screen, if enabled in settings
+	public static var achLay:AchievementsOverlay;
 	public static var gameInstance:Main; // for mods to access the main class instance, if needed
 	public static var flxInstance:FunkinGame; // just FunkinGame instance, for mods to access it directly if needed
 
@@ -196,6 +197,8 @@ class Main extends Sprite {
 			fpsVar.visible = ClientPrefs.data.showFPS;
 		}
 		#end
+		achLay = new AchievementsOverlay();
+		addChild(achLay);
 
 		#if (linux || mac) // fix the app icon not showing up on the Linux Panel / Mac Dock
 		Lib.current.stage.window.setIcon(Image.fromFile("icon.png"));
