@@ -1,6 +1,6 @@
 package funkin.modding.scripts.components;
 
-#if flxanimate
+#if flixel_animate
 class ModchartAnimateSprite extends FlxAnimate {
 	public var animOffsets:Map<String, Array<Float>> = new Map<String, Array<Float>>();
 

@@ -37,9 +37,9 @@ import funkin.objects.Alphabet;
 import funkin.objects.BGSprite;
 import funkin.states.PlayState;
 import funkin.states.LoadingState;
-#if flxanimate
-import flxanimate.*;
-import flxanimate.PsychFlxAnimate as FlxAnimate;
+#if flixel_animate
+import animate.*;
+import animate.FlxAnimate as FlxAnimate;
 #end
 // Flixel
 import flixel.sound.FlxSound;

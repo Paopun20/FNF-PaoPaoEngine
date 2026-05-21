@@ -4,45 +4,23 @@ package;
 import lime.system.System;
 #end
 import flixel.FlxG;
-import flixel.FlxGame;
-import flixel.FlxState;
-import flixel.graphics.FlxGraphic;
 import funkin.backend.Highscore;
 import funkin.frontend.huds.FPSCounter;
 import funkin.states.TitleState;
-import funkin.backend.utils.ThreadUtil;
 import flixel.util.FlxSignal;
-import haxe.io.Path;
 import lime.app.Application;
-import openfl.Assets;
-import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
 import openfl.events.Event;
 import sys.thread.Thread;
-import funkin.ds.BytesMap;
 #if (linux || mac)
 import lime.graphics.Image;
 #end
 #if desktop
 import funkin.backend.modules.ALSoftConfig; // Just to make sure DCE doesn't remove this, since it's not directly referenced anywhere else.
 #end
-#if CRASH_HANDLER
-import haxe.CallStack;
-import haxe.Exception;
-import haxe.io.Path;
-import openfl.Lib;
-import sys.FileSystem;
-import sys.io.File;
-#end
-#if CRASH_DEBUGGER
-import funkin.backend.utils.macro.SourceMap;
-#end
-import haxe.ds.StringMap;
 #if hxhardware
 import hxhardware.CPU;
-import hxhardware.GPU;
-import hxhardware.Memory;
 #end
 #if SlWindowsAPI
 import winapi.WindowsAPI;
@@ -58,148 +36,7 @@ import funkin.backend.game.FunkinGame;
 import funkin.backend.utils.HxSignalKill;
 #end
 
-/**
- * Error and crash handling system for PaoPaoEngine
- * Handles uncaught errors, critical errors, and provides logging functionality
- */
-final class ErrorHandle {
-	#if CRASH_HANDLER
-	#if CRASH_DEBUGGER
-	private static var _sourceMap:BytesMap<String> = SourceMap.build();
-	#end
-
-	public static function init():Void {
-		FunkinGame.onGameCrash.add(onCrash);
-		untyped __global__.__hxcpp_set_critical_error_handler(onCriticalError);
-	}
-
-	static function onCriticalError(message:String):Void // 💀 it cook
-	{
-		// Wrap as a synthetic exception so onCrash can handle it uniformly
-		onCrash(new Exception(message));
-	}
-
-	private static function onCrash(e:Exception):Void {
-		var errMsg:String = "";
-		var path:String;
-		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
-		var dateNow:String = Date.now().toString();
-		#if CRASH_DEBUGGER
-		var getLine = function(file:String, line:Int):String {
-			var content = getFile(file);
-			if (content != null) {
-				var lines = content.split("\n");
-				if (line > 0 && line <= lines.length)
-					return lines[line - 1].trim();
-			}
-			return "Could not retrieve source code line.";
-		};
-		#end
-
-		CoolLog.critical("Crash detected!");
-
-		dateNow = dateNow.replace(" ", "_").replace(":", "-");
-		path = "./crash/" + "PaoPaoEngine_" + dateNow + ".log";
-
-		// Build stack trace
-		var stackIndex:Int = 0;
-		for (stackItem in callStack) {
-			switch (stackItem) {
-				case FilePos(s, file, line, column):
-					errMsg += file + " (line " + line + ")\n";
-					#if CRASH_DEBUGGER
-					errMsg += "-> " + getLine(file, line) + "\n";
-					#end
-					stackIndex++;
-				default:
-					errMsg += stackIndex + " " + Std.string(stackItem) + "\n";
-					stackIndex++;
-			}
-		}
-
-		// Improved error reporting: always show something useful
-		var errorDetail = "";
-		var errorType = "";
-		if (e != null) {
-			errorType = Type.getClassName(Type.getClass(e));
-			if (e.message != null && e.message != "") {
-				errorDetail = e.message;
-			} else if (e.toString() != null && e.toString() != "") {
-				errorDetail = e.toString();
-			} else {
-				errorDetail = "<no error details available>";
-			}
-		} else {
-			errorType = "<Unknown Exception Type>";
-			errorDetail = "<Exception object is null>";
-		}
-		errMsg += '\n${errorType.split(".").pop()}: ' + errorDetail;
-		#if officialBuild
-		errMsg += "\nPlease report this error to the GitHub page: https://github.com/Paopun20/FNF-PaoPaoEngine";
-		#end
-		errMsg += "\n\n> Cool Crash Handler written by: PaoPao";
-
-		// Save crash log
-		#if CRASH_DEBUGGER
-		// uhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh, what lib I can use like imgui and easy to use in Haxe?
-
-		// For now, just save the logs and show a simple dialog, but in the future we can make a full crash debugger with stack trace navigation
-		saveLogs(path, errMsg);
-		showDialogWindow(errMsg, "Game Crash!");
-		shutdown();
-		#else
-		saveLogs(path, errMsg);
-		showDialogWindow(errMsg, "Game Crash!");
-		shutdown();
-		#end
-	}
-
-	/**
-	 * Save logs to file
-	 */
-	private static function saveLogs(filename:String, content:String):Void {
-		try {
-			if (!FileSystem.exists("./crash/"))
-				FileSystem.createDirectory("./crash/");
-
-			File.saveContent(filename, content + "\n");
-			CoolLog.critical("Crash dump saved in " + Path.normalize(filename));
-		} catch (e:Dynamic) {
-			trace('Failed to save crash log: $e');
-		}
-	}
-
-	/**
-	 * Show a dialog window with error message
-	 */
-	private static function showDialogWindow(message:String, title:String):Void {
-		try {
-			Application.current.window.alert(message, title);
-		} catch (e:Dynamic) {
-			trace('Failed to show dialog window: $e');
-		}
-	}
-
-	/**
-	 * Shutdown the application
-	 */
-	private static function shutdown():Void {
-		#if DISCORD_ALLOWED
-		DiscordClient.shutdown();
-		#end
-
-		#if sys
-		Sys.exit(1);
-		#end
-	}
-
-	#if CRASH_DEBUGGER
-	private static function getFile(path:String):Null<String> {
-		return _sourceMap.get(path.replace("\\", "/"));
-	}
-	#end
-	#end
-}
+import openfl.Lib;
 
 #if (linux && !debug)
 @:cppInclude('./external/gamemode_client.h')

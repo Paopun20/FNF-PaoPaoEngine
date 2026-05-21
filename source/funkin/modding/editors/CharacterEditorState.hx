@@ -26,6 +26,16 @@ typedef PointerGraphic = flixel.system.debug.interaction.tools.Pointer.GraphicCu
 class PointerGraphic extends BitmapData {}
 #end
 
+// Local typedef that overrides the imported AnimArray with the full Psych Engine field set.
+private typedef AnimArray = {
+	var anim:String;
+	var name:String;
+	var fps:Int;
+	var loop:Bool;
+	var indices:Array<Int>;
+	var offsets:Array<Int>;
+}
+
 class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent {
 	var character:Character;
 	var ghost:FlxSprite;
@@ -330,7 +340,6 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 					if (animateGhost == null) // If I created the animateGhost on create() and you didn't load an atlas, it would crash the game on destroy, so we create it here
 					{
 						animateGhost = new FlxAnimate(ghost.x, ghost.y);
-						animateGhost.showPivot = false;
 						insert(members.indexOf(ghost), animateGhost);
 						animateGhost.active = false;
 					}
@@ -343,7 +352,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 					else
 						animateGhost.anim.addBySymbol('anim', myAnim.name, 0, false);
 
-					animateGhost.anim.play('anim', true, false, character.atlas.anim.curFrame);
+					animateGhost.anim.play('anim', true, false, animateGhost.anim.curAnim?.curFrame ?? 0);
 					animateGhost.anim.pause();
 
 					animateGhostImage = character.imageFile;
@@ -564,7 +573,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 						if (!character.isAnimateAtlas)
 							character.animation.remove(animationInputText.text);
 						else
-							@:privateAccess character.atlas.anim.animsMap.remove(animationInputText.text);
+							character.atlas.anim.remove(animationInputText.text);
 					}
 					character.animationsArray.remove(anim);
 				}
@@ -594,13 +603,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 						if (!character.isAnimateAtlas)
 							character.animation.remove(anim.anim);
 						else
-							@:privateAccess character.atlas.anim.animsMap.remove(anim.anim);
-						character.animOffsets.remove(anim.anim);
-						character.animationsArray.remove(anim);
-					}
-
-					if (resetAnim && character.animationsArray.length > 0) {
-						curAnim = FlxMath.wrap(curAnim, 0, anims.length - 1);
+							character.atlas.anim.remove(anim.anim);
 						character.playAnim(anims[curAnim].anim, true);
 					}
 					reloadAnimList();
@@ -803,19 +806,16 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		var anims:Array<AnimArray> = character.animationsArray.copy();
 
 		character.atlas = FlxDestroyUtil.destroy(character.atlas);
-		character.isAnimateAtlas = false;
 		character.color = FlxColor.WHITE;
 		character.alpha = 1;
 
 		if (Paths.fileExists('images/' + character.imageFile + '/Animation.json', TEXT)) {
 			character.atlas = new FlxAnimate();
-			character.atlas.showPivot = false;
 			try {
 				Paths.loadAnimateAtlas(character.atlas, character.imageFile);
 			} catch (e:Dynamic) {
 				FlxG.log.warn('Could not load atlas ${character.imageFile}: $e');
 			}
-			character.isAnimateAtlas = true;
 		} else {
 			character.frames = Paths.getMultiAtlas(character.imageFile.split(','));
 		}
@@ -1022,9 +1022,9 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			if (!character.isAnimateAtlas && character.animation.curAnim != null) {
 				frames = character.animation.curAnim.curFrame;
 				length = character.animation.curAnim.numFrames;
-			} else if (character.isAnimateAtlas && character.atlas.anim != null) {
-				frames = character.atlas.anim.curFrame;
-				length = character.atlas.anim.length;
+			} else if (character.isAnimateAtlas && character.atlas.anim != null && character.atlas.anim.curAnim != null) {
+				frames = character.atlas.anim.curAnim.curFrame;
+				length = character.atlas.anim.curAnim.numFrames;
 			}
 
 			if (length >= 0) {
@@ -1038,8 +1038,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 						frames = FlxMath.wrap(frames + Std.int(isLeft ? -shiftMult : shiftMult), 0, length - 1);
 						if (!character.isAnimateAtlas)
 							character.animation.curAnim.curFrame = frames;
-						else
-							character.atlas.anim.curFrame = frames;
+						else if (character.atlas.anim.curAnim != null)
+							character.atlas.anim.curAnim.curFrame = frames;
 						holdingFrameElapsed -= 0.1;
 					}
 				}
@@ -1048,243 +1048,243 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 				// if(character.animation.curAnim.paused) txt += ' - PAUSED';
 				clr = FlxColor.WHITE;
 			}
-		}
-		if (txt != frameAdvanceText.text)
-			frameAdvanceText.text = txt;
-		frameAdvanceText.color = clr;
+			if (txt != frameAdvanceText.text)
+				frameAdvanceText.text = txt;
+			frameAdvanceText.color = clr;
 
-		// OTHER CONTROLS
-		if (FlxG.keys.justPressed.F12)
-			silhouettes.visible = !silhouettes.visible;
+			// OTHER CONTROLS
+			if (FlxG.keys.justPressed.F12)
+				silhouettes.visible = !silhouettes.visible;
 
-		if (FlxG.keys.justPressed.F1 || (helpBg.visible && FlxG.keys.justPressed.ESCAPE)) {
-			helpBg.visible = !helpBg.visible;
-			helpTexts.visible = helpBg.visible;
-		} else if (FlxG.keys.justPressed.ESCAPE) {
-			if (!_goToPlayState) {
-				if (!unsavedProgress) {
-					MusicBeatState.switchState(new funkin.modding.editors.MasterEditorMenu());
-					FlxG.sound.playMusic(Paths.music('freakyMenu'));
-				} else
-					openSubState(new ExitConfirmationPrompt());
-			} else {
-				FlxG.mouse.visible = false;
-				MusicBeatState.switchState(new PlayState());
-			}
-			return;
-		}
-	}
-
-	inline function updatePointerPos(?snap:Bool = true) {
-		if (character == null || cameraFollowPointer == null)
-			return;
-
-		var offX:Float = 0;
-		var offY:Float = 0;
-		if (!character.isPlayer) {
-			offX = character.getMidpoint().x + 150 + character.cameraPosition[0];
-			offY = character.getMidpoint().y - 100 + character.cameraPosition[1];
-		} else {
-			offX = character.getMidpoint().x - 100 - character.cameraPosition[0];
-			offY = character.getMidpoint().y - 100 + character.cameraPosition[1];
-		}
-		cameraFollowPointer.setPosition(offX, offY);
-
-		if (snap) {
-			FlxG.camera.scroll.x = cameraFollowPointer.getMidpoint().x - FlxG.width / 2;
-			FlxG.camera.scroll.y = cameraFollowPointer.getMidpoint().y - FlxG.height / 2;
-		}
-	}
-
-	inline function updateHealthBar() {
-		healthColorStepperR.value = character.healthColorArray[0];
-		healthColorStepperG.value = character.healthColorArray[1];
-		healthColorStepperB.value = character.healthColorArray[2];
-		healthBar.leftBar.color = healthBar.rightBar.color = FlxColor.fromRGB(character.healthColorArray[0], character.healthColorArray[1],
-			character.healthColorArray[2]);
-		healthIcon.changeIcon(character.healthIcon, false);
-		updatePresence();
-	}
-
-	inline function updatePresence() {
-		#if DISCORD_ALLOWED
-		// Updating Discord Rich Presence
-		DiscordClient.changePresence("Character Editor", "Character: " + _char, healthIcon.getCharacter());
-		#end
-	}
-
-	inline function reloadAnimList() {
-		anims = character.animationsArray;
-		if (anims.length > 0)
-			character.playAnim(anims[0].anim, true);
-		curAnim = 0;
-
-		updateText();
-		if (animationDropDown != null)
-			reloadAnimationDropDown();
-	}
-
-	inline function updateText() {
-		animsTxt.removeFormat(selectedFormat);
-
-		var intendText:String = '';
-		for (num => anim in anims) {
-			if (num > 0)
-				intendText += '\n';
-
-			if (num == curAnim) {
-				var n:Int = intendText.length;
-				intendText += anim.anim + ": " + anim.offsets;
-				animsTxt.addFormat(selectedFormat, n, intendText.length);
-			} else
-				intendText += anim.anim + ": " + anim.offsets;
-		}
-		animsTxt.text = intendText;
-	}
-
-	inline function updateCharacterPositions() {
-		if ((character != null && !character.isPlayer) || (character == null && predictCharacterIsNotPlayer(_char)))
-			character.setPosition(dadPosition.x, dadPosition.y);
-		else
-			character.setPosition(bfPosition.x, bfPosition.y);
-
-		character.x += character.positionArray[0];
-		character.y += character.positionArray[1];
-		updatePointerPos(false);
-	}
-
-	inline function predictCharacterIsNotPlayer(name:String) {
-		return (name != 'bf' && !name.startsWith('bf-') && !name.endsWith('-player') && !name.endsWith('-playable') && !name.endsWith('-dead'))
-			|| name.endsWith('-opponent')
-			|| name.startsWith('gf-')
-			|| name.endsWith('-gf')
-			|| name == 'gf';
-	}
-
-	function addAnimation(anim:String, name:String, fps:Float, loop:Bool, indices:Array<Int>) {
-		if (!character.isAnimateAtlas) {
-			if (indices != null && indices.length > 0)
-				character.animation.addByIndices(anim, name, indices, "", fps, loop);
-			else
-				character.animation.addByPrefix(anim, name, fps, loop);
-		} else {
-			if (indices != null && indices.length > 0)
-				character.atlas.anim.addBySymbolIndices(anim, name, indices, fps, loop);
-			else
-				character.atlas.anim.addBySymbol(anim, name, fps, loop);
-		}
-
-		if (!character.hasAnimation(anim))
-			character.addOffset(anim, 0, 0);
-	}
-
-	inline function newAnim(anim:String, name:String):AnimArray {
-		return {
-			offsets: [0, 0],
-			loop: false,
-			fps: 24,
-			anim: anim,
-			indices: [],
-			name: name
-		};
-	}
-
-	var characterList:Array<String> = [];
-
-	function reloadCharacterDropDown() {
-		characterList = Mods.mergeAllTextsNamed('data/characterList.txt');
-		var foldersToCheck:Array<String> = Mods.directoriesWithFile(Paths.getSharedPath(), 'characters/');
-		for (folder in foldersToCheck)
-			for (file in FileSystem.readDirectory(folder))
-				if (file.toLowerCase().endsWith('.json')) {
-					var charToCheck:String = file.substr(0, file.length - 5);
-					if (!characterList.contains(charToCheck))
-						characterList.push(charToCheck);
+			if (FlxG.keys.justPressed.F1 || (helpBg.visible && FlxG.keys.justPressed.ESCAPE)) {
+				helpBg.visible = !helpBg.visible;
+				helpTexts.visible = helpBg.visible;
+			} else if (FlxG.keys.justPressed.ESCAPE) {
+				if (!_goToPlayState) {
+					if (!unsavedProgress) {
+						MusicBeatState.switchState(new funkin.modding.editors.MasterEditorMenu());
+						FlxG.sound.playMusic(Paths.music('freakyMenu'));
+					} else
+						openSubState(new ExitConfirmationPrompt());
+				} else {
+					FlxG.mouse.visible = false;
+					MusicBeatState.switchState(new PlayState());
 				}
-
-		if (characterList.length < 1)
-			characterList.push('');
-		charDropDown.list = characterList;
-		charDropDown.selectedLabel = _char;
-	}
-
-	function reloadAnimationDropDown() {
-		var animList:Array<String> = [];
-		for (anim in anims)
-			animList.push(anim.anim);
-		if (animList.length < 1)
-			animList.push('NO ANIMATIONS'); // Prevents crash
-
-		animationDropDown.list = animList;
-	}
-
-	// save
-	var _file:FileReference;
-
-	function onSaveComplete(_):Void {
-		if (_file == null)
-			return;
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
-		FlxG.log.notice("Successfully saved file.");
-	}
-
-	/**
-	 * Called when the save file dialog is cancelled.
-	 */
-	function onSaveCancel(_):Void {
-		if (_file == null)
-			return;
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
-	}
-
-	/**
-	 * Called if there is an error while saving the gameplay recording.
-	 */
-	function onSaveError(_):Void {
-		if (_file == null)
-			return;
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
-		FlxG.log.error("Problem saving file");
-	}
-
-	function saveCharacter() {
-		if (_file != null)
-			return;
-
-		var json:Dynamic = {
-			"animations": character.animationsArray,
-			"image": character.imageFile,
-			"scale": character.jsonScale,
-			"sing_duration": character.singDuration,
-			"healthicon": character.healthIcon,
-
-			"position": character.positionArray,
-			"camera_position": character.cameraPosition,
-
-			"flip_x": character.originalFlipX,
-			"no_antialiasing": character.noAntialiasing,
-			"healthbar_colors": character.healthColorArray,
-			"vocals_file": character.vocalsFile,
-			"_editor_isPlayer": character.isPlayer
-		};
-
-		var data:String = PsychJsonPrinter.print(json, ['offsets', 'position', 'healthbar_colors', 'camera_position', 'indices']);
-
-		if (data.length > 0) {
-			_file = new FileReference();
-			_file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
-			_file.addEventListener(Event.CANCEL, onSaveCancel);
-			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-			_file.save(data, '$_char.json');
+				return;
+			}
 		}
-	}
+	} // end update()
+
+	function updatePointerPos(?snap:Bool = true) {
+			if (character == null || cameraFollowPointer == null)
+				return;
+
+			var offX:Float = 0;
+			var offY:Float = 0;
+			if (!character.isPlayer) {
+				offX = character.getMidpoint().x + 150 + character.cameraPosition[0];
+				offY = character.getMidpoint().y - 100 + character.cameraPosition[1];
+			} else {
+				offX = character.getMidpoint().x - 100 - character.cameraPosition[0];
+				offY = character.getMidpoint().y - 100 + character.cameraPosition[1];
+			}
+			cameraFollowPointer.setPosition(offX, offY);
+
+			if (snap) {
+				FlxG.camera.scroll.x = cameraFollowPointer.getMidpoint().x - FlxG.width / 2;
+				FlxG.camera.scroll.y = cameraFollowPointer.getMidpoint().y - FlxG.height / 2;
+			}
+		}
+
+		inline function updateHealthBar() {
+			healthColorStepperR.value = character.healthColorArray[0];
+			healthColorStepperG.value = character.healthColorArray[1];
+			healthColorStepperB.value = character.healthColorArray[2];
+			healthBar.leftBar.color = healthBar.rightBar.color = FlxColor.fromRGB(character.healthColorArray[0], character.healthColorArray[1],
+				character.healthColorArray[2]);
+			healthIcon.changeIcon(character.healthIcon, false);
+			updatePresence();
+		}
+
+		inline function updatePresence() {
+			#if DISCORD_ALLOWED
+			// Updating Discord Rich Presence
+			DiscordClient.changePresence("Character Editor", "Character: " + _char, healthIcon.getCharacter());
+			#end
+		}
+
+		inline function reloadAnimList() {
+			anims = character.animationsArray;
+			if (anims.length > 0)
+				character.playAnim(anims[0].anim, true);
+			curAnim = 0;
+
+			updateText();
+			if (animationDropDown != null)
+				reloadAnimationDropDown();
+		}
+
+		inline function updateText() {
+			animsTxt.removeFormat(selectedFormat);
+
+			var intendText:String = '';
+			for (num => anim in anims) {
+				if (num > 0)
+					intendText += '\n';
+
+				if (num == curAnim) {
+					var n:Int = intendText.length;
+					intendText += anim.anim + ": " + anim.offsets;
+					animsTxt.addFormat(selectedFormat, n, intendText.length);
+				} else
+					intendText += anim.anim + ": " + anim.offsets;
+			}
+			animsTxt.text = intendText;
+		}
+
+		inline function updateCharacterPositions() {
+			if ((character != null && !character.isPlayer) || (character == null && predictCharacterIsNotPlayer(_char)))
+				character.setPosition(dadPosition.x, dadPosition.y);
+			else
+				character.setPosition(bfPosition.x, bfPosition.y);
+
+			character.x += character.positionArray[0];
+			character.y += character.positionArray[1];
+			updatePointerPos(false);
+		}
+
+		inline function predictCharacterIsNotPlayer(name:String) {
+			return (name != 'bf' && !name.startsWith('bf-') && !name.endsWith('-player') && !name.endsWith('-playable') && !name.endsWith('-dead'))
+				|| name.endsWith('-opponent')
+				|| name.startsWith('gf-')
+				|| name.endsWith('-gf')
+				|| name == 'gf';
+		}
+
+		function addAnimation(anim:String, name:String, fps:Float, loop:Bool, indices:Array<Int>) {
+			if (!character.isAnimateAtlas) {
+				if (indices != null && indices.length > 0)
+					character.animation.addByIndices(anim, name, indices, "", fps, loop);
+				else
+					character.animation.addByPrefix(anim, name, fps, loop);
+			} else {
+				if (indices != null && indices.length > 0)
+					character.atlas.anim.addBySymbolIndices(anim, name, indices, fps, loop);
+				else
+					character.atlas.anim.addBySymbol(anim, name, fps, loop);
+			}
+
+			if (!character.hasAnimation(anim))
+				character.addOffset(anim, 0, 0);
+		}
+
+		inline function newAnim(anim:String, name:String):AnimArray {
+			return {
+				offsets: [0, 0],
+				loop: false,
+				fps: 24,
+				anim: anim,
+				indices: [],
+				name: name
+			};
+		}
+
+		var characterList:Array<String> = [];
+
+		function reloadCharacterDropDown() {
+			characterList = Mods.mergeAllTextsNamed('data/characterList.txt');
+			var foldersToCheck:Array<String> = Mods.directoriesWithFile(Paths.getSharedPath(), 'characters/');
+			for (folder in foldersToCheck)
+				for (file in FileSystem.readDirectory(folder))
+					if (file.toLowerCase().endsWith('.json')) {
+						var charToCheck:String = file.substr(0, file.length - 5);
+						if (!characterList.contains(charToCheck))
+							characterList.push(charToCheck);
+					}
+
+			if (characterList.length < 1)
+				characterList.push('');
+			charDropDown.list = characterList;
+			charDropDown.selectedLabel = _char;
+		}
+
+		function reloadAnimationDropDown() {
+			var animList:Array<String> = [];
+			for (anim in anims)
+				animList.push(anim.anim);
+			if (animList.length < 1)
+				animList.push('NO ANIMATIONS'); // Prevents crash
+
+			animationDropDown.list = animList;
+		}
+
+		// save
+		var _file:FileReference;
+
+		function onSaveComplete(_):Void {
+			if (_file == null)
+				return;
+			_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+			_file.removeEventListener(Event.CANCEL, onSaveCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+			_file = null;
+			FlxG.log.notice("Successfully saved file.");
+		}
+
+		/**
+		 * Called when the save file dialog is cancelled.
+		 */
+		function onSaveCancel(_):Void {
+			if (_file == null)
+				return;
+			_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+			_file.removeEventListener(Event.CANCEL, onSaveCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+			_file = null;
+		}
+
+		/**
+		 * Called if there is an error while saving the gameplay recording.
+		 */
+		function onSaveError(_):Void {
+			if (_file == null)
+				return;
+			_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+			_file.removeEventListener(Event.CANCEL, onSaveCancel);
+			_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+			_file = null;
+			FlxG.log.error("Problem saving file");
+		}
+
+		function saveCharacter() {
+			if (_file != null)
+				return;
+
+			var json:Dynamic = {
+				"animations": character.animationsArray,
+				"image": character.imageFile,
+				"scale": character.jsonScale,
+				"sing_duration": character.singDuration,
+				"healthicon": character.healthIcon,
+
+				"position": character.positionArray,
+				"camera_position": character.cameraPosition,
+
+				"flip_x": character.originalFlipX,
+				"no_antialiasing": character.noAntialiasing,
+				"healthbar_colors": character.healthColorArray,
+				"vocals_file": character.vocalsFile,
+				"_editor_isPlayer": character.isPlayer
+			};
+
+			var data:String = PsychJsonPrinter.print(json, ['offsets', 'position', 'healthbar_colors', 'camera_position', 'indices']);
+
+			if (data.length > 0) {
+				_file = new FileReference();
+				_file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
+				_file.addEventListener(Event.CANCEL, onSaveCancel);
+				_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+				_file.save(data, '$_char.json');
+			}
+		}
 }

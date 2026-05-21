@@ -1725,7 +1725,7 @@ class PsychFunctions {
 		#if DISCORD_ALLOWED DiscordClient.addLuaCallbacks(lua); #end
 		#if ACHIEVEMENTS_ALLOWED Achievements.addCallbacks(lua); #end
 		#if TRANSLATIONS_ALLOWED Language.addLuaCallbacks(lua); #end
-		#if flxanimate FlxAnimateFunctions.implement(lua); #end
+		#if flixel_animate FlxAnimateFunctions.implement(lua); #end
 		HxLua.implement(lua);
 		ReflectionFunctions.implement(lua);
 		TextFunctions.implement(lua);

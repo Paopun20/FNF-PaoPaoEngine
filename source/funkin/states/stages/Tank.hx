@@ -144,7 +144,6 @@ class Tank extends BaseStage {
 		// inCutscene = true; //this would stop the camera movement, oops
 
 		tankman = new FlxAnimate(dad.x + 419, dad.y + 225);
-		tankman.showPivot = false;
 		Paths.loadAnimateAtlas(tankman, 'cutscenes/tankman');
 		tankman.antialiasing = ClientPrefs.data.antialiasing;
 		addBehindDad(tankman);
@@ -282,7 +281,6 @@ class Tank extends BaseStage {
 		Paths.sound('stressCutscene');
 
 		pico = new FlxAnimate(gf.x + 150, gf.y + 450);
-		pico.showPivot = false;
 		Paths.loadAnimateAtlas(pico, 'cutscenes/picoAppears');
 		pico.antialiasing = ClientPrefs.data.antialiasing;
 		pico.anim.addBySymbol('dance', 'GF Dancing at Gunpoint', 24, true);
@@ -294,9 +292,9 @@ class Tank extends BaseStage {
 		cutsceneHandler.push(pico);
 
 		// prepare pico animation cycle
-		function picoStressCycle() {
-			switch (pico.anim.curInstance.symbol.name) {
-				case "dieBitch", "GF Time to Die sequence":
+		function picoStressCycle(name:String) {
+			switch (name) {
+				case "GF Time to Die sequence":
 					pico.anim.play('picoAppears', true);
 					boyfriendGroup.alpha = 1;
 					boyfriendCutscene.visible = false;
@@ -307,17 +305,14 @@ class Tank extends BaseStage {
 							boyfriend.animation.curAnim.finish(); // Instantly goes to last frame
 						}
 					});
-				case "picoAppears", "Pico Saves them sequence":
+				case "Pico Saves them sequence":
 					pico.anim.play('picoEnd', true);
-				case "picoEnd", "Pico Dual Wield on Speaker idle":
+				case "Pico Dual Wield on Speaker idle":
 					gfGroup.alpha = 1;
 					pico.visible = false;
-					if (pico.anim.onComplete.has(picoStressCycle)) // for safety
-						pico.anim.onComplete.remove(picoStressCycle);
 			}
 		}
-		pico.anim.onComplete.add(picoStressCycle);
-
+		pico.anim.onFinish.add(picoStressCycle);
 		boyfriendCutscene = new FlxSprite(boyfriend.x + 5, boyfriend.y + 20);
 		boyfriendCutscene.antialiasing = ClientPrefs.data.antialiasing;
 		boyfriendCutscene.frames = Paths.getSparrowAtlas('characters/BOYFRIEND');

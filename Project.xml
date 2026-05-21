@@ -32,6 +32,7 @@
 	<define name="SHOW_LOADING_SCREEN" />
 	<section unless="noBaseGameFile">
 		<define name="BASE_GAME_FILES" />
+		<define name="LOADING_EASTER_EGG" />
 	</section>
 	<define name="VIDEOS_ALLOWED" if="cpp" unless="32bits || hl || html5" />
 	<!-- ____________________________ Window Settings ___________________________ -->
@@ -52,7 +53,7 @@
 	<source name="source" />
 	<!-- __________________________ Game Assets & Etc. __________________________ -->
 	<!-- Turn on Crash Handler -->
-	<define name="CRASH_HANDLER" if="desktop release" />
+	<define name="CRASH_HANDLER" if="desktop" />
 	<define name="CRASH_DEBUGGER" if="CRASH_HANDLER desktop" />
 	<!-- <define name="CRASH_EXPERIMENTAL" if="CRASH_DEBUGGER" /> -->
 	<!-- <haxelib name="" if="CRASH_EXPERIMENTAL"/> -->
@@ -93,7 +94,6 @@
 	<!-- _______________________________ Libraries ______________________________ -->
 	<haxelib name="flixel" />
 	<haxelib name="flixel-addons" version="4.0.1" />
-	<haxelib name="flxanimate" version="4.0.0" />
 	<haxelib name="flixel-animate" />
 	<haxelib name="random" />
 	<haxelib name="thx.semver" />

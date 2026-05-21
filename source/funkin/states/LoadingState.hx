@@ -183,6 +183,11 @@ class LoadingState extends EditableState {
 	var IoX:Float = 0;
 	var IoY:Float = 0;
 
+	#if LOADING_EASTER_EGG
+	var logoClickCount:Int = 0;
+	var easterEggActive:Bool = false;
+	#end
+
 	override function create() {
 		persistentUpdate = true;
 
@@ -260,14 +265,74 @@ class LoadingState extends EditableState {
 		insert(members.indexOf(barGroup), obj);
 	}
 
+	function addOverlay(obj:flixel.FlxBasic) {
+		insert(members.length, obj);
+	}
+
 	var transitioning:Bool = false;
 
 	function onIogoScreenClick() {
-		myCoooooollogo.angle = FlxG.random.float(-25, 25);
-		myCoooooollogo.x += FlxG.random.float(-25, 25);
-		myCoooooollogo.y += FlxG.random.float(-25, 25);
-		FlxTween.cancelTweensOf(myCoooooollogo);
-		FlxTween.tween(myCoooooollogo, {angle: 0, x: IoX, y: IoY}, 0.5, {ease: FlxEase.elasticOut});
+		if (logoClickCount == 10) {
+			#if LOADING_EASTER_EGG
+			easterEggActive = true;
+			startEasterEgg();
+			#end
+		} else {
+			myCoooooollogo.angle = FlxG.random.float(-25, 25);
+			myCoooooollogo.x += FlxG.random.float(-25, 25);
+			myCoooooollogo.y += FlxG.random.float(-25, 25);
+			FlxTween.cancelTweensOf(myCoooooollogo);
+			FlxTween.tween(myCoooooollogo, {angle: 0, x: IoX, y: IoY}, 0.5, {ease: FlxEase.elasticOut});
+		}
+		logoClickCount++;
+	}
+
+	/*
+		step:
+		1. Press 10 times
+		2. if have #if LOADING_EASTER_EGG
+		3. lights out (completely black)
+		4. play loading/lights-off
+		5. wait 3 sec
+		6. play loading/MusicBox
+		7. wait for MusicBox is done
+		8. play loading/lights-on, and also the icon has disappeared
+		9. Got Achievement (Achievement ID: something_wrong)
+	 */
+	var blackout:FlxSprite;
+
+	function startEasterEgg() {
+		myCoooooollogo.visible = false;
+
+		blackout = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		blackout.updateHitbox();
+		blackout.screenCenter();
+		blackout.visible = false;
+		addOverlay(blackout);
+
+		blackout.visible = true;
+
+		FlxG.sound.music.pause();
+
+		FlxG.sound.play(Paths.sound('loading/lights-off'), 1.0);
+
+		new FlxTimer().start(3, function(tmr) {
+			var musicBox = FlxG.sound.play(Paths.sound('loading/MusicBox'));
+
+			musicBox.onComplete = function() {
+				FlxG.camera.flash(FlxColor.WHITE, 0.25);
+				FlxG.sound.play(Paths.sound('loading/lights-on'));
+				FlxG.sound.music.play();
+				blackout.visible = false;
+
+				if (Achievements.exists("something_wrong"))
+					Achievements.unlock("something_wrong", true #if debug , true #end);
+
+				new FlxTimer().start(3, function(tmr) {
+					easterEggActive = false;
+				});
+			};
+		});
 	}
 
 	override function update(elapsed:Float) {
@@ -293,7 +358,7 @@ class LoadingState extends EditableState {
 			return;
 
 		if (!transitioning) {
-			if (!finishedLoading && checkLoaded()) {
+			if (!finishedLoading && checkLoaded() && !easterEggActive) {
 				if (stateChangeDelay <= 0) {
 					transitioning = true;
 					onLoad();
@@ -875,7 +940,7 @@ class LoadingState extends EditableState {
 			var img:String = character.image;
 			img = img.trim();
 
-			#if flxanimate
+			#if flixel_animate
 			var animToFind:String = Paths.getPath('images/$img/Animation.json', TEXT);
 			if (#if MODS_ALLOWED FileSystem.exists(animToFind) || #end Assets.exists(animToFind))
 				isAnimateAtlas = true;
@@ -894,7 +959,7 @@ class LoadingState extends EditableState {
 					arrayMutex.release();
 				#end
 			}
-			#if flxanimate
+			#if flixel_animate
 			else {
 				#if (sys || MULTITHREADED_LOADING)
 				if (arrayMutex != null)
@@ -979,7 +1044,7 @@ class LoadingState extends EditableState {
 
 			if (!FunkinCache.currentTrackedAssets.exists(requestKey)) {
 				var file:String = Paths.getPath(requestKey, IMAGE);
-				if (FileSystem.exists(file) ) {
+				if (FileSystem.exists(file)) {
 					var bitmap:BitmapData = BitmapData.fromFile(file);
 
 					#if (sys || MULTITHREADED_LOADING)

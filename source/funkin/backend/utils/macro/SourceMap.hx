@@ -57,7 +57,7 @@ final class SourceMap {
 		flush();
 	}
 
-	macro public static function build():ExprOf<BytesMap<String>> {
+	macro public static function build():ExprOf<BytesMap> {
 		var setExprs:Array<Expr> = [];
 		var startTime = Timer.stamp();
 
@@ -73,7 +73,7 @@ final class SourceMap {
 		flush();
 
 		return macro {
-			var __map = new BytesMap<String>();
+			var __map = new BytesMap();
 			$b{setExprs};
 			__map;
 		};
@@ -105,7 +105,13 @@ final class SourceMap {
 			return [FileSystem.absolutePath("./source")];
 		};
 
-		for (node in xml.firstElement()) {
+		var rootElement = xml.firstElement();
+		if (rootElement == null) {
+			printRGB(255, 165, 0, "Project.xml has no root element");
+			return [FileSystem.absolutePath("./source")];
+		}
+
+		for (node in rootElement) {
 			if (node.nodeType != Xml.Element)
 				continue;
 
@@ -160,13 +166,22 @@ final class SourceMap {
 			// Fix: process.wait() does not exist — exitCode() blocks until the process finishes.
 			process.exitCode();
 
-			var output = process.stdout.readAll().toString().trim();
-
-			if (output == "") {
+			var output = process.stdout.readAll();
+			if (output == null || output.length == 0) {
 				return null;
 			}
 
-			var rootPath = FileSystem.absolutePath(output.split("\n")[0].trim());
+			var outputStr = output.toString().trim();
+			if (outputStr == "") {
+				return null;
+			}
+
+			var lines = outputStr.split("\n");
+			if (lines.length == 0) {
+				return null;
+			}
+
+			var rootPath = FileSystem.absolutePath(lines[0].trim());
 
 			// Fix: Path is now imported (haxe.io.Path)
 			var haxelibJson = Path.join([rootPath, "haxelib.json"]);
@@ -176,7 +191,18 @@ final class SourceMap {
 			}
 
 			// Fix: Json is now imported (haxe.Json)
-			var json:Dynamic = Json.parse(File.getContent(haxelibJson));
+		var jsonContent = File.getContent(haxelibJson);
+		if (jsonContent == null || jsonContent.trim() == "") {
+			return rootPath;
+		}
+		
+		var json:Dynamic = try Json.parse(jsonContent) catch (e:Dynamic) {
+			return rootPath;
+		};
+		
+		if (json == null) {
+			return rootPath;
+		}
 
 			var classPath:String = Reflect.field(json, "classPath");
 			if (classPath == null || classPath.trim() == "") {

@@ -391,7 +391,7 @@ class Paths {
 	}
 	#end
 
-	#if flxanimate
+	#if flixel_animate
 	public static function loadAnimateAtlas(spr:FlxAnimate, folderOrImg:Dynamic, spriteJson:Dynamic = null, animationJson:Dynamic = null) {
 		var changedAnimJson = false;
 		var changedAtlasJson = false;
@@ -448,7 +448,7 @@ class Paths {
 		// trace(folderOrImg);
 		// trace(spriteJson);
 		// trace(animationJson);
-		spr.loadAtlasEx(folderOrImg, spriteJson, animationJson);
+		spr.frames = FlxAnimateFrames.fromAnimate(animationJson, null, null, null, false);
 	}
 	#end
 }

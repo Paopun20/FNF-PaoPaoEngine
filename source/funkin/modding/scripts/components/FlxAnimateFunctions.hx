@@ -2,7 +2,7 @@ package funkin.modding.scripts.components;
 
 import openfl.utils.Assets;
 
-#if (LUA_ALLOWED && flxanimate)
+#if (LUA_ALLOWED && flixel_animate)
 class FlxAnimateFunctions {
 	public static function implement(lua:LuaScript) {
 		lua.set("makeFlxAnimateSprite", function(tag:String, ?x:Float = 0, ?y:Float = 0, ?loadFolder:String = null) {
@@ -28,13 +28,13 @@ class FlxAnimateFunctions {
 		});
 
 		lua.set("addAnimationBySymbol",
-			function(tag:String, name:String, symbol:String, ?framerate:Float = 24, ?loop:Bool = false, ?matX:Float = 0, ?matY:Float = 0) {
+			function(tag:String, name:String, symbol:String, ?framerate:Float = 24, ?loop:Bool = false, ?flipX:Bool = false, ?flipY:Bool = false) {
 				var obj:FlxAnimate = cast MusicBeatState.getVariables().get(tag);
 				if (obj == null)
 					return false;
 
-				obj.anim.addBySymbol(name, symbol, framerate, loop, matX, matY);
-				if (obj.anim.curSymbol == null) {
+				obj.anim.addBySymbol(name, symbol, framerate, loop, flipX, flipY);
+				if (!obj.isAnimate) {
 					var obj2:ModchartAnimateSprite = cast(obj, ModchartAnimateSprite);
 					if (obj2 != null)
 						obj2.playAnim(name, true); // is ModchartAnimateSprite
@@ -45,7 +45,7 @@ class FlxAnimateFunctions {
 			});
 
 		lua.set("addAnimationBySymbolIndices",
-			function(tag:String, name:String, symbol:String, ?indices:Any = null, ?framerate:Float = 24, ?loop:Bool = false, ?matX:Float = 0, ?matY:Float = 0) {
+			function(tag:String, name:String, symbol:String, ?indices:Any = null, ?framerate:Float = 24, ?loop:Bool = false, ?flipX:Bool = false, ?flipY:Bool = false) {
 				var obj:FlxAnimate = cast MusicBeatState.getVariables().get(tag);
 				if (obj == null)
 					return false;
@@ -61,8 +61,8 @@ class FlxAnimateFunctions {
 					indices = myIndices;
 				}
 
-				obj.anim.addBySymbolIndices(name, symbol, indices, framerate, loop, matX, matY);
-				if (obj.anim.curSymbol == null) {
+				obj.anim.addBySymbolIndices(name, symbol, indices, framerate, loop, flipX, flipY);
+				if (!obj.isAnimate) {
 					var obj2:ModchartAnimateSprite = cast(obj, ModchartAnimateSprite);
 					if (obj2 != null)
 						obj2.playAnim(name, true); // is ModchartAnimateSprite

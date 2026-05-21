@@ -56,6 +56,9 @@ class Achievements {
 		#if BASE_GAME_FILES
 		createAchievement('debugger', {name: "Debugger", description: "Beat the \"Test\" Stage from the Chart Editor.", hidden: true});
 		#end
+		#if LOADING_EASTER_EGG
+		createAchievement('something_wrong', {name: "Something Wrong is Here", description: "Something answered your final breath.", hidden: true});
+		#end
 
 		// dont delete this thing below
 		_originalLength = _sortID + 1;
@@ -144,24 +147,24 @@ class Achievements {
 
 	static var _lastUnlock:Int = -999;
 
-	public static function unlock(name:String, autoStartPopup:Bool = true):String {
+	public static function unlock(name:String, autoStartPopup:Bool = true #if debug , force:Bool = false #end):String {
 		if (!achievements.exists(name)) {
 			FlxG.log.error('Achievement "$name" does not exists!');
 			throw new AchievementNotFoundException('Achievement "$name" does not exists!');
-			return null;
 		}
 
-		if (Achievements.isUnlocked(name))
+		if (Achievements.isUnlocked(name) #if debug && !force #end)
 			return null;
 
-		// trace('Completed achievement "$name"');
 		CoolLog.info('Completed achievement "$name"');
-		achievementsUnlocked.push(name);
 
-		// earrape prevention
+		if (!achievementsUnlocked.contains(name))
+			achievementsUnlocked.push(name);
+
+		// Earrape prevention
 		var time:Int = openfl.Lib.getTimer();
-		if (Math.abs(time - _lastUnlock) >= 100) // If last unlocked happened in less than 100 ms (0.1s) ago, then don't play sound
-		{
+
+		if (time - _lastUnlock >= 100) {
 			FlxG.sound.play(Paths.sound('confirmMenu'), 0.5);
 			_lastUnlock = time;
 		}
@@ -171,6 +174,7 @@ class Achievements {
 
 		if (autoStartPopup)
 			startPopup(name);
+
 		return name;
 	}
 

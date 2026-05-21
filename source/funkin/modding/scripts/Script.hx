@@ -38,8 +38,8 @@ import funkin.backend.Achievements;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 #end
-#if flxanimate
-import flxanimate.FlxAnimate;
+#if flixel_animate
+import animate.FlxAnimate;
 #end
 #if sys
 import sys.io.File;
@@ -156,7 +156,7 @@ class Script implements IFlxDestroyable implements IScriptExecutor {
 		defaults.set('ErrorHandledRuntimeShader', funkin.shaders.ErrorHandledShader.ErrorHandledRuntimeShader);
 		#end
 		defaults.set('ShaderFilter', openfl.filters.ShaderFilter);
-		#if flxanimate
+		#if flixel_animate
 		defaults.set('FlxAnimate', FlxAnimate);
 		#end
 
