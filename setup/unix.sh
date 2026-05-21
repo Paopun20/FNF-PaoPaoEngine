@@ -40,6 +40,7 @@ haxelib git hxhardware https://github.com/Vortex2Oblivion/hxhardware.git --alway
 haxelib git lscript https://github.com/SrtHero278/lscript.git --always
 haxelib git lemonui https://github.com/NebulaStellaNova/LemonUI.git --always
 haxelib git nxscript https://github.com/senioritaelizabeth/NxScript.git --always
+haxelib git flixel-animate https://github.com/MaybeMaru/flixel-animate.git --always
 
 # funkin
 haxelib git funkin.vis https://github.com/FunkinCrew/funkVis.git 22b1ce089dd924f15cdc4632397ef3504d464e90 --always
