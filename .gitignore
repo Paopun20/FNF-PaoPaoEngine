@@ -29,3 +29,8 @@ mods/*
 
 # Environment Variables
 .env
+
+# why
+*.crt
+*.pfx
+*.key
