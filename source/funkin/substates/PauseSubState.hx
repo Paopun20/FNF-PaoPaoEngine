@@ -257,11 +257,11 @@ class PauseSubState extends EditableSubstate {
 				case "Restart Song":
 					#if HSCRIPT_ALLOWED
 					HScript.reset();
-					CacheScript.clearCache();
 					#end
 					#if PYTHON_ALLOWED
 					Python.reset();
 					#end
+					CacheScript.clearCache();
 					restartSong();
 				case "Leave Charting Mode":
 					restartSong();
@@ -288,6 +288,7 @@ class PauseSubState extends EditableSubstate {
 					#if PYTHON_ALLOWED
 					Python.reset(true);
 					#end
+					CacheScript.clearCache();
 				case 'Toggle Botplay':
 					PlayState.instance.cpuControlled = !PlayState.instance.cpuControlled;
 					PlayState.changedDifficulty = true;
@@ -327,6 +328,7 @@ class PauseSubState extends EditableSubstate {
 					#if PYTHON_ALLOWED
 					Python.reset(true);
 					#end
+					CacheScript.clearCache();
 			}
 		}
 	}
@@ -350,7 +352,7 @@ class PauseSubState extends EditableSubstate {
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
 		}
-		MusicBeatState.resetState();
+		MusicBeatState.switchState(new PlayState());
 	}
 
 	override function destroy() {

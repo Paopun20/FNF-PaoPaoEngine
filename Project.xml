@@ -37,7 +37,7 @@
 	<define name="VIDEOS_ALLOWED" if="cpp" unless="32bits || hl || html5" />
 	<!-- ____________________________ Window Settings ___________________________ -->
 	<!--These window settings apply to all targets-->
-	<window width="1280" height="720" fps="60" background="null" hardware="true" vsync="false" allow-high-dpi="true" allow-shaders="true" />
+	<window width="1280" height="720" fps="60" background="null" hardware="true" vsync="false" allow-high-dpi="true" allow-shaders="true" require-shaders="true" depth-buffer="true" stencil-buffer="true" antialiasing="4" />
 	<!--HTML5-specific-->
 	<window if="html5" resizable="true" />
 	<!--Desktop-specific-->
