@@ -17,16 +17,16 @@ if ! command -v haxe >/dev/null 2>&1; then
 fi
 
 haxelib install openfl 9.5.1 --always
-haxelib install flixel 6.1.2
-haxelib install flixel-addons 4.0.1 
-haxelib install flixel-tools 1.5.1
-haxelib install flixel-animate
-haxelib install hxcpp 4.3.2
-haxelib install tink_core 2.1.1
-haxelib install moonchart 0.5.1
-haxelib install random 1.4.1
-haxelib install lime 8.3.1
-haxelib install thx.semver 0.2.2
+haxelib install flixel 6.1.2 --always
+haxelib install flixel-addons 4.0.1 --always
+haxelib install flixel-tools 1.5.1 --always
+haxelib install flixel-animate 1.5.0 --always
+haxelib install hxcpp 4.3.2 --always
+haxelib install tink_core 2.1.1 --always
+haxelib install moonchart 0.5.1 --always
+haxelib install random 1.4.1 --always
+haxelib install lime 8.3.1 --always
+haxelib install thx.semver 0.2.2 --always
 haxelib install sl-windows-api --always
 
 # My Lib
