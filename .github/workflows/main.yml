@@ -112,6 +112,7 @@ jobs:
         run: |
           haxelib setup ${{ matrix.lib-path }}
           haxelib --global update haxelib
+          haxelib fixrepo
 
       - name: Install Haxelib deps (Unix)
         if: matrix.target != 'windows'
