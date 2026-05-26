@@ -122,6 +122,12 @@ jobs:
         if: matrix.target != 'mac'
         run: haxelib git hxcpp https://github.com/HaxeFoundation/hxcpp --always
 
+      - name: Build HxCpp
+        run: |
+          cd "$(haxelib libpath hxcpp)/tools/hxcpp"
+          haxe compile.hxml
+          
+
       - name: Build project
         run: |
           haxelib run lime build ${{ matrix.target }} --app-version="4.0.0-${{ github.run_id }}" -D officialBuild -final
