@@ -1,20 +1,3 @@
-if ([string]::IsNullOrEmpty((Get-Command haxe -ea 0))) {
-    [void][System.Console]::WriteLine("oh, Haxe not found.")
-    [system.Diagnostics.Process]::Start("cmd","/c start https://haxe.org/download/")
-    [void][System.Console]::WriteLine("Press Enter to continue...")
-    [void][System.Console]::ReadLine()
-    [System.Environment]::Exit(1)
-}
-
-if ([string]::IsNullOrEmpty((Get-Command haxe -ea 0)))
-{
-    [void][System.Console]::WriteLine("oh, Haxe not found.")
-    [system.Diagnostics.Process]::Start("cmd","/c start https://haxe.org/download/")
-    [void][System.Console]::WriteLine("Press Enter to continue...")
-    [void][System.Console]::ReadLine()
-    [System.Environment]::Exit(1)
-}
-
 # execute commands from data
 haxelib install openfl 9.5.1 --always
 haxelib install flixel 6.1.2 --always
