@@ -120,13 +120,12 @@ jobs:
 
       - name: Fix Hxcpp (mac)
         if: matrix.target != 'mac'
-        run: haxelib git hxcpp https://github.com/HaxeFoundation/hxcpp --always
+        run: haxelib git hxcpp https://github.com/Paopun20/hxcpp-zlib-update --always
 
       - name: Build HxCpp
         run: |
           cd "$(haxelib libpath hxcpp)/tools/hxcpp"
           haxe compile.hxml
-          
 
       - name: Build project
         run: |
