@@ -117,13 +117,17 @@ jobs:
         if: matrix.target != 'windows'
         run: |
           chmod +x ${{ matrix.setup-file }} || true
-          sh ${{ matrix.setup-file }}
 
       - name: Install Haxelib deps (Windows)
         if: matrix.target == 'windows'
         shell: pwsh
         run: |
           pwsh -ExecutionPolicy Bypass -File ${{ matrix.setup-file }}
+          sh ${{ matrix.setup-file }}
+
+      - name: Fix Hxcpp (mac)
+        if: matrix.target != 'mac'
+        run: haxelib git hxcpp https://github.com/HaxeFoundation/hxcpp --always
 
       - name: Build project
         run: |

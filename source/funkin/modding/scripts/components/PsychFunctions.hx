@@ -70,6 +70,22 @@ class PsychFunctions {
 			return pack.getScriptsByName(exclusions);
 		}
 
+		inline function setOnScriptType(type:Null<ScriptType>, varName:String, arg:Dynamic, ignoreSelf:Bool, exclusions:Array<String>):Void {
+			var excludeObjs = resolveExclusions(exclusions, ignoreSelf);
+			if (type == null)
+				pack.set(varName, arg, excludeObjs);
+			else
+				pack.setOnly(type, varName, arg, excludeObjs);
+		}
+
+		inline function callOnScriptType(type:Null<ScriptType>, funcName:String, args:Array<Dynamic>, ignoreStops:Bool, ignoreSelf:Bool,
+				excludeScripts:Array<String>, excludeValues:Array<Dynamic>):Dynamic {
+			var excludeObjs = resolveExclusions(excludeScripts, ignoreSelf);
+			var result = type == null ? pack.call(funcName, args, ignoreStops, excludeObjs, excludeValues) : pack.callOnly(type, funcName, args, ignoreStops,
+				excludeObjs, excludeValues);
+			return result != null ? result : LuaUtils.Function_Continue;
+		}
+
 		// Lua shit
 		lua.set('luaDebugMode', false);
 		lua.set('luaDeprecatedWarnings', true);
@@ -168,71 +184,43 @@ class PsychFunctions {
 		});
 
 		lua.set("setOnScripts", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) {
-			if (exclusions == null)
-				exclusions = [];
-			if (ignoreSelf && !exclusions.contains(lua.scriptName))
-				exclusions.push(lua.scriptName);
-			var excludeObjs = resolveExclusions(exclusions, ignoreSelf);
-			pack.set(varName, arg, excludeObjs);
+			setOnScriptType(null, varName, arg, ignoreSelf, exclusions);
 		});
 
 		lua.set("setOnHScript", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) {
-			if (exclusions == null)
-				exclusions = [];
-			if (ignoreSelf && !exclusions.contains(lua.scriptName))
-				exclusions.push(lua.scriptName);
-			var excludeObjs = resolveExclusions(exclusions, ignoreSelf);
-			pack.setOnly(ScriptType.HSCRIPT, varName, arg, excludeObjs);
+			setOnScriptType(ScriptType.HSCRIPT, varName, arg, ignoreSelf, exclusions);
 		});
 
 		lua.set("setOnLuas", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) {
-			if (exclusions == null)
-				exclusions = [];
-			if (ignoreSelf && !exclusions.contains(lua.scriptName))
-				exclusions.push(lua.scriptName);
-			var excludeObjs = resolveExclusions(exclusions, ignoreSelf);
-			pack.setOnly(ScriptType.LUA, varName, arg, excludeObjs);
+			setOnScriptType(ScriptType.LUA, varName, arg, ignoreSelf, exclusions);
 		});
 
 		lua.set("setOnPython", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) {
-			if (exclusions == null)
-				exclusions = [];
-			if (ignoreSelf && !exclusions.contains(lua.scriptName))
-				exclusions.push(lua.scriptName);
-			var excludeObjs = resolveExclusions(exclusions, ignoreSelf);
-			pack.setOnly(ScriptType.HSCRIPT, varName, arg, excludeObjs);
+			setOnScriptType(ScriptType.PYTHON, varName, arg, ignoreSelf, exclusions);
 		});
 
 		lua.set("callOnScripts",
 			function(funcName:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, ?ignoreSelf:Bool = true, ?excludeScripts:Array<String> = null,
 					?excludeValues:Array<Dynamic> = null) {
-				var excludeObjs = resolveExclusions(excludeScripts, ignoreSelf);
-				var result = pack.call(funcName, args, ignoreStops, excludeObjs, excludeValues);
-				return result != null ? result : LuaUtils.Function_Continue;
+				return callOnScriptType(null, funcName, args, ignoreStops, ignoreSelf, excludeScripts, excludeValues);
 			});
 
 		lua.set("callOnLuas",
 			function(funcName:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, ?ignoreSelf:Bool = true, ?excludeScripts:Array<String> = null,
 					?excludeValues:Array<Dynamic> = null) {
-				var excludeObjs = resolveExclusions(excludeScripts, ignoreSelf);
-				var result = pack.callOnly(ScriptType.LUA, funcName, args, ignoreStops, excludeObjs, excludeValues);
-				return result != null ? result : LuaUtils.Function_Continue;
+				return callOnScriptType(ScriptType.LUA, funcName, args, ignoreStops, ignoreSelf, excludeScripts, excludeValues);
 			});
 
 		lua.set("callOnHScript",
 			function(funcName:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, ?ignoreSelf:Bool = true, ?excludeScripts:Array<String> = null,
 					?excludeValues:Array<Dynamic> = null) {
-				var excludeObjs = resolveExclusions(excludeScripts, ignoreSelf);
-				var result = pack.callOnly(ScriptType.HSCRIPT, funcName, args, ignoreStops, excludeObjs, excludeValues);
-				return result != null ? result : LuaUtils.Function_Continue;
+				return callOnScriptType(ScriptType.HSCRIPT, funcName, args, ignoreStops, ignoreSelf, excludeScripts, excludeValues);
 			});
 
 		lua.set("callOnPython",
 			function(funcName:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, ?ignoreSelf:Bool = true, ?excludeScripts:Array<String> = null,
 					?excludeValues:Array<Dynamic> = null) {
-				var excludeObjs = resolveExclusions(excludeScripts, ignoreSelf);
-				var result = pack.callOnly(ScriptType.PYTHON, funcName, args, ignoreStops, excludeObjs, excludeValues);
-				return result != null ? result : LuaUtils.Function_Continue;
+				return callOnScriptType(ScriptType.PYTHON, funcName, args, ignoreStops, ignoreSelf, excludeScripts, excludeValues);
 			});
 
 		lua.set("callScript", function(luaFile:String, funcName:String, ?args:Array<Dynamic> = null) {
@@ -454,13 +442,8 @@ class PsychFunctions {
 		});
 
 		lua.set("loadGraphic", function(variable:String, image:String, ?gridX:Int = 0, ?gridY:Int = 0) {
-			var split:Array<String> = variable.split('.');
-			var spr:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
 			var animated = gridX != 0 || gridY != 0;
-
-			if (split.length > 1) {
-				spr = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			}
+			var spr:FlxSprite = getObjectFromPath(variable);
 
 			if (spr != null && image != null && image.length > 0) {
 				spr.loadGraphic(Paths.image(image), animated, gridX, gridY);
@@ -468,11 +451,7 @@ class PsychFunctions {
 		});
 
 		lua.set("loadFrames", function(variable:String, image:String, spriteType:String = 'auto') {
-			var split:Array<String> = variable.split('.');
-			var spr:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1) {
-				spr = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			}
+			var spr:FlxSprite = getObjectFromPath(variable);
 
 			if (spr != null && image != null && image.length > 0) {
 				LuaUtils.loadFrames(spr, image, spriteType);
@@ -480,11 +459,7 @@ class PsychFunctions {
 		});
 
 		lua.set("loadMultipleFrames", function(variable:String, images:Array<String>) {
-			var split:Array<String> = variable.split('.');
-			var spr:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1) {
-				spr = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			}
+			var spr:FlxSprite = getObjectFromPath(variable);
 
 			if (spr != null && images != null && images.length > 0) {
 				spr.frames = Paths.getMultiAtlas(images);
@@ -837,66 +812,42 @@ class PsychFunctions {
 		});
 
 		lua.set("getMidpointX", function(variable:String):Float {
-			var split:Array<String> = variable.split('.');
-			var obj:FlxObject = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1) {
-				obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			}
+			var obj:FlxObject = getObjectFromPath(variable);
 			if (obj != null)
 				return obj.getMidpoint().x;
 			return 0;
 		});
 
 		lua.set("getMidpointY", function(variable:String):Float {
-			var split:Array<String> = variable.split('.');
-			var obj:FlxObject = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1) {
-				obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			}
+			var obj:FlxObject = getObjectFromPath(variable);
 			if (obj != null)
 				return obj.getMidpoint().y;
 			return 0;
 		});
 
 		lua.set("getGraphicMidpointX", function(variable:String):Float {
-			var split:Array<String> = variable.split('.');
-			var obj:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1) {
-				obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			}
+			var obj:FlxSprite = getObjectFromPath(variable);
 			if (obj != null)
 				return obj.getGraphicMidpoint().x;
 			return 0;
 		});
 
 		lua.set("getGraphicMidpointY", function(variable:String):Float {
-			var split:Array<String> = variable.split('.');
-			var obj:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1) {
-				obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			}
+			var obj:FlxSprite = getObjectFromPath(variable);
 			if (obj != null)
 				return obj.getGraphicMidpoint().y;
 			return 0;
 		});
 
 		lua.set("getScreenPositionX", function(variable:String, ?camera:String = 'game'):Float {
-			var split:Array<String> = variable.split('.');
-			var obj:FlxObject = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1) {
-				obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			}
+			var obj:FlxObject = getObjectFromPath(variable);
 			if (obj != null)
 				return obj.getScreenPosition(LuaUtils.cameraFromString(camera)).x;
 			return 0;
 		});
 
 		lua.set("getScreenPositionY", function(variable:String, ?camera:String = 'game'):Float {
-			var split:Array<String> = variable.split('.');
-			var obj:FlxObject = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1) {
-				obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			}
+			var obj:FlxObject = getObjectFromPath(variable);
 			if (obj != null)
 				return obj.getScreenPosition(LuaUtils.cameraFromString(camera)).y;
 			return 0;
@@ -1024,68 +975,31 @@ class PsychFunctions {
 		});
 
 		lua.set("setGraphicSize", function(obj:String, x:Float, y:Float = 0, updateHitbox:Bool = true) {
-			if (game != null && game.getLuaObject(obj) != null) {
-				var shit:FlxSprite = game.getLuaObject(obj);
-				shit.setGraphicSize(x, y);
+			var sprite:FlxSprite = getLuaObjectOrPath(game, obj);
+			if (sprite != null) {
+				sprite.setGraphicSize(x, y);
 				if (updateHitbox)
-					shit.updateHitbox();
-				return;
-			}
-
-			var split:Array<String> = obj.split('.');
-			var poop:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1) {
-				poop = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			}
-
-			if (poop != null) {
-				poop.setGraphicSize(x, y);
-				if (updateHitbox)
-					poop.updateHitbox();
+					sprite.updateHitbox();
 				return;
 			}
 			CoolLog.info('setGraphicSize: Couldnt find object: ' + obj);
 		});
 
 		lua.set("scaleObject", function(obj:String, x:Float, y:Float, updateHitbox:Bool = true) {
-			if (game != null && game.getLuaObject(obj) != null) {
-				var shit:FlxSprite = game.getLuaObject(obj);
-				shit.scale.set(x, y);
+			var sprite:FlxSprite = getLuaObjectOrPath(game, obj);
+			if (sprite != null) {
+				sprite.scale.set(x, y);
 				if (updateHitbox)
-					shit.updateHitbox();
-				return;
-			}
-
-			var split:Array<String> = obj.split('.');
-			var poop:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1) {
-				poop = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			}
-
-			if (poop != null) {
-				poop.scale.set(x, y);
-				if (updateHitbox)
-					poop.updateHitbox();
+					sprite.updateHitbox();
 				return;
 			}
 			CoolLog.info('scaleObject: Couldnt find object: ' + obj);
 		});
 
 		lua.set("updateHitbox", function(obj:String) {
-			if (game != null && game.getLuaObject(obj) != null) {
-				var shit:FlxSprite = game.getLuaObject(obj);
-				shit.updateHitbox();
-				return;
-			}
-
-			var split:Array<String> = obj.split('.');
-			var poop:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1) {
-				poop = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			}
-
-			if (poop != null) {
-				poop.updateHitbox();
+			var sprite:FlxSprite = getLuaObjectOrPath(game, obj);
+			if (sprite != null) {
+				sprite.updateHitbox();
 				return;
 			}
 			CoolLog.info('updateHitbox: Couldnt find object: ' + obj);
@@ -1149,19 +1063,7 @@ class PsychFunctions {
 		});
 
 		lua.set("setObjectCamera", function(obj:String, camera:String = 'game'):Bool {
-			if (game != null) {
-				var real:FlxBasic = game.getLuaObject(obj);
-				if (real != null) {
-					real.cameras = [LuaUtils.cameraFromString(camera)];
-					return true;
-				}
-			}
-
-			var split:Array<String> = obj.split('.');
-			var object:FlxBasic = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1) {
-				object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			}
+			var object:FlxBasic = getLuaObjectOrPath(game, obj);
 
 			if (object != null) {
 				object.cameras = [LuaUtils.cameraFromString(camera)];
@@ -1172,19 +1074,7 @@ class PsychFunctions {
 		});
 
 		lua.set("setBlendMode", function(obj:String, blend:String = ''):Bool {
-			if (game != null) {
-				var real:FlxSprite = game.getLuaObject(obj);
-				if (real != null) {
-					real.blend = LuaUtils.blendModeFromString(blend);
-					return true;
-				}
-			}
-
-			var split:Array<String> = obj.split('.');
-			var spr:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1) {
-				spr = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			}
+			var spr:FlxSprite = getLuaObjectOrPath(game, obj);
 
 			if (spr != null) {
 				spr.blend = LuaUtils.blendModeFromString(blend);
@@ -1195,17 +1085,7 @@ class PsychFunctions {
 		});
 
 		lua.set("screenCenter", function(obj:String, pos:String = 'xy') {
-			var spr:FlxObject = null;
-			if (game != null)
-				spr = game.getLuaObject(obj);
-
-			if (spr == null) {
-				var split:Array<String> = obj.split('.');
-				spr = LuaUtils.getObjectDirectly(split[0]);
-				if (split.length > 1) {
-					spr = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-				}
-			}
+			var spr:FlxObject = getLuaObjectOrPath(game, obj);
 
 			if (spr != null) {
 				switch (pos.trim().toLowerCase()) {
@@ -1239,11 +1119,7 @@ class PsychFunctions {
 		});
 
 		lua.set("getPixelColor", function(obj:String, x:Int, y:Int) {
-			var split:Array<String> = obj.split('.');
-			var spr:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
-			if (split.length > 1) {
-				spr = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-			}
+			var spr:FlxSprite = getObjectFromPath(obj);
 
 			if (spr != null)
 				return spr.pixels.getPixel32(x, y);
@@ -1731,6 +1607,23 @@ class PsychFunctions {
 		CustomSubstate.implement(lua);
 		ShaderFunctions.implement(lua);
 		DeprecatedFunctions.implement(lua);
+	}
+
+	private static function getObjectFromPath(path:String):Dynamic {
+		var split:Array<String> = path.split('.');
+		var object:Dynamic = LuaUtils.getObjectDirectly(split[0]);
+		if (split.length > 1)
+			object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
+		return object;
+	}
+
+	private static function getLuaObjectOrPath(game:PlayState, path:String):Dynamic {
+		if (game != null) {
+			var luaObject:Dynamic = game.getLuaObject(path);
+			if (luaObject != null)
+				return luaObject;
+		}
+		return getObjectFromPath(path);
 	}
 
 	private static function findScript(scriptFile:String, ext:String = '.lua'):String {
