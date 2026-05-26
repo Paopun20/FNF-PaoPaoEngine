@@ -100,14 +100,6 @@ jobs:
                      "ndk;21.4.7075529" \
                      "cmake;3.22.1"
 
-      - name: Cache haxelib
-        uses: actions/cache@v4
-        with:
-          path: ${{ matrix.lib-path }}
-          key: ${{ runner.os }}-haxelib
-          restore-keys: |
-            ${{ runner.os }}-haxelib-
-
       - name: Setup Haxelib
         run: |
           haxelib setup ${{ matrix.lib-path }}
