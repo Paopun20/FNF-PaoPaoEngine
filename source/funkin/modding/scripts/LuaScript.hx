@@ -16,7 +16,9 @@ import flixel.util.FlxTimer;
 import funkin.modding.scripts.components.PsychFunctions;
 import lscript.LScript;
 import llua.LuaJIT as FunkinLuaJIT;
+import funkin.modding.scripts.bridge.HxRuner;
 #end
+
 
 using StringTools;
 using funkin.backend.utils.tools.QolTools;
@@ -50,6 +52,7 @@ class LuaScript extends Script implements IScriptExecutor {
 			}
 			CoolLog.info(s, info);
 		}
+		HxRuner.implement(this);
 		Script.preset(this);
 	}
 

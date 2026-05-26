@@ -1,6 +1,6 @@
 package funkin.modding.scripts.components;
 
-import funkin.modding.scripts.LuaScript;
+import funkin.modding.scripts.Script;
 import funkin.modding.scripts.utils.LuaUtils;
 import funkin.shaders.CustomShader;
 
@@ -49,8 +49,7 @@ class ShaderFunctions {
 		return false;
 	}
 
-	#if LUA_ALLOWED
-	public static function implement(lua:LuaScript) {
+	public static function implement(lua:Script) {
 		lua.set("initLuaShader", initShader);
 		lua.set("setSpriteShader", setSpriteShader);
 		lua.set("removeSpriteShader", removeSpriteShader);
@@ -82,41 +81,6 @@ class ShaderFunctions {
 			return false;
 		});
 	}
-	#end
-
-	#if PYTHON_ALLOWED
-	public static function pyimplement(python:Python) {
-		python.set("initPythonShader", initShader);
-		python.set("setSpriteShader", setSpriteShader);
-		python.set("removeSpriteShader", removeSpriteShader);
-
-		python.set("getShaderBool", (obj:String, prop:String) -> getUniform(obj, prop));
-		python.set("getShaderBoolArray", (obj:String, prop:String) -> getUniform(obj, prop));
-		python.set("getShaderInt", (obj:String, prop:String) -> getUniform(obj, prop));
-		python.set("getShaderIntArray", (obj:String, prop:String) -> getUniform(obj, prop));
-		python.set("getShaderFloat", (obj:String, prop:String) -> getUniform(obj, prop));
-		python.set("getShaderFloatArray", (obj:String, prop:String) -> getUniform(obj, prop));
-
-		python.set("setShaderBool", (obj:String, prop:String, value:Bool) -> setUniform(obj, prop, value));
-		python.set("setShaderBoolArray", (obj:String, prop:String, values:Dynamic) -> setUniform(obj, prop, values));
-		python.set("setShaderInt", (obj:String, prop:String, value:Int) -> setUniform(obj, prop, value));
-		python.set("setShaderIntArray", (obj:String, prop:String, values:Dynamic) -> setUniform(obj, prop, values));
-		python.set("setShaderFloat", (obj:String, prop:String, value:Float) -> setUniform(obj, prop, value));
-		python.set("setShaderFloatArray", (obj:String, prop:String, values:Dynamic) -> setUniform(obj, prop, values));
-
-		python.set("setShaderSampler2D", (obj:String, prop:String, bitmapdataPath:String) -> {
-			var shader = getShader(obj);
-			if (shader == null)
-				return false;
-			var value = Paths.image(bitmapdataPath);
-			if (value != null && value.bitmap != null) {
-				shader.hset(prop, value.bitmap);
-				return true;
-			}
-			return false;
-		});
-	}
-	#end
 
 	static function getUniform(obj:String, prop:String):Dynamic {
 		var shader = getShader(obj);

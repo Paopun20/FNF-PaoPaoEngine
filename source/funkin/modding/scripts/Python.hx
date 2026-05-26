@@ -36,6 +36,9 @@ import paopao.hython.Expr as PyExpr;
 import paopao.hython.Error.Error as PyError;
 import paopao.hython.Parser as PyParser;
 import paopao.hython.Printer as PyPrinter;
+
+import funkin.modding.scripts.bridge.HxRuner;
+
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 #end
@@ -1170,15 +1173,15 @@ class Python extends Script implements IScriptExecutor {
 				set(name, func);
 		}
 
-		#if DISCORD_ALLOWED DiscordClient.addPythonCallbacks(this); #end
+		#if DISCORD_ALLOWED DiscordClient.addCallbacks(this); #end
 		#if ACHIEVEMENTS_ALLOWED Achievements.addCallbacks(this); #end // wip
-		// #if TRANSLATIONS_ALLOWED Language.addPythonCallbacks(this); #end // wip
-		HxPy.implement(this);
+		#if TRANSLATIONS_ALLOWED Language.addCallbacks(this); #end // wip
+		HxRuner.implement(this);
 		ReflectionFunctions.implement(this);
 		TextFunctions.implement(this);
 		ExtraFunctions.implement(this);
 		CustomSubstate.implement(this);
-		ShaderFunctions.pyimplement(this);
+		ShaderFunctions.implement(this);
 	}
 
 	public static function pythonTrace(text:String, ignoreCheck:Bool = false, deprecated:Bool = false, color:FlxColor = FlxColor.WHITE) {

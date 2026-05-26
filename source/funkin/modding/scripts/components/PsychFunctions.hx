@@ -1721,11 +1721,10 @@ class PsychFunctions {
 			lua.set("getCameraFollowY", function():Float return game != null ? game.camFollow.y : 0);
 		}
 
-		#if DISCORD_ALLOWED DiscordClient.addLuaCallbacks(lua); #end
+		#if DISCORD_ALLOWED DiscordClient.addCallbacks(lua); #end
 		#if ACHIEVEMENTS_ALLOWED Achievements.addCallbacks(lua); #end
-		#if TRANSLATIONS_ALLOWED Language.addLuaCallbacks(lua); #end
+		#if TRANSLATIONS_ALLOWED Language.addCallbacks(lua); #end
 		#if flixel_animate FlxAnimateFunctions.implement(lua); #end
-		HxLua.implement(lua);
 		ReflectionFunctions.implement(lua);
 		TextFunctions.implement(lua);
 		ExtraFunctions.implement(lua);

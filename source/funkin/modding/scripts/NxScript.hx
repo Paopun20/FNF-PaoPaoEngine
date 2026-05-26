@@ -9,6 +9,8 @@ package funkin.modding.scripts;
  */
 #if NXSCRIPT_ALLOWED
 import nx.script.Interpreter;
+import funkin.modding.scripts.components.*;
+import funkin.modding.scripts.bridge.HxRuner;
 #end
 
 class NxScript extends Script implements IScriptExecutor {
@@ -30,8 +32,17 @@ class NxScript extends Script implements IScriptExecutor {
 		#if NXSCRIPT_ALLOWED
 		interp = new Interpreter();
 		this.origin = path;
-		#end
+		#if DISCORD_ALLOWED DiscordClient.addCallbacks(this); #end
+		#if ACHIEVEMENTS_ALLOWED Achievements.addCallbacks(this); #end
+		#if TRANSLATIONS_ALLOWED Language.addCallbacks(this); #end
+		HxRuner.implement(this);
+		ReflectionFunctions.implement(this);
+		TextFunctions.implement(this);
+		ExtraFunctions.implement(this);
+		CustomSubstate.implement(this);
+		ShaderFunctions.implement(this);
 		Script.preset(this);
+		#end
 	}
 
 	override function execute() {

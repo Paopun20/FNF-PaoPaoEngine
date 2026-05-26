@@ -1,8 +1,6 @@
 package funkin.backend;
 
-#if LUA_ALLOWED
-import funkin.modding.scripts.LuaScript;
-#end
+import funkin.modding.scripts.Script;
 
 class Language {
 	public static var defaultLangName:String = 'English (US)'; // en-US
@@ -97,8 +95,7 @@ class Language {
 	}
 	#end
 
-	#if LUA_ALLOWED
-	public static function addLuaCallbacks(lua:LuaScript) {
+	public static function addCallbacks(lua:Script) {
 		lua.set("getTranslationPhrase", function(key:String, ?defaultPhrase:String, ?values:Array<Dynamic> = null) {
 			return getPhrase(key, defaultPhrase, values);
 		});
@@ -107,5 +104,4 @@ class Language {
 			return getFileTranslation(key);
 		});
 	}
-	#end
 }

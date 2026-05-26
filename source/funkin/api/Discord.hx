@@ -1,6 +1,6 @@
 package funkin.api;
 
-import funkin.modding.scripts.LuaScript;
+import funkin.modding.scripts.Script;
 #if DISCORD_ALLOWED
 import sys.thread.Thread;
 import lime.app.Application;
@@ -177,8 +177,7 @@ class DiscordClient {
 	}
 	#end
 
-	#if LUA_ALLOWED
-	public static function addLuaCallbacks(lua:LuaScript) {
+	public static function addCallbacks(lua:Script) {
 		lua.set("changeDiscordPresence", changePresence);
 
 		lua.set("changeDiscordClientID", function(?newID:String = null) {
@@ -187,18 +186,5 @@ class DiscordClient {
 			clientID = newID;
 		});
 	}
-	#end
-
-	#if PYTHON_ALLOWED
-	public static function addPythonCallbacks(py:Python) {
-		py.set("changeDiscordPresence", changePresence);
-
-		py.set("changeDiscordClientID", function(?newID:String = null) {
-			if (newID == null)
-				newID = _defaultID;
-			clientID = newID;
-		});
-	}
-	#end
 }
 #end
