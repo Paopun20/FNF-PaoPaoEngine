@@ -119,7 +119,7 @@ jobs:
           pwsh -ExecutionPolicy Bypass -File ${{ matrix.setup-file }}
 
       - name: Fix Hxcpp (mac)
-        if: matrix.target != 'mac'
+        if: matrix.target == 'mac'
         run: haxelib git hxcpp https://github.com/Paopun20/hxcpp-zlib-update --always
 
       - name: Build HxCpp
