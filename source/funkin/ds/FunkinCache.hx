@@ -183,10 +183,10 @@ class FunkinCache {
 
 	/** Load raw `BitmapData` from the filesystem or the OpenFL asset bundle. */
 	static function loadBitmapFromDisk(key:String, ?parentFolder:String):BitmapData {
-		var file:String = funkin.backend.Paths.getPath(key, IMAGE, parentFolder, true);
+		var file:String = Paths.getPath(key, IMAGE, parentFolder, true);
 		#if MODS_ALLOWED
 		if (FileSystem.exists(file))
-			return BetterBitmapData.fromFile(file);
+			return BitmapData.fromFile(file);
 		#end
 		if (OpenFlAssets.exists(file, IMAGE))
 			return OpenFlAssets.getBitmapData(file);

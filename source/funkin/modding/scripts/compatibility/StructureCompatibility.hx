@@ -38,7 +38,7 @@ class StructureCompatibility {
 		'psychlua.ReflectionFunctions' => 'funkin.modding.scripts.components.ReflectionFunctions',
 		'psychlua.ShaderFunctions' => 'funkin.modding.scripts.components.ShaderFunctions',
 		'psychlua.TextFunctions' => 'funkin.modding.scripts.components.TextFunctions',
-		'psychlua.ModchartAnimateSprite' => 'funkin.modding.scripts.components.ModchartAnimateSprite',
+		'psychlua.ModchartAnimateSprite' => 'funkin.modding.objects.ModchartAnimateSprite',
 		// States
 		'states.PlayState' => 'funkin.states.PlayState',
 		'states.MainMenuState' => 'funkin.states.MainMenuState',

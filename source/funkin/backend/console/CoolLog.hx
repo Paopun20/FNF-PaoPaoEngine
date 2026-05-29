@@ -11,31 +11,35 @@ import funkin.backend.utils.AnsiUtil.AnsiCode;
 using StringTools;
 using funkin.backend.utils.tools.QolTools;
 
-private enum abstract Level(Int8) {
-	var INFO;
-	var DEBUG;
-	var WARNING;
-	var ERROR;
-	var CRITICAL;
-	var TRACE;
+/**
+ * Log levels ordered by numeric severity.
+ * The underlying Int8 value IS the severity — no separate levelToInt needed.
+ */
+private enum abstract Level(Int8) from Int8 to Int8 {
+	var DEBUG = 10;
+	var INFO = 20;
+	var WARNING = 30;
+	var ERROR = 40;
+	var CRITICAL = 50;
+	var TRACE = 60;
 }
 
 @:analyzer(optimize, local_dce, fusion, user_var_fusion)
 class CoolLog {
-	private static final COLORS:Map<Level, Array<AnsiCode>> = [
-		DEBUG => [AnsiCode.CYAN],
-		INFO => [AnsiCode.GREEN],
-		WARNING => [AnsiCode.YELLOW],
-		ERROR => [AnsiCode.RED],
-		CRITICAL => [AnsiCode.BG_MAGENTA, AnsiCode.BLACK],
-		TRACE => [AnsiCode.WHITE],
+	private static final COLORS:Map<Int, Array<AnsiCode>> = [
+		(DEBUG : Int) => [AnsiCode.CYAN],
+		(INFO : Int) => [AnsiCode.GREEN],
+		(WARNING : Int) => [AnsiCode.YELLOW],
+		(ERROR : Int) => [AnsiCode.RED],
+		(CRITICAL : Int) => [AnsiCode.BG_MAGENTA, AnsiCode.BLACK],
+		(TRACE : Int) => [AnsiCode.WHITE],
 	];
 
-	private static final TIME_COLOR = rgb(160, 120, 255);
-	private static final FILE_COLOR = rgb(80, 200, 255);
-	private static final LINE_COLOR = rgb(140, 140, 140);
-	private static final MSG_COLOR = rgb(230, 230, 230);
-	private static final OBJ_COLOR = rgb(120, 220, 220);
+	private static final TIME_COLOR:AnsiCode = rgb(160, 120, 255);
+	private static final FILE_COLOR:AnsiCode = rgb(80, 200, 255);
+	private static final LINE_COLOR:AnsiCode = rgb(140, 140, 140);
+	private static final MSG_COLOR:AnsiCode = rgb(230, 230, 230);
+	private static final OBJ_COLOR:AnsiCode = rgb(120, 220, 220);
 
 	private static var level:Level =
 		#if debug
@@ -48,7 +52,7 @@ class CoolLog {
 
 	public static function init() {
 		nativeTrace = Log.trace;
-		Log.trace = (v, ?infos) -> log(Level.TRACE, v, infos); // Fixed
+		Log.trace = (v, ?infos) -> log(Level.TRACE, v, infos);
 	}
 
 	public static function uninit() {
@@ -56,7 +60,7 @@ class CoolLog {
 			Log.trace = nativeTrace;
 	}
 
-	public static function setLevel(lvl:Level) {
+	public static function setLevel(lvl:Level):Void {
 		level = lvl;
 	}
 
@@ -64,117 +68,98 @@ class CoolLog {
 		return level;
 	}
 
+	public static inline function debug(v:Dynamic, ?i:PosInfos)
+		log(Level.DEBUG, v, i);
+
+	public static inline function info(v:Dynamic, ?i:PosInfos)
+		log(Level.INFO, v, i);
+
+	public static inline function warning(v:Dynamic, ?i:PosInfos)
+		log(Level.WARNING, v, i);
+
+	public static inline function error(v:Dynamic, ?i:PosInfos)
+		log(Level.ERROR, v, i);
+
+	public static inline function critical(v:Dynamic, ?i:PosInfos)
+		log(Level.CRITICAL, v, i);
+
+	private static function log(lvl:Level, v:Dynamic, ?infos:PosInfos):Void {
+		if ((lvl : Int) < (level : Int))
+			return;
+
+		final time = AnsiUtil.apply('[' + now() + ']', [TIME_COLOR]);
+		final tag = AnsiUtil.apply(levelTag(lvl), COLORS.get(lvl) ?? [AnsiCode.WHITE]);
+		final location = formatLocation(infos);
+		final msg = formatValue(v);
+
+		Sys.stdout().write(Bytes.ofString('$time $tag $location: $msg\n'));
+		Sys.stdout().flush();
+	}
+
+	private static function formatLocation(?infos:PosInfos):String {
+		if (infos == null)
+			return AnsiUtil.apply("unknown", [FILE_COLOR]) + ":" + AnsiUtil.apply("0", [LINE_COLOR]);
+
+		final parts = infos.fileName.split("/");
+		final file = AnsiUtil.apply(parts.last(), [FILE_COLOR]);
+		final line = AnsiUtil.apply(Std.string(infos.lineNumber), [LINE_COLOR]);
+		return '$file:$line';
+	}
+
+	private static function formatValue(v:Dynamic):String {
+		return Std.isOfType(v, String) ? AnsiUtil.apply(v, [MSG_COLOR]) : AnsiUtil.apply(prettyJson(v), [OBJ_COLOR]);
+	}
+
+	/**
+	 * Attempts JSON pretty-printing; falls back to Std.string on failure.
+	 * Logs a warning when fallback is triggered so the exception isn't silently swallowed.
+	 */
+	private static function prettyJson(v:Dynamic):String {
+		try {
+			return JsonPrinter.print(v, null, "  ");
+		} catch (e) {
+			Sys.stderr().write(Bytes.ofString('[CoolLog] prettyJson fallback: ${e.message}\n'));
+			Sys.stderr().flush();
+			return Std.string(v);
+		}
+	}
+
+	private static function levelTag(lvl:Level):String {
+		return switch (lvl : Int) {
+			case 10: "DEBUG";
+			case 20: "INFO";
+			case 30: "WARNING";
+			case 40: "ERROR";
+			case 50: "CRITICAL";
+			case 60: "TRACE";
+			default: "UNKNOWN";
+		}
+	}
+
 	private static inline function now():String {
-		var t = Date.now();
+		final t = Date.now();
 		return lpad('${t.getHours()}', 2, "0") + ":" + lpad('${t.getMinutes()}', 2, "0") + ":" + lpad('${t.getSeconds()}', 2, "0") + "."
 			+ lpad('${Std.int(t.getTime() % 1000)}', 3, "0");
 	}
 
 	private static inline function lpad(s:String, len:Int, c:String):String {
-		while (s.length < len)
-			s = c + s;
-		return s;
+		return StringTools.lpad(s, c, len);
 	}
 
 	public static function getColorByHex(hex:String):AnsiCode {
-		if (hex.startsWith("#"))
-			hex = hex.substr(1);
-		if (hex.length != 6)
+		final h = hex.startsWith("#") ? hex.substr(1) : hex;
+		if (h.length != 6)
 			return AnsiCode.WHITE;
 
-		var r = Std.parseInt("0x" + hex.substr(0, 2));
-		var g = Std.parseInt("0x" + hex.substr(2, 2));
-		var b = Std.parseInt("0x" + hex.substr(4, 2));
+		final r = Std.parseInt("0x" + h.substr(0, 2));
+		final g = Std.parseInt("0x" + h.substr(2, 2));
+		final b = Std.parseInt("0x" + h.substr(4, 2));
 
 		if (r == null || g == null || b == null)
 			return AnsiCode.WHITE;
-
-		return cast rgb(r, g, b);
+		return rgb(r, g, b);
 	}
 
-	private static inline function rgb(r:Int, g:Int, b:Int):String
+	private static inline function rgb(r:Int, g:Int, b:Int):AnsiCode
 		return '\x1b[38;2;${r};${g};${b}m';
-
-	private static inline function pretty(v:Dynamic):String {
-		try {
-			return JsonPrinter.print(v, null, "  ");
-		} catch (_) {
-			return Std.string(v);
-		}
-	}
-
-	private static function levelToInt(lvl:Level):Int {
-		return switch (lvl) {
-			case DEBUG: 10;
-			case INFO: 20;
-			case WARNING: 30;
-			case ERROR: 40;
-			case CRITICAL: 50;
-			case TRACE: 60;
-		}
-	}
-
-	private static function levelTag(lvl:Level):String {
-		return switch (lvl) {
-			case DEBUG: "DEBUG";
-			case INFO: "INFO";
-			case WARNING: "WARNING";
-			case ERROR: "ERROR";
-			case CRITICAL: "CRITICAL";
-			case TRACE: "TRACE";
-		}
-	}
-
-	/**
-	 * Creates a clickable hyperlink using the OSC 8 ANSI escape sequence.
-	 * Supported in terminals like iTerm2, Windows Terminal, GNOME Terminal, etc.
-	 * Falls back to plain text in unsupported terminals.
-	 * @param url  The URL to open when clicked.
-	 * @param text The visible label shown in the terminal.
-	 */
-	private static inline function link(url:String, text:String):String
-		return '\033]8;;$url\033\\$text\033]8;;\033\\';
-
-	private static function log(lvl:Level, v:Dynamic, ?infos:PosInfos) {
-		var current = levelToInt(level);
-		if (levelToInt(lvl) < current)
-			return;
-
-		var time = AnsiUtil.apply('[' + now() + ']', [cast TIME_COLOR]);
-		var tag = AnsiUtil.apply(levelTag(lvl), COLORS.get(lvl));
-
-		var fs = infos != null ? infos.fileName.split("/") : [];
-
-		var file = "unknown";
-		var line = "0";
-
-		if (infos != null) {
-			file = fs.last();
-			line = Std.string(infos.lineNumber);
-		}
-
-		var location = AnsiUtil.apply(file, [cast FILE_COLOR]) + ":" + AnsiUtil.apply(line, [cast LINE_COLOR]);
-		// location = link(location, file); // why the fack, it not working >:(
-
-		var msg = Std.isOfType(v, String) ? AnsiUtil.apply(v, [cast MSG_COLOR]) : AnsiUtil.apply(pretty(v), [cast OBJ_COLOR]);
-
-		Sys.stdout().write(Bytes.ofString('$time $tag $location: $msg'));
-		Sys.stdout().write(Bytes.ofString('\x1b[0m\n')); // Reset colors
-		Sys.stdout().flush();
-	}
-
-	public static inline function debug(v:Dynamic, ?i)
-		log(Level.DEBUG, v, i);
-
-	public static inline function info(v:Dynamic, ?i)
-		log(Level.INFO, v, i);
-
-	public static inline function warning(v:Dynamic, ?i)
-		log(Level.WARNING, v, i);
-
-	public static inline function error(v:Dynamic, ?i)
-		log(Level.ERROR, v, i);
-
-	public static inline function critical(v:Dynamic, ?i)
-		log(Level.CRITICAL, v, i);
 }

@@ -6,7 +6,6 @@ import flixel.graphics.FlxGraphic;
 import flixel.math.FlxRect;
 import flixel.system.FlxAssets;
 import openfl.display.BitmapData;
-import funkin.backend.display.BetterBitmapData;
 import openfl.display3D.textures.RectangleTexture;
 import openfl.utils.AssetType;
 import openfl.utils.Assets as OpenFlAssets;

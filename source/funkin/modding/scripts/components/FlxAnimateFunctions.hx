@@ -1,6 +1,7 @@
 package funkin.modding.scripts.components;
 
 import openfl.utils.Assets;
+import funkin.modding.objects.ModchartAnimateSprite;
 
 #if (LUA_ALLOWED && flixel_animate)
 class FlxAnimateFunctions {

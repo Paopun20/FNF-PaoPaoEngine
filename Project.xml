@@ -45,7 +45,7 @@
 	<!--Mobile-specific-->
 	<window if="mobile" orientation="landscape" fullscreen="true" width="0" height="0" resizable="false" />
 	<!--Switch-specific-->
-	<window if="switch" orientation="landscape" fullscreen="true" width="0" height="0" resizable="false" hardware="true" />
+	<window if="switch" orientation="landscalsoftape" fullscreen="true" width="0" height="0" resizable="false" hardware="true" />
 	<!-- _____________________________ Path Settings ____________________________ -->
 	<set name="BUILD_DIR" value="export/debug" if="debug" />
 	<set name="BUILD_DIR" value="export/release" unless="debug" />

@@ -48,7 +48,7 @@ enum abstract AnsiCode(String) from String to String {
 }
 
 /**
- * This class provides functionality for applying ANSI codes to strings for terminal output.
+ * Provides functionality for applying ANSI codes to strings for terminal output.
  */
 @:nullSafety
 class AnsiUtil {
@@ -70,7 +70,82 @@ class AnsiUtil {
 	private static var codesSupported:Null<Bool> = null;
 
 	/**
-	 * Safe wrapper for Sys.getEnv (returns null on non-sys targets).
+	 * Applies the specified ANSI codes to the input string,
+	 * stripping them if the terminal does not support ANSI.
+	 *
+	 * @param input The input value to style.
+	 * @param codes The ANSI codes to apply.
+	 * @return The styled string, or a plain string if ANSI is unsupported.
+	 */
+	public static function apply(input:Dynamic, codes:Array<AnsiCode>):String {
+		final styled = codes.join('') + input + AnsiCode.RESET;
+		return resolveOutput(styled);
+	}
+
+	/**
+	 * Resets the cached ANSI support detection.
+	 * Useful for testing or repl-like environments where env vars may change.
+	 */
+	public static function resetCache():Void {
+		codesSupported = null;
+	}
+
+	@:noCompletion
+	private static function resolveOutput(output:String):String {
+		if (codesSupported == null)
+			codesSupported = detectAnsiSupport();
+		return codesSupported ? output : REGEX_ANSI_CODES.replace(output, '');
+	}
+
+	#if sys
+	@:noCompletion
+	private static function detectAnsiSupport():Bool {
+		final term = getEnvSafe('TERM');
+		if (term == 'dumb') return false;
+		if (term != null && (REGEX_TERM_256.match(term) || REGEX_TERM_TYPES.match(term))) return true;
+		if (isSupportedCiEnv()) return true;
+		if (isTeamCitySupported()) return true;
+		return checkTermProgram();
+	}
+
+	@:noCompletion
+	private static function isSupportedCiEnv():Bool {
+		if (getEnvSafe('CI') == null) return false;
+
+		final ciEnvNames:Array<String> = [
+			"GITHUB_ACTIONS", "GITEA_ACTIONS",    "TRAVIS", "CIRCLECI",
+			      "APPVEYOR",     "GITLAB_CI", "BUILDKITE",    "DRONE"
+		];
+
+		for (ci in ciEnvNames)
+			if (getEnvSafe(ci) != null) return true;
+
+		return getEnvSafe("CI_NAME") == "codeship";
+	}
+
+	@:noCompletion
+	private static function isTeamCitySupported():Bool {
+		final tc = getEnvSafe("TEAMCITY_VERSION");
+		return tc != null && REGEX_TEAMCITY_VERSION.match(tc);
+	}
+
+	@:noCompletion
+	private static function checkTermProgram():Bool {
+		return getEnvSafe('TERM_PROGRAM') == 'iTerm.app'
+			|| getEnvSafe('TERM_PROGRAM') == 'Apple_Terminal'
+			|| getEnvSafe('COLORTERM') != null
+			|| getEnvSafe('ANSICON') != null
+			|| getEnvSafe('ConEmuANSI') != null
+			|| getEnvSafe('WT_SESSION') != null;
+	}
+	#else
+	@:noCompletion
+	private static inline function detectAnsiSupport():Bool
+		return false;
+	#end
+
+	/**
+	 * Safe wrapper for Sys.getEnv — returns null on non-sys targets.
 	 */
 	private static function getEnvSafe(name:String):Null<String> {
 		#if sys
@@ -78,68 +153,5 @@ class AnsiUtil {
 		#else
 		return null;
 		#end
-	}
-
-	/**
-	 * Applies the specified ANSI codes to the input string.
-	 *
-	 * You can pass one or multiple ANSI codes for combining styles.
-	 *
-	 * @param input The input.
-	 * @param codes The ANSI codes to apply.
-	 *
-	 * @return The styled string.
-	 */
-	public static function apply(input:Dynamic, codes:Array<AnsiCode>):String {
-		return stripCodes(codes.join('') + input + AnsiCode.RESET);
-	}
-
-	@:noCompletion
-	private static function stripCodes(output:String):String {
-		#if sys
-		if (codesSupported == null) {
-			final term:Null<String> = getEnvSafe('TERM');
-
-			if (term == 'dumb')
-				codesSupported = false;
-			else {
-				if (codesSupported != true && term != null)
-					codesSupported = REGEX_TERM_256.match(term) || REGEX_TERM_TYPES.match(term);
-
-				if (getEnvSafe('CI') != null) {
-					final ciEnvNames:Array<String> = [
-						"GITHUB_ACTIONS", "GITEA_ACTIONS",    "TRAVIS", "CIRCLECI",
-						      "APPVEYOR",     "GITLAB_CI", "BUILDKITE",    "DRONE"
-					];
-
-					for (ci in ciEnvNames) {
-						if (getEnvSafe(ci) != null) {
-							codesSupported = true;
-							break;
-						}
-					}
-
-					if (codesSupported != true && getEnvSafe("CI_NAME") == "codeship")
-						codesSupported = true;
-				}
-
-				final teamCity:Null<String> = getEnvSafe("TEAMCITY_VERSION");
-				if (codesSupported != true && teamCity != null)
-					codesSupported = REGEX_TEAMCITY_VERSION.match(teamCity);
-
-				if (codesSupported != true) {
-					codesSupported = getEnvSafe('TERM_PROGRAM') == 'iTerm.app'
-						|| getEnvSafe('TERM_PROGRAM') == 'Apple_Terminal'
-						|| getEnvSafe('COLORTERM') != null
-						|| getEnvSafe('ANSICON') != null
-						|| getEnvSafe('ConEmuANSI') != null
-						|| getEnvSafe('WT_SESSION') != null;
-				}
-			}
-		}
-		#else
-		codesSupported = false;
-		#end
-		return codesSupported == true ? output : REGEX_ANSI_CODES.replace(output, '');
 	}
 }

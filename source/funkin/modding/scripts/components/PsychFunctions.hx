@@ -38,6 +38,7 @@ import funkin.backend.MusicBeatState;
 import funkin.substates.GameOverSubstate;
 import funkin.substates.PauseSubState;
 import funkin.modding.scripts.components.CustomSubstate;
+import funkin.modding.objects.ModchartAnimateSprite;
 import funkin.modding.scripts.ScriptPack;
 import openfl.utils.Assets;
 #if sys
@@ -54,6 +55,9 @@ import funkin.modding.scripts.HScript;
 #end
 #if PYTHON_ALLOWED
 import funkin.modding.scripts.Python;
+#end
+#if NXSCRIPT_ALLOWED
+import funkin.modding.scripts.NxScript;
 #end
 
 class PsychFunctions {
@@ -277,6 +281,18 @@ class PsychFunctions {
 				}
 			}
 			#end
+			#if NXSCRIPT_ALLOWED
+			var hxPath:String = findScript(scriptFile, '.hx');
+			if (hxPath != null) {
+				for (script in pack.scripts) {
+					if (Std.isOfType(script, NxScript)) {
+						var pythonInstance:NxScript = cast script;
+						if (pythonInstance.origin == hxPath)
+							return true;
+					}
+				}
+			}
+			#end
 			return false;
 		});
 
@@ -366,6 +382,32 @@ class PsychFunctions {
 			#end
 		});
 
+		lua.set("addNxScript", function(scriptFile:String, ?ignoreAlreadyRunning:Bool = false) {
+			#if NXSCRIPT_ALLOWED
+			var scriptPath:String = findScript(scriptFile, '.nx');
+			if (scriptPath != null) {
+				if (!ignoreAlreadyRunning) {
+					for (script in pack.scripts) {
+						if (Std.isOfType(script, NxScript)) {
+							var pythonInstance:NxScript = cast script;
+							if (pythonInstance.origin == scriptPath) {
+								CoolLog.info('addPython: The script "' + scriptPath + '" is already running!');
+								return;
+							}
+						}
+					}
+				}
+				var newScript = new NxScript(scriptPath);
+				pack.add(newScript);
+				newScript.execute();
+				return;
+			}
+			CoolLog.info("addNxScript: Script doesn't exist!");
+			#else
+			CoolLog.info("addNxScript: NxScript is not supported on this platform!");
+			#end
+		});
+
 		lua.set("removeLuaScript", function(luaFile:String):Bool {
 			var luaPath:String = findScript(luaFile);
 			if (luaPath != null) {
@@ -437,6 +479,32 @@ class PsychFunctions {
 			return false;
 			#else
 			CoolLog.info("removePython: Python is not supported on this platform!");
+			return false;
+			#end
+		});
+
+		lua.set("removeNxScript", function(scriptFile:String):Bool {
+			#if PYTHON_ALLOWED
+			var scriptPath:String = findScript(scriptFile, '.hx');
+			if (scriptPath != null) {
+				var foundAny:Bool = false;
+				for (script in pack.scripts) {
+					if (Std.isOfType(script, NxScript)) {
+						var pythonInstance:NxScript = cast script;
+						if (pythonInstance.origin == scriptPath) {
+							pythonInstance.destroy();
+							pack.remove(pythonInstance);
+							foundAny = true;
+						}
+					}
+				}
+				if (foundAny)
+					return true;
+			}
+			CoolLog.info("removeNxScript: NxScript script $scriptFile isn't running!");
+			return false;
+			#else
+			CoolLog.info("removeNxScript: NxScript is not supported on this platform!");
 			return false;
 			#end
 		});

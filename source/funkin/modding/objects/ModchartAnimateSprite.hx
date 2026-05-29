@@ -1,4 +1,4 @@
-package funkin.modding.scripts.components;
+package funkin.modding.objects;
 
 #if flixel_animate
 class ModchartAnimateSprite extends FlxAnimate {

@@ -3,6 +3,8 @@ package funkin.backend.network;
 import haxe.Http;
 import haxe.Json;
 import haxe.ds.StringMap;
+import haxe.http.HttpMethod;
+import haxe.http.HttpStatus;
 
 using StringTools;
 
@@ -13,43 +15,39 @@ class HttpClient {
 	/** Maximum number of retry attempts for transient errors. */
 	public static final MAX_RETRIES:Int = 3;
 
-	// HTTP status code boundaries
-	static final HTTP_SUCCESS_MIN:Int = 200;
-	static final HTTP_REDIRECT_MIN:Int = 300;
-	static final HTTP_CLIENT_ERROR_MIN:Int = 400;
+	static final RETRYABLE_ERRORS:Array<String> = [
+		"Network Error",
+		"Timeout Error",
+		"General Error",
+		"Service Unavailable",
+		"Connection Refused",
+		"Failed to Connect",
+		"Network Unreachable",
+		"Host Down",
+		"Gateway Timeout",
+		"Internal Server Error",
+		"Too Many Requests"
+	];
 
+	#if sys
 	public static var hasInternet(get, null):Bool;
 
-	public static function get_hasInternet() {
-		return runSync(function(cb:(Bool, Dynamic) -> Void) {
-			getRequest("https://www.google.com", (b:Bool, _:Dynamic) -> {
-				cb(b, null);
-			});
-		});
+	public static function get_hasInternet():Bool {
+		try {
+			sys.Http.requestUrl("https://www.google.com");
+			return true;
+		} catch (_) {
+			return false;
+		}
 	}
-
-	private static function runSync(asyncFunc:((Bool, Dynamic) -> Void)->Void):Dynamic {
-		var result:Dynamic = null;
-		var completed = false;
-		var success = false;
-
-		asyncFunc(function(s:Bool, res:Dynamic) {
-			completed = true;
-			success = s;
-			result = res;
-		});
-
-		while (!completed) {}
-
-		return result;
-	}
+	#end
 
 	/** Sends an HTTP GET request and delivers the raw response string to `callback`. */
 	public static function getRequest(url:String, callback:(Bool, Dynamic) -> Void, headers:StringMap<String> = null,
 			queryParams:StringMap<String> = null):Void {
 		dispatchRequest({
 			url: url,
-			method: "GET",
+			method: HttpMethod.Get,
 			data: null,
 			includesRequestBody: false,
 			headers: headers,
@@ -65,7 +63,7 @@ class HttpClient {
 			queryParams:StringMap<String> = null, contentType:String = "application/json"):Void {
 		dispatchRequest({
 			url: url,
-			method: "POST",
+			method: HttpMethod.Post,
 			data: data,
 			includesRequestBody: true,
 			headers: headers,
@@ -81,7 +79,7 @@ class HttpClient {
 			queryParams:StringMap<String> = null, contentType:String = "application/json"):Void {
 		dispatchRequest({
 			url: url,
-			method: "PUT",
+			method: HttpMethod.Put,
 			data: data,
 			includesRequestBody: true,
 			headers: headers,
@@ -97,7 +95,7 @@ class HttpClient {
 			queryParams:StringMap<String> = null):Void {
 		dispatchRequest({
 			url: url,
-			method: "DELETE",
+			method: HttpMethod.Delete,
 			data: null,
 			includesRequestBody: false,
 			headers: headers,
@@ -113,7 +111,7 @@ class HttpClient {
 			queryParams:StringMap<String> = null, contentType:String = "application/json"):Void {
 		dispatchRequest({
 			url: url,
-			method: "PATCH",
+			method: HttpMethod.Patch,
 			data: data,
 			includesRequestBody: true,
 			headers: headers,
@@ -141,19 +139,18 @@ class HttpClient {
 		final http = buildHttpRequest(validatedUrl, req);
 		attachResponseHandlers(http, req);
 
-		final requiresRequestBody = (req.method == "POST" || req.method == "PUT" || req.method == "PATCH");
-		http.request(requiresRequestBody);
+		http.request(req.includesRequestBody);
 	}
 
 	private static function buildHttpRequest(validatedUrl:String, req:RequestContext):Http {
-		final fullUrl = appendQueryParams(validatedUrl, req.queryParams);
-		final http = new Http(fullUrl);
+		final http = new Http(validatedUrl);
 		http.cnxTimeout = DEFAULT_TIMEOUT_SECONDS;
 
 		applyHeaders(http, req.headers);
+		applyQueryParams(http, req.queryParams);
 		applyNonStandardMethod(http, req.method);
 
-		if (req.includesRequestBody || req.method != "GET")
+		if (req.includesRequestBody)
 			applyRequestBody(http, req.data, req.method, req.contentType);
 
 		return http;
@@ -167,18 +164,18 @@ class HttpClient {
 	 * On other targets, the de-facto `X-HTTP-Method-Override` header tunnel is used
 	 * because haxe.Http only exposes GET/POST at the socket level.
 	 */
-	private static function applyNonStandardMethod(http:Http, method:String):Void {
-		if (method == "GET" || method == "POST")
+	private static function applyNonStandardMethod(http:Http, method:HttpMethod):Void {
+		if (method == HttpMethod.Get || method == HttpMethod.Post)
 			return;
 
 		#if js
-		http.customRequest(method != "POST", method);
+		http.customRequest(method != HttpMethod.Post, method);
 		#else
 		http.setHeader("X-HTTP-Method-Override", method);
 		#end
 	}
 
-	private static function applyRequestBody(http:Http, data:Dynamic, method:String, contentType:String):Void {
+	private static function applyRequestBody(http:Http, data:Dynamic, method:HttpMethod, contentType:String):Void {
 		http.setHeader("Content-Type", contentType);
 
 		if (data == null)
@@ -208,21 +205,20 @@ class HttpClient {
 
 		http.onData = response -> handleDataResponse(statusCode, response, http, req);
 
-		http.onError = error -> handleTransportError(error, req);
+		http.onError = error -> handleRetryableError(error, req);
 	}
 
 	private static function handleDataResponse(statusCode:Int, response:String, http:Http, req:RequestContext):Void {
-		if (statusCode >= HTTP_CLIENT_ERROR_MIN) {
+		if (statusCode >= (cast HttpStatus.BadRequest : Int)) {
 			handleRetryableError('HTTP $statusCode', req);
 			return;
 		}
 
-		if (statusCode >= HTTP_REDIRECT_MIN) {
+		if (statusCode >= (cast HttpStatus.MultipleChoices : Int)) {
 			handleRedirect(http, req);
 			return;
 		}
 
-		// statusCode >= HTTP_SUCCESS_MIN — happy path
 		logTrace('${req.method} $statusCode - success');
 		safeCallback(req.callback, true, response);
 	}
@@ -240,7 +236,7 @@ class HttpClient {
 		// Re-issue as GET so the redirect target receives a safe request.
 		dispatchRequest({
 			url: location,
-			method: "GET",
+			method: HttpMethod.Get,
 			data: null,
 			includesRequestBody: false,
 			headers: req.headers,
@@ -249,10 +245,6 @@ class HttpClient {
 			retries: req.retries + 1,
 			callback: req.callback
 		});
-	}
-
-	private static function handleTransportError(error:String, req:RequestContext):Void {
-		handleRetryableError(error, req);
 	}
 
 	private static function handleRetryableError(error:String, req:RequestContext):Void {
@@ -283,21 +275,18 @@ class HttpClient {
 			return null;
 
 		final parsed = new HttpUrl(url);
-		return parsed.valid ? parsed.toString() : null;
+		return parsed.valid ? parsed.inputUrl : null;
 	}
 
-	private static function appendQueryParams(baseUrl:String, queryParams:StringMap<String>):String {
+	private static function applyQueryParams(http:Http, queryParams:StringMap<String>):Void {
 		if (queryParams == null)
-			return baseUrl;
+			return;
 
-		final pairs = [
-			for (key in queryParams.keys()) {
-				final value = queryParams.get(key);
-				if (value != null) '$key=${StringTools.urlEncode(value)}';
-			}
-		];
-
-		return pairs.length > 0 ? baseUrl + "?" + pairs.join("&") : baseUrl;
+		for (key in queryParams.keys()) {
+			final value = queryParams.get(key);
+			if (value != null)
+				http.addParameter(key, value);
+		}
 	}
 
 	private static function applyHeaders(http:Http, headers:StringMap<String>):Void {
@@ -335,20 +324,7 @@ class HttpClient {
 	}
 
 	private static function isRetryableError(errorType:String):Bool {
-		final retryableErrors = [
-			"Network Error",
-			"Timeout Error",
-			"General Error",
-			"Service Unavailable",
-			"Connection Refused",
-			"Failed to Connect",
-			"Network Unreachable",
-			"Host Down",
-			"Gateway Timeout",
-			"Internal Server Error",
-			"Too Many Requests"
-		];
-		return retryableErrors.contains(errorType);
+		return RETRYABLE_ERRORS.contains(errorType);
 	}
 
 	private static function safeCallback(callback:(Bool, Dynamic) -> Void, success:Bool, result:Dynamic):Void {
@@ -373,7 +349,7 @@ class HttpClient {
 
 private typedef RequestContext = {
 	var url:String;
-	var method:String;
+	var method:HttpMethod;
 	var data:Dynamic;
 	var includesRequestBody:Bool;
 	var headers:Null<StringMap<String>>;
@@ -383,11 +359,10 @@ private typedef RequestContext = {
 	var callback:(Bool, Dynamic) -> Void;
 }
 
-// HttpUrl — validates and parses a URL string
 private class HttpUrl {
 	private static final URL_REGEX = ~/^(https?):\/\/([a-zA-Z0-9.-]+)(:[0-9]+)?(\/[^?#]*)?(\?[^#]*)?(#.*)?$/;
 
-	public final url:String;
+	public final inputUrl:String;
 	public final valid:Bool;
 	public final secure:Bool;
 	public final host:String;
@@ -395,7 +370,7 @@ private class HttpUrl {
 	public final path:String;
 
 	public function new(url:String) {
-		this.url = url;
+		this.inputUrl = url;
 		this.valid = URL_REGEX.match(url);
 
 		if (!this.valid) {
@@ -418,7 +393,4 @@ private class HttpUrl {
 
 		return secure ? 443 : 80;
 	}
-
-	public function toString():String
-		return url;
 }
