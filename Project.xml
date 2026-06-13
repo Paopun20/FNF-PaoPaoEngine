@@ -240,6 +240,4 @@
 	<icon path="art/icons/genIcon/icon2048.png" size='2048' />
 	<icon path="art/icons/genIcon/icon4096.png" size='4096' />
 	<icon path="art/icons/genIcon/iconOG.png" />
-
-	<certificate path="trusted-ca.crt" password="v5Sdx4Hop344377216873789813367633800278636022682117385361995579514045560056750895267840" if="I_WANT_ADD_CERTIFICATE_FOR_NO_REASON"/>
 </project>
