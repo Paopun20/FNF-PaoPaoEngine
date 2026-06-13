@@ -4,7 +4,6 @@ import flixel.graphics.FlxGraphic;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxSignal.FlxTypedSignal;
 import haxe.Exception;
-import hscript.IHScriptCustomBehaviour;
 import lime.utils.Float32Array;
 import openfl.display.BitmapData;
 import openfl.display.ShaderInput;
@@ -16,6 +15,11 @@ import openfl.utils._internal.Log;
 import openfl.utils.Assets;
 
 using StringTools;
+
+interface IHScriptCustomBehaviour {
+	public function hset(name:String, val:Dynamic):Dynamic;
+	public function hget(name:String):Dynamic;
+}
 
 @:access(openfl.display3D.Context3D)
 @:access(openfl.display3D.Program3D)

@@ -14,7 +14,7 @@ class PsychJsonPrinter extends JsonPrinter {
 	}
 
 	override function fieldsString(v:Dynamic, fields:Array<String>) {
-		writeObject(v, fields, false);
+		_writeObject(v, fields, false);
 	}
 
 	function isComplex(v:Dynamic):Bool {
@@ -39,7 +39,7 @@ class PsychJsonPrinter extends JsonPrinter {
 		}
 	}
 
-	function writeObject(v:Dynamic, fields:Array<String>, forceMultiline:Bool) {
+	function _writeObject(v:Dynamic, fields:Array<String>, forceMultiline:Bool) {
 		addChar('{'.code);
 		nind++;
 
@@ -78,24 +78,24 @@ class PsychJsonPrinter extends JsonPrinter {
 	function writeValue(v:Dynamic, singleLine:Bool) {
 		switch (Type.typeof(v)) {
 			case TObject:
-				writeObject(v, Reflect.fields(v), !singleLine);
+				_writeObject(v, Reflect.fields(v), !singleLine);
 
 			case TClass(Array):
-				writeArray(v, !singleLine);
+				_writeArray(v, !singleLine);
 
 			case TClass(haxe.ds.StringMap):
 				var map:haxe.ds.StringMap<Dynamic> = cast v;
 				var o = {};
 				for (k in map.keys())
 					Reflect.setField(o, k, map.get(k));
-				writeObject(o, Reflect.fields(o), true);
+				_writeObject(o, Reflect.fields(o), true);
 
 			default:
 				write(null, v);
 		}
 	}
 
-	function writeArray(a:Array<Dynamic>, forceMultiline:Bool) {
+	function _writeArray(a:Array<Dynamic>, forceMultiline:Bool) {
 		addChar('['.code);
 		nind++;
 
