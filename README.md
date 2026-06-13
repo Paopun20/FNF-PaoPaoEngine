@@ -5,7 +5,16 @@
 > [!WARNING]
 > This engine is currently under heavy development, some API is not 100% same as **Psych Engine** mods, ya your cook bro
 
-PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/FunkinCrew/Funkin) Engine aimed at optimization, lightweight, cross-platform.
+PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/FunkinCrew/Funkin) Engine aimed at optimization, lightweight, cross-platform
+
+## About
+
+I am a solo developer, and I am doing this for fun, so please be patient with the development process, or just make a pull request if you want to help. I will review it as soon as possible.
+
+I am working on this engine, so please don't expect a stable release or a release date. I will release it when it's ready.
+
+I have a Discord server for anyone who wants to chat or "bot spam and got banned." You can join it here:
+<https://discord.gg/XQDpcrk74Q>
 
 ## Features/Changes from the fork until 0.1.0 initial releases (maybe)
 
@@ -15,7 +24,7 @@ PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
 - NxScript [**Experimental**]
   > <https://github.com/Kitsumizy/NxScript/>
 - Hscript (Improved)
-  > Use Own's Codename's HScript library
+  > Use SScript library
 - Optimize by Cache AST (HScript/Python only)
   > Cache AST (Abstract Syntax Tree)\
   > Reuse Cache AST
@@ -50,22 +59,6 @@ PaoPao Engine is a cross-platform [Friday Night Funkin'](https://github.com/Funk
   - Offset End
     > Shortens the **displayed song length** in the Time UI, making the bar fill up earlier.\
     > Useful for fake endings. Does not affect `Conductor.songPosition` or `songLength`.
-
-## Mod Scripting You can use for now
-
-- Lua
-- Hscript
-- Python
-- NxScript
-
-## About
-
-I am a solo developer, and I am doing this for fun, so please be patient with the development process, or just make a pull request if you want to help. I will review it as soon as possible.
-
-I am working on this engine, so please don't expect a stable release or a release date. I will release it when it's ready.
-
-I have a Discord server for anyone who wants to chat or "bot spam and get banned." You can join it here:
-<https://discord.gg/XQDpcrk74Q>
 
 ## Credits
 

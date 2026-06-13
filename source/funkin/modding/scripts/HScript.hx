@@ -12,19 +12,11 @@ import funkin.modding.scripts.Python;
 #end
 #if HSCRIPT_ALLOWED
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
-import funkin.modding.scripts.utils.CacheScript.CacheParser;
-import funkin.modding.scripts.utils.CacheScript.CacheType;
-import funkin.modding.scripts.utils.CacheScript;
 import funkin.modding.scripts.compatibility.StructureCompatibility;
 import funkin.objects.NoteSplash;
 import funkin.objects.StrumNote;
 import funkin.backend.utils.NdllUtil;
-import hscript.Expr.Error as HscriptError;
-import hscript.Expr;
-import hscript.Interp;
-import hscript.Parser;
-import hscript.Printer;
-import hscript.Tools;
+import hscript.SScript;
 import flixel.FlxBasic;
 import funkin.modding.scripts.ScriptPack;
 
@@ -33,17 +25,21 @@ using StringTools;
 typedef StringMap<T> = Map<String, T>;
 
 class HScript extends Script implements IScriptExecutor {
-	public static var printer:Printer = new Printer();
+	/**
+	 * Variables that survive a full `reset()` call and are propagated into every
+	 * new script instance on construction.  These are distinct from
+	 * `SScript.globalVariables`, which is the built-in cross-instance shared map
+	 * (our former `publicVariables`).
+	 */
 	public static var staticVariables:StringMap<Dynamic> = new StringMap<Dynamic>();
-	public static var publicVariables:StringMap<Dynamic> = new StringMap<Dynamic>();
 
-	public var interp:Interp;
+	public var script:SScript;
 	public var returnValue:Dynamic;
 
 	public var variables(get, never):StringMap<Dynamic>;
 
 	public function get_variables()
-		return interp.variables;
+		return script.variables;
 
 	#if MODS_ALLOWED
 	public var modFolder:String = null;
@@ -53,44 +49,7 @@ class HScript extends Script implements IScriptExecutor {
 	public static function reset(clearCache:Bool = false) {
 		CoolLog.info('Resetting HScript');
 		staticVariables = new StringMap<Dynamic>();
-		publicVariables = new StringMap<Dynamic>();
-
-		if (clearCache)
-			CacheScript.clear(CacheType.HSCRIPT);
-	}
-
-	// Error handlers
-
-	private final function onError(e:HscriptError) {
-		if (Std.isOfType(e, HscriptError)) {
-			CoolLog.error(Printer.errorToString(e), this.interp.posInfos());
-		}
-	}
-
-	private final function onWarning(e:HscriptError) {
-		if (Std.isOfType(e, HscriptError)) {
-			CoolLog.warning(Printer.errorToString(e), this.interp.posInfos());
-		}
-	}
-
-	private final function onImportFailed(classPath:Array<String>, classAlias:Null<String>):Bool {
-		var varName = (classAlias != null) ? classAlias : classPath[classPath.length - 1];
-		var fullPath = classPath.join(".");
-		var classObj = LuaUtils.resolveClass(fullPath);
-
-		if (classObj != null) {
-			set(varName, classObj);
-			return true;
-		}
-
-		// hscriptDebugMode suppresses errors in favour of warnings during development
-		if (get("hscriptDebugMode")) {
-			CoolLog.warning('Import failed: $fullPath (alias: ${classAlias != null ? classAlias : "none"})', this.interp.posInfos());
-			return true;
-		}
-
-		CoolLog.error('Import failed: $fullPath (alias: ${classAlias != null ? classAlias : "none"})', this.interp.posInfos());
-		return false;
+		SScript.globalVariables.clear();
 	}
 
 	// Construction
@@ -98,15 +57,9 @@ class HScript extends Script implements IScriptExecutor {
 	public override function new(?file:String = '', ?varsToBring:Any = null, ?parentInstance:Dynamic = null) {
 		super(file);
 
-		interp = new Interp();
-		interp.allowStaticVariables = interp.allowPublicVariables = true;
-		interp.errorHandler = onError;
-		interp.importFailedCallback = onImportFailed;
-		interp.publicVariables = publicVariables;
-		interp.staticVariables = staticVariables;
-
-		var activeState = FlxG.state.subState ?? FlxG.state;
-		addExHScript(this.interp, LuaUtils.isPlayStateScript(activeState));
+		// Create an empty SScript; the file/code is loaded later in execute() / codeExecute()
+		// so that all variable presets are applied before the script body runs.
+		script = new SScript();
 
 		this.scriptName = this.fileName;
 		if (this.scriptName != null && this.scriptName.length > 0)
@@ -118,6 +71,10 @@ class HScript extends Script implements IScriptExecutor {
 		#if MODS_ALLOWED
 		resolveModFolder(file);
 		#end
+
+		// Propagate truly-static values into this instance.
+		for (key => value in staticVariables)
+			script.set(key, value);
 
 		Script.preset(this);
 		preset(varsToBring);
@@ -152,7 +109,7 @@ class HScript extends Script implements IScriptExecutor {
 	}
 
 	private function loadScriptContent(path:String):Null<String> {
-		// If origin contains a newline it is already raw code, not a file path
+		// If the string already contains a newline it is raw code, not a file path.
 		if (path.contains('\n'))
 			return path;
 
@@ -168,156 +125,27 @@ class HScript extends Script implements IScriptExecutor {
 		if (closed)
 			return null;
 
-		var cachedExpr = getOrParseExpr(code);
-		returnValue = interp.execute(cachedExpr);
+		try {
+			script.doString(code);
+		} catch (e:Dynamic) {
+			CoolLog.error('HScript execute error in "$scriptName": $e');
+			return null;
+		}
+
+		if (script.parsingException != null)
+			CoolLog.error('HScript parse/execute error in "$scriptName": ${Std.string(script.parsingException)}');
+		returnValue = null;
 		return returnValue;
 	}
 
-	private function getOrParseExpr(code:String):Dynamic {
-		var cacheKey = CacheScript.hashCode(#if MODS_ALLOWED modFolder + #end scriptName + code);
-
-		if (CacheScript.exists(cacheKey, CacheType.HSCRIPT)) {
-			CoolLog.info('HScript reused AST for "$scriptName" ($cacheKey)');
-			return CacheScript.get(cacheKey, CacheType.HSCRIPT);
-		}
-
-		var expr = CacheParser.parse(code, CacheType.HSCRIPT, this.scriptName);
-		CacheScript.set(cacheKey, expr, CacheType.HSCRIPT);
-		CoolLog.info('HScript parsed AST for "$scriptName" ($cacheKey)');
-		return expr;
-	}
-
 	// Parent binding
-
 	override function set_parent(parent:Dynamic):Dynamic {
-		if (interp == null)
-			return this;
-
-		interp.scriptObject = parent;
-
-		if (parent.variables != null)
-			interp.publicVariables = parent.variables;
-
-		for (fieldName in Reflect.fields(parent))
-			this.set(fieldName, Reflect.field(parent, fieldName));
-
-		// Re-apply object-dependent bindings now that scriptObject is set
-		addExHScript(this.interp, LuaUtils.isPlayStateScript(FlxG.state ?? FlxG.state.subState));
-
+		script.setSpecialObject(parent);
 		return this;
 	}
 
 	override function get_parent():Dynamic
-		return interp.scriptObject;
-
-	// PlayState and generic interp bindings
-
-	public static function addExHScript(targetInterp:Interp, isPlayState:Bool = false) {
-		if (targetInterp == null)
-			return;
-
-		if (isPlayState)
-			registerPlayStateBindings(targetInterp);
-		else
-			registerGenericBindings(targetInterp);
-	}
-
-	private static function registerPlayStateBindings(targetInterp:Interp):Void {
-		var ps = PlayState.instance;
-		targetInterp.variables.set("game", ps);
-		targetInterp.variables.set("add", buildPlayStateAddFn(ps));
-		targetInterp.variables.set('insert', ps.insert);
-		targetInterp.variables.set('remove', ps.remove);
-		targetInterp.variables.set('addBehindGF', ps.addBehindGF);
-		targetInterp.variables.set('addBehindDad', ps.addBehindDad);
-		targetInterp.variables.set('addBehindBF', ps.addBehindBF);
-
-		targetInterp.variables.set('setVar', function(name:String, value:Dynamic) {
-			ps.variables.set(name, value);
-			return value;
-		});
-		targetInterp.variables.set('getVar', function(name:String) return ps.variables.exists(name) ? ps.variables.get(name) : null);
-		targetInterp.variables.set('removeVar', function(name:String):Bool {
-			if (!ps.variables.exists(name))
-				return false;
-			ps.variables.remove(name);
-			return true;
-		});
-
-		targetInterp.variables.set('customSubstate', CustomSubstate.instance);
-		targetInterp.variables.set('customSubstateName', CustomSubstate.name);
-
-		/* 
-			for (field in Type.getInstanceFields(Type.getClass(ps)))
-			{
-				try
-				{
-					var obj = Reflect.getProperty(ps, field);
-					if (Reflect.isObject(obj)){
-						targetInterp.variables.set(field, obj);
-					} else if (Reflect.isFunction(obj)) {
-						if (!targetInterp.variables.exists(field)) {
-							targetInterp.variables.set(field, obj);
-						}
-					}
-				}
-				catch (e:Dynamic)
-				{
-				}
-		}*/
-	}
-
-	/**
-	 * Inserts a display object below the topmost character group so that
-	 * it renders behind characters by default.
-	 */
-	private static function buildPlayStateAddFn(ps:PlayState):(FlxBasic, ?Bool) -> Void {
-		return function(basic:FlxBasic, ?frontOfChars:Bool = false) {
-			if (frontOfChars) {
-				ps.add(basic);
-				return;
-			}
-
-			// Insert behind the frontmost character group
-			var position = ps.members.indexOf(ps.gfGroup);
-			if (ps.members.indexOf(ps.boyfriendGroup) < position)
-				position = ps.members.indexOf(ps.boyfriendGroup);
-			else if (ps.members.indexOf(ps.dadGroup) < position)
-				position = ps.members.indexOf(ps.dadGroup);
-
-			ps.insert(position, basic);
-		};
-	}
-
-	private static function registerGenericBindings(targetInterp:Interp):Void {
-		var scriptObj = targetInterp.scriptObject;
-
-		// Guard: if the parent object isn't set yet, skip object-dependent bindings.
-		// set_parent() will call this again once scriptObject is available.
-		if (scriptObj == null)
-			return;
-
-		targetInterp.variables.set("game", scriptObj);
-		targetInterp.variables.set('add', scriptObj.add);
-		targetInterp.variables.set('insert', scriptObj.insert);
-		targetInterp.variables.set('remove', scriptObj.remove);
-
-		var vars:Dynamic = scriptObj.variables;
-		if (vars == null)
-			return;
-
-		targetInterp.variables.set('setVar', function(name:String, value:Dynamic) {
-			vars.set(name, value);
-			return value;
-		});
-		targetInterp.variables.set('getVar', function(name:String) return vars.get(name));
-		targetInterp.variables.set('removeVar', function(name:String):Bool {
-			if (vars.get(name) == null)
-				return false;
-			vars.remove(name);
-			return true;
-		});
-	}
+		return parent;
 
 	// Preset
 
@@ -328,6 +156,36 @@ class HScript extends Script implements IScriptExecutor {
 		}
 
 		Script.preset(this);
+
+		if (PlayState.instance != null) {
+			set("game", PlayState.instance);
+			set("add", PlayState.instance.add);
+			set('insert', PlayState.instance.insert);
+			set('remove', PlayState.instance.remove);
+			set('addBehindGF', PlayState.instance.addBehindGF);
+			set('addBehindDad', PlayState.instance.addBehindDad);
+			set('addBehindBF', PlayState.instance.addBehindBF);
+		} else {
+			var ps = FlxG.state;
+
+			set("game", ps);
+			set("add", ps.add);
+			set('insert', ps.insert);
+			set('remove', ps.remove);
+		}
+
+		set('setVar', function(name:String, value:Dynamic) {
+			MusicBeatState.getVariables().set(name, value);
+			return value;
+		});
+
+		set('getVar', function(name:String) return MusicBeatState.getVariables().exists(name) ? MusicBeatState.getVariables().get(name) : null);
+		set('removeVar', function(name:String):Bool {
+			if (MusicBeatState.getVariables().get(name) == null)
+				return false;
+			MusicBeatState.getVariables().remove(name);
+			return true;
+		});
 
 		set('luaDebugMode', false);
 		set('luaDeprecatedWarnings', true);
@@ -418,12 +276,14 @@ class HScript extends Script implements IScriptExecutor {
 
 	private function registerGlobalCallback() {
 		if (scriptPack != null) {
-			// Register every scripts except this
-			set("createGlobalCallback", function(name:String, func:Dynamic) {
+			// Register every script except this one.
+			set("createGlobalCallback", function(name:String, func:String) {
 				scriptPack.set(name, Reflect.makeVarArgs(function(args:Array<Dynamic>) {
-					var functionRef = interp.variables.get(func);
-					var result = Reflect.callMethod(null, functionRef, args);
-					return result ?? LuaUtils.Function_Continue;
+					if (!hasFunction(func))
+						return LuaUtils.Function_Continue;
+					// Use SScript's call() so errors are caught and surfaced cleanly.
+					var callResult = script.call(func, args);
+					return callResult.returnValue ?? LuaUtils.Function_Continue;
 				}), [this]);
 			});
 		}
@@ -433,7 +293,7 @@ class HScript extends Script implements IScriptExecutor {
 		set('getModSetting', function(saveTag:String, ?modName:String = null) {
 			if (modName == null) {
 				if (this.modFolder == null) {
-					CoolLog.error('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!', this.interp.posInfos());
+					CoolLog.error('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!');
 					return null;
 				}
 				modName = this.modFolder;
@@ -445,21 +305,21 @@ class HScript extends Script implements IScriptExecutor {
 	// Variable access
 
 	public override function set(variable:String, data:Dynamic):Void {
-		if (interp == null || closed)
+		if (script == null || closed)
 			return;
-		interp.variables.set(variable, data);
+		script.set(variable, data);
 	}
 
 	public override function get(variable:String):Dynamic {
-		if (interp == null || closed)
+		if (script == null || closed)
 			return null;
-		return interp.variables.get(variable);
+		return script.variables.get(variable);
 	}
 
 	public override function hasFunction(funcName:String):Bool {
-		if (interp == null || closed)
+		if (script == null || closed)
 			return false;
-		return interp.variables.exists(funcName) && Reflect.isFunction(interp.variables.get(funcName));
+		return script.variables.exists(funcName) && Reflect.isFunction(script.variables.get(funcName));
 	}
 
 	public override function call(func:String, ?args:Array<Dynamic>):Dynamic {
@@ -469,13 +329,19 @@ class HScript extends Script implements IScriptExecutor {
 		if (args == null)
 			args = [];
 
-		try {
-			var functionRef = interp.variables.get(func);
-			if (functionRef == null || !Reflect.isFunction(functionRef))
-				return LuaUtils.Function_Continue;
+		if (!hasFunction(func))
+			return LuaUtils.Function_Continue;
 
-			var result = Reflect.callMethod(null, functionRef, args);
-			return result ?? LuaUtils.Function_Continue;
+		try {
+			var callResult = script.call(func, args);
+
+			if (callResult.exceptions != null && callResult.exceptions.length > 0) {
+				var stack = haxe.CallStack.toString(haxe.CallStack.exceptionStack(true));
+				CoolLog.error('HScript call error in $func: ${callResult.exceptions[0]}\n$stack');
+			}
+
+			returnValue = callResult.returnValue;
+			return returnValue ?? LuaUtils.Function_Continue;
 		} catch (e:Dynamic) {
 			var stack = haxe.CallStack.toString(haxe.CallStack.exceptionStack(true));
 			CoolLog.error('HScript call error in $func: $e\n$stack');
@@ -485,11 +351,12 @@ class HScript extends Script implements IScriptExecutor {
 	}
 
 	// Lifecycle
+
 	public override function destroy():Void {
 		if (closed)
 			return;
 		closed = true;
-		interp = null;
+		script = null;
 		origin = null;
 		super.destroy();
 	}

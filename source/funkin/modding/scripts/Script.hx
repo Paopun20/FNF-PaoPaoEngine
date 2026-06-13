@@ -208,7 +208,7 @@ class Script implements IFlxDestroyable implements IScriptExecutor {
 		return defaults;
 	}
 
-	public var parent(get, set):Dynamic;
+	@:isVar public var parent(get, set):Dynamic;
 
 	function set_parent(value:Dynamic):Dynamic
 		throw new NotImplementedException("override this function");
