@@ -152,7 +152,7 @@ class PaoPaoCamera extends FlxCamera {
 	public function updateFollowDelta(elapsed:Float = 0):Void {
 		if (deadzone == null) {
 			target.getMidpoint(_point);
-			_point.addPoint(targetOffset);
+			_point.add(targetOffset);
 			_scrollTarget.set(_point.x - width * 0.5, _point.y - height * 0.5);
 		} else {
 			var edge:Float;

@@ -15,7 +15,22 @@ import sys.io.File;
 import sys.io.Process;
 
 using StringTools;
+
+#if hxp
+import hxp.*;
+import lime.tools.*;
 #end
+
+enum FileModes {
+	XML(data:Xml);
+	HXP(data:Dynamic);
+}
+#end
+
+#if !lime
+#error "for lime project only"
+#end
+class UnsupportException extends haxe.Exception {}
 
 /*
 	Simple macro to build a source map of all .hx files in the project at compile time, based on the paths defined in Project.xml. This allows us to include source code in error logs without needing to read files at runtime, which is especially useful for platforms with limited file access or for packaging everything into a single binary.
@@ -90,61 +105,72 @@ final class SourceMap {
 		return (path != null && path != "") ? FileSystem.absolutePath(path) : null;
 	}
 
-	private static function getSourcePaths():Array<String> {
-		var paths:Array<String> = [];
-
+	private static function getProjectFile():FileModes {
+		var data:Dynamic;
 		var xmlPath = "./Project.xml";
-		if (!FileSystem.exists(xmlPath)) {
-			printRGB(255, 165, 0, "Project.xml not found");
-			return [FileSystem.absolutePath("./source")];
-		}
+		var hxpPath = "./Project.hxp";
 
-		var content = File.getContent(xmlPath);
-		var xml = try Xml.parse(content) catch (e:Dynamic) {
-			printRGB(255, 165, 0, 'Failed to parse Project.xml: $e');
-			return [FileSystem.absolutePath("./source")];
-		};
+		if (FileSystem.exists(xmlPath)) {
+			var content = File.getContent(xmlPath);
 
-		var rootElement = xml.firstElement();
-		if (rootElement == null) {
-			printRGB(255, 165, 0, "Project.xml has no root element");
-			return [FileSystem.absolutePath("./source")];
-		}
+			var xml = try {
+				Xml.parse(content);
+			} catch (e:Dynamic) {
+				null;
+			};
 
-		for (node in rootElement) {
-			if (node.nodeType != Xml.Element)
-				continue;
-
-			switch (node.nodeName) {
-				case "source" | "classpath":
-					// <source path="source"/>
-					var path = resolvePathAttr(node);
-					if (path != null && path != "")
-						paths.push(FileSystem.absolutePath(path));
-					else
-						printRGB(255, 165, 0, 'Invalid <source> path in Project.xml');
-
-				case "haxelib":
-					// <haxelib name="flixel"/>
-					// <haxelib name="flixel" version="5.4.0"/>
-					var name = node.get("name");
-					var version = node.get("version"); // null if not set
-					if (name != null && name != "") {
-						var libPath = resolveHaxelibPath(name, version);
-						if (libPath != null)
-							paths.push(libPath);
-						else
-							printRGB(255, 165, 0, 'Could not resolve haxelib $name:$version');
-					}
-
-				default:
-					// Just facking ignore other nodes
+			if (xml != null) {
+				var data = xml.firstElement();
+				if (data != null)
+					return FileModes.XML(data);
 			}
 		}
 
-		if (paths.length == 0) {
-			printRGB(255, 165, 0, "No paths found in Project.xml, falling back to ./source");
-			paths.push(FileSystem.absolutePath("./source"));
+		// todo: hxp check
+
+		return FileModes.HXP(null);
+	}
+
+	private static function getSourcePaths():Array<String> {
+		var paths:Array<String> = [];
+
+		var mode = getProjectFile();
+
+		switch (mode) {
+			case XML(datas):
+				for (node in datas) {
+					if (node.nodeType != Xml.Element)
+						continue;
+
+					switch (node.nodeName) {
+						case "source" | "classpath":
+							// <source path="source"/>
+							var path = resolvePathAttr(node);
+							if (path != null && path != "") {
+								paths.push(FileSystem.absolutePath(path));
+							} else {
+								printRGB(255, 165, 0, 'Invalid <source> path in Project.xml');
+							}
+
+						case "haxelib":
+							// <haxelib name="flixel"/>
+							// <haxelib name="flixel" version="5.4.0"/>
+							var name = node.get("name");
+							var version = node.get("version"); // null if not set
+							if (name != null && name != "") {
+								var libPath = resolveHaxelibPath(name, version);
+								if (libPath != null)
+									paths.push(libPath);
+								else
+									printRGB(255, 165, 0, 'Could not resolve haxelib $name:$version');
+							}
+
+						default:
+							// Just facking ignore other nodes
+					}
+				}
+			case HXP(_): // todo: do this shit
+				throw new UnsupportException("Project.hxp is not supported yet");
 		}
 
 		return paths;
@@ -153,20 +179,20 @@ final class SourceMap {
 	/*
 		haxelib libpath lime:8.3.2 <- libName:version format if version is provided, otherwise just haxelib set version kicks it
 		C:/HaxeToolkit/haxe/lib/lime/8,3,2/ <- output with trailing slash
-		(it work i test it)
 	 */
 	private static function resolveHaxelibPath(name:String, ?version:String):Null<String> {
 		var libArg = (version != null && version != "") ? '$name:$version' : name;
 
 		try {
-			// Fix: Process has no static run() method and no ProcessOptions — use new Process(cmd, args).
-			// sys.io.Process also has no cwd parameter; haxelib resolves paths globally so this is fine.
 			var process = new Process("haxelib", ["libpath", libArg]);
+			var exitCode = process.exitCode();
 
-			// Fix: process.wait() does not exist — exitCode() blocks until the process finishes.
-			process.exitCode();
+			if (exitCode != 0) {
+				return null;
+			}
 
 			var output = process.stdout.readAll();
+			process.close();
 			if (output == null || output.length == 0) {
 				return null;
 			}
@@ -183,26 +209,24 @@ final class SourceMap {
 
 			var rootPath = FileSystem.absolutePath(Path.normalize(lines[0].trim()));
 
-			// Fix: Path is now imported (haxe.io.Path)
 			var haxelibJson = Path.join([rootPath, "haxelib.json"]);
 
 			if (!FileSystem.exists(haxelibJson)) {
 				return rootPath;
 			}
 
-			// Fix: Json is now imported (haxe.Json)
-		var jsonContent = File.getContent(haxelibJson);
-		if (jsonContent == null || jsonContent.trim() == "") {
-			return rootPath;
-		}
-		
-		var json:Dynamic = try Json.parse(jsonContent) catch (e:Dynamic) {
-			return rootPath;
-		};
-		
-		if (json == null) {
-			return rootPath;
-		}
+			var jsonContent = File.getContent(haxelibJson);
+			if (jsonContent == null || jsonContent.trim() == "") {
+				return rootPath;
+			}
+
+			var json:Dynamic = try Json.parse(jsonContent) catch (e:Dynamic) {
+				return rootPath;
+			};
+
+			if (json == null) {
+				return rootPath;
+			}
 
 			var classPath:String = Reflect.field(json, "classPath");
 			if (classPath == null || classPath.trim() == "") {

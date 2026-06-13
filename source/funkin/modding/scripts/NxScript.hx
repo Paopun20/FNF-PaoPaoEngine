@@ -18,13 +18,19 @@ class NxScript extends Script implements IScriptExecutor {
 	public var interp:Interpreter;
 	#end
 
-	override function set_parent(value:Dynamic):Dynamic {
+	override function set_parent(value:Dynamic):Dynamic
+		#if NXSCRIPT_ALLOWED
+		return interp.parent = value;
+		#else
 		return null;
-	}
+		#end
 
-	override function get_parent():Dynamic {
+	override function get_parent():Dynamic
+		#if NXSCRIPT_ALLOWED
+		return interp.parent;
+		#else
 		return null;
-	}
+		#end
 
 	public function new(path:String) {
 		super(path);

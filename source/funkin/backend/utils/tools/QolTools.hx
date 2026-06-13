@@ -9,8 +9,6 @@ import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 
 class QolTools {
-	public function new() {}
-
 	// Float extensions
 	// myFloat.clamp(0, 1)
 

@@ -202,7 +202,7 @@ class HScript extends Script implements IScriptExecutor {
 			this.set(fieldName, Reflect.field(parent, fieldName));
 
 		// Re-apply object-dependent bindings now that scriptObject is set
-		addExHScript(this.interp, LuaUtils.isPlayStateScript(FlxG.state.subState ?? FlxG.state));
+		addExHScript(this.interp, LuaUtils.isPlayStateScript(FlxG.state ?? FlxG.state.subState));
 
 		return this;
 	}

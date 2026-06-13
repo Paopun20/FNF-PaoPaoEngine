@@ -284,7 +284,11 @@ class MainMenuState extends EditableState {
 
 						#if MODS_ALLOWED
 						case 'mods':
+							#if debug
+							MusicBeatState.switchState(new NewModsMenuState());
+							#else
 							MusicBeatState.switchState(new ModsMenuState());
+							#end
 						#end
 
 						#if ACHIEVEMENTS_ALLOWED

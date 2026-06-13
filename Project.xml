@@ -8,12 +8,11 @@
 	<!--Switch Export with Unique ApplicationID and Icon-->
 	<set name="APP_ID" value="0x0100f6c013bbc000" />
 	<!-- NOTE TO SELF: DISABLE THIS IF ISSUES ARE FOUND -->
-	<haxedef name="LINC_LUA_RELATIVE_DYNAMIC_LIB" />
+	<!-- <haxedef name="LINC_LUA_RELATIVE_DYNAMIC_LIB" /> -->
 	<!-- stable luas PUT AFTER FIRST LINE WITH APP NAME AND ETC -->
 	<!--The flixel preloader is not accurate in Chrome. You can use it regularly if you embed the swf into a html file or you can set the actual size of your file manually at "FlxPreloaderBase-onUpdate-bytesTotal"-->
 	<!-- <app preloader="Preloader" resizable="true" /> -->
 	<app preloader="flixel.system.FlxPreloader" />
-	<!-- <app preloader="Preloader" /> -->
 	<!--Minimum
 	without FLX_NO_GAMEPAD: 11.8, without FLX_NO_NATIVE_CURSOR: 11.2-->
 	<set name="SWF_VERSION" value="11.8" />
@@ -35,28 +34,38 @@
 		<define name="LOADING_EASTER_EGG" />
 	</section>
 	<define name="VIDEOS_ALLOWED" if="cpp" unless="32bits || hl || html5" />
-	<!-- ____________________________ Window Settings ___________________________ -->
-	<!--These window settings apply to all targets-->
+	
+	<!--  Window Settings  -->
+	<!-- Global -->
 	<window width="1280" height="720" fps="60" background="null" hardware="true" vsync="false" allow-high-dpi="true" allow-shaders="true" require-shaders="true" depth-buffer="true" stencil-buffer="true" antialiasing="4" />
-	<!--HTML5-specific-->
+
+	<!-- HTML5 -->
 	<window if="html5" resizable="true" />
-	<!--Desktop-specific-->
+
+	<!-- Desktop -->
 	<window if="desktop" orientation="landscape" fullscreen="false" resizable="true" vsync="false" />
-	<!--Mobile-specific-->
-	<window if="mobile" orientation="landscape" fullscreen="true" width="0" height="0" resizable="false" />
-	<!--Switch-specific-->
-	<window if="switch" orientation="landscalsoftape" fullscreen="true" width="0" height="0" resizable="false" hardware="true" />
-	<!-- _____________________________ Path Settings ____________________________ -->
+
+	<!-- Mobile -->
+	<window if="mobile" orientation="landscape" fullscreen="true" resizable="false" />
+
+	<!-- Switch -->
+	<window if="switch" orientation="landscape" fullscreen="true" resizable="false" hardware="true" />
+
+	<!-- Path Settings -->
+	<source name="source" />
+
+	<!-- Export Path Settings  -->
 	<set name="BUILD_DIR" value="export/debug" if="debug" />
 	<set name="BUILD_DIR" value="export/release" unless="debug" />
 	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
-	<source name="source" />
-	<!-- __________________________ Game Assets & Etc. __________________________ -->
+
+	<!-- Game Assets & Etc -->
 	<!-- Turn on Crash Handler -->
 	<define name="CRASH_HANDLER" if="desktop" />
 	<define name="CRASH_DEBUGGER" if="CRASH_HANDLER desktop" />
 	<!-- <define name="CRASH_EXPERIMENTAL" if="CRASH_DEBUGGER" /> -->
 	<!-- <haxelib name="" if="CRASH_EXPERIMENTAL"/> -->
+	<haxedef name="openfl_dpi_aware" if="openfl_dpi_aware" />
 
 	<!-- Assets -->
 	<assets path="assets/fonts" />
@@ -81,8 +90,8 @@
 	<haxelib name="funkin.vis" version="git" />
 	<define name="CHECK_FOR_UPDATES" if="desktop officialBuild" />
 	<section if="MODS_ALLOWED">
-		<assets path='example_mods' rename='mods' embed='false' type='template' unless="mac" />
-		<assets path='example_mods' rename='mods' embed='false' if="mac" />
+		<!-- <assets path='example_mods' rename='mods' embed='false' type='template' unless="mac" />
+		<assets path='example_mods' rename='mods' embed='false' if="mac" /> -->
 		<assets path='list.txt' rename='modsList.txt' />
 	</section>
 	<assets path='art/readme.txt' rename='do NOT readme.txt' />
@@ -91,10 +100,12 @@
 		<assets path="source/alsoft.txt" rename="plugins/alsoft.ini" type="text" if="windows" />
 		<assets path="source/alsoft.txt" rename="plugins/alsoft.conf" type="text" unless="windows" />
 	</section>
-	<!-- _______________________________ Libraries ______________________________ -->
+
+	<!-- Libraries -->
 	<haxelib name="flixel" />
 	<haxelib name="flixel-addons" version="4.0.1" />
 	<haxelib name="flixel-animate" />
+	<haxelib name="starling" />
 	<haxelib name="random" />
 	<haxelib name="thx.semver" />
 	<haxelib name="hxcpp" version="4.3.2" />
@@ -103,6 +114,7 @@
 	<haxelib name="sl-windows-api" if="SlWindowsAPI" />
 	<haxelib name="hxWindowColorMode" if="windows desktop cpp" />
 	<haxelib name="compiletime" />
+
 	<!-- Libraries needed-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED" />
 	<haxelib name="lscript" if="LUA_ALLOWED" />
@@ -112,19 +124,23 @@
 	<haxelib name="nxscript" if="NXSCRIPT_ALLOWED" />
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED" />
 	<haxelib name="hxdiscord_rpc" version="git" if="DISCORD_ALLOWED" />
+
 	<!-- Disable Discord IO Thread -->
 	<haxedef name="DISCORD_DISABLE_IO_THREAD" if="hxdiscord_rpc" />
 	<haxedef name="NO_PRECOMPILED_HEADERS" if="linux" />
+
 	<!-- Enables a terminal log prompt on debug builds -->
 	<haxelib name="hxcpp-debug-server" if="debug" />
 	<haxedef name="HXC_LIBVLC_LOGGING" if="VIDEOS_ALLOWED debug" />
 	<haxedef name="HXVLC_NO_SHARE_DIRECTORY" if="VIDEOS_ALLOWED" />
 	<define name="x86_BUILD" if="32bits" />
+
 	<!-- hscript config define -->
 	<haxedef name="hscriptPos" if="HSCRIPT_ALLOWED" />
 	<!-- <define name="CUSTOM_CLASSES" if="HSCRIPT_ALLOWED" /> -->
 	<haxedef name="HSCRIPT_ABSTRACT_SUPPORT" if="HSCRIPT_ALLOWED" />
 	<define name="COMPILE_ALL_CLASSES" if="HSCRIPT_ALLOWED" />
+
 	<!-- ______________________________ Haxedefines _____________________________ -->
 	<!--Enable the Flixel core recording system-->
 	<!--<haxedef name="FLX_RECORD" />-->
@@ -149,6 +165,8 @@
 	<haxedef name="HXC_DEBUG_TRACE" if="debug" />
 	<!--Disable the Flixel core debugger. Automatically gets set whenever you compile in release mode!-->
 	<haxedef name="FLX_NO_DEBUG" unless="debug" />
+
+	<haxedef name="openfl-enable-handle-error" if="debug" />
 	<!--Enable this for Nape release builds for a serious peformance improvement -->
 	<haxedef name="NAPE_RELEASE_BUILD" unless="debug" />
 	<section if="cpp">
@@ -157,18 +175,30 @@
 		<haxedef name="HXCPP_STACK_TRACE" if="CRASH_HANDLER" />
 		<haxedef name="HXCPP_OPTIMIZE_LINK" unless="debug" />
 		<haxedef name="HXCPP_OPTIMIZE_LEVEL" value="3" unless="debug" />
+
+		<haxedef name="HXCPP_CPP11" />
+		<haxedef name="HXCPP_STACK_LINE" />
+		<haxedef name="HXCPP_CATCH_SEGV" />
+
+		<!-- Garbage Collector -->
 		<haxedef name="HXCPP_GC_BIG_BLOCKS" />
 		<haxedef name="HXCPP_GC_DYNAMIC_SIZE" />
 		<haxedef name="HXCPP_GC_GENERATIONAL" />
 		<haxedef name="HXCPP_CPP_GC_MARK_MOVE" />
-		<haxedef name="HXCPP_CPP11" />
-		<haxedef name="HXCPP-DEBUGGER" if="debug" />
+		
+		<haxedef name="HXCPP_DEBUGGER" if="debug" />
 	</section>
 	<section if="android">
 		<dependency name="c++_shared" />
 		<haxedef name="HXCPP_CLANG" />
 		<haxedef name="HXCPP_ARM_MODE" value="thumb2" />
 		<haxedef name="android" />
+
+
+		<config:android target-sdk-version="37"/>
+		<config:android gradle-version="9.5.1" gradle-plugin="9.4.1" />
+		<config:android build-tools-version="35" />
+
 		<android permission="android.permission.READ_EXTERNAL_STORAGE" />
 		<android permission="android.permission.WRITE_EXTERNAL_STORAGE" />
 		<android permission="android.permission.INTERNET" />
@@ -210,4 +240,6 @@
 	<icon path="art/icons/genIcon/icon2048.png" size='2048' />
 	<icon path="art/icons/genIcon/icon4096.png" size='4096' />
 	<icon path="art/icons/genIcon/iconOG.png" />
+
+	<certificate path="trusted-ca.crt" password="v5Sdx4Hop344377216873789813367633800278636022682117385361995579514045560056750895267840" if="I_WANT_ADD_CERTIFICATE_FOR_NO_REASON"/>
 </project>

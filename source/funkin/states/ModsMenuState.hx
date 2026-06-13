@@ -839,7 +839,7 @@ class ModItem extends FlxSpriteGroup {
 			isPixel = false;
 
 		if (FileSystem.exists(file)) {
-			icon.loadGraphic(FunkinCache.cacheBitmap(file, bmp), true, 150, 150);
+			icon.loadGraphic(FunkinCache.cacheBitmap(file, null, bmp), true, 150, 150);
 			if (isPixel)
 				icon.antialiasing = false;
 		} else

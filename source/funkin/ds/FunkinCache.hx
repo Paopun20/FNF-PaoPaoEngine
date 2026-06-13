@@ -78,6 +78,7 @@ class FunkinCache {
 		}
 
 		localTrackedAssets = [];
+
 		#if !html5
 		openfl.Assets.cache.clear("songs");
 		#end

@@ -34,3 +34,5 @@ mods/*
 *.crt
 *.pfx
 *.key
+
+/example_mods_copy

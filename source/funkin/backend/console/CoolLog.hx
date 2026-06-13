@@ -4,6 +4,7 @@ import haxe.Log;
 import haxe.PosInfos;
 import funkin.ds.Int8;
 import haxe.io.Bytes;
+import haxe.io.Encoding;
 import haxe.format.JsonPrinter;
 import funkin.backend.utils.AnsiUtil;
 import funkin.backend.utils.AnsiUtil.AnsiCode;
@@ -56,8 +57,10 @@ class CoolLog {
 	}
 
 	public static function uninit() {
-		if (nativeTrace != null)
+		if (nativeTrace != null) {
 			Log.trace = nativeTrace;
+			nativeTrace = null; // add this
+		}
 	}
 
 	public static function setLevel(lvl:Level):Void {
@@ -87,13 +90,30 @@ class CoolLog {
 		if ((lvl : Int) < (level : Int))
 			return;
 
+		final colors = COLORS.get(lvl) ?? [AnsiCode.WHITE];
+
+		#if ((debug && !no_unicode_output_at_debug) && !true) // debug test new output (todo: need to fix a Unicode error)
+		/*
+			https://en.wikipedia.org/wiki/Block_Elements
+		 */
+		final box = AnsiUtil.apply("▏", colors);
+
+		final time = AnsiUtil.apply(now() + ' │', [TIME_COLOR]);
+		final tag = AnsiUtil.apply(levelTag(lvl), colors);
+		final location = formatLocation(infos);
+		final msg = '$box ' + formatValue(v);
+
+		final out = '$box $time $tag $location › $msg';
+		#else
 		final time = AnsiUtil.apply('[' + now() + ']', [TIME_COLOR]);
-		final tag = AnsiUtil.apply(levelTag(lvl), COLORS.get(lvl) ?? [AnsiCode.WHITE]);
+		final tag = AnsiUtil.apply(levelTag(lvl), colors);
 		final location = formatLocation(infos);
 		final msg = formatValue(v);
 
-		Sys.stdout().write(Bytes.ofString('$time $tag $location: $msg\n'));
-		Sys.stdout().flush();
+		final out = '$time $tag $location $msg';
+		#end
+
+		Sys.println(out);
 	}
 
 	private static function formatLocation(?infos:PosInfos):String {

@@ -77,7 +77,8 @@ class AnsiUtil {
 	 * @param codes The ANSI codes to apply.
 	 * @return The styled string, or a plain string if ANSI is unsupported.
 	 */
-	public static function apply(input:Dynamic, codes:Array<AnsiCode>):String {
+	public static function apply(input:String, codes:Array<AnsiCode>):String {
+		if (codes.length == 0) return resolveOutput(Std.string(input));
 		final styled = codes.join('') + input + AnsiCode.RESET;
 		return resolveOutput(styled);
 	}
@@ -101,16 +102,21 @@ class AnsiUtil {
 	@:noCompletion
 	private static function detectAnsiSupport():Bool {
 		final term = getEnvSafe('TERM');
-		if (term == 'dumb') return false;
-		if (term != null && (REGEX_TERM_256.match(term) || REGEX_TERM_TYPES.match(term))) return true;
-		if (isSupportedCiEnv()) return true;
-		if (isTeamCitySupported()) return true;
+		if (term == 'dumb')
+			return false;
+		if (term != null && (REGEX_TERM_256.match(term) || REGEX_TERM_TYPES.match(term)))
+			return true;
+		if (isSupportedCiEnv())
+			return true;
+		if (isTeamCitySupported())
+			return true;
 		return checkTermProgram();
 	}
 
 	@:noCompletion
 	private static function isSupportedCiEnv():Bool {
-		if (getEnvSafe('CI') == null) return false;
+		if (getEnvSafe('CI') == null)
+			return false;
 
 		final ciEnvNames:Array<String> = [
 			"GITHUB_ACTIONS", "GITEA_ACTIONS",    "TRAVIS", "CIRCLECI",
@@ -118,7 +124,8 @@ class AnsiUtil {
 		];
 
 		for (ci in ciEnvNames)
-			if (getEnvSafe(ci) != null) return true;
+			if (getEnvSafe(ci) != null)
+				return true;
 
 		return getEnvSafe("CI_NAME") == "codeship";
 	}
@@ -147,6 +154,7 @@ class AnsiUtil {
 	/**
 	 * Safe wrapper for Sys.getEnv — returns null on non-sys targets.
 	 */
+	@:noCompletion
 	private static function getEnvSafe(name:String):Null<String> {
 		#if sys
 		return Sys.getEnv(name);

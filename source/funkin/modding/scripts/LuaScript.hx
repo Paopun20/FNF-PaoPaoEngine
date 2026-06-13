@@ -7,7 +7,6 @@ import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxAngle;
 import flixel.math.FlxMath;
-import flixel.sound.FlxSound;
 import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxAxes;
@@ -87,7 +86,6 @@ class LuaScript extends Script implements IScriptExecutor {
 		set('FlxMath', FlxMath);
 		set('FlxGroup', FlxGroup);
 		set('FlxSpriteGroup', FlxSpriteGroup);
-		set('FlxSound', FlxSound);
 		set('FlxColor', {
 			TRANSPARENT: FlxColor.TRANSPARENT,
 			WHITE: FlxColor.WHITE,
@@ -112,17 +110,6 @@ class LuaScript extends Script implements IScriptExecutor {
 		});
 
 		set('Paths', Paths);
-
-		set('print', (s:String) -> {
-			var info:PosInfos = {
-				fileName: '$folderName/$fileName',
-				lineNumber: 0,
-				className: '$folderName/$fileName',
-				methodName: "",
-				customParams: [] // Fuck YOU
-			}
-			CoolLog.info(s, info);
-		});
 
 		// Custom
 		/* set('add', (object:FlxBasic) -> return FlxG.state.add(object));

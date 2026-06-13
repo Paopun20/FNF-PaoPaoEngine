@@ -35,7 +35,7 @@ This project is a game built using:
 
 - Haxe
 - Lime
-- OpenFL (if enabled)
+- OpenFL
 
 Primary goals:
 
@@ -53,7 +53,7 @@ Primary goals:
 ├── Assets/
 ├── Source/
 ├── Project.xml
-└── AGENTS.md
+└── (etc.)
 ```
 
 ---
